@@ -1,6 +1,7 @@
 use super::FreePrimFn;
 use super::free_impl;
 use crate::cfg::CfgMod;
+use crate::cfg::exception::illegal_input;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
@@ -36,7 +37,7 @@ pub fn not() -> FreePrimFuncVal {
 
 fn fn_not(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Bit(b) = input else {
-        return Val::default();
+        return illegal_input();
     };
     Val::Bit(b.not())
 }
@@ -47,13 +48,13 @@ pub fn and() -> FreePrimFuncVal {
 
 fn fn_and(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return Val::default();
+        return illegal_input();
     };
     let Val::Bit(left) = pair.first else {
-        return Val::default();
+        return illegal_input();
     };
     let Val::Bit(right) = pair.second else {
-        return Val::default();
+        return illegal_input();
     };
     Val::Bit(left.and(right))
 }
@@ -64,13 +65,13 @@ pub fn or() -> FreePrimFuncVal {
 
 fn fn_or(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return Val::default();
+        return illegal_input();
     };
     let Val::Bit(left) = pair.first else {
-        return Val::default();
+        return illegal_input();
     };
     let Val::Bit(right) = pair.second else {
-        return Val::default();
+        return illegal_input();
     };
     Val::Bit(left.or(right))
 }
@@ -81,13 +82,13 @@ pub fn xor() -> FreePrimFuncVal {
 
 fn fn_xor(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return Val::default();
+        return illegal_input();
     };
     let Val::Bit(left) = pair.first else {
-        return Val::default();
+        return illegal_input();
     };
     let Val::Bit(right) = pair.second else {
-        return Val::default();
+        return illegal_input();
     };
     Val::Bit(left.xor(right))
 }
@@ -98,13 +99,13 @@ pub fn imply() -> FreePrimFuncVal {
 
 fn fn_imply(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return Val::default();
+        return illegal_input();
     };
     let Val::Bit(left) = pair.first else {
-        return Val::default();
+        return illegal_input();
     };
     let Val::Bit(right) = pair.second else {
-        return Val::default();
+        return illegal_input();
     };
     Val::Bit(left.imply(right))
 }

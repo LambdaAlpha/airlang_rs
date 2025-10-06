@@ -11,6 +11,9 @@ use super::free_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
+use crate::cfg::exception::fail;
+use crate::cfg::exception::illegal_ctx;
+use crate::cfg::exception::illegal_input;
 use crate::cfg::lib::memo::repr::parse_adapter;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::memo::Memo;
@@ -67,7 +70,7 @@ pub fn new() -> FreePrimFuncVal {
 fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
     let Some(memo) = parse_memo(input) else {
         error!("parse_memo failed");
-        return Val::default();
+        return illegal_input();
     };
     Val::Memo(memo)
 }
@@ -79,7 +82,7 @@ pub fn repr() -> FreePrimFuncVal {
 fn fn_repr(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Memo(memo) = input else {
         error!("input {input:?} should be a memo");
-        return Val::default();
+        return illegal_input();
     };
     generate_memo(memo)
 }
@@ -91,7 +94,7 @@ pub fn reverse() -> FreePrimFuncVal {
 fn fn_reverse(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Memo(memo) = input else {
         error!("input {input:?} should be a memo");
-        return Val::default();
+        return illegal_input();
     };
     let ctx = Memo::from(memo);
     let reverse = ctx.reverse();
@@ -105,11 +108,11 @@ pub fn remove() -> MutPrimFuncVal {
 fn fn_remove(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Memo(memo) = ctx else {
         error!("ctx {ctx:?} should be a memo");
-        return Val::default();
+        return illegal_ctx();
     };
     let Val::Symbol(s) = input else {
         error!("input {input:?} should be a symbol");
-        return Val::default();
+        return illegal_input();
     };
     memo.remove(s).unwrap_or_default()
 }
@@ -121,15 +124,15 @@ pub fn contract() -> ConstPrimFuncVal {
 fn fn_contract(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Memo(memo) = &*ctx else {
         error!("ctx {ctx:?} should be a memo");
-        return Val::default();
+        return illegal_ctx();
     };
     let Val::Symbol(s) = input else {
         error!("input {input:?} should be a symbol");
-        return Val::default();
+        return illegal_input();
     };
     let Some(contract) = memo.get_contract(s.clone()) else {
         error!("variable {s:?} should exist");
-        return Val::default();
+        return fail();
     };
     generate_contract(contract)
 }
@@ -141,22 +144,24 @@ pub fn set_contract() -> MutPrimFuncVal {
 fn fn_set_contract(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Memo(memo) = ctx else {
         error!("ctx {ctx:?} should be a memo");
-        return Val::default();
+        return illegal_ctx();
     };
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return Val::default();
+        return illegal_input();
     };
     let pair = Pair::from(pair);
     let Val::Symbol(s) = pair.first else {
         error!("input.first {:?} should be a symbol", pair.first);
-        return Val::default();
+        return illegal_input();
     };
     let Some(contract) = parse_contract(&pair.second) else {
         error!("parse contract failed");
-        return Val::default();
+        return illegal_input();
     };
-    let _ = memo.set_contract(s, contract);
+    if memo.set_contract(s, contract).is_err() {
+        return fail();
+    }
     Val::default()
 }
 
@@ -167,11 +172,11 @@ pub fn exist() -> ConstPrimFuncVal {
 fn fn_exist(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Memo(memo) = &*ctx else {
         error!("ctx {ctx:?} should be a memo");
-        return Val::default();
+        return illegal_ctx();
     };
     let Val::Symbol(s) = input else {
         error!("input {input:?} should be a symbol");
-        return Val::default();
+        return illegal_input();
     };
     Val::Bit(Bit::from(memo.exist(s)))
 }

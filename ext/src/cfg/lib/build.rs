@@ -5,6 +5,8 @@ use std::path::Path;
 
 use airlang::Air;
 use airlang::cfg::CfgMod;
+use airlang::cfg::exception::fail;
+use airlang::cfg::exception::illegal_input;
 use airlang::cfg::lib::FreeImpl;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::semantics::cfg::Cfg;
@@ -44,7 +46,7 @@ const CUR_URL_KEY: &str = "build.this_url";
 fn fn_load(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(url) = input else {
         error!("input {input:?} should be a text");
-        return Val::default();
+        return illegal_input();
     };
     let url = Text::from(url);
     let cur_url_key = Symbol::from_str_unchecked(CUR_URL_KEY);
@@ -60,17 +62,17 @@ fn load_from_url(cfg: &mut Cfg, url: String) -> Val {
         Ok(content) => content,
         Err(err) => {
             eprintln!("failed to read {url}: {err}");
-            return Val::default();
+            return fail();
         }
     };
     let Ok(val) = parse(content) else {
         error!("{content} should be a valid air source code");
-        return Val::default();
+        return fail();
     };
 
     let Some(mut mod_air) = Air::new(cfg.clone()) else {
         error!("prelude should exist in cfg");
-        return Val::default();
+        return fail();
     };
     let cur_url_key = Symbol::from_str_unchecked(CUR_URL_KEY);
     mod_air.cfg_mut().begin_scope();

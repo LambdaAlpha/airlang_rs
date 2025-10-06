@@ -8,6 +8,8 @@ use super::const_impl;
 use super::free_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
+use crate::cfg::exception::illegal_ctx;
+use crate::cfg::exception::illegal_input;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
@@ -104,7 +106,7 @@ pub fn length() -> ConstPrimFuncVal {
 fn fn_length(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
-        return Val::default();
+        return illegal_ctx();
     };
     let len: Int = map.len().into();
     Val::Int(len.into())
@@ -117,7 +119,7 @@ pub fn items() -> ConstPrimFuncVal {
 fn fn_items(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
-        return Val::default();
+        return illegal_ctx();
     };
     let items: List<Val> =
         map.iter().map(|(k, v)| Val::Pair(Pair::new(k.clone(), v.clone()).into())).collect();
@@ -131,7 +133,7 @@ pub fn into_items() -> MutPrimFuncVal {
 fn fn_into_items(_cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
     let Val::Map(map) = ctx else {
         error!("ctx {ctx:?} should be a map");
-        return Val::default();
+        return illegal_ctx();
     };
     let mut origin = Map::default();
     swap(&mut **map, &mut origin);
@@ -147,7 +149,7 @@ pub fn keys() -> ConstPrimFuncVal {
 fn fn_keys(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
-        return Val::default();
+        return illegal_ctx();
     };
     let keys: List<Val> = map.keys().cloned().collect();
     Val::List(keys.into())
@@ -160,7 +162,7 @@ pub fn into_keys() -> MutPrimFuncVal {
 fn fn_into_keys(_cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
     let Val::Map(map) = ctx else {
         error!("ctx {ctx:?} should be a map");
-        return Val::default();
+        return illegal_ctx();
     };
     let mut origin = Map::default();
     swap(&mut **map, &mut origin);
@@ -175,7 +177,7 @@ pub fn values() -> ConstPrimFuncVal {
 fn fn_values(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
-        return Val::default();
+        return illegal_ctx();
     };
     let values: List<Val> = map.values().cloned().collect();
     Val::List(values.into())
@@ -188,7 +190,7 @@ pub fn into_values() -> MutPrimFuncVal {
 fn fn_into_values(_cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
     let Val::Map(map) = ctx else {
         error!("ctx {ctx:?} should be a map");
-        return Val::default();
+        return illegal_ctx();
     };
     let mut origin = Map::default();
     swap(&mut **map, &mut origin);
@@ -203,7 +205,7 @@ pub fn contain() -> ConstPrimFuncVal {
 fn fn_contain(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
-        return Val::default();
+        return illegal_ctx();
     };
     Val::Bit(Bit::from(map.contains_key(&input)))
 }
@@ -215,11 +217,11 @@ pub fn contain_all() -> ConstPrimFuncVal {
 fn fn_contain_all(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
-        return Val::default();
+        return illegal_ctx();
     };
     let Val::List(keys) = input else {
         error!("input {input:?} should be a list");
-        return Val::default();
+        return illegal_input();
     };
     let keys = List::from(keys);
     let b = keys.into_iter().all(|k| map.contains_key(&k));
@@ -233,11 +235,11 @@ pub fn contain_any() -> ConstPrimFuncVal {
 fn fn_contain_many(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
-        return Val::default();
+        return illegal_ctx();
     };
     let Val::List(keys) = input else {
         error!("input {input:?} should be a list");
-        return Val::default();
+        return illegal_input();
     };
     let keys = List::from(keys);
     let b = keys.into_iter().any(|k| map.contains_key(&k));
@@ -251,11 +253,11 @@ pub fn set() -> MutPrimFuncVal {
 fn fn_set(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
         error!("ctx {ctx:?} should be a map");
-        return Val::default();
+        return illegal_ctx();
     };
     let Val::Pair(key_value) = input else {
         error!("input {input:?} should be a pair");
-        return Val::default();
+        return illegal_input();
     };
     let key_value = Pair::from(key_value);
     let key = key_value.first;
@@ -270,11 +272,11 @@ pub fn set_many() -> MutPrimFuncVal {
 fn fn_set_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
         error!("ctx {ctx:?} should be a map");
-        return Val::default();
+        return illegal_ctx();
     };
     let Val::Map(update) = input else {
         error!("input {input:?} should be a map");
-        return Val::default();
+        return illegal_input();
     };
     let update = Map::from(update);
     let map: Map<Val, Val> =
@@ -289,7 +291,7 @@ pub fn get() -> ConstPrimFuncVal {
 fn fn_get(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
-        return Val::default();
+        return illegal_ctx();
     };
     map.get(&input).cloned().unwrap_or_default()
 }
@@ -301,11 +303,11 @@ pub fn get_many() -> ConstPrimFuncVal {
 fn fn_get_many(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
-        return Val::default();
+        return illegal_ctx();
     };
     let Val::List(keys) = input else {
         error!("input {input:?} should be a list");
-        return Val::default();
+        return illegal_input();
     };
     let keys = List::from(keys);
     let map: Map<Val, Val> =
@@ -320,7 +322,7 @@ pub fn remove() -> MutPrimFuncVal {
 fn fn_remove(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
         error!("ctx {ctx:?} should be a map");
-        return Val::default();
+        return illegal_ctx();
     };
     map.remove(&input).unwrap_or_default()
 }
@@ -332,11 +334,11 @@ pub fn remove_many() -> MutPrimFuncVal {
 fn fn_remove_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
         error!("ctx {ctx:?} should be a map");
-        return Val::default();
+        return illegal_ctx();
     };
     let Val::List(keys) = input else {
         error!("input {input:?} should be a list");
-        return Val::default();
+        return illegal_input();
     };
     let keys = List::from(keys);
     let map: Map<Val, Val> =
@@ -351,7 +353,7 @@ pub fn clear() -> MutPrimFuncVal {
 fn fn_clear(_cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
     let Val::Map(map) = ctx else {
         error!("ctx {ctx:?} should be a map");
-        return Val::default();
+        return illegal_ctx();
     };
     map.clear();
     Val::default()
@@ -364,7 +366,7 @@ pub fn new_map() -> FreePrimFuncVal {
 fn fn_new_map(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::List(list) = input else {
         error!("input {input:?} should be a list");
-        return Val::default();
+        return illegal_input();
     };
     let list = List::from(list);
     let map: Option<Map<Val, Val>> = list
@@ -379,7 +381,7 @@ fn fn_new_map(_cfg: &mut Cfg, input: Val) -> Val {
         .collect();
     match map {
         Some(map) => Val::Map(map.into()),
-        None => Val::default(),
+        None => illegal_input(),
     }
 }
 
@@ -390,7 +392,7 @@ pub fn new_set() -> FreePrimFuncVal {
 fn fn_new_set(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::List(list) = input else {
         error!("input {input:?} should be a list");
-        return Val::default();
+        return illegal_input();
     };
     let list = List::from(list);
     let map: Map<Val, Val> = list.into_iter().map(|k| (k, Val::default())).collect();
@@ -404,7 +406,7 @@ pub fn new_multiset() -> FreePrimFuncVal {
 fn fn_new_multiset(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::List(list) = input else {
         error!("input {input:?} should be a list");
-        return Val::default();
+        return illegal_input();
     };
     let list = List::from(list);
     let mut multiset = Map::with_capacity(list.len());

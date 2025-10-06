@@ -3,6 +3,7 @@ use log::error;
 use super::FreePrimFn;
 use super::free_impl;
 use crate::cfg::CfgMod;
+use crate::cfg::exception::illegal_input;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
@@ -41,11 +42,11 @@ pub fn parse() -> FreePrimFuncVal {
 fn fn_parse(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(input) = input else {
         error!("input {input:?} should be a text");
-        return Val::default();
+        return illegal_input();
     };
     let Ok(val) = crate::syntax::parse(&input) else {
         error!("parse {input:?} failed");
-        return Val::default();
+        return illegal_input();
     };
     val
 }
@@ -57,7 +58,7 @@ pub fn generate() -> FreePrimFuncVal {
 fn fn_generate(_cfg: &mut Cfg, input: Val) -> Val {
     let Ok(repr) = (&input).try_into() else {
         error!("generate {input:?} failed");
-        return Val::default();
+        return illegal_input();
     };
     let str = generate_pretty(repr);
     Val::Text(Text::from(str).into())

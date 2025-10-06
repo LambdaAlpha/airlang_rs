@@ -15,6 +15,8 @@ use crate::cfg::CoreCfg;
 use crate::cfg::adapter::CallPrimAdapter;
 use crate::cfg::adapter::SymbolAdapter;
 use crate::cfg::adapter::prim_adapter;
+use crate::cfg::exception::fail;
+use crate::cfg::exception::illegal_input;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::memo::Memo;
 use crate::semantics::val::BIT;
@@ -101,11 +103,11 @@ fn fn_any(_cfg: &mut Cfg, input: Val) -> Val {
             CFG => Val::Cfg(Cfg::any(rng, DEPTH).into()),
             MEMO => Val::Memo(Memo::any(rng, DEPTH).into()),
             FUNC => Val::Func(FuncVal::any(rng, DEPTH)),
-            _ => Val::default(),
+            _ => fail(),
         },
         v => {
             error!("input {v:?} should be a symbol or a unit");
-            Val::default()
+            illegal_input()
         }
     }
 }
@@ -144,7 +146,7 @@ pub fn equal() -> FreePrimFuncVal {
 fn fn_equal(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return Val::default();
+        return illegal_input();
     };
     Val::Bit(Bit::from(pair.first == pair.second))
 }

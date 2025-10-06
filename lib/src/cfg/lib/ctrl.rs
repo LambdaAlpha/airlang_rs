@@ -13,6 +13,8 @@ use crate::cfg::adapter::CallPrimAdapter;
 use crate::cfg::adapter::PrimAdapter;
 use crate::cfg::adapter::SymbolAdapter;
 use crate::cfg::adapter::id_adapter;
+use crate::cfg::exception::fail;
+use crate::cfg::exception::illegal_input;
 use crate::cfg::lib::ctx::pattern::PatternAssign;
 use crate::cfg::lib::ctx::pattern::PatternMatch;
 use crate::cfg::lib::ctx::pattern::PatternParse;
@@ -177,7 +179,7 @@ pub fn do_() -> MutPrimFuncVal {
 
 fn fn_do(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Some(block) = Block::parse(input) else {
-        return Val::default();
+        return illegal_input();
     };
     block.eval(cfg, ctx)
 }
@@ -188,7 +190,7 @@ pub fn test() -> MutPrimFuncVal {
 
 fn fn_test(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Some(test) = Test::parse(input) else {
-        return Val::default();
+        return illegal_input();
     };
     test.eval(cfg, ctx)
 }
@@ -221,7 +223,7 @@ impl Test {
         let condition = Eval.mut_call(cfg, ctx, self.condition);
         let Val::Bit(b) = condition else {
             error!("condition {condition:?} should be a bit");
-            return Val::default();
+            return illegal_input();
         };
         let branch = if *b { self.branch_then } else { self.branch_else };
         branch.eval(cfg, ctx)
@@ -234,7 +236,7 @@ pub fn switch() -> MutPrimFuncVal {
 
 fn fn_switch(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Some(switch) = Switch::parse(input) else {
-        return Val::default();
+        return illegal_input();
     };
     switch.eval(cfg, ctx)
 }
@@ -282,7 +284,7 @@ impl Switch {
     fn eval(mut self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
         let val = Eval.mut_call(cfg, ctx, self.val);
         let Some(body) = self.map.remove(&val).or(self.default) else {
-            return Val::default();
+            return illegal_input();
         };
         body.eval(cfg, ctx)
     }
@@ -294,7 +296,7 @@ pub fn match_() -> MutPrimFuncVal {
 
 fn fn_match(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Some(match_) = Match::parse(input) else {
-        return Val::default();
+        return illegal_input();
     };
     match_.eval(cfg, ctx)
 }
@@ -342,7 +344,7 @@ impl Match {
             let pattern = adapter.mut_call(cfg, ctx, pattern);
             let Some(pattern) = pattern.parse() else {
                 error!("parse pattern failed");
-                return Val::default();
+                return fail();
             };
             if pattern.match_(&val) {
                 pattern.assign(ctx, val);
@@ -359,7 +361,7 @@ pub fn loop_() -> MutPrimFuncVal {
 
 fn fn_loop(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Some(loop_) = Loop::parse(input) else {
-        return Val::default();
+        return illegal_input();
     };
     loop_.eval(cfg, ctx)
 }
@@ -386,7 +388,7 @@ impl Loop {
             let cond = Eval.mut_call(cfg, ctx, self.condition.clone());
             let Val::Bit(bit) = cond else {
                 error!("condition {cond:?} should be a bit");
-                return Val::default();
+                return fail();
             };
             if !*bit {
                 break;
@@ -408,7 +410,7 @@ pub fn iterate() -> MutPrimFuncVal {
 
 fn fn_iterate(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Some(iterate) = Iterate::parse(input) else {
-        return Val::default();
+        return illegal_input();
     };
     iterate.eval(cfg, ctx)
 }
@@ -447,7 +449,7 @@ impl Iterate {
                 let i = Int::from(i);
                 if i.is_negative() {
                     error!("{i:?} should be positive");
-                    return Val::default();
+                    return fail();
                 }
                 let Some(i) = i.to_u128() else { panic!("iterate on super big int {i:?}!!!") };
                 let iter = (0 .. i).map(|i| {
@@ -490,7 +492,7 @@ impl Iterate {
                 });
                 iterate_val(cfg, ctx, self.body, self.name, iter)
             }
-            _ => Val::default(),
+            _ => fail(),
         }
     }
 }

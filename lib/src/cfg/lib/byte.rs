@@ -6,6 +6,8 @@ use super::const_impl;
 use super::free_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
+use crate::cfg::exception::illegal_ctx;
+use crate::cfg::exception::illegal_input;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
@@ -44,7 +46,7 @@ pub fn length() -> ConstPrimFuncVal {
 fn fn_length(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Byte(byte) = &*ctx else {
         error!("ctx {ctx:?} should be a byte");
-        return Val::default();
+        return illegal_ctx();
     };
     let len: Int = byte.len().into();
     Val::Int(len.into())
@@ -57,11 +59,11 @@ pub fn push() -> MutPrimFuncVal {
 fn fn_push(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Byte(byte) = ctx else {
         error!("ctx {ctx:?} should be a byte");
-        return Val::default();
+        return illegal_ctx();
     };
     let Val::Byte(b) = input else {
         error!("input {input:?} should be a byte");
-        return Val::default();
+        return illegal_input();
     };
     byte.push(&b);
     Val::default()
@@ -75,19 +77,19 @@ pub fn join() -> FreePrimFuncVal {
 fn fn_join(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return Val::default();
+        return illegal_input();
     };
     let separator: &[u8] = match &pair.first {
         Val::Unit(_) => &[],
         Val::Byte(b) => b,
         s => {
             error!("separator {s:?} should be a unit or a byte");
-            return Val::default();
+            return illegal_input();
         }
     };
     let Val::List(bytes) = &pair.second else {
         error!("input.second {:?} should be a list", pair.second);
-        return Val::default();
+        return illegal_input();
     };
     let bytes: Option<Vec<&[u8]>> = bytes
         .iter()
@@ -101,7 +103,7 @@ fn fn_join(_cfg: &mut Cfg, input: Val) -> Val {
         })
         .collect();
     let Some(bytes) = bytes else {
-        return Val::default();
+        return illegal_input();
     };
     let byte = bytes.join(separator);
     Val::Byte(Byte::from(byte).into())

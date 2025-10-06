@@ -11,6 +11,8 @@ use super::func::repr::generate_ctx_access;
 use super::func::repr::parse_adapter;
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
+use crate::cfg::exception::illegal_ctx;
+use crate::cfg::exception::illegal_input;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
@@ -65,7 +67,7 @@ pub fn new() -> FreePrimFuncVal {
 fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
     let Some(func) = parse_func(input) else {
         error!("parse func failed");
-        return Val::default();
+        return illegal_input();
     };
     Val::Func(func)
 }
@@ -77,7 +79,7 @@ pub fn repr() -> FreePrimFuncVal {
 fn fn_repr(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Func(func) = input else {
         error!("input {input:?} should be a function");
-        return Val::default();
+        return illegal_input();
     };
     generate_func(func)
 }
@@ -89,7 +91,7 @@ pub fn ctx_access() -> ConstPrimFuncVal {
 fn fn_ctx_access(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
-        return Val::default();
+        return illegal_ctx();
     };
     let access = generate_ctx_access(func.ctx_access());
     Val::Symbol(Symbol::from_str_unchecked(access))
@@ -102,7 +104,7 @@ pub fn is_primitive() -> ConstPrimFuncVal {
 fn fn_is_primitive(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
-        return Val::default();
+        return illegal_ctx();
     };
     let is_primitive = func.is_primitive();
     Val::Bit(Bit::from(is_primitive))
@@ -115,7 +117,7 @@ pub fn id() -> ConstPrimFuncVal {
 fn fn_id(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
-        return Val::default();
+        return illegal_ctx();
     };
     Val::Symbol(func.id())
 }
@@ -127,9 +129,13 @@ pub fn code() -> ConstPrimFuncVal {
 fn fn_code(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
-        return Val::default();
+        return illegal_ctx();
     };
-    generate_code(func)
+    let Some(code) = generate_code(func) else {
+        error!("func {func:?} should have code");
+        return illegal_ctx();
+    };
+    code
 }
 
 pub fn memo() -> ConstPrimFuncVal {
@@ -139,11 +145,11 @@ pub fn memo() -> ConstPrimFuncVal {
 fn fn_memo(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
-        return Val::default();
+        return illegal_ctx();
     };
     let Some(memo) = func.memo() else {
         error!("func {func:?} should have an inner memory");
-        return Val::default();
+        return illegal_ctx();
     };
     Val::Memo(MemoVal::from(memo.clone()))
 }

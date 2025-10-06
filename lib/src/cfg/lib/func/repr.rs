@@ -215,14 +215,14 @@ fn generate_prim(id: Symbol) -> Val {
     Val::Map(repr.into())
 }
 
-pub(in crate::cfg) fn generate_code(func: &FuncVal) -> Val {
+pub(in crate::cfg) fn generate_code(func: &FuncVal) -> Option<Val> {
     match func {
-        FuncVal::FreePrim(_) => Val::default(),
-        FuncVal::FreeComp(f) => free_code(&f.comp),
-        FuncVal::ConstPrim(_) => Val::default(),
-        FuncVal::ConstComp(f) => dyn_code(&f.comp),
-        FuncVal::MutPrim(_) => Val::default(),
-        FuncVal::MutComp(f) => dyn_code(&f.comp),
+        FuncVal::FreePrim(_) => None,
+        FuncVal::FreeComp(f) => Some(free_code(&f.comp)),
+        FuncVal::ConstPrim(_) => None,
+        FuncVal::ConstComp(f) => Some(dyn_code(&f.comp)),
+        FuncVal::MutPrim(_) => None,
+        FuncVal::MutComp(f) => Some(dyn_code(&f.comp)),
     }
 }
 

@@ -6,6 +6,7 @@ use super::DynPrimFn;
 use super::const_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
+use crate::cfg::exception::illegal_ctx;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
@@ -47,7 +48,7 @@ pub fn first() -> ConstPrimFuncVal {
 fn fn_first(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Pair(pair) = &*ctx else {
         error!("ctx {ctx:?} should be a pair");
-        return Val::default();
+        return illegal_ctx();
     };
     pair.first.clone()
 }
@@ -59,7 +60,7 @@ pub fn set_first() -> MutPrimFuncVal {
 fn fn_set_first(_cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Pair(pair) = ctx else {
         error!("ctx {ctx:?} should be a pair");
-        return Val::default();
+        return illegal_ctx();
     };
     swap(&mut pair.first, &mut input);
     input
@@ -72,7 +73,7 @@ pub fn second() -> ConstPrimFuncVal {
 fn fn_second(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Pair(pair) = &*ctx else {
         error!("ctx {ctx:?} should be a pair");
-        return Val::default();
+        return illegal_ctx();
     };
     pair.second.clone()
 }
@@ -84,7 +85,7 @@ pub fn set_second() -> MutPrimFuncVal {
 fn fn_set_second(_cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Pair(pair) = ctx else {
         error!("ctx {ctx:?} should be a pair");
-        return Val::default();
+        return illegal_ctx();
     };
     swap(&mut pair.second, &mut input);
     input

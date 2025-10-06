@@ -4,6 +4,8 @@ use std::io::stdin;
 use std::io::stdout;
 
 use airlang::cfg::CfgMod;
+use airlang::cfg::exception::illegal_ctx;
+use airlang::cfg::exception::illegal_input;
 use airlang::cfg::lib::DynPrimFn;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::free_impl;
@@ -58,7 +60,7 @@ pub fn read_line() -> MutPrimFuncVal {
 fn fn_read_line(_cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
     let Val::Text(t) = ctx else {
         error!("ctx {ctx:?} should be a text");
-        return Val::default();
+        return illegal_ctx();
     };
     let _ = stdin().read_line(t);
     Val::default()
@@ -71,7 +73,7 @@ pub fn print() -> FreePrimFuncVal {
 fn fn_print(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
         error!("input {input:?} should be a text");
-        return Val::default();
+        return illegal_input();
     };
     print!("{}", &**t);
     Val::default()
@@ -84,7 +86,7 @@ pub fn print_line() -> FreePrimFuncVal {
 fn fn_print_line(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
         error!("input {input:?} should be a text");
-        return Val::default();
+        return illegal_input();
     };
     println!("{}", &**t);
     Val::default()
@@ -106,7 +108,7 @@ pub fn error_print() -> FreePrimFuncVal {
 fn fn_error_print(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
         error!("input {input:?} should be a text");
-        return Val::default();
+        return illegal_input();
     };
     eprint!("{}", &**t);
     Val::default()
@@ -119,7 +121,7 @@ pub fn error_print_line() -> FreePrimFuncVal {
 fn fn_error_print_line(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
         error!("input {input:?} should be a text");
-        return Val::default();
+        return illegal_input();
     };
     eprintln!("{}", &**t);
     Val::default()

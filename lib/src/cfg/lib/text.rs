@@ -6,6 +6,8 @@ use super::const_impl;
 use super::free_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
+use crate::cfg::exception::illegal_ctx;
+use crate::cfg::exception::illegal_input;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
@@ -55,12 +57,12 @@ pub fn from_utf8() -> FreePrimFuncVal {
 fn fn_from_utf8(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Byte(byte) = input else {
         error!("input {input:?} should be a byte");
-        return Val::default();
+        return illegal_input();
     };
     let byte = Byte::from(byte);
     let Ok(str) = String::from_utf8(byte.into()) else {
         error!("input should be a utf8 text");
-        return Val::default();
+        return illegal_input();
     };
     Val::Text(Text::from(str).into())
 }
@@ -72,7 +74,7 @@ pub fn into_utf8() -> FreePrimFuncVal {
 fn fn_into_utf8(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(text) = input else {
         error!("input {input:?} should be a text");
-        return Val::default();
+        return illegal_input();
     };
     let text = Text::from(text);
     let byte = Byte::from(String::from(text).into_bytes());
@@ -86,7 +88,7 @@ pub fn length() -> ConstPrimFuncVal {
 fn fn_length(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Text(t) = &*ctx else {
         error!("ctx {ctx:?} should be a text");
-        return Val::default();
+        return illegal_ctx();
     };
     let len: Int = t.len().into();
     Val::Int(len.into())
@@ -99,11 +101,11 @@ pub fn push() -> MutPrimFuncVal {
 fn fn_push(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Text(text) = ctx else {
         error!("ctx {ctx:?} should be a text");
-        return Val::default();
+        return illegal_ctx();
     };
     let Val::Text(t) = input else {
         error!("input {input:?} should be a text");
-        return Val::default();
+        return illegal_input();
     };
     text.push_str(&t);
     Val::default()
@@ -117,19 +119,19 @@ pub fn join() -> FreePrimFuncVal {
 fn fn_join(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return Val::default();
+        return illegal_input();
     };
     let separator = match &pair.first {
         Val::Unit(_) => "",
         Val::Text(t) => t,
         v => {
             error!("separator {v:?} should be a text or a unit");
-            return Val::default();
+            return illegal_input();
         }
     };
     let Val::List(texts) = &pair.second else {
         error!("input.second {:?} should be a list", pair.second);
-        return Val::default();
+        return illegal_input();
     };
     let texts: Option<Vec<&str>> = texts
         .iter()
@@ -143,7 +145,7 @@ fn fn_join(_cfg: &mut Cfg, input: Val) -> Val {
         })
         .collect();
     let Some(texts) = texts else {
-        return Val::default();
+        return illegal_input();
     };
     let text = texts.join(separator);
     Val::Text(Text::from(text).into())

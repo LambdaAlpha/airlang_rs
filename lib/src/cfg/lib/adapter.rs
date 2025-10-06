@@ -21,6 +21,7 @@ use crate::cfg::adapter::SymbolAdapter;
 use crate::cfg::adapter::adapter_func;
 use crate::cfg::adapter::id_adapter;
 use crate::cfg::adapter::prim_adapter;
+use crate::cfg::exception::illegal_input;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::val::FreePrimFuncVal;
@@ -57,7 +58,7 @@ pub fn new() -> FreePrimFuncVal {
 
 fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
     let Some(adapter) = parse(input) else {
-        return Val::default();
+        return illegal_input();
     };
     let func = adapter_func(adapter);
     Val::Func(func)

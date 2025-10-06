@@ -1,6 +1,8 @@
 use std::process::Command;
 
 use airlang::cfg::CfgMod;
+use airlang::cfg::exception::fail;
+use airlang::cfg::exception::illegal_input;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::free_impl;
 use airlang::semantics::cfg::Cfg;
@@ -43,25 +45,25 @@ pub fn call() -> FreePrimFuncVal {
 fn fn_call(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Map(mut map) = input else {
         error!("input {input:?} should be a map");
-        return Val::default();
+        return illegal_input();
     };
     let program_key = Val::Symbol(Symbol::from_str_unchecked(PROGRAM));
     let Some(program) = map.remove(&program_key) else {
         error!("program name should be provided");
-        return Val::default();
+        return illegal_input();
     };
     let Val::Text(program) = program else {
         error!("program {program:?} should be a text");
-        return Val::default();
+        return illegal_input();
     };
     let arguments_key = Val::Symbol(Symbol::from_str_unchecked(ARGUMENTS));
     let Some(arguments) = map.remove(&arguments_key) else {
         error!("arguments should be provided");
-        return Val::default();
+        return illegal_input();
     };
     let Val::List(arguments) = arguments else {
         error!("arguments {arguments:?} should be a list");
-        return Val::default();
+        return illegal_input();
     };
     let arguments = List::from(arguments);
     let arguments = arguments
@@ -76,7 +78,7 @@ fn fn_call(_cfg: &mut Cfg, input: Val) -> Val {
         })
         .collect::<Option<Vec<String>>>();
     let Some(arguments) = arguments else {
-        return Val::default();
+        return illegal_input();
     };
 
     let output = Command::new(&**program).args(arguments).output();
@@ -84,7 +86,7 @@ fn fn_call(_cfg: &mut Cfg, input: Val) -> Val {
         Ok(output) => output,
         Err(e) => {
             error!("call program failed: {e}");
-            return Val::default();
+            return fail();
         }
     };
 

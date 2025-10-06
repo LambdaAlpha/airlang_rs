@@ -7,6 +7,9 @@ use super::DynPrimFn;
 use super::const_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
+use crate::cfg::exception::fail;
+use crate::cfg::exception::illegal_ctx;
+use crate::cfg::exception::illegal_input;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
@@ -82,7 +85,7 @@ pub fn length() -> ConstPrimFuncVal {
 fn fn_length(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::List(list) = &*ctx else {
         error!("ctx {ctx:?} should be a list");
-        return Val::default();
+        return illegal_ctx();
     };
     let len: Int = list.len().into();
     Val::Int(len.into())
@@ -95,22 +98,22 @@ pub fn set() -> MutPrimFuncVal {
 fn fn_set(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
-        return Val::default();
+        return illegal_ctx();
     };
     let Val::Pair(index_value) = input else {
         error!("input {input:?} should be a pair");
-        return Val::default();
+        return illegal_input();
     };
     let index_value = Pair::from(index_value);
     let index = index_value.first;
     let Some(i) = to_index(index) else {
         error!("input.first should be a valid index");
-        return Val::default();
+        return illegal_input();
     };
     let mut value = index_value.second;
     let Some(current) = list.get_mut(i) else {
         error!("index {i:?} should < list.len {}", list.len());
-        return Val::default();
+        return fail();
     };
     swap(current, &mut value);
     value
@@ -123,27 +126,27 @@ pub fn set_many() -> MutPrimFuncVal {
 fn fn_set_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
-        return Val::default();
+        return illegal_ctx();
     };
     let Val::Pair(index_value) = input else {
         error!("input {input:?} should be a pair");
-        return Val::default();
+        return illegal_input();
     };
     let index_value = Pair::from(index_value);
     let index = index_value.first;
     let Some(i) = to_index(index) else {
         error!("input.first should be a valid index");
-        return Val::default();
+        return illegal_input();
     };
     let Val::List(values) = index_value.second else {
         error!("input.second {:?} should be a list", index_value.second);
-        return Val::default();
+        return illegal_input();
     };
     let values = List::from(values);
     let end = i + values.len();
     if end > list.len() {
         error!("end {end} should <= list.len {}", list.len());
-        return Val::default();
+        return fail();
     }
     let ret: List<Val> = list.splice(i .. end, values).collect();
     Val::List(ret.into())
@@ -156,15 +159,15 @@ pub fn get() -> ConstPrimFuncVal {
 fn fn_get(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::List(list) = &*ctx else {
         error!("ctx {ctx:?} should be a list");
-        return Val::default();
+        return illegal_ctx();
     };
     let Some(i) = to_index(input) else {
         error!("input should be a valid index");
-        return Val::default();
+        return illegal_input();
     };
     let Some(val) = list.get(i) else {
         error!("index {i} should < list.len {}", list.len());
-        return Val::default();
+        return fail();
     };
     val.clone()
 }
@@ -176,22 +179,22 @@ pub fn get_many() -> ConstPrimFuncVal {
 fn fn_get_many(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::List(list) = &*ctx else {
         error!("ctx {ctx:?} should be a list");
-        return Val::default();
+        return illegal_ctx();
     };
     let Val::Pair(range) = input else {
         error!("input {input:?} should be a pair");
-        return Val::default();
+        return illegal_input();
     };
     let range = Pair::from(range);
     let Some((from, to)) = to_range(range) else {
         error!("input should be a valid range");
-        return Val::default();
+        return illegal_input();
     };
     let from = from.unwrap_or_default();
     let to = to.unwrap_or(list.len());
     let Some(slice) = list.get(from .. to) else {
         error!("range {from} : {to} should be in 0 : {}", list.len());
-        return Val::default();
+        return fail();
     };
     Val::List(List::from(slice.to_owned()).into())
 }
@@ -203,22 +206,22 @@ pub fn insert() -> MutPrimFuncVal {
 fn fn_insert(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
-        return Val::default();
+        return illegal_ctx();
     };
     let Val::Pair(index_value) = input else {
         error!("input {input:?} should be a pair");
-        return Val::default();
+        return illegal_input();
     };
     let index_value = Pair::from(index_value);
     let index = index_value.first;
     let Some(i) = to_index(index) else {
         error!("input.first should be a valid index");
-        return Val::default();
+        return illegal_input();
     };
     let value = index_value.second;
     if i > list.len() {
         error!("index {i} should <= list.len {}", list.len());
-        return Val::default();
+        return fail();
     }
     list.insert(i, value);
     Val::default()
@@ -231,26 +234,26 @@ pub fn insert_many() -> MutPrimFuncVal {
 fn fn_insert_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
-        return Val::default();
+        return illegal_ctx();
     };
     let Val::Pair(index_value) = input else {
         error!("input {input:?} should be a pair");
-        return Val::default();
+        return illegal_input();
     };
     let index_value = Pair::from(index_value);
     let index = index_value.first;
     let Some(i) = to_index(index) else {
         error!("input.first should be a valid index");
-        return Val::default();
+        return illegal_input();
     };
     let Val::List(values) = index_value.second else {
         error!("input.second {:?} should be a list", index_value.second);
-        return Val::default();
+        return illegal_input();
     };
     let values = List::from(values);
     if i > list.len() {
         error!("index {i} should <= list.len {}", list.len());
-        return Val::default();
+        return fail();
     }
     list.splice(i .. i, values);
     Val::default()
@@ -263,15 +266,15 @@ pub fn remove() -> MutPrimFuncVal {
 fn fn_remove(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
-        return Val::default();
+        return illegal_ctx();
     };
     let Some(i) = to_index(input) else {
         error!("input should be a valid index");
-        return Val::default();
+        return illegal_input();
     };
     if i >= list.len() {
         error!("index {i} should < list.len {}", list.len());
-        return Val::default();
+        return fail();
     }
     list.remove(i)
 }
@@ -283,22 +286,22 @@ pub fn remove_many() -> MutPrimFuncVal {
 fn fn_remove_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
-        return Val::default();
+        return illegal_ctx();
     };
     let Val::Pair(range) = input else {
         error!("input {input:?} should be a pair");
-        return Val::default();
+        return illegal_input();
     };
     let range = Pair::from(range);
     let Some((from, to)) = to_range(range) else {
         error!("input should be a valid range");
-        return Val::default();
+        return illegal_input();
     };
     let from = from.unwrap_or_default();
     let to = to.unwrap_or(list.len());
     if from > to || to > list.len() {
         error!("range {from} : {to} should be in 0 : {}", list.len());
-        return Val::default();
+        return fail();
     }
     let ret: List<Val> = list.splice(from .. to, Vec::new()).collect();
     Val::List(ret.into())
@@ -311,7 +314,7 @@ pub fn push() -> MutPrimFuncVal {
 fn fn_push(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
-        return Val::default();
+        return illegal_ctx();
     };
     list.push(input);
     Val::default()
@@ -324,11 +327,11 @@ pub fn push_many() -> MutPrimFuncVal {
 fn fn_push_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
-        return Val::default();
+        return illegal_ctx();
     };
     let Val::List(mut values) = input else {
         error!("input {input:?} should be a list");
-        return Val::default();
+        return illegal_input();
     };
     list.append(&mut values);
     Val::default()
@@ -341,11 +344,11 @@ pub fn pop() -> MutPrimFuncVal {
 fn fn_pop(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
-        return Val::default();
+        return illegal_ctx();
     };
     let Val::Unit(_) = input else {
         error!("input {input:?} should be a unit");
-        return Val::default();
+        return illegal_input();
     };
     list.pop().unwrap_or_default()
 }
@@ -357,20 +360,20 @@ pub fn pop_many() -> MutPrimFuncVal {
 fn fn_pop_many(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
-        return Val::default();
+        return illegal_ctx();
     };
     let Val::Int(i) = input else {
         error!("input {input:?} should be an int");
-        return Val::default();
+        return illegal_input();
     };
     let Some(i) = i.to_usize() else {
         error!("index {i:?} should <= list.len {}", list.len());
-        return Val::default();
+        return fail();
     };
     let list = &mut **list;
     if i > list.len() {
         error!("index {i} should <= list.len {}", list.len());
-        return Val::default();
+        return fail();
     }
     let start = list.len() - i;
     let list = list.split_off(start);
@@ -385,7 +388,7 @@ pub fn clear() -> MutPrimFuncVal {
 fn fn_clear(_cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
-        return Val::default();
+        return illegal_ctx();
     };
     list.clear();
     Val::default()

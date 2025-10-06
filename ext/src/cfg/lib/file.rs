@@ -1,4 +1,6 @@
 use airlang::cfg::CfgMod;
+use airlang::cfg::exception::fail;
+use airlang::cfg::exception::illegal_input;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::free_impl;
 use airlang::semantics::cfg::Cfg;
@@ -33,14 +35,14 @@ fn fn_read_to_text(_cfg: &mut Cfg, input: Val) -> Val {
         Val::Text(path) => std::fs::read_to_string(&**path),
         v => {
             error!("input {v:?} should be a text");
-            return Val::default();
+            return illegal_input();
         }
     };
     match result {
         Ok(content) => Val::Text(Text::from(content).into()),
         Err(err) => {
             eprintln!("{err}");
-            Val::default()
+            fail()
         }
     }
 }

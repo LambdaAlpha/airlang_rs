@@ -5,6 +5,8 @@ use super::MutImpl;
 use super::const_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
+use crate::cfg::exception::illegal_ctx;
+use crate::cfg::exception::illegal_input;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::CallApply;
 use crate::semantics::func::ConstFn;
@@ -53,21 +55,21 @@ pub fn apply() -> MutPrimFuncVal {
 
 fn fn_apply_free(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Call(call) = input else {
-        return Val::default();
+        return illegal_input();
     };
     CallApply.free_call(cfg, call)
 }
 
 fn fn_apply_const(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Call(call) = input else {
-        return Val::default();
+        return illegal_input();
     };
     CallApply.const_call(cfg, ctx, call)
 }
 
 fn fn_apply_mut(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Call(call) = input else {
-        return Val::default();
+        return illegal_input();
     };
     CallApply.mut_call(cfg, ctx, call)
 }
@@ -78,7 +80,7 @@ pub fn func() -> ConstPrimFuncVal {
 
 fn fn_func(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Call(call) = &*ctx else {
-        return Val::default();
+        return illegal_ctx();
     };
     call.func.clone()
 }
@@ -89,7 +91,7 @@ pub fn set_func() -> MutPrimFuncVal {
 
 fn fn_set_func(_cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Call(call) = ctx else {
-        return Val::default();
+        return illegal_ctx();
     };
     swap(&mut call.func, &mut input);
     input
@@ -101,7 +103,7 @@ pub fn input() -> ConstPrimFuncVal {
 
 fn fn_input(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Call(call) = &*ctx else {
-        return Val::default();
+        return illegal_ctx();
     };
     call.input.clone()
 }
@@ -112,7 +114,7 @@ pub fn set_input() -> MutPrimFuncVal {
 
 fn fn_set_input(_cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Call(call) = ctx else {
-        return Val::default();
+        return illegal_ctx();
     };
     swap(&mut call.input, &mut input);
     input

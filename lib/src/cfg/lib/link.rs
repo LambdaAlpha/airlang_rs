@@ -3,6 +3,7 @@ use log::error;
 use super::FreePrimFn;
 use super::free_impl;
 use crate::cfg::CfgMod;
+use crate::cfg::exception::illegal_input;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
@@ -46,7 +47,7 @@ pub fn get() -> FreePrimFuncVal {
 fn fn_get(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Link(link) = input else {
         error!("input {input:?} should be a link");
-        return Val::default();
+        return illegal_input();
     };
     link.get_clone()
 }
@@ -58,12 +59,12 @@ pub fn set() -> FreePrimFuncVal {
 fn fn_set(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return Val::default();
+        return illegal_input();
     };
     let pair = Pair::from(pair);
     let Val::Link(mut link) = pair.first else {
         error!("input.first {:?} should be a link", pair.first);
-        return Val::default();
+        return illegal_input();
     };
     link.set(pair.second)
 }

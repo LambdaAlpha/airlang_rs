@@ -93,4 +93,6 @@ pub mod lib;
 
 pub mod prelude;
 
+pub mod exception;
+
 mod utils;

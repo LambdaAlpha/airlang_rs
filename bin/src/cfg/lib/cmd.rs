@@ -5,6 +5,8 @@ use airlang::cfg::CoreCfg;
 use airlang::cfg::adapter::CallPrimAdapter;
 use airlang::cfg::adapter::SymbolAdapter;
 use airlang::cfg::adapter::prim_adapter;
+use airlang::cfg::exception::fail;
+use airlang::cfg::exception::illegal_input;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::free_impl;
 use airlang::semantics::cfg::Cfg;
@@ -41,19 +43,19 @@ pub fn call() -> FreePrimFuncVal {
 fn fn_call(_cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return Val::default();
+        return illegal_input();
     };
     let program: &str = match &pair.first {
         Val::Text(program) => program,
         Val::Symbol(symbol) => symbol,
         v => {
             error!("program {v:?} should be a text or a symbol");
-            return Val::default();
+            return illegal_input();
         }
     };
     let Val::List(arguments) = &pair.second else {
         error!("arguments {:?} should be a list", pair.second);
-        return Val::default();
+        return illegal_input();
     };
     let arguments = arguments
         .iter()
@@ -70,16 +72,16 @@ fn fn_call(_cfg: &mut Cfg, input: Val) -> Val {
         })
         .collect::<Option<Vec<&str>>>();
     let Some(arguments) = arguments else {
-        return Val::default();
+        return illegal_input();
     };
 
     let child = Command::new(program).args(arguments).spawn();
     let Ok(mut child) = child else {
         eprintln!("failed to execute program");
-        return Val::default();
+        return fail();
     };
     let Ok(status) = child.wait() else {
-        return Val::default();
+        return fail();
     };
 
     if let Some(status) = status.code()
