@@ -1,3 +1,36 @@
+length
+-----
+_ do [
+    length = _ import .memory.length,
+    new = _ import .memory.new,
+    any = _ import .value.any,
+    m = _ new {
+        a : . : _ any .,
+        b : . : _ any .,
+        c : . : _ any .,
+        d : . : _ any .,
+    },
+    m which _ length _
+]
+-----
+4
+=====
+length == repr length
+-----
+_ do [
+    memory.length = _ import .memory.length,
+    map.length = _ import .map.length,
+    represent = _ import .memory.represent,
+    any = _ import .value.any,
+    m = _ any memory,
+    m1 = _ represent m,
+    l = m which _ memory.length _,
+    l1 = m1 which _ map.length _,
+    l == l1
+]
+-----
+true
+=====
 read none
 -----
 _ do [

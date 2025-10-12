@@ -19,6 +19,7 @@ use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
+use crate::type_::Int;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
@@ -28,6 +29,7 @@ use crate::type_::Pair;
 pub struct CfgLib {
     pub new: FreePrimFuncVal,
     pub repr: FreePrimFuncVal,
+    pub length: FreePrimFuncVal,
     pub snapshot: FreePrimFuncVal,
     pub exist: FreePrimFuncVal,
     pub import: FreePrimFuncVal,
@@ -41,6 +43,7 @@ impl Default for CfgLib {
         CfgLib {
             new: new(),
             repr: repr(),
+            length: length(),
             snapshot: snapshot(),
             exist: exist(),
             import: import(),
@@ -55,6 +58,7 @@ impl CfgMod for CfgLib {
     fn extend(self, cfg: &Cfg) {
         self.new.extend(cfg);
         self.repr.extend(cfg);
+        self.length.extend(cfg);
         self.snapshot.extend(cfg);
         self.exist.extend(cfg);
         self.import.extend(cfg);
@@ -122,6 +126,14 @@ fn fn_repr(_cfg: &mut Cfg, input: Val) -> Val {
         list.push(Val::Map(map.into()));
     }
     Val::List(list.into())
+}
+
+pub fn length() -> FreePrimFuncVal {
+    FreePrimFn { id: "configuration.length", f: free_impl(fn_length) }.free()
+}
+
+fn fn_length(cfg: &mut Cfg, _input: Val) -> Val {
+    Val::Int(Int::from(cfg.len()).into())
 }
 
 pub fn snapshot() -> FreePrimFuncVal {

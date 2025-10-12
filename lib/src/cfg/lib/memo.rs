@@ -23,12 +23,14 @@ use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::ConstRef;
+use crate::type_::Int;
 use crate::type_::Pair;
 
 #[derive(Clone)]
 pub struct MemoLib {
     pub new: FreePrimFuncVal,
     pub repr: FreePrimFuncVal,
+    pub length: ConstPrimFuncVal,
     pub reverse: FreePrimFuncVal,
     pub remove: MutPrimFuncVal,
     pub contract: ConstPrimFuncVal,
@@ -41,6 +43,7 @@ impl Default for MemoLib {
         MemoLib {
             new: new(),
             repr: repr(),
+            length: length(),
             reverse: reverse(),
             remove: remove(),
             contract: contract(),
@@ -55,6 +58,7 @@ impl CfgMod for MemoLib {
         CoreCfg::extend_adapter(cfg, &self.new.id, parse_adapter());
         self.new.extend(cfg);
         self.repr.extend(cfg);
+        self.length.extend(cfg);
         self.reverse.extend(cfg);
         self.remove.extend(cfg);
         self.contract.extend(cfg);
@@ -85,6 +89,18 @@ fn fn_repr(_cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input();
     };
     generate_memo(memo)
+}
+
+pub fn length() -> ConstPrimFuncVal {
+    DynPrimFn { id: "memory.length", f: const_impl(fn_length) }.const_()
+}
+
+fn fn_length(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+    let Val::Memo(memo) = &*ctx else {
+        error!("ctx {ctx:?} should be a memo");
+        return illegal_ctx();
+    };
+    Val::Int(Int::from(memo.len()).into())
 }
 
 pub fn reverse() -> FreePrimFuncVal {

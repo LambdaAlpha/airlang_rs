@@ -17,6 +17,43 @@ _ do [
 -----
 true
 =====
+length
+-----
+_ do [
+    new = _ import .configuration.new,
+    where = _ import .configuration.where,
+    length = _ import .configuration.length,
+    any = _ import .value.any,
+    c = _ new [
+        {a : _ any ., b : _ any .},
+        {a : _ any .},
+        {b : _ any ., c : _ any .},
+        {},
+        {b : _ any .},
+    ],
+    c where _ length _
+]
+-----
+3 
+=====
+length == snapshot repr length
+-----
+_ do [
+    configuration.length = _ import .configuration.length,
+    map.length = _ import .map.length,
+    snapshot = _ import .configuration.snapshot,
+    represent = _ import .configuration.represent,
+    any = _ import .value.any,
+    where = _ import .configuration.where,
+    c = _ any configuration,
+    [m] = _ represent c where _ snapshot _,
+    lc = c where _ configuration.length _,
+    lm = m which _ map.length _,
+    lc == lm
+]
+-----
+true
+=====
 snapshot
 -----
 _ do [
