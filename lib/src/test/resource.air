@@ -1,0 +1,30 @@
+steps
+-----
+_ do [
+    steps = _ import .resource.steps,
+    _ steps _
+]
+-----
+11
+=====
+measure_steps 0
+-----
+_ do [
+    measure_steps = _ import .resource.measure_steps,
+    (v : s) = _ measure_steps true,
+    s
+]
+-----
+0
+=====
+measure_steps ref + form + call
+-----
+_ do [
+    measure_steps = _ import .resource.measure_steps,
+    a = true,
+    b = false,
+    (v : s) = _ measure_steps a and b,
+    s
+]
+-----
+5

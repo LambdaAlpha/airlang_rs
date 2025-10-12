@@ -1,5 +1,6 @@
 use log::error;
 use log::info;
+use log::trace;
 
 use crate::cfg::CoreCfg;
 use crate::semantics::cfg::Cfg;
@@ -31,7 +32,9 @@ impl Air {
     }
 
     pub fn interpret(&mut self, input: Val) -> Val {
-        composite_call(&mut self.cfg, &mut self.memo, input)
+        let output = composite_call(&mut self.cfg, &mut self.memo, input);
+        trace!("{} steps", self.cfg.steps());
+        output
     }
 
     pub fn memo_mut(&mut self) -> &mut Memo {

@@ -42,7 +42,8 @@ impl<'a, Fn> SymbolEval<'a, Fn> {
 }
 
 impl<'a, Fn> FreeFn<Cfg, Symbol, Val> for SymbolEval<'a, Fn> {
-    fn free_call(&self, _cfg: &mut Cfg, input: Symbol) -> Val {
+    fn free_call(&self, cfg: &mut Cfg, input: Symbol) -> Val {
+        cfg.step();
         let (prefix, s) = self.recognize(input.clone());
         match prefix {
             SYMBOL_LITERAL_CHAR => Val::Symbol(s),
@@ -63,6 +64,7 @@ impl<'a, Fn> ConstFn<Cfg, Val, Symbol, Val> for SymbolEval<'a, Fn>
 where Fn: ConstFn<Cfg, Val, Val, Val>
 {
     fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Symbol) -> Val {
+        cfg.step();
         let (prefix, s) = self.recognize(input);
         match prefix {
             SYMBOL_LITERAL_CHAR => Val::Symbol(s),
@@ -89,6 +91,7 @@ impl<'a, Fn> MutFn<Cfg, Val, Symbol, Val> for SymbolEval<'a, Fn>
 where Fn: MutFn<Cfg, Val, Val, Val>
 {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Symbol) -> Val {
+        cfg.step();
         let (prefix, s) = self.recognize(input);
         match prefix {
             SYMBOL_LITERAL_CHAR => Val::Symbol(s),
@@ -135,6 +138,7 @@ impl<'a, Func> FreeFn<Cfg, CallVal, Val> for CallEval<'a, Func>
 where Func: FreeFn<Cfg, Val, Val>
 {
     fn free_call(&self, cfg: &mut Cfg, call: CallVal) -> Val {
+        cfg.step();
         let call = Call::from(call);
         let func = self.func.free_call(cfg, call.func);
         let Val::Func(func) = func else {
@@ -153,6 +157,7 @@ impl<'a, Func> ConstFn<Cfg, Val, CallVal, Val> for CallEval<'a, Func>
 where Func: ConstFn<Cfg, Val, Val, Val>
 {
     fn const_call(&self, cfg: &mut Cfg, mut ctx: ConstRef<Val>, call: CallVal) -> Val {
+        cfg.step();
         let call = Call::from(call);
         let func = self.func.const_call(cfg, ctx.reborrow(), call.func);
         let Val::Func(func) = func else {
@@ -171,6 +176,7 @@ impl<'a, Func> MutFn<Cfg, Val, CallVal, Val> for CallEval<'a, Func>
 where Func: MutFn<Cfg, Val, Val, Val>
 {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, call: CallVal) -> Val {
+        cfg.step();
         let call = Call::from(call);
         let func = self.func.mut_call(cfg, ctx, call.func);
         let Val::Func(func) = func else {

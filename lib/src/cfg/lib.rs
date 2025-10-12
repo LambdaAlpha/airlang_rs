@@ -6,6 +6,7 @@ use self::byte::ByteLib;
 use self::call::CallLib;
 use self::cfg::CfgLib;
 use self::ctrl::CtrlLib;
+use self::ctx::CtxLib;
 use self::func::FuncLib;
 use self::int::IntLib;
 use self::lang::LangLib;
@@ -15,13 +16,13 @@ use self::map::MapLib;
 use self::memo::MemoLib;
 use self::number::NumberLib;
 use self::pair::PairLib;
+use self::resource::ResourceLib;
 use self::symbol::SymbolLib;
 use self::syntax::SyntaxLib;
 use self::text::TextLib;
 use self::unit::UnitLib;
 use self::value::ValueLib;
 use crate::cfg::CfgMod;
-use crate::cfg::lib::ctx::CtxLib;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::ConstPrimFunc;
@@ -58,6 +59,7 @@ pub struct CoreLib {
     pub adapter: AdapterLib,
     pub ctrl: CtrlLib,
     pub value: ValueLib,
+    pub resource: ResourceLib,
     pub syntax: SyntaxLib,
     pub lang: LangLib,
 }
@@ -83,6 +85,7 @@ impl CfgMod for CoreLib {
         self.adapter.extend(cfg);
         self.ctrl.extend(cfg);
         self.value.extend(cfg);
+        self.resource.extend(cfg);
         self.syntax.extend(cfg);
         self.lang.extend(cfg);
     }
@@ -257,6 +260,8 @@ pub mod adapter;
 pub mod ctrl;
 
 pub mod value;
+
+pub mod resource;
 
 pub mod syntax;
 

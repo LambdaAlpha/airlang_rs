@@ -15,6 +15,7 @@ use crate::type_::Symbol;
 // todo design invariant
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
 pub struct Cfg {
+    steps: u128,
     max_scope: usize,
     // box is required for StableDeref, which is required for insert
     map: OnceMap<Symbol, Box<OnceMap<usize /*scope*/, Box<Val>>>>,
@@ -95,7 +96,17 @@ impl Cfg {
                 (k.clone(), Box::new(new_scopes))
             })
             .collect();
-        Self { max_scope: 0, map }
+        Self { steps: 0, max_scope: 0, map }
+    }
+
+    #[inline(always)]
+    pub(crate) fn step(&mut self) {
+        self.steps += 1;
+    }
+
+    #[inline(always)]
+    pub fn steps(&self) -> u128 {
+        self.steps
     }
 }
 

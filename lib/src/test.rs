@@ -175,6 +175,11 @@ fn test_value() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_resource() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/resource.air"), "test/resource.air")
+}
+
+#[test]
 fn test_syntax() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/syntax.air"), "test/syntax.air")
 }
