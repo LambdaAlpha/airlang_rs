@@ -1,5 +1,4 @@
 pub(crate) use self::eval::CFG_ADAPTER;
-pub(crate) use self::eval::CallApply;
 pub(crate) use self::eval::CallEval;
 pub(crate) use self::eval::Eval;
 pub(crate) use self::eval::SYMBOL_EVAL_CHAR;

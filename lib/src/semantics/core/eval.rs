@@ -185,41 +185,6 @@ where Func: MutFn<Cfg, Val, Val, Val>
     }
 }
 
-pub(crate) struct CallApply;
-
-impl FreeFn<Cfg, CallVal, Val> for CallApply {
-    fn free_call(&self, cfg: &mut Cfg, call: CallVal) -> Val {
-        let call = Call::from(call);
-        let Val::Func(func) = call.func else {
-            error!("func {:?} should be a func", call.func);
-            return Val::default();
-        };
-        func.free_call(cfg, call.input)
-    }
-}
-
-impl ConstFn<Cfg, Val, CallVal, Val> for CallApply {
-    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, call: CallVal) -> Val {
-        let call = Call::from(call);
-        let Val::Func(func) = call.func else {
-            error!("func {:?} should be a func", call.func);
-            return Val::default();
-        };
-        func.const_call(cfg, ctx, call.input)
-    }
-}
-
-impl MutFn<Cfg, Val, CallVal, Val> for CallApply {
-    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, call: CallVal) -> Val {
-        let call = Call::from(call);
-        let Val::Func(func) = call.func else {
-            error!("func {:?} should be a func", call.func);
-            return Val::default();
-        };
-        func.mut_call(cfg, ctx, call.input)
-    }
-}
-
 #[derive(Debug, Default, Copy, Clone)]
 pub(crate) struct Eval;
 

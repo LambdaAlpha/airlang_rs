@@ -359,3 +359,43 @@ _ do [
 ]
 -----
 true
+=====
+apply free
+-----
+_ do [
+    apply = _ import .function.apply,
+    not apply _ not true
+]
+-----
+true
+=====
+apply const
+-----
+_ do [
+    apply = _ import .function.apply,
+    read = _ import .context.read,
+    a = 1,
+    read apply .a
+]
+-----
+1
+=====
+apply mut
+-----
+_ do [
+    apply = _ import .function.apply,
+    = apply .a : 1,
+    a
+]
+-----
+1
+=====
+apply no adapter
+-----
+_ do [
+    apply = _ import .function.apply,
+    test apply true : [a = true] : [b = true],
+    a and b
+]
+-----
+true

@@ -45,22 +45,3 @@ _ do [
 ]
 -----
 true
-=====
-apply const
------
-_ do [
-    apply = _ import .call.apply,
-    _ apply _ form@ 1 + 1
-]
------
-2
-=====
-apply mut
------
-_ do [
-    apply = _ import .call.apply,
-    _ apply _ form@ .a = 1,
-    a
-]
------
-1

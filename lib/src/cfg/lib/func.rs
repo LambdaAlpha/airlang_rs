@@ -4,6 +4,7 @@ use self::repr::generate_func;
 use self::repr::parse_func;
 use super::DynPrimFn;
 use super::FreePrimFn;
+use super::MutImpl;
 use super::const_impl;
 use super::free_impl;
 use super::func::repr::generate_code;
@@ -14,12 +15,17 @@ use crate::cfg::CoreCfg;
 use crate::cfg::exception::illegal_ctx;
 use crate::cfg::exception::illegal_input;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::func::ConstFn;
+use crate::semantics::func::FreeFn;
+use crate::semantics::func::MutFn;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MemoVal;
+use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::ConstRef;
+use crate::type_::Pair;
 use crate::type_::Symbol;
 
 #[derive(Clone)]
@@ -31,6 +37,7 @@ pub struct FuncLib {
     pub id: ConstPrimFuncVal,
     pub code: ConstPrimFuncVal,
     pub memo: ConstPrimFuncVal,
+    pub apply: MutPrimFuncVal,
 }
 
 impl Default for FuncLib {
@@ -43,6 +50,7 @@ impl Default for FuncLib {
             id: id(),
             code: code(),
             memo: memo(),
+            apply: apply(),
         }
     }
 }
@@ -57,6 +65,7 @@ impl CfgMod for FuncLib {
         self.id.extend(cfg);
         self.code.extend(cfg);
         self.memo.extend(cfg);
+        self.apply.extend(cfg);
     }
 }
 
@@ -152,6 +161,50 @@ fn fn_memo(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
         return illegal_ctx();
     };
     Val::Memo(MemoVal::from(memo.clone()))
+}
+
+pub fn apply() -> MutPrimFuncVal {
+    DynPrimFn { id: "function.apply", f: MutImpl::new(fn_apply_free, fn_apply_const, fn_apply_mut) }
+        .mut_()
+}
+
+fn fn_apply_free(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
+        return illegal_input();
+    };
+    let pair = Pair::from(pair);
+    let Val::Func(func) = pair.first else {
+        error!("input.first {:?} should be a func", pair.first);
+        return illegal_input();
+    };
+    func.free_call(cfg, pair.second)
+}
+
+fn fn_apply_const(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
+        return illegal_input();
+    };
+    let pair = Pair::from(pair);
+    let Val::Func(func) = pair.first else {
+        error!("input.first {:?} should be a func", pair.first);
+        return illegal_input();
+    };
+    func.const_call(cfg, ctx, pair.second)
+}
+
+fn fn_apply_mut(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
+        return illegal_input();
+    };
+    let pair = Pair::from(pair);
+    let Val::Func(func) = pair.first else {
+        error!("input.first {:?} should be a func", pair.first);
+        return illegal_input();
+    };
+    func.mut_call(cfg, ctx, pair.second)
 }
 
 mod repr;
