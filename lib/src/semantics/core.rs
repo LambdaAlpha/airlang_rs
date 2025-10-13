@@ -7,6 +7,7 @@ pub(crate) use self::eval::SYMBOL_REF_CHAR;
 pub(crate) use self::eval::SymbolEval;
 pub(crate) use self::eval::import_adapter;
 pub(crate) use self::form::CallForm;
+pub(crate) use self::form::Form;
 pub(crate) use self::form::ListForm;
 pub(crate) use self::form::MapForm;
 pub(crate) use self::form::PairForm;

@@ -4,6 +4,7 @@ use super::ListForm;
 use super::MapForm;
 use super::PairForm;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::form::Form;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
@@ -202,7 +203,7 @@ impl FreeFn<Cfg, Val, Val> for Eval {
             Val::Call(call) => self.free_call(cfg, call),
             Val::List(list) => self.free_call(cfg, list),
             Val::Map(map) => self.free_call(cfg, map),
-            v => v,
+            v => Form.free_call(cfg, v),
         }
     }
 }
@@ -215,7 +216,7 @@ impl ConstFn<Cfg, Val, Val, Val> for Eval {
             Val::Call(call) => self.const_call(cfg, ctx, call),
             Val::List(list) => self.const_call(cfg, ctx, list),
             Val::Map(map) => self.const_call(cfg, ctx, map),
-            v => v,
+            v => Form.const_call(cfg, ctx, v),
         }
     }
 }
@@ -228,7 +229,7 @@ impl MutFn<Cfg, Val, Val, Val> for Eval {
             Val::Call(call) => self.mut_call(cfg, ctx, call),
             Val::List(list) => self.mut_call(cfg, ctx, list),
             Val::Map(map) => self.mut_call(cfg, ctx, map),
-            v => v,
+            v => Form.mut_call(cfg, ctx, v),
         }
     }
 }

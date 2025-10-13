@@ -5,9 +5,9 @@ _ do [
     _ steps _
 ]
 -----
-11
+13
 =====
-measure_steps 0
+measure_steps 1
 -----
 _ do [
     measure_steps = _ import .resource.measure_steps,
@@ -15,7 +15,7 @@ _ do [
     s
 ]
 -----
-0
+1
 =====
 measure_steps ref + form + call
 -----

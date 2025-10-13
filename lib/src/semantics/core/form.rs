@@ -15,6 +15,29 @@ use crate::type_::ConstRef;
 use crate::type_::List;
 use crate::type_::Map;
 
+pub(crate) struct Form;
+
+impl FreeFn<Cfg, Val, Val> for Form {
+    fn free_call(&self, cfg: &mut Cfg, input: Val) -> Val {
+        cfg.step();
+        input
+    }
+}
+
+impl ConstFn<Cfg, Val, Val, Val> for Form {
+    fn const_call(&self, cfg: &mut Cfg, _ctx: ConstRef<Val>, input: Val) -> Val {
+        cfg.step();
+        input
+    }
+}
+
+impl MutFn<Cfg, Val, Val, Val> for Form {
+    fn mut_call(&self, cfg: &mut Cfg, _ctx: &mut Val, input: Val) -> Val {
+        cfg.step();
+        input
+    }
+}
+
 pub(crate) struct PairForm<'a, Some, First, Second> {
     pub(crate) some: &'a Map<Val, Some>,
     pub(crate) first: &'a First,
