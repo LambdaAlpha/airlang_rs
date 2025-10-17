@@ -498,16 +498,26 @@ fn raw_map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
 }
 
 fn symbol(i: &mut &str) -> ModalResult<Symbol> {
-    let literal = take_while(1 .., |c| is_symbol(c) && c != '\\' && c != SYMBOL_QUOTE);
-    let fragment = alt((literal, symbol_escaped, symbol_space));
-    let symbol = repeat(0 .., fragment).fold(String::new, |mut string, fragment| {
-        string.push_str(fragment);
-        string
-    });
-    delimited_cut(SYMBOL_QUOTE, symbol, SYMBOL_QUOTE)
-        .map(Symbol::from_string_unchecked)
-        .context(label("symbol"))
-        .parse_next(i)
+    let symbol = move |i: &mut _| {
+        let mut s = String::new();
+        let mut literal = take_while(1 .., |c| is_symbol(c) && c != '\\' && c != SYMBOL_QUOTE);
+        loop {
+            match peek(any).parse_next(i)? {
+                SYMBOL_QUOTE => break,
+                '\\' => s.push_str(symbol_escaped.parse_next(i)?),
+                '\r' | '\n' => {
+                    symbol_newline.parse_next(i)?;
+                    if let Some(SYMBOL_QUOTE) = i.chars().next() {
+                        break;
+                    }
+                    ' '.parse_next(i)?;
+                }
+                _ => s.push_str(literal.parse_next(i)?),
+            }
+        }
+        Ok(Symbol::from_string_unchecked(s))
+    };
+    delimited_cut(SYMBOL_QUOTE, symbol, SYMBOL_QUOTE).context(label("symbol")).parse_next(i)
 }
 
 fn symbol_escaped<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
@@ -515,28 +525,16 @@ fn symbol_escaped<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
         '\\' => empty.value("\\").parse_next(i),
         '_' => empty.value(" ").parse_next(i),
         QUOTE => empty.value(concatcp!(SYMBOL_QUOTE)).parse_next(i),
-        ' ' | '\t' | '\r' | '\n' => opt(spaces).value("").parse_next(i),
+        ' ' | '\t' => opt(space_tab).value("").parse_next(i),
         _ => fail.parse_next(i),
     })
     .context(expect_desc("escape character"))
     .parse_next(i)
 }
 
-// ignore spaces following \n
-fn symbol_space<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
-    (move |i: &mut _| match any.parse_next(i)? {
-        '\n' => opt(space_tab).value("").parse_next(i),
-        '\r' => ('\n', opt(space_tab)).value("").parse_next(i),
-        '\t' => take_while(0 .., '\t').value("").parse_next(i),
-        _ => fail.parse_next(i),
-    })
-    .context(expect_desc("spaces"))
-    .parse_next(i)
-}
-
 fn raw_symbol(i: &mut &str) -> ModalResult<Symbol> {
     let literal = take_while(0 .., is_symbol);
-    let symbol = separated(1 .., terminated(literal, raw_symbol_newline), ' ')
+    let symbol = separated(1 .., terminated(literal, symbol_newline), ' ')
         .map(|fragments: Vec<_>| fragments.join(""));
     delimited_cut(SYMBOL_QUOTE, symbol, SYMBOL_QUOTE)
         .map(Symbol::from_string_unchecked)
@@ -544,7 +542,7 @@ fn raw_symbol(i: &mut &str) -> ModalResult<Symbol> {
         .parse_next(i)
 }
 
-fn raw_symbol_newline(i: &mut &str) -> ModalResult<()> {
+fn symbol_newline(i: &mut &str) -> ModalResult<()> {
     (line_ending, opt(space_tab), '|'.context(expect_char('|')))
         .void()
         .context(expect_desc("newline"))
@@ -552,14 +550,26 @@ fn raw_symbol_newline(i: &mut &str) -> ModalResult<()> {
 }
 
 fn text(i: &mut &str) -> ModalResult<Text> {
-    let literal = take_till(1 .., |c| matches!(c, '"' | '\\' | '\r' | '\n'));
-    let space = terminated(line_ending, opt(space_tab));
-    let fragment = alt((literal.map(StrFragment::Str), text_escaped, space.map(StrFragment::Str)));
-    let text = repeat(0 .., fragment).fold(String::new, |mut string, fragment| {
-        fragment.push(&mut string);
-        string
-    });
-    delimited_cut(TEXT_QUOTE, text, TEXT_QUOTE).map(Text::from).context(label("text")).parse_next(i)
+    let text = move |i: &mut _| {
+        let mut s = String::new();
+        let mut literal = take_till(1 .., |c| matches!(c, '"' | '\\' | '\r' | '\n'));
+        loop {
+            match peek(any).parse_next(i)? {
+                TEXT_QUOTE => break,
+                '\\' => text_escaped.parse_next(i)?.push(&mut s),
+                '\r' | '\n' => {
+                    s.push_str(text_newline.parse_next(i)?);
+                    if let Some(TEXT_QUOTE) = i.chars().next() {
+                        break;
+                    }
+                    ' '.parse_next(i)?;
+                }
+                _ => s.push_str(literal.parse_next(i)?),
+            }
+        }
+        Ok(Text::from(s))
+    };
+    delimited_cut(TEXT_QUOTE, text, TEXT_QUOTE).context(label("text")).parse_next(i)
 }
 
 fn text_escaped<'a>(i: &mut &'a str) -> ModalResult<StrFragment<'a>> {
@@ -571,7 +581,7 @@ fn text_escaped<'a>(i: &mut &'a str) -> ModalResult<StrFragment<'a>> {
         '\\' => empty.value(StrFragment::Char('\\')).parse_next(i),
         '_' => empty.value(StrFragment::Char(' ')).parse_next(i),
         QUOTE => empty.value(StrFragment::Char(TEXT_QUOTE)).parse_next(i),
-        ' ' | '\t' | '\r' | '\n' => opt(spaces).value(StrFragment::Str("")).parse_next(i),
+        ' ' | '\t' => opt(space_tab).value(StrFragment::Str("")).parse_next(i),
         _ => fail.parse_next(i),
     })
     .context(expect_desc("escape character"))
@@ -588,7 +598,7 @@ fn unicode(i: &mut &str) -> ModalResult<char> {
 }
 
 fn raw_text(i: &mut &str) -> ModalResult<Text> {
-    let fragment = separated(1 .., (raw_text_until_newline, raw_text_newline), ' ');
+    let fragment = separated(1 .., (raw_text_until_newline, text_newline), ' ');
     let text = fragment.map(|fragments: Vec<_>| {
         let mut s = String::new();
         for (literal, newline) in fragments {
@@ -609,7 +619,7 @@ fn raw_text_until_newline<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
     repeat(0 .., alt((no_rn, only_r))).map(|()| ()).take().parse_next(i)
 }
 
-fn raw_text_newline<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
+fn text_newline<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
     let newline = alt(('+'.value(true), '|'.value(false)))
         .context(expect_char('+'))
         .context(expect_char('|'));

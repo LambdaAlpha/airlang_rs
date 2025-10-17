@@ -30,21 +30,27 @@ unicode space
 -----
 "\u( 1f701 )"
 =====
-multiline
+multiline newline end
 -----
-"\
-multiple \
-lines\
 "
+| many\_
+| many
+|  lines
+|"
 =====
-multiline indent
+multiline inline end
 -----
-"\
-  a
-  b
-  \_ c\
-  d\
+"many
+|  many
+| \_lines"
+=====
+multiline mix
+-----
 "
++ many
+|  many 
+| lines
++"
 =====
 raw special symbol
 -----
