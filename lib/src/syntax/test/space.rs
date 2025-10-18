@@ -24,6 +24,5 @@ pub(super) fn expected() -> Vec<Repr> {
         map(vec![(symbol("a"), symbol("b"))]),
         symbol("c"),
         symbol("a"),
-        symbol("a"),
     ]
 }

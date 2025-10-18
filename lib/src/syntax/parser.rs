@@ -14,7 +14,6 @@ use winnow::combinator::alt;
 use winnow::combinator::cut_err;
 use winnow::combinator::delimited;
 use winnow::combinator::empty;
-use winnow::combinator::eof;
 use winnow::combinator::fail;
 use winnow::combinator::not;
 use winnow::combinator::opt;
@@ -27,8 +26,6 @@ use winnow::error::ContextError;
 use winnow::error::ErrMode;
 use winnow::error::StrContext;
 use winnow::error::StrContextValue;
-use winnow::stream::Checkpoint;
-use winnow::stream::Stream;
 use winnow::token::any;
 use winnow::token::one_of;
 use winnow::token::take_till;
@@ -104,9 +101,7 @@ impl ParseCtx {
 type E = ErrMode<ContextError>;
 
 pub fn parse<T: ParseRepr>(src: &str) -> Result<T, super::ParseError> {
-    terminated(top::<T>, eof.context(expect_desc("end")))
-        .parse(src)
-        .map_err(|e| super::ParseError { msg: e.to_string() })
+    top::<T>.parse(src).map_err(|e| super::ParseError { msg: e.to_string() })
 }
 
 fn label(label: &'static str) -> StrContext {
@@ -122,7 +117,8 @@ fn expect_char(c: char) -> StrContext {
 }
 
 fn top<T: ParseRepr>(src: &mut &str) -> ModalResult<T> {
-    trim_comment(compose(ParseCtx::default())).parse_next(src)
+    let ctx = ParseCtx::default();
+    trim_comment(ctx, compose(ctx)).parse_next(src)
 }
 
 fn trim<'a, O, F>(f: F) -> impl Parser<&'a str, O, E>
@@ -130,9 +126,9 @@ where F: Parser<&'a str, O, E> {
     delimited(opt(spaces), f, opt(spaces))
 }
 
-fn trim_comment<'a, O, F>(f: F) -> impl Parser<&'a str, O, E>
+fn trim_comment<'a, O, F>(ctx: ParseCtx, f: F) -> impl Parser<&'a str, O, E>
 where F: Parser<&'a str, O, E> {
-    delimited(opt(spaces_comment), f, opt(spaces_comment))
+    delimited(opt(spaces_comment(ctx)), f, opt(spaces_comment(ctx)))
 }
 
 fn spaces(i: &mut &str) -> ModalResult<()> {
@@ -144,51 +140,39 @@ fn space_tab(i: &mut &str) -> ModalResult<()> {
     take_while(1 .., |c| matches!(c, ' ' | '\t')).void().context(label("space_tab")).parse_next(i)
 }
 
-fn spaces_comment(i: &mut &str) -> ModalResult<()> {
-    repeat(1 .., alt((spaces, comment))).parse_next(i)
+fn spaces_comment<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
+    repeat(1 .., alt((spaces, comment(ctx))))
 }
 
-fn comment(i: &mut &str) -> ModalResult<()> {
+fn comment<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
+    let comment_tokens = repeat(0 .., comment_token(ctx));
     let comment = delimited_cut(SCOPE_LEFT, comment_tokens, SCOPE_RIGHT);
-    preceded(COMMENT, comment).context(label("comment")).parse_next(i)
+    preceded(COMMENT, comment).context(label("comment"))
 }
 
-fn comment_tokens(i: &mut &str) -> ModalResult<()> {
-    repeat(0 .., comment_token).parse_next(i)
-}
-
-fn comment_token(i: &mut &str) -> ModalResult<()> {
-    match peek(any).parse_next(i)? {
-        // delimiters
-        LIST_LEFT => delimited_cut(LIST_LEFT, comment_tokens, LIST_RIGHT).parse_next(i),
-        LIST_RIGHT => fail.parse_next(i),
-        MAP_LEFT => delimited_cut(MAP_LEFT, comment_tokens, MAP_RIGHT).parse_next(i),
-        MAP_RIGHT => fail.parse_next(i),
-        SCOPE_LEFT => delimited_cut(SCOPE_LEFT, comment_tokens, SCOPE_RIGHT).parse_next(i),
-        SCOPE_RIGHT => fail.parse_next(i),
-        SEPARATOR => any.void().parse_next(i),
-        ' ' | '\t' | '\r' | '\n' => spaces.parse_next(i),
-        TEXT_QUOTE => {
-            let text = take_until(0 .., TEXT_QUOTE).void();
-            delimited_cut(TEXT_QUOTE, text, TEXT_QUOTE).parse_next(i)
-        }
-        SYMBOL_QUOTE => {
-            let symbol = take_until(0 .., SYMBOL_QUOTE).void();
-            delimited_cut(SYMBOL_QUOTE, symbol, SYMBOL_QUOTE).parse_next(i)
-        }
-
-        _ => {
-            let symbol = trivial_symbol1.context(label("symbol")).parse_next(i)?;
-            if symbol != UNIT || !i.starts_with([TEXT_QUOTE, SYMBOL_QUOTE]) {
-                return empty.parse_next(i);
-            }
-            let quote = i.chars().next().unwrap();
-            let line = (take_until(0 .., '\n'), '\n', opt(space_tab), one_of(is_symbol));
-            let content = separated(1 .., line, ' ');
-            delimited_cut(quote, content, quote).parse_next(i)
-        }
+fn comment_token<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
+    // to avoid error[E0720]: cannot resolve opaque type
+    move |i: &mut _| {
+        alt((spaces, comment(ctx), SEPARATOR.void(), token::<C>(ctx).void())).parse_next(i)
     }
 }
+
+#[derive(Clone, PartialEq, Eq, Hash)]
+struct C;
+
+macro_rules! impl_parse_repr_for_comment {
+    ($($t:ty)*) => {
+        $(impl From<$t> for C {
+            fn from(_: $t) -> C {
+                C
+            }
+        })*
+    };
+}
+
+impl_parse_repr_for_comment!(Unit Bit Symbol Text Int Number Byte);
+impl_parse_repr_for_comment!(Pair<C, C> Call<C, C> List<C> Map<C, C>);
+impl ParseRepr for C {}
 
 fn delimited_cut<'a, T, F>(left: char, f: F, right: char) -> impl Parser<&'a str, T, E>
 where F: Parser<&'a str, T, E> {
@@ -202,9 +186,11 @@ where F: Parser<&'a str, T, E> {
     delimited_cut(left, trim(f), right)
 }
 
-fn delimited_trim_comment<'a, T, F>(left: char, f: F, right: char) -> impl Parser<&'a str, T, E>
+fn delimited_trim_comment<'a, T, F>(
+    ctx: ParseCtx, left: char, f: F, right: char,
+) -> impl Parser<&'a str, T, E>
 where F: Parser<&'a str, T, E> {
-    delimited_cut(left, trim_comment(f), right)
+    delimited_cut(left, trim_comment(ctx, f), right)
 }
 
 fn scoped<'a, T, F>(f: F) -> impl Parser<&'a str, T, E>
@@ -212,18 +198,13 @@ where F: Parser<&'a str, T, E> {
     delimited_trim(SCOPE_LEFT, f, SCOPE_RIGHT)
 }
 
-fn scoped_trim_comment<'a, T, F>(f: F) -> impl Parser<&'a str, T, E>
+fn scoped_trim_comment<'a, T, F>(ctx: ParseCtx, f: F) -> impl Parser<&'a str, T, E>
 where F: Parser<&'a str, T, E> {
-    delimited_trim_comment(SCOPE_LEFT, f, SCOPE_RIGHT)
+    delimited_trim_comment(ctx, SCOPE_LEFT, f, SCOPE_RIGHT)
 }
 
 fn scope<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
-    scoped_trim_comment(compose(ctx)).context(label("scope"))
-}
-
-fn full_symbol<'a, T, F>(f: F) -> impl Parser<&'a str, T, E>
-where F: Parser<&'a str, T, E> {
-    terminated(f, not(one_of(is_trivial_symbol)).context(expect_desc("no symbols")))
+    scoped_trim_comment(ctx, compose(ctx)).context(label("scope"))
 }
 
 fn trivial_symbol1<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
@@ -243,7 +224,6 @@ fn is_symbol(c: char) -> bool {
 
 fn token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
     (move |i: &mut _| match peek(any).parse_next(i)? {
-        // delimiters
         LIST_LEFT => list(ctx).map(Token::Default).parse_next(i),
         LIST_RIGHT => fail.parse_next(i),
         MAP_LEFT => map(ctx).map(Token::Default).parse_next(i),
@@ -254,7 +234,6 @@ fn token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
         SPACE => fail.parse_next(i),
         TEXT_QUOTE => text.map(T::from).map(Token::Default).parse_next(i),
         SYMBOL_QUOTE => symbol.map(T::from).map(Token::Default).parse_next(i),
-
         _ => cut_err(ext(ctx)).parse_next(i),
     })
     .context(label("token"))
@@ -263,38 +242,31 @@ fn token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
 fn ext<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
     move |i: &mut _| {
         let i: &mut &str = i;
-        let checkpoint = i.checkpoint();
+        if matches!(i.chars().next(), Some('0' ..= '9')) {
+            let int_or_number = int_or_number.map(Token::Default);
+            let end = not(one_of(is_trivial_symbol));
+            return cut_err(terminated(int_or_number, end).context(label("int or number")))
+                .parse_next(i);
+        }
         let symbol = trivial_symbol1.context(label("symbol")).parse_next(i)?;
         if i.starts_with(LEFT_DELIMITERS) {
-            prefix(symbol, ctx).map(Token::Default).parse_next(i)
-        } else {
-            alt((
-                keyword(symbol, checkpoint).map(Token::Default),
-                empty.value(Token::Unquote(Symbol::from_str_unchecked(symbol))),
-            ))
-            .parse_next(i)
+            return prefix(symbol, ctx).map(Token::Default).parse_next(i);
         }
+        if let Some(keyword) = keyword(symbol) {
+            return Ok(Token::Default(keyword));
+        }
+        Ok(Token::Unquote(Symbol::from_str_unchecked(symbol)))
     }
 }
 
 const LEFT_DELIMITERS: [char; 5] = [SCOPE_LEFT, LIST_LEFT, MAP_LEFT, SYMBOL_QUOTE, TEXT_QUOTE];
 
-fn keyword<'a, T: ParseRepr>(
-    s: &'a str, checkpoint: Checkpoint<&'a str, &'a str>,
-) -> impl Parser<&'a str, T, E> {
-    move |i: &mut _| {
-        let i: &mut &str = i;
-        match s {
-            UNIT => Ok(T::from(Unit)),
-            TRUE => Ok(T::from(Bit::true_())),
-            FALSE => Ok(T::from(Bit::false_())),
-            s if matches!(s.chars().next(), Some('0' ..= '9')) => {
-                i.reset(&checkpoint);
-                return cut_err(full_symbol(int_or_number).context(label("int or number")))
-                    .parse_next(i);
-            }
-            _ => fail.parse_next(i),
-        }
+fn keyword<T: ParseRepr>(s: &str) -> Option<T> {
+    match s {
+        UNIT => Some(T::from(Unit)),
+        TRUE => Some(T::from(Bit::true_())),
+        FALSE => Some(T::from(Bit::false_())),
+        _ => None,
     }
 }
 
@@ -348,13 +320,13 @@ fn compose_token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<
 fn compose_left<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
     move |i: &mut _| {
         let mut left = token(ctx).parse_next(i)?;
-        let next = &mut preceded(spaces_comment, token(ctx));
-        let last = &mut preceded(spaces_comment, token(ctx));
+        let mut next = preceded(spaces_comment(ctx), token(ctx));
+        let last = &mut preceded(spaces_comment(ctx), token(ctx));
         loop {
-            let Ok(func) = next.parse_next(i) else {
+            let Some(func) = opt(next.by_ref()).parse_next(i)? else {
                 return Ok(left);
             };
-            left = compose_one(ctx, i, next, last, left, func)?;
+            left = compose_one(ctx, i, &mut next, last, left, func)?;
         }
     }
 }
@@ -362,12 +334,12 @@ fn compose_left<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T
 fn compose_right<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
     move |i: &mut _| {
         let left = token(ctx).parse_next(i)?;
-        let next = &mut preceded(spaces_comment, token(ctx));
-        let last = &mut preceded(spaces_comment, compose_right(ctx));
-        let Ok(func) = next.parse_next(i) else {
+        let mut next = preceded(spaces_comment(ctx), token(ctx));
+        let last = &mut preceded(spaces_comment(ctx), compose_right(ctx));
+        let Some(func) = opt(next.by_ref()).parse_next(i)? else {
             return Ok(left);
         };
-        compose_one(ctx, i, next, last, left, func)
+        compose_one(ctx, i, &mut next, last, left, func)
     }
 }
 
@@ -425,7 +397,7 @@ fn list<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     let items = move |i: &mut _| {
         let mut list = Vec::new();
         let mut repr = opt(compose(ctx));
-        let mut separator = opt(trim_comment(SEPARATOR.context(expect_char(SEPARATOR))));
+        let mut separator = opt(trim_comment(ctx, SEPARATOR.context(expect_char(SEPARATOR))));
         loop {
             let Some(item) = repr.parse_next(i)? else {
                 break;
@@ -437,12 +409,12 @@ fn list<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
         }
         Ok(T::from(List::from(list)))
     };
-    delimited_trim_comment(LIST_LEFT, items, LIST_RIGHT).context(label("list"))
+    delimited_trim_comment(ctx, LIST_LEFT, items, LIST_RIGHT).context(label("list"))
 }
 
 fn raw_list<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
-    let repr_list = separated(0 .., repr::<T>(ctx), spaces_comment);
-    delimited_trim_comment(LIST_LEFT, repr_list, LIST_RIGHT)
+    let repr_list = separated(0 .., repr::<T>(ctx), spaces_comment(ctx));
+    delimited_trim_comment(ctx, LIST_LEFT, repr_list, LIST_RIGHT)
         .map(|tokens: Vec<_>| T::from(List::from(tokens)))
         .context(label("raw list"))
 }
@@ -451,12 +423,12 @@ fn map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     let items = move |i: &mut _| {
         let mut map = Map::default();
         let mut key = opt(repr(ctx));
-        let mut pair = opt(preceded(spaces_comment, PAIR.void()));
+        let mut pair = opt(preceded(spaces_comment(ctx), PAIR.void()));
         let mut value = cut_err(preceded(
-            spaces_comment.context(expect_desc("space")),
+            spaces_comment(ctx).context(expect_desc("space")),
             compose(ctx).context(expect_desc("value")),
         ));
-        let mut separator = opt(trim_comment(SEPARATOR.context(expect_char(SEPARATOR))));
+        let mut separator = opt(trim_comment(ctx, SEPARATOR.context(expect_char(SEPARATOR))));
         let mut duplicate = fail.context(expect_desc("no duplicate keys"));
         loop {
             let Some(k) = key.parse_next(i)? else {
@@ -477,12 +449,12 @@ fn map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
         }
         Ok(T::from(map))
     };
-    delimited_trim_comment(MAP_LEFT, items, MAP_RIGHT).context(label("map"))
+    delimited_trim_comment(ctx, MAP_LEFT, items, MAP_RIGHT).context(label("map"))
 }
 
 fn raw_map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     let items = move |i: &mut _| {
-        let tokens: Vec<_> = separated(0 .., repr::<T>(ctx), spaces_comment).parse_next(i)?;
+        let tokens: Vec<_> = separated(0 .., repr::<T>(ctx), spaces_comment(ctx)).parse_next(i)?;
         if !tokens.len().is_multiple_of(2) {
             return cut_err(fail.context(expect_desc("even number of tokens"))).parse_next(i);
         }
@@ -494,7 +466,7 @@ fn raw_map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
         }
         Ok(T::from(map))
     };
-    delimited_trim_comment(MAP_LEFT, items, MAP_RIGHT).context(label("raw map"))
+    delimited_trim_comment(ctx, MAP_LEFT, items, MAP_RIGHT).context(label("raw map"))
 }
 
 fn symbol(i: &mut &str) -> ModalResult<Symbol> {
@@ -668,12 +640,12 @@ fn number(i: &mut &str) -> ModalResult<Number> {
 
 fn trim_num0<'a, F>(f: F) -> impl Parser<&'a str, String, E>
 where F: Parser<&'a str, &'a str, E> {
-    separated(0 .., f, '_').map(|s: Vec<&str>| s.join(""))
+    separated(0 .., f, COMMENT).map(|s: Vec<&str>| s.join(""))
 }
 
 fn trim_num1<'a, F>(f: F) -> impl Parser<&'a str, String, E>
 where F: Parser<&'a str, &'a str, E> {
-    separated(1 .., f, '_').map(|s: Vec<&str>| s.join(""))
+    separated(1 .., f, COMMENT).map(|s: Vec<&str>| s.join(""))
 }
 
 fn sign(i: &mut &str) -> ModalResult<bool> {

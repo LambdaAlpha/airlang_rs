@@ -73,19 +73,3 @@ _(_(a) b) c
 empty comment
 -----
 _() a
-=====
-error comment
------
-_(
-    ()
-    3(a b c d)
-    [,]
-    [, 1]
-    {a : , b}
-    {,,}
-    _(,),
-    ,
-    integer(a)
-    a(b)
-    c""
-) a
