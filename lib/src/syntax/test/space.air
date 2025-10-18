@@ -51,8 +51,9 @@ a _("") b _("") c
 =====
 multiline comment
 -----
-_(."
-|") a
+_("
+|(
+|)") a
 =====
 complex comment
 -----

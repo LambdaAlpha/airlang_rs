@@ -63,9 +63,9 @@ pub(super) fn expected() -> Vec<Repr> {
         symbol("--stat"),
         symbol("\\"),
         symbol(" "),
-        symbol(" ab cd"),
-        symbol(" ab cd"),
-        symbol("\\_\\''"),
-        symbol("-|/\\:;!?"),
+        symbol(" 'a  b"),
+        symbol("\\_\\``"),
+        symbol(" ' '\\_\\`\\_\\` ' '"),
+        symbol(" ' '\\_\\`\\_\\` ' '"),
     ]
 }

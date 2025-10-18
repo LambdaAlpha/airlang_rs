@@ -275,8 +275,6 @@ fn prefix<'a, T: ParseRepr>(prefix: &str, ctx: ParseCtx) -> impl Parser<&'a str,
         let i: &mut &str = i;
         match prefix {
             UNIT => match i.chars().next().unwrap() {
-                TEXT_QUOTE => raw_text.map(T::from).parse_next(i),
-                SYMBOL_QUOTE => raw_symbol.map(T::from).parse_next(i),
                 LIST_LEFT => raw_list(ctx).parse_next(i),
                 MAP_LEFT => raw_map(ctx).parse_next(i),
                 _ => fail.context(label("prefix token")).parse_next(i),
@@ -473,18 +471,35 @@ fn symbol(i: &mut &str) -> ModalResult<Symbol> {
     let symbol = move |i: &mut _| {
         let mut s = String::new();
         let mut literal = take_while(1 .., |c| is_symbol(c) && c != '\\' && c != SYMBOL_QUOTE);
+        let mut raw_literal = take_while(0 .., is_symbol);
+        let mut raw = false;
         loop {
-            match peek(any).parse_next(i)? {
-                SYMBOL_QUOTE => break,
-                '\\' => s.push_str(symbol_escaped.parse_next(i)?),
-                '\r' | '\n' => {
-                    symbol_newline.parse_next(i)?;
-                    if let Some(SYMBOL_QUOTE) = i.chars().next() {
-                        break;
+            if raw {
+                match peek(any).parse_next(i)? {
+                    '\r' | '\n' => {
+                        symbol_newline.parse_next(i)?;
+                        match any.parse_next(i)? {
+                            SCOPE_RIGHT => raw = false,
+                            ' ' => {}
+                            _ => return fail.parse_next(i),
+                        }
                     }
-                    ' '.parse_next(i)?;
+                    _ => s.push_str(raw_literal.parse_next(i)?),
                 }
-                _ => s.push_str(literal.parse_next(i)?),
+            } else {
+                match peek(any).parse_next(i)? {
+                    SYMBOL_QUOTE => break,
+                    '\\' => s.push_str(symbol_escaped.parse_next(i)?),
+                    '\r' | '\n' => {
+                        symbol_newline.parse_next(i)?;
+                        match any.parse_next(i)? {
+                            SCOPE_LEFT => raw = true,
+                            ' ' => {}
+                            _ => return fail.parse_next(i),
+                        }
+                    }
+                    _ => s.push_str(literal.parse_next(i)?),
+                }
             }
         }
         Ok(Symbol::from_string_unchecked(s))
@@ -504,16 +519,6 @@ fn symbol_escaped<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
     .parse_next(i)
 }
 
-fn raw_symbol(i: &mut &str) -> ModalResult<Symbol> {
-    let literal = take_while(0 .., is_symbol);
-    let symbol = separated(1 .., terminated(literal, symbol_newline), ' ')
-        .map(|fragments: Vec<_>| fragments.join(""));
-    delimited_cut(SYMBOL_QUOTE, symbol, SYMBOL_QUOTE)
-        .map(Symbol::from_string_unchecked)
-        .context(label("raw symbol"))
-        .parse_next(i)
-}
-
 fn symbol_newline(i: &mut &str) -> ModalResult<()> {
     (line_ending, opt(space_tab), '|'.context(expect_char('|')))
         .void()
@@ -523,20 +528,46 @@ fn symbol_newline(i: &mut &str) -> ModalResult<()> {
 
 fn text(i: &mut &str) -> ModalResult<Text> {
     let text = move |i: &mut _| {
+        let i: &mut &str = i;
         let mut s = String::new();
         let mut literal = take_till(1 .., |c| matches!(c, '"' | '\\' | '\r' | '\n'));
+        let mut raw_literal = take_until(1 .., ('\r', '\n'));
+        let mut raw = false;
         loop {
-            match peek(any).parse_next(i)? {
-                TEXT_QUOTE => break,
-                '\\' => text_escaped.parse_next(i)?.push(&mut s),
-                '\r' | '\n' => {
-                    s.push_str(text_newline.parse_next(i)?);
-                    if let Some(TEXT_QUOTE) = i.chars().next() {
-                        break;
+            if raw {
+                match peek(any).parse_next(i)? {
+                    c @ ('\r' | '\n') => {
+                        if c == '\r' && !i.starts_with("\r\n") {
+                            s.push('\r'.parse_next(i)?);
+                            continue;
+                        }
+                        s.push_str(text_newline.parse_next(i)?);
+                        match any.parse_next(i)? {
+                            SCOPE_RIGHT => raw = false,
+                            ' ' => {}
+                            _ => return fail.parse_next(i),
+                        }
                     }
-                    ' '.parse_next(i)?;
+                    _ => s.push_str(raw_literal.parse_next(i)?),
                 }
-                _ => s.push_str(literal.parse_next(i)?),
+            } else {
+                match peek(any).parse_next(i)? {
+                    TEXT_QUOTE => break,
+                    '\\' => text_escaped.parse_next(i)?.push(&mut s),
+                    c @ ('\r' | '\n') => {
+                        if c == '\r' && !i.starts_with("\r\n") {
+                            s.push('\r'.parse_next(i)?);
+                            continue;
+                        }
+                        s.push_str(text_newline.parse_next(i)?);
+                        match any.parse_next(i)? {
+                            SCOPE_LEFT => raw = true,
+                            ' ' => {}
+                            _ => return fail.parse_next(i),
+                        }
+                    }
+                    _ => s.push_str(literal.parse_next(i)?),
+                }
             }
         }
         Ok(Text::from(s))
@@ -567,28 +598,6 @@ fn unicode(i: &mut &str) -> ModalResult<char> {
         .verify_map(std::char::from_u32)
         .context(expect_desc("unicode"))
         .parse_next(i)
-}
-
-fn raw_text(i: &mut &str) -> ModalResult<Text> {
-    let fragment = separated(1 .., (raw_text_until_newline, text_newline), ' ');
-    let text = fragment.map(|fragments: Vec<_>| {
-        let mut s = String::new();
-        for (literal, newline) in fragments {
-            s.push_str(literal);
-            s.push_str(newline);
-        }
-        s
-    });
-    delimited_cut(TEXT_QUOTE, text, TEXT_QUOTE)
-        .map(Text::from)
-        .context(label("raw text"))
-        .parse_next(i)
-}
-
-fn raw_text_until_newline<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
-    let no_rn = take_until(1 .., ('\r', '\n')).void();
-    let only_r = ('\r', peek(not('\n'))).void();
-    repeat(0 .., alt((no_rn, only_r))).map(|()| ()).take().parse_next(i)
 }
 
 fn text_newline<'a>(i: &mut &'a str) -> ModalResult<&'a str> {

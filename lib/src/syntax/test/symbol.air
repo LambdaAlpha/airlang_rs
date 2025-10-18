@@ -238,28 +238,34 @@ escape space
 -----
 '\_'
 =====
-multiline newline end
------
-' a\ b
-|  c
-| d
-|'
-=====
-multiline inline end
+multiline rich
 -----
 '
-|  ab 
-| c
-| d'
+| \_\`
+| a 
+|  b'
 =====
-raw escape
+multiline raw
 -----
-.'\_\''
-|'
+'
+|(\_
+| \``
+|)'
 =====
-raw special symbol
+multiline mix
 -----
-.'
-| -|/\
-| :;!?
-|'
+'\_\`
+| \_\`
+|(\_\`
+| \_\`
+|)\_\`
+| \_\`'
+=====
+multiline indent
+-----
+   '\_\`
+   | \_\`
+   |(\_\`
+   | \_\`
+   |)\_\`
+   | \_\`'

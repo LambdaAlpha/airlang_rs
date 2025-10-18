@@ -191,18 +191,14 @@ fn should_quote(str: &str) -> bool {
 
 impl Gen for &Text {
     fn gen_(self, ctx: GenCtx, s: &mut String) {
+        s.push(TEXT_QUOTE);
         if ctx.fmt.symbol_encoding {
-            s.push(TEXT_QUOTE);
             escape_text_symbol(s, self);
         } else if ctx.fmt.compact {
-            s.push(TEXT_QUOTE);
             escape_text(s, self);
         } else if self.contains('\n') {
-            s.push_str(UNIT);
-            s.push(TEXT_QUOTE);
             escape_text_raw(ctx, s, self);
         } else {
-            s.push(TEXT_QUOTE);
             escape_text(s, self);
         }
         s.push(TEXT_QUOTE);
@@ -244,7 +240,7 @@ pub fn escape_text_symbol(s: &mut String, str: &str) {
 fn escape_text_raw(ctx: GenCtx, s: &mut String, str: &str) {
     s.push('\n');
     indent(ctx, s);
-    s.push_str("| ");
+    s.push_str("|(");
     for line in str.split_inclusive('\n') {
         s.push_str(line);
         if line.ends_with('\n') {
@@ -254,7 +250,7 @@ fn escape_text_raw(ctx: GenCtx, s: &mut String, str: &str) {
     }
     s.push('\n');
     indent(ctx, s);
-    s.push('|');
+    s.push_str("|)");
 }
 
 impl Gen for &Int {

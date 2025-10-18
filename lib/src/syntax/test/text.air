@@ -30,59 +30,51 @@ unicode space
 -----
 "\u( 1f701 )"
 =====
-multiline newline end
+multiline rich
+-----
+"\_\t\r\n
+| \_\t\r\n
+| "
+=====
+multiline rich newline
+-----
+"\_\t\r\n
++ \_\t\r\n
+| "
+=====
+multiline raw
 -----
 "
-| many\_
-| many
-|  lines
-|"
-=====
-multiline inline end
------
-"many
-|  many
-| \_lines"
+|(\_\t\r\n
+| \_\t\r\n
+| `!@#$%^&*()-_=+[{]}\|;:'",<.>/?
++)"
 =====
 multiline mix
 -----
+"\_\t\r\n
+| \_\t\r\n
+|(\_\t\r\n
+| \_\t\r\n
+|)\_\t\r\n
+| \_\t\r\n"
+=====
+multiline indent
+-----
+    "\_\t\r\n
+    | \_\t\r\n
+    |(\_\t\r\n
+    | \_\t\r\n
+    |)\_\t\r\n
+    | \_\t\r\n"
+=====
+multiline rich empty
+-----
 "
-+ many
-|  many 
-| lines
-+"
-=====
-raw special symbol
------
-."`!@#$%^&*()-_=+[{]}\|;:'",<.>/?
-|"
-=====
-raw line indicator
------
-."
-| 12345
-|  67890
-+ 12345 
-| 67890
-+"
-=====
-raw indent
------
-  ."
-   | 12345
-   |  67890
-  + 12345 
-   | 67890
-  +"
-=====
-raw escape
------
-.""
 | "
-|"
 =====
-raw empty
+multiline raw empty
 -----
-."
-| 
-|"
+"
+|(
+|)"
