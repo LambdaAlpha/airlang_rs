@@ -44,7 +44,7 @@ pub(crate) const SYMBOL_QUOTE: char = '\'';
 
 // keywords
 
-pub(crate) const COMMENT: &str = "_";
+pub(crate) const EMPTY: &str = "_";
 
 pub(crate) const LEFT: &str = "<";
 pub(crate) const RIGHT: &str = ">";

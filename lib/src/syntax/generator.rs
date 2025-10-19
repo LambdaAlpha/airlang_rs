@@ -6,8 +6,8 @@ use derive_more::IsVariant;
 use num_traits::Signed;
 
 use super::BYTE;
-use super::COMMENT;
 use super::Direction;
+use super::EMPTY;
 use super::FALSE;
 use super::LEFT;
 use super::LIST_LEFT;
@@ -396,11 +396,11 @@ fn gen_call_left(ctx: GenCtx, s: &mut String, func: GenRepr, input: GenRepr) {
     s.push(' ');
     gen_scope_if_need(ctx, s, func);
     s.push(' ');
-    s.push_str(COMMENT);
+    s.push_str(EMPTY);
 }
 
 fn gen_call_right(ctx: GenCtx, s: &mut String, func: GenRepr, input: GenRepr) {
-    s.push_str(COMMENT);
+    s.push_str(EMPTY);
     s.push(' ');
     gen_scope_if_need(ctx, s, func);
     s.push(' ');

@@ -33,8 +33,8 @@ use winnow::token::take_until;
 use winnow::token::take_while;
 
 use super::BYTE;
-use super::COMMENT;
 use super::Direction;
+use super::EMPTY;
 use super::FALSE;
 use super::INT;
 use super::LEFT;
@@ -147,7 +147,7 @@ fn spaces_comment<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
 fn comment<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
     let comment_tokens = repeat(0 .., comment_token(ctx));
     let comment = delimited_cut(SCOPE_LEFT, comment_tokens, SCOPE_RIGHT);
-    preceded(COMMENT, comment).context(label("comment"))
+    preceded(EMPTY, comment).context(label("comment"))
 }
 
 fn comment_token<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
@@ -193,7 +193,7 @@ where F: Parser<&'a str, T, E> {
     delimited_cut(left, trim_comment(ctx, f), right)
 }
 
-fn scoped<'a, T, F>(f: F) -> impl Parser<&'a str, T, E>
+fn scoped_trim<'a, T, F>(f: F) -> impl Parser<&'a str, T, E>
 where F: Parser<&'a str, T, E> {
     delimited_trim(SCOPE_LEFT, f, SCOPE_RIGHT)
 }
@@ -212,10 +212,7 @@ fn trivial_symbol1<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
 }
 
 fn is_trivial_symbol(c: char) -> bool {
-    if is_delimiter(c) {
-        return false;
-    }
-    Symbol::is_symbol(c)
+    Symbol::is_symbol(c) && !is_delimiter(c)
 }
 
 fn is_symbol(c: char) -> bool {
@@ -234,20 +231,15 @@ fn token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
         SPACE => fail.parse_next(i),
         TEXT_QUOTE => text.map(T::from).map(Token::Default).parse_next(i),
         SYMBOL_QUOTE => symbol.map(T::from).map(Token::Default).parse_next(i),
-        _ => cut_err(ext(ctx)).parse_next(i),
+        '0' ..= '9' => int_or_number.map(Token::Default).parse_next(i),
+        _ => cut_err(symbol_token(ctx)).parse_next(i),
     })
     .context(label("token"))
 }
 
-fn ext<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
+fn symbol_token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
     move |i: &mut _| {
         let i: &mut &str = i;
-        if matches!(i.chars().next(), Some('0' ..= '9')) {
-            let int_or_number = int_or_number.map(Token::Default);
-            let end = not(one_of(is_trivial_symbol));
-            return cut_err(terminated(int_or_number, end).context(label("int or number")))
-                .parse_next(i);
-        }
         let symbol = trivial_symbol1.context(label("symbol")).parse_next(i)?;
         if i.starts_with(LEFT_DELIMITERS) {
             return prefix(symbol, ctx).map(Token::Default).parse_next(i);
@@ -372,11 +364,11 @@ fn infix<T: ParseRepr>(_ctx: ParseCtx, left: Token<T>, func: T, right: Token<T>)
 
 fn left_right<T: ParseRepr>(left: Token<T>, right: Token<T>) -> T {
     let left = match left {
-        Token::Unquote(s) if *s == *COMMENT => None,
+        Token::Unquote(s) if *s == *EMPTY => None,
         left => Some(left.into_repr()),
     };
     let right = match right {
-        Token::Unquote(s) if *s == *COMMENT => None,
+        Token::Unquote(s) if *s == *EMPTY => None,
         right => Some(right.into_repr()),
     };
     match (left, right) {
@@ -593,7 +585,7 @@ fn text_escaped<'a>(i: &mut &'a str) -> ModalResult<StrFragment<'a>> {
 
 fn unicode(i: &mut &str) -> ModalResult<char> {
     let digit = take_while(1 .. 7, is_hexadecimal);
-    scoped(digit)
+    scoped_trim(digit)
         .map(move |hex| u32::from_str_radix(hex, 16).unwrap())
         .verify_map(std::char::from_u32)
         .context(expect_desc("unicode"))
@@ -628,33 +620,33 @@ impl StrFragment<'_> {
 fn int_or_number<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
     let norm = preceded('0', (sign, significand, opt(exponent)));
     let short = (empty.value(true), significand_radix(10, digit1, "decimal"), opt(exponent));
-    alt((norm, short))
-        .map(|(sign, significand, exponent)| build_int_or_number(sign, significand, exponent))
-        .context(label("int or number"))
-        .parse_next(i)
+    let end = not(one_of(|c| is_trivial_symbol(c) || LEFT_DELIMITERS.contains(&c)));
+    let f = alt((norm, short))
+        .map(|(sign, significand, exponent)| build_int_or_number(sign, significand, exponent));
+    cut_err(terminated(f, end).context(label("int or number"))).parse_next(i)
 }
 
 // todo design support spaces
 fn int(i: &mut &str) -> ModalResult<Int> {
     let int = (sign, integral).map(|(sign, i)| build_int(sign, i));
-    scoped(int).context(label("int")).parse_next(i)
+    scoped_trim(int).context(label("int")).parse_next(i)
 }
 
 // todo design support spaces
 fn number(i: &mut &str) -> ModalResult<Number> {
     let number = (sign, significand, opt(exponent))
         .map(|(sign, significand, exponent)| build_number(sign, significand, exponent));
-    scoped(number).context(label("number")).parse_next(i)
+    scoped_trim(number).context(label("number")).parse_next(i)
 }
 
 fn trim_num0<'a, F>(f: F) -> impl Parser<&'a str, String, E>
 where F: Parser<&'a str, &'a str, E> {
-    separated(0 .., f, COMMENT).map(|s: Vec<&str>| s.join(""))
+    separated(0 .., f, EMPTY).map(|s: Vec<&str>| s.join(""))
 }
 
 fn trim_num1<'a, F>(f: F) -> impl Parser<&'a str, String, E>
 where F: Parser<&'a str, &'a str, E> {
-    separated(1 .., f, COMMENT).map(|s: Vec<&str>| s.join(""))
+    separated(1 .., f, EMPTY).map(|s: Vec<&str>| s.join(""))
 }
 
 fn sign(i: &mut &str) -> ModalResult<bool> {
@@ -755,7 +747,7 @@ fn byte(i: &mut &str) -> ModalResult<Byte> {
     let hex = preceded('X', cut_err(hexadecimal_byte));
     let bin = preceded('B', cut_err(binary_byte));
     let byte = alt((hex, bin, hexadecimal_byte));
-    scoped(byte).context(label("byte")).parse_next(i)
+    scoped_trim(byte).context(label("byte")).parse_next(i)
 }
 
 fn hexadecimal_byte(i: &mut &str) -> ModalResult<Byte> {
