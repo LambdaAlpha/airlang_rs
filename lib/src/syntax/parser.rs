@@ -28,7 +28,6 @@ use winnow::error::StrContext;
 use winnow::error::StrContextValue;
 use winnow::token::any;
 use winnow::token::one_of;
-use winnow::token::take_till;
 use winnow::token::take_until;
 use winnow::token::take_while;
 
@@ -522,17 +521,13 @@ fn text(i: &mut &str) -> ModalResult<Text> {
     let text = move |i: &mut _| {
         let i: &mut &str = i;
         let mut s = String::new();
-        let mut literal = take_till(1 .., |c| matches!(c, '"' | '\\' | '\r' | '\n'));
-        let mut raw_literal = take_until(1 .., ('\r', '\n'));
+        let mut literal = take_until(1 .., ('"', '\\', '\n'));
+        let mut raw_literal = take_until(1 .., '\n');
         let mut raw = false;
         loop {
             if raw {
                 match peek(any).parse_next(i)? {
-                    c @ ('\r' | '\n') => {
-                        if c == '\r' && !i.starts_with("\r\n") {
-                            s.push('\r'.parse_next(i)?);
-                            continue;
-                        }
+                    '\n' => {
                         s.push_str(text_newline.parse_next(i)?);
                         match any.parse_next(i)? {
                             SCOPE_RIGHT => raw = false,
@@ -546,11 +541,7 @@ fn text(i: &mut &str) -> ModalResult<Text> {
                 match peek(any).parse_next(i)? {
                     TEXT_QUOTE => break,
                     '\\' => text_escaped.parse_next(i)?.push(&mut s),
-                    c @ ('\r' | '\n') => {
-                        if c == '\r' && !i.starts_with("\r\n") {
-                            s.push('\r'.parse_next(i)?);
-                            continue;
-                        }
+                    '\n' => {
                         s.push_str(text_newline.parse_next(i)?);
                         match any.parse_next(i)? {
                             SCOPE_LEFT => raw = true,
@@ -596,8 +587,8 @@ fn text_newline<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
     let newline = alt(('+'.value(true), '|'.value(false)))
         .context(expect_char('+'))
         .context(expect_char('|'));
-    (line_ending, opt(space_tab), newline)
-        .map(|(ending, _, newline): (&str, _, _)| if newline { ending } else { "" })
+    ("\n", opt(space_tab), newline)
+        .map(|(_, _, newline): (&str, _, _)| if newline { "\n" } else { "" })
         .context(expect_desc("newline"))
         .parse_next(i)
 }
