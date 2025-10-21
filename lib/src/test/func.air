@@ -399,3 +399,24 @@ _ do [
 ]
 -----
 true
+=====
+recurse
+-----
+_ do [
+    recurse = _ import .function.recurse,
+    g = _ function {
+        code : .fi : _ do [
+            (.f : .i) = .fi,
+            (.i < 1) test [
+                0
+            ] : [
+                .i + .f .f .i - 1
+            ]
+        ],
+        context_access : .free,
+    },
+    g = _ recurse g,
+    _ g 10
+]
+-----
+55
