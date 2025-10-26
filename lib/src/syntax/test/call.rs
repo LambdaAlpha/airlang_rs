@@ -46,5 +46,6 @@ pub(super) fn expected() -> Vec<Repr> {
         list(vec![call(symbol("a"), symbol("b"))]),
         map(vec![(call(symbol("a"), symbol("b")), symbol("c"))]),
         map(vec![(symbol("a"), call(symbol("b"), symbol("c")))]),
+        infix_call(symbol("_"), symbol("_"), symbol("_")),
     ]
 }

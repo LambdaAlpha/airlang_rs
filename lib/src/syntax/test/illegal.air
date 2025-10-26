@@ -36,7 +36,7 @@ text extra unpaired
 =====
 text escape unpaired
 -----
-"\"
+"\`
 =====
 text wrong quote
 -----
@@ -44,7 +44,7 @@ text wrong quote
 =====
 text concat
 -----
-"a""b"
+"a""b""c"
 =====
 text unknown escape
 -----
@@ -62,25 +62,21 @@ unicode not exist
 -----
 "\u(1234567)"
 =====
-raw text one line 
+raw text unpaired
 -----
-.""
+"
+|(
+| "
 =====
 raw text no space after line indicator
 -----
-."
-|abc
-+"
-=====
-raw text no last line indicator
------
-."
-| abc
 "
+|abc
++ "
 =====
 raw text no line indicator
 -----
-."
+"
 abc
 +"
 =====
@@ -98,7 +94,7 @@ symbol extra unpaired
 =====
 symbol escape unpaired
 -----
-'\'
+'\`
 =====
 symbol wrong quote
 -----
@@ -124,23 +120,25 @@ symbol unknown symbol prefix
 -----
 @''
 =====
-raw symbol tab
+symbol tab
 -----
-.'	a
+'	a
 |'
 =====
-raw symbol one line
+raw symbol unpaired
 -----
-.''
+'
+|(
+| '
 =====
 raw symbol wrong line indicator
 -----
-.'
-+'
+'
++ a'
 =====
 raw symbol illegal
 -----
-.'
+'
 | 中
 '
 =====
