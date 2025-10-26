@@ -299,87 +299,103 @@ fn repr<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     token(ctx).map(Token::into_repr)
 }
 
-fn compose_token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
+fn compose<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     move |i: &mut _| match ctx.direction {
         Direction::Left => compose_left(ctx).parse_next(i),
         Direction::Right => compose_right(ctx).parse_next(i),
     }
 }
 
-fn compose_left<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
+fn compose_left<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     move |i: &mut _| {
-        let mut left = token(ctx).parse_next(i)?;
         let mut next = preceded(spaces_comment(ctx), token(ctx));
-        let last = &mut preceded(spaces_comment(ctx), token(ctx));
+        let left = token(ctx).parse_next(i)?;
+        let Some(func) = opt(next.by_ref()).parse_next(i)? else {
+            return Ok(left.into_repr());
+        };
+        let right = next.parse_next(i)?;
+        let mut left = compose_one(ctx, left, func, right);
         loop {
             let Some(func) = opt(next.by_ref()).parse_next(i)? else {
                 return Ok(left);
             };
-            left = compose_one(ctx, i, &mut next, last, left, func)?;
+            let right = next.parse_next(i)?;
+            left = compose_one_left(ctx, left, func, right);
         }
     }
 }
 
-fn compose_right<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
+fn compose_right<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     move |i: &mut _| {
+        let mut middle = opt(preceded(spaces_comment(ctx), token(ctx)));
         let left = token(ctx).parse_next(i)?;
-        let mut next = preceded(spaces_comment(ctx), token(ctx));
-        let last = &mut preceded(spaces_comment(ctx), compose_right(ctx));
-        let Some(func) = opt(next.by_ref()).parse_next(i)? else {
-            return Ok(left);
+        let Some(middle) = middle.parse_next(i)? else {
+            return Ok(left.into_repr());
         };
-        compose_one(ctx, i, &mut next, last, left, func)
+        compose_right_recursive(ctx, i, left, middle)
     }
 }
 
-#[allow(clippy::single_match_else)]
-fn compose_one<'a, T: ParseRepr>(
-    ctx: ParseCtx, i: &mut &'a str, _next: &mut dyn Parser<&'a str, Token<T>, E>,
-    last: &mut dyn Parser<&'a str, Token<T>, E>, left: Token<T>, func: Token<T>,
-) -> ModalResult<Token<T>> {
-    let repr = match func {
-        Token::Unquote(s) => match &*s {
-            PAIR => {
-                let right = last.parse_next(i)?;
-                T::from(Pair::new(left.into_repr(), right.into_repr()))
-            }
-            _ => {
-                let right = last.parse_next(i)?;
-                infix(ctx, left, T::from(s), right)
-            }
-        },
-        Token::Default(func) => {
-            let right = last.parse_next(i)?;
-            infix(ctx, left, func, right)
+fn compose_right_recursive<T: ParseRepr>(
+    ctx: ParseCtx, i: &mut &str, left: Token<T>, middle: Token<T>,
+) -> ModalResult<T> {
+    let mut next = preceded(spaces_comment(ctx), token(ctx));
+    let right = next.parse_next(i)?;
+    let Some(middle2) = opt(next.by_ref()).parse_next(i)? else {
+        let repr = compose_one(ctx, left, middle, right);
+        return Ok(repr);
+    };
+    let right = compose_right_recursive(ctx, i, right, middle2)?;
+    let repr = compose_one_right(ctx, left, middle, right);
+    Ok(repr)
+}
+
+fn compose_one<T: ParseRepr>(_ctx: ParseCtx, left: Token<T>, func: Token<T>, right: Token<T>) -> T {
+    match func {
+        Token::Unquote(s) if *s == *PAIR => T::from(Pair::new(left.into_repr(), right.into_repr())),
+        func => {
+            let input = match (opt_repr(left), opt_repr(right)) {
+                (Some(left), Some(right)) => T::from(Pair::new(left, right)),
+                (Some(left), None) => left,
+                (None, Some(right)) => right,
+                (None, None) => T::from(Unit),
+            };
+            T::from(Call::new(func.into_repr(), input))
         }
-    };
-    Ok(Token::Default(repr))
-}
-
-fn infix<T: ParseRepr>(_ctx: ParseCtx, left: Token<T>, func: T, right: Token<T>) -> T {
-    let input = left_right(left, right);
-    T::from(Call { func, input })
-}
-
-fn left_right<T: ParseRepr>(left: Token<T>, right: Token<T>) -> T {
-    let left = match left {
-        Token::Unquote(s) if *s == *EMPTY => None,
-        left => Some(left.into_repr()),
-    };
-    let right = match right {
-        Token::Unquote(s) if *s == *EMPTY => None,
-        right => Some(right.into_repr()),
-    };
-    match (left, right) {
-        (Some(left), Some(right)) => T::from(Pair::new(left, right)),
-        (Some(left), None) => left,
-        (None, Some(right)) => right,
-        (None, None) => T::from(Unit),
     }
 }
 
-fn compose<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
-    compose_token(ctx).map(Token::into_repr)
+fn compose_one_left<T: ParseRepr>(_ctx: ParseCtx, left: T, func: Token<T>, right: Token<T>) -> T {
+    match func {
+        Token::Unquote(s) if *s == *PAIR => T::from(Pair::new(left, right.into_repr())),
+        func => {
+            let input = match opt_repr(right) {
+                Some(right) => T::from(Pair::new(left, right)),
+                None => left,
+            };
+            T::from(Call::new(func.into_repr(), input))
+        }
+    }
+}
+
+fn compose_one_right<T: ParseRepr>(_ctx: ParseCtx, left: Token<T>, func: Token<T>, right: T) -> T {
+    match func {
+        Token::Unquote(s) if *s == *PAIR => T::from(Pair::new(left.into_repr(), right)),
+        func => {
+            let input = match opt_repr(left) {
+                Some(left) => T::from(Pair::new(left, right)),
+                None => right,
+            };
+            T::from(Call::new(func.into_repr(), input))
+        }
+    }
+}
+
+fn opt_repr<T: ParseRepr>(token: Token<T>) -> Option<T> {
+    match token {
+        Token::Unquote(s) if *s == *EMPTY => None,
+        token => Some(token.into_repr()),
+    }
 }
 
 fn list<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
