@@ -10,11 +10,11 @@ _ form _a
 -----
 _a
 =====
-form @
+form .
 -----
-_ form @a
+_ form .a
 -----
-@a
+.a
 =====
 form_ trivial
 -----
@@ -30,24 +30,24 @@ a
 =====
 form_ _ special
 -----
-_ form_ _@a
+_ form_ _.a
 -----
-@a
+.a
 =====
-form_ @
+form_ .
 -----
 _ do [
     a = 1,
-    [_ form_ @a, a]
+    [_ form_ .a, a]
 ]
 -----
 [1, 1]
 =====
-form_ @ special
+form_ . special
 -----
 _ do [
     __a = 1,
-    [_ form_ @_a, @_a]
+    [_ form_ ._a, ._a]
 ]
 -----
 [1, 1]
@@ -61,35 +61,35 @@ _ do [
 -----
 false
 =====
-form@ trivial
+form. trivial
 -----
 _ do [
     a = 1,
-    [_ form@ a, a]
+    [_ form. a, a]
 ]
 -----
 [1, 1]
 =====
-form@ _
+form. _
 -----
-_ form@ _a
+_ form. _a
 -----
 a
 =====
-form@ @
+form. .
 -----
 _ do [
     a = 1,
-    [_ form@ @a, a]
+    [_ form. .a, a]
 ]
 -----
 [1, 1]
 =====
-form@ $
+form. $
 -----
 _ do [
     a = _ form _ not true,
-    _ form@ $a
+    _ form. $a
 ]
 -----
 false
@@ -109,11 +109,11 @@ _ form$ _a
 -----
 a
 =====
-form$ @
+form$ .
 -----
 _ do [
     a = 1,
-    [_ form$ @a, a]
+    [_ form$ .a, a]
 ]
 -----
 [1, 1]
@@ -130,7 +130,7 @@ false
 eval call
 -----
 _ do [
-    a = _ form@ _ eval _ not true,
+    a = _ form. _ eval _ not true,
     $a
 ]
 -----
@@ -154,11 +154,11 @@ _ eval_ _a
 -----
 a
 =====
-eval_ @
+eval_ .
 -----
 _ do [
     a = 1,
-    [_ eval_ @a, a]
+    [_ eval_ .a, a]
 ]
 -----
 [1, 1]
@@ -172,35 +172,35 @@ _ do [
 -----
 false
 =====
-eval@ trivial
+eval. trivial
 -----
 _ do [
     a = 1,
-    [_ eval@ a, a]
+    [_ eval. a, a]
 ]
 -----
 [1, 1]
 =====
-eval@ _
+eval. _
 -----
-_ eval@ _a
+_ eval. _a
 -----
 a
 =====
-eval@ @
+eval. .
 -----
 _ do [
     a = 1,
-    [_ eval@ @a, a]
+    [_ eval. .a, a]
 ]
 -----
 [1, 1]
 =====
-eval@ $
+eval. $
 -----
 _ do [
     a = _ form _ not true,
-    _ eval@ $a
+    _ eval. $a
 ]
 -----
 false
@@ -220,11 +220,11 @@ _ eval$ _a
 -----
 a
 =====
-eval$ @
+eval$ .
 -----
 _ do [
     a = 1,
-    [_ eval$ @a, a]
+    [_ eval$ .a, a]
 ]
 -----
 [1, 1]
@@ -262,7 +262,7 @@ new primitive from symbol 2
 -----
 _ do [
     new = _ import _adapter.new,
-    f = _ new eval@,
+    f = _ new eval.,
     _ f _ not true
 ]
 -----
@@ -273,10 +273,10 @@ new primitive form
 _ do [
     new = _ import _adapter.new,
     f = _ new {default : form},
-    _ f [@a, _ f a]
+    _ f [.a, _ f a]
 ]
 -----
-[@a, _ f a]
+[.a, _ f a]
 =====
 new primitive form_
 -----
@@ -288,12 +288,12 @@ _ do [
 -----
 [a, _ f a]
 =====
-new primitive form@
+new primitive form.
 -----
 _ do [
     new = _ import _adapter.new,
     a = 1,
-    f = _ new {default : form@},
+    f = _ new {default : form.},
     _ f [a, _ _a a]
 ]
 -----
@@ -315,7 +315,7 @@ new primitive eval
 _ do [
     new = _ import _adapter.new,
     f = _ new {default : eval},
-    b = _ form@ _ f [_a, _ not true],
+    b = _ form. _ f [_a, _ not true],
     $b
 ]
 -----
@@ -326,17 +326,17 @@ new primitive eval_
 _ do [
     new = _ import _adapter.new,
     f = _ new {default : eval_},
-    _ f [a, _ @not true]
+    _ f [a, _ .not true]
 ]
 -----
 [a, false]
 =====
-new primitive eval@
+new primitive eval.
 -----
 _ do [
     new = _ import _adapter.new,
     a = 1,
-    f = _ new {default : eval@},
+    f = _ new {default : eval.},
     _ f [a, _ not true]
 ]
 -----
@@ -348,7 +348,7 @@ _ do [
     new = _ import _adapter.new,
     a = _ form _ not true,
     f = _ new {default : eval$},
-    _ f [a, _ @not true]
+    _ f [a, _ .not true]
 ]
 -----
 [false, false]
@@ -361,16 +361,16 @@ _ do [
         pair : {
             this : {},
             that : form_,
-        } : eval@ : {pair : .}
+        } : eval. : {pair : .}
     },
     [
         _ f this : _ not true,
         _ f that : a,
-        _ f (_ not true) : @a : $b,
+        _ f (_ not true) : .a : $b,
     ] 
 ]
 -----
-[this : _ not true, that : a, false : @a : $b]
+[this : _ not true, that : a, false : .a : $b]
 =====
 new multiple
 -----
@@ -381,7 +381,7 @@ _ do [
     f = _ new {
         pair : {} : form_ : {pair : form_}
     },
-    _ f a : _b : _ @c $d
+    _ f a : _b : _ .c $d
 ]
 -----
 a : b : _ 1 2
@@ -391,7 +391,7 @@ new call
 _ do [
     new = _ import _adapter.new,
     f = _ new {
-        call : _ eval@ eval@
+        call : _ eval. eval.
     },
     _ f _ _g _ not true
 ]
@@ -405,7 +405,7 @@ _ do [
     f = _ new {
         list : [form, eval_]
     },
-    _ f [_ not true, _ @not true, _ _not true]
+    _ f [_ not true, _ .not true, _ _not true]
 ]
 -----
 [_ not true, false, _ _not true]
@@ -417,7 +417,7 @@ _ do [
     f = _ new {
         list : [form, eval_] : form_
     },
-    _ f [_ not true, _ @not true, _ _not true]
+    _ f [_ not true, _ .not true, _ _not true]
 ]
 -----
 [_ not true, false, _ not true]
@@ -434,7 +434,7 @@ _ do [
     },
     _ f {
         a : _ not true,
-        b : _ @not true,
+        b : _ .not true,
         c : _ _not true,
     }
 ]
@@ -453,7 +453,7 @@ _ do [
     },
     _ f {
         a : _ not true,
-        b : _ @not true,
+        b : _ .not true,
         c : _ _not true,
     }
 ]
@@ -464,7 +464,7 @@ new func
 -----
 _ do [
     new = _ import _adapter.new,
-    f = _ new @not,
+    f = _ new .not,
     _ f true
 ]
 -----
@@ -485,7 +485,7 @@ _ do [
     new = _ import _adapter.new,
     context_access = _ import _function.context_access,
     read = _ import _context.read,
-    f = _ new @read,
+    f = _ new .read,
     f which _ context_access .
 ]
 -----
@@ -495,7 +495,7 @@ access mutable
 -----
 _ do [
     context_access = _ import _function.context_access,
-    eval@ which _ context_access .
+    eval. which _ context_access .
 ]
 -----
 mutable

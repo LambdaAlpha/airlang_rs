@@ -30,15 +30,15 @@ __a
 =====
 symbol literal special 3
 -----
-_@a
+_.a
 -----
-@a
+.a
 =====
 ctx ref
 -----
 _ do [
     a = 1,
-    @a
+    .a
 ]
 -----
 1
@@ -47,7 +47,7 @@ ref will not remove
 -----
 _ do [
     a = 1,
-    @a,
+    .a,
     a
 ]
 -----
@@ -57,7 +57,7 @@ ref special
 -----
 _ do [
     __a = 1,
-    @_a
+    ._a
 ]
 -----
 1
@@ -84,7 +84,7 @@ list ref
 -----
 _ do [
     l = [0, 3, 6],
-    l which _ do [@0 : @1 : @2]
+    l which _ do [.0 : .1 : .2]
 ]
 -----
 0 : 3 : 6

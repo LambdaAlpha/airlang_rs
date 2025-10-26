@@ -130,7 +130,7 @@ mutable mutate
 -----
 _ do [
     f = _ function {
-        code : (_c : _i) : _c which _@i = 2,
+        code : (_c : _i) : _c which _.i = 2,
         context_access : _mutable,
     },
     a = 1,
@@ -144,7 +144,7 @@ const mutate fail
 -----
 _ do [
     f = _ function {
-        code : (_c : _i) : _c which _@i = 2,
+        code : (_c : _i) : _c which _.i = 2,
         context_access : _constant,
     },
     a = 1,
@@ -279,7 +279,7 @@ access mutable
 -----
 _ do [
     context_access = _ import _function.context_access,
-    eval@ which _ context_access .
+    eval. which _ context_access .
 ]
 -----
 mutable

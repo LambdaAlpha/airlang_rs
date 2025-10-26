@@ -6,7 +6,7 @@ _ do [
     input = _ import _call.input,
     f = _ any .,
     i = _ any .,
-    c = _ form@ _ f i,
+    c = _ form. _ f i,
     (f == c which _ function .) and (i == c which _ input .)
 ]
 -----
@@ -38,7 +38,7 @@ _ do [
     set_input = _ import _call.set_input,
     f1 = _ any .,
     i1 = _ any .,
-    c = _ form@ _ f1 i1,
+    c = _ form. _ f1 i1,
     f2 = c which _ set_function _ any .,
     i2 = c which _ set_input _ any .,
     (f1 == f2) and (i1 == i2)

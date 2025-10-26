@@ -26,7 +26,7 @@ pub(crate) struct SymbolEval<'a, Fn> {
 }
 
 pub(crate) const SYMBOL_LITERAL_CHAR: char = '_';
-pub(crate) const SYMBOL_REF_CHAR: char = '@';
+pub(crate) const SYMBOL_REF_CHAR: char = '.';
 pub(crate) const SYMBOL_EVAL_CHAR: char = '$';
 
 impl<'a, Fn> SymbolEval<'a, Fn> {

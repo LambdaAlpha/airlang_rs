@@ -40,8 +40,8 @@ impl PatternParse for Val {
     }
 }
 
-const SYMBOL_LITERAL_CHAR: char = '*';
-const SYMBOL_REF_CHAR: char = '#';
+const SYMBOL_LITERAL_CHAR: char = '-';
+const SYMBOL_REF_CHAR: char = '*';
 
 impl PatternParse for Symbol {
     fn parse(self) -> Option<Pattern> {
