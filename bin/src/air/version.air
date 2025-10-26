@@ -1,7 +1,7 @@
 _ do [
-    version = _ import .language.version,
-    generate = _ import .syntax.generate,
-    join = _ import .text.join,
+    version = _ import _language.version,
+    generate = _ import _syntax.generate,
+    join = _ import _text.join,
     [major, minor, patch] = version,
     major = _ generate major,
     minor = _ generate minor,

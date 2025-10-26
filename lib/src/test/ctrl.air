@@ -51,7 +51,7 @@ do return true
 _ do [
     1,
     2,
-    true .return 3,
+    true _return 3,
     4
 ]
 -----
@@ -62,7 +62,7 @@ do return false
 _ do [
     1,
     2,
-    false .return 3,
+    false _return 3,
     4
 ]
 -----
@@ -74,7 +74,7 @@ _ do [
     1,
     _ do [
         2,
-        true .return 3,
+        true _return 3,
         4
     ],
     5
@@ -88,7 +88,7 @@ _ do [
     1,
     a = _ do [
         2,
-        true .return 3,
+        true _return 3,
         4
     ],
     a + 2
@@ -100,7 +100,7 @@ do return eval
 -----
 _ do [
     b = 2,
-    (b > 0) .return b - 1,
+    (b > 0) _return b - 1,
     b + 1
 ]
 -----
@@ -160,7 +160,7 @@ test return
 -----
 true test [
     1,
-    true .return 2,
+    true _return 2,
     3
 ] : [
     4
@@ -172,7 +172,7 @@ test return
 -----
 true test [
     1,
-    true .return 2,
+    true _return 2,
     3
 ] : [
     4
@@ -191,7 +191,7 @@ true test [
 =====
 switch symbol
 -----
-.a switch {
+_a switch {
     a : [_ not true],
     b : [1]
 }
@@ -223,7 +223,7 @@ switch any
     1 : [2],
     "1" : ["2"],
     a : [b],
-    "a" : [.b]
+    "a" : [_b]
 }
 -----
 b
@@ -231,7 +231,7 @@ b
 switch default
 -----
 1 switch {
-} : [.a]
+} : [_a]
 -----
 a
 =====
@@ -267,22 +267,22 @@ match pattern
 match order
 -----
 _ do [
-    exist = _ import .memory.exist,
+    exist = _ import _memory.exist,
     [1, 2, 3] match [
         [2, a, b] : [x = 1],
         [1, c, d] : [y = 1],
         [e, 2, f] : [z = 1],
     ],
     [
-        .a exist _,
-        .b exist _,
+        _a exist _,
+        _b exist _,
         c,
         d,
-        .e exist _,
-        .f exist _,
-        .x exist _,
+        _e exist _,
+        _f exist _,
+        _x exist _,
         y,
-        .z exist _
+        _z exist _
     ]
 ]
 -----
@@ -321,13 +321,13 @@ match default
 match conditional eval exist
 -----
 _ do [
-    exist = _ import .memory.exist,
+    exist = _ import _memory.exist,
     1 match [
         1 : [a = 1],
         2 : [b = 2],
         _ : [c = 3]
     ],
-    [a, .b exist _, .c exist _]
+    [a, _b exist _, _c exist _]
 ]
 -----
 [1, false, false]
@@ -335,13 +335,13 @@ _ do [
 match conditional eval default
 -----
 _ do [
-    exist = _ import .memory.exist,
+    exist = _ import _memory.exist,
     3 match [
         1 : [a = 1],
         2 : [b = 2],
         _ : [c = 3]
     ],
-    [.a exist _, .b exist _, c]
+    [_a exist _, _b exist _, c]
 ]
 -----
 [false, false, 3]
@@ -363,7 +363,7 @@ match return
 1 match [
     1 : [
         2,
-        true .return 3,
+        true _return 3,
         4
     ]
 ]
@@ -375,7 +375,7 @@ match return
 1 match [
     1 : [
         2,
-        true .return 3,
+        true _return 3,
         4
     ]
 ]
@@ -436,7 +436,7 @@ _ do [
 loop test
 -----
 _ do [
-    <> = _ import .integer.less_greater,
+    <> = _ import _integer.less_greater,
     a = 42,
     b = 24,
     (a <> b) loop [
@@ -458,7 +458,7 @@ _ do [
     b = 0,
     (b < 5) loop [
         b = b + 1,
-        (b == 2) .continue .,
+        (b == 2) _continue .,
         a = a + b,
     ],
     a
@@ -472,7 +472,7 @@ _ do [
     a = 0,
     b = 0,
     (b < 5) loop [
-        (a > 5) .return a,
+        (a > 5) _return a,
         b = b + 1,
         a = a + b,
     ]
@@ -507,7 +507,7 @@ _ do [
 iterate return 1
 -----
 [1, 2, 3, 4, 5] iterate i : [
-    (i == 3) .return true
+    (i == 3) _return true
 ]
 -----
 true
@@ -516,7 +516,7 @@ iterate return 2
 -----
 _ do [
     [1, 2, 3, 4, 5] iterate i : [
-        (i == 3) .return .,
+        (i == 3) _return .,
         a = i
     ],
     a
@@ -531,7 +531,7 @@ _ do [
     b = 0,
     [1, 2, 3, 4, 5] iterate i : [
         a = a + i,
-        (i == 3) .continue .,
+        (i == 3) _continue .,
         b = b + i
     ],
     a : b
@@ -542,7 +542,7 @@ _ do [
 iterate list map
 -----
 _ do [
-    push = _ import .list.push,
+    push = _ import _list.push,
     a = [],
     [1, 2, 3, 4, 5] iterate i : [
         a which _ push i + 1
@@ -585,7 +585,7 @@ iterate integer negative
 iterate byte
 -----
 _ do [
-    push = _ import .list.push,
+    push = _ import _list.push,
     b = [],
     byte(1122334455) iterate i : [
         b which _ push i
@@ -598,9 +598,9 @@ _ do [
 iterate symbol
 -----
 _ do [
-    push = _ import .list.push,
+    push = _ import _list.push,
     s = [],
-    .abc iterate i : [
+    _abc iterate i : [
         s which _ push i
     ],
     s
@@ -611,7 +611,7 @@ _ do [
 iterate text
 -----
 _ do [
-    push = _ import .list.push,
+    push = _ import _list.push,
     t = [],
     "hello" iterate i : [
         t which _ push i
@@ -624,8 +624,8 @@ _ do [
 iterate map
 -----
 _ do [
-    push = _ import .list.push,
-    new_map = _ import .map.new,
+    push = _ import _list.push,
+    new_map = _ import _map.new,
     kv = [],
     {1 : 2, 3 : 4} iterate i : [
         kv which _ push i

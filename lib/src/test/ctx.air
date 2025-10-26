@@ -1,10 +1,10 @@
 read ref
 -----
 _ do [
-    any = _ import .value.any,
-    read = _ import .context.read,
+    any = _ import _value.any,
+    read = _ import _context.read,
     a = _ any .,
-    a == .a read _
+    a == _a read _
 ]
 -----
 true
@@ -12,10 +12,10 @@ true
 read indirect
 -----
 _ do [
-    any = _ import .value.any,
-    read = _ import .context.read,
+    any = _ import _value.any,
+    read = _ import _context.read,
     a = _ any .,
-    b = .a,
+    b = _a,
     a == b read _
 ]
 -----
@@ -33,7 +33,7 @@ _ do [
 = return
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     a = 1,
     a = _ any .
 ]
@@ -43,7 +43,7 @@ _ do [
 = another
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     a = _ any .,
     a = 2,
     a
@@ -64,7 +64,7 @@ _ do [
 = indirect
 -----
 _ do [
-    a = .b,
+    a = _b,
     @a = 1,
     b
 ]
@@ -74,8 +74,8 @@ _ do [
 = special key 1
 -----
 _ do [
-    ..a = 1,
-    @.a
+    __a = 1,
+    @_a
 ]
 -----
 1
@@ -83,9 +83,9 @@ _ do [
 = special key 2
 -----
 _ do [
-    first = _ import .pair.first,
-    ..p = 1 : 2,
-    .p which _ first .
+    first = _ import _pair.first,
+    __p = 1 : 2,
+    _p which _ first .
 ]
 -----
 1
@@ -244,7 +244,7 @@ _ do [
 = pair ctx
 -----
 _ do [
-    first = _ import .pair.first,
+    first = _ import _pair.first,
     p = 1 : 2,
     p which first = 3,
     p which _ first .
@@ -255,9 +255,9 @@ _ do [
 = call ctx
 -----
 _ do [
-    function = _ import .call.function,
+    function = _ import _call.function,
     t = _ form _ func input,
-    t which function = .c,
+    t which function = _c,
     t which _ function .
 ]
 -----
@@ -266,9 +266,9 @@ c
 = list ctx
 -----
 _ do [
-    get = _ import .list.get,
+    get = _ import _list.get,
     l = [1, 2, 3],
-    l which .1 = 4,
+    l which _1 = 4,
     l which _ get 1
 ]
 -----
@@ -277,10 +277,10 @@ _ do [
 = map ctx
 -----
 _ do [
-    get = _ import .map.get,
+    get = _ import _map.get,
     m = {a : 1, b : 2},
     m which a = 3,
-    m which _ get .a
+    m which _ get _a
 ]
 -----
 3
@@ -288,10 +288,10 @@ _ do [
 = map ctx not exist
 -----
 _ do [
-    get = _ import .map.get,
+    get = _ import _map.get,
     m = {},
     m which a = 3,
-    m which _ get .a
+    m which _ get _a
 ]
 -----
 3
@@ -299,7 +299,7 @@ _ do [
 is_constant default
 -----
 _ do [
-    is_constant = _ import .context.is_constant,
+    is_constant = _ import _context.is_constant,
     _ is_constant .
 ]
 -----
@@ -308,11 +308,11 @@ false
 is_constant true
 -----
 _ do [
-    new = _ import .memory.new,
-    set_contract = _ import .memory.set_contract,
-    is_constant = _ import .context.is_constant,
+    new = _ import _memory.new,
+    set_contract = _ import _memory.set_contract,
+    is_constant = _ import _context.is_constant,
     a = _ new {},
-    .a set_contract .final,
+    _a set_contract _final,
     a which _ is_constant .
 ]
 -----
@@ -321,8 +321,8 @@ true
 is_constant false
 -----
 _ do [
-    new = _ import .memory.new,
-    is_constant = _ import .context.is_constant,
+    new = _ import _memory.new,
+    is_constant = _ import _context.is_constant,
     a = _ new {},
     a which _ is_constant .
 ]
@@ -332,12 +332,12 @@ false
 which 1
 -----
 _ do [
-    new = _ import .memory.new,
-    set_first = _ import .pair.set_first,
+    new = _ import _memory.new,
+    set_first = _ import _pair.set_first,
     a = _ new {p : . : 1 : 2},
     b = 3,
-    a which _ apply .p which _ set_first b,
-    a which _ move .p,
+    a which _ apply _p which _ set_first b,
+    a which _ move _p,
 ]
 -----
 3 : 2
@@ -345,14 +345,14 @@ _ do [
 which 2
 -----
 _ do [
-    new = _ import .memory.new,
-    set_first = _ import .pair.set_first,
+    new = _ import _memory.new,
+    set_first = _ import _pair.set_first,
     a = _ new {
         p : . : 1 : 2,
         b : . : 3,
     },
-    a which _ apply .p which _ set_first .b,
-    a which _ move .p,
+    a which _ apply _p which _ set_first _b,
+    a which _ move _p,
 ]
 -----
 3 : 2
@@ -360,15 +360,15 @@ _ do [
 which 3
 -----
 _ do [
-    new = _ import .memory.new,
-    set_first = _ import .pair.set_first,
+    new = _ import _memory.new,
+    set_first = _ import _pair.set_first,
     a = _ new {
         set_first : . : set_first,
         p : . : 1 : 2,
         b : . : 3,
     },
-    a which _ apply .p which _ .set_first .b,
-    a which _ move .p,
+    a which _ apply _p which _ _set_first _b,
+    a which _ move _p,
 ]
 -----
 3 : 2
@@ -376,9 +376,9 @@ _ do [
 which recursive
 -----
 _ do [
-    new = _ import .memory.new,
+    new = _ import _memory.new,
     a = _ new {b : . : _ new {c : . : 1}},
-    a which _ apply .b which _ apply ..c
+    a which _ apply _b which _ apply __c
 ]
 -----
 1
@@ -386,7 +386,7 @@ _ do [
 which self
 -----
 _ do [
-    self = _ import .context.self,
+    self = _ import _context.self,
     u = 1,
     u which _ self .
 ]
@@ -396,10 +396,10 @@ _ do [
 self
 -----
 _ do [
-    self = _ import .context.self,
+    self = _ import _context.self,
     a = 1,
     b = _ self .,
-    b which _ apply .a
+    b which _ apply _a
 ]
 -----
 1
@@ -407,12 +407,12 @@ _ do [
 self non-sync
 -----
 _ do [
-    any = _ import .value.any,
-    self = _ import .context.self,
-    exist = _ import .memory.exist,
+    any = _ import _value.any,
+    self = _ import _context.self,
+    exist = _ import _memory.exist,
     a = _ self .,
     b = _ any .,
-    a which _ exist .b
+    a which _ exist _b
 ]
 -----
 false

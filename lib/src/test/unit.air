@@ -1,8 +1,8 @@
 unit return .
 -----
 _ do [
-    any = _ import .value.any,
-    unit = _ import .unit.unit,
+    any = _ import _value.any,
+    unit = _ import _unit.unit,
     _ unit _ any .
 ]
 -----

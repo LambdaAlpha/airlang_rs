@@ -1,10 +1,10 @@
 length set
 -----
 _ do [
-    any = _ import .value.any,
-    length = _ import .map.length,
-    set = _ import .map.set,
-    contain = _ import .map.contain,
+    any = _ import _value.any,
+    length = _ import _map.length,
+    set = _ import _map.set,
+    contain = _ import _map.contain,
     a = _ any map,
     l1 = a which _ length .,
     k = _ any .,
@@ -20,9 +20,9 @@ true
 length set_many
 -----
 _ do [
-    any = _ import .value.any,
-    length = _ import .map.length,
-    set_many = _ import .map.set_many,
+    any = _ import _value.any,
+    length = _ import _map.length,
+    set_many = _ import _map.set_many,
     a = _ any map,
     la = a which _ length .,
     b = _ any map,
@@ -38,9 +38,9 @@ true
 items new
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .map.new,
-    items = _ import .map.items,
+    any = _ import _value.any,
+    new = _ import _map.new,
+    items = _ import _map.items,
     a1 = _ any map,
     a2 = _ new a1 which _ items .,
     a1 == a2
@@ -51,9 +51,9 @@ true
 into_items new
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .map.new,
-    into_items = _ import .map.into_items,
+    any = _ import _value.any,
+    new = _ import _map.new,
+    into_items = _ import _map.into_items,
     a1 = _ any map,
     a2 = a1,
     a3 = _ new a1 which _ into_items .,
@@ -65,10 +65,10 @@ true
 keys set
 -----
 _ do [
-    any = _ import .value.any,
-    new_set = _ import .map.new_set,
-    keys = _ import .map.keys,
-    set_many = _ import .map.set_many,
+    any = _ import _value.any,
+    new_set = _ import _map.new_set,
+    keys = _ import _map.keys,
+    set_many = _ import _map.set_many,
     a1 = _ any map,
     a2 = _ new_set a1 which _ keys .,
     a1 which _ set_many a2,
@@ -80,10 +80,10 @@ true
 into_keys set
 -----
 _ do [
-    any = _ import .value.any,
-    new_set = _ import .map.new_set,
-    keys = _ import .map.keys,
-    into_keys = _ import .map.into_keys,
+    any = _ import _value.any,
+    new_set = _ import _map.new_set,
+    keys = _ import _map.keys,
+    into_keys = _ import _map.into_keys,
     a1 = _ any map,
     a2 = _ new_set a1 which _ keys .,
     a3 = _ new_set a1 which _ into_keys .,
@@ -95,11 +95,11 @@ true
 values multiset
 -----
 _ do [
-    any = _ import .value.any,
-    second = _ import .pair.second,
-    multiset = _ import .map.new_multiset,
-    values = _ import .map.values,
-    set = _ import .map.set,
+    any = _ import _value.any,
+    second = _ import _pair.second,
+    multiset = _ import _map.new_multiset,
+    values = _ import _map.values,
+    set = _ import _map.set,
     a1 = _ any map,
     b1 = _ multiset a1 which _ values .,
     a2 = {},
@@ -117,10 +117,10 @@ true
 into_values multiset
 -----
 _ do [
-    any = _ import .value.any,
-    multiset = _ import .map.new_multiset,
-    values = _ import .map.values,
-    into_values = _ import .map.into_values,
+    any = _ import _value.any,
+    multiset = _ import _map.new_multiset,
+    values = _ import _map.values,
+    into_values = _ import _map.into_values,
     a1 = _ any map,
     a2 = _ multiset a1 which _ values .,
     a3 = _ multiset a1 which _ into_values .,
@@ -132,9 +132,9 @@ true
 set contain
 -----
 _ do [
-    any = _ import .value.any,
-    set = _ import .map.set,
-    contain = _ import .map.contain,
+    any = _ import _value.any,
+    set = _ import _map.set,
+    contain = _ import _map.contain,
     a = _ any map,
     k = _ any .,
     v = _ any .,
@@ -147,9 +147,9 @@ true
 set get
 -----
 _ do [
-    any = _ import .value.any,
-    set = _ import .map.set,
-    get = _ import .map.get,
+    any = _ import _value.any,
+    set = _ import _map.set,
+    get = _ import _map.get,
     a = _ any map,
     k = _ any .,
     v = _ any .,
@@ -163,10 +163,10 @@ true
 set_many contain_all
 -----
 _ do [
-    any = _ import .value.any,
-    set_many = _ import .map.set_many,
-    contain_all = _ import .map.contain_all,
-    keys = _ import .map.keys,
+    any = _ import _value.any,
+    set_many = _ import _map.set_many,
+    contain_all = _ import _map.contain_all,
+    keys = _ import _map.keys,
     a = _ any map,
     b = _ any map,
     a which _ set_many b,
@@ -178,9 +178,9 @@ true
 remove_many contain_any
 -----
 _ do [
-    any = _ import .value.any,
-    remove_many = _ import .map.remove_many,
-    contain_any = _ import .map.contain_any,
+    any = _ import _value.any,
+    remove_many = _ import _map.remove_many,
+    contain_any = _ import _map.contain_any,
     a = _ any map,
     b = _ any list,
     a which _ remove_many b,
@@ -192,10 +192,10 @@ true
 set_many get_many
 -----
 _ do [
-    any = _ import .value.any,
-    set_many = _ import .map.set_many,
-    get_many = _ import .map.get_many,
-    keys = _ import .map.keys,
+    any = _ import _value.any,
+    set_many = _ import _map.set_many,
+    get_many = _ import _map.get_many,
+    keys = _ import _map.keys,
     a = _ any map,
     b = _ any map,
     a which _ set_many b,
@@ -208,10 +208,10 @@ true
 get remove
 -----
 _ do [
-    any = _ import .value.any,
-    get = _ import .map.get,
-    remove = _ import .map.remove,
-    contain = _ import .map.contain,
+    any = _ import _value.any,
+    get = _ import _map.get,
+    remove = _ import _map.remove,
+    contain = _ import _map.contain,
     a = _ any map,
     k = _ any .,
     v1 = a which _ get k,
@@ -225,10 +225,10 @@ true
 get_many remove_many
 -----
 _ do [
-    any = _ import .value.any,
-    get_many = _ import .map.get_many,
-    remove_many = _ import .map.remove_many,
-    contain_any = _ import .map.contain_any,
+    any = _ import _value.any,
+    get_many = _ import _map.get_many,
+    remove_many = _ import _map.remove_many,
+    contain_any = _ import _map.contain_any,
     a = _ any map,
     ks = _ any list,
     vs1 = a which _ get_many ks,
@@ -242,8 +242,8 @@ true
 clear
 -----
 _ do [
-    any = _ import .value.any,
-    clear = _ import .map.clear,
+    any = _ import _value.any,
+    clear = _ import _map.clear,
     a = _ any map,
     a which _ clear .,
     a == {}
@@ -254,7 +254,7 @@ true
 length
 -----
 _ do [
-    length = _ import .map.length,
+    length = _ import _map.length,
     m = {1 : 2, 3 : 3},
     m which _ length .
 ]
@@ -264,8 +264,8 @@ _ do [
 items new 1
 -----
 _ do [
-    items = _ import .map.items,
-    new = _ import .map.new,
+    items = _ import _map.items,
+    new = _ import _map.new,
     m = {1 : 2, 3 : 3},
     i = m which _ items .,
     _ new i
@@ -276,8 +276,8 @@ _ do [
 keys new_set 1
 -----
 _ do [
-    keys = _ import .map.keys,
-    new_set = _ import .map.new_set,
+    keys = _ import _map.keys,
+    new_set = _ import _map.new_set,
     m = {1 : 2, 3 : 3},
     k = m which _ keys .,
     _ new_set k
@@ -288,8 +288,8 @@ _ do [
 values multiset 1
 -----
 _ do [
-    values = _ import .map.values,
-    multiset = _ import .map.new_multiset,
+    values = _ import _map.values,
+    multiset = _ import _map.new_multiset,
     m = {1 : 2, 3 : 2},
     v = m which _ values .,
     _ multiset v
@@ -300,7 +300,7 @@ _ do [
 contain 1
 -----
 _ do [
-    contain = _ import .map.contain,
+    contain = _ import _map.contain,
     m = {1 : 2},
     m which _ contain 1
 ]
@@ -310,7 +310,7 @@ true
 contain 2
 -----
 _ do [
-    contain = _ import .map.contain,
+    contain = _ import _map.contain,
     m = {1 : 2},
     m which _ contain 2
 ]
@@ -320,7 +320,7 @@ false
 contain_all 1
 -----
 _ do [
-    contain_all = _ import .map.contain_all,
+    contain_all = _ import _map.contain_all,
     m = {1 : 2, 3 : 4},
     m which _ contain_all [1, 3]
 ]
@@ -330,7 +330,7 @@ true
 contain_all 2
 -----
 _ do [
-    contain_all = _ import .map.contain_all,
+    contain_all = _ import _map.contain_all,
     m = {1 : 2, 3 : 4},
     m which _ contain_all [1, 2]
 ]
@@ -340,7 +340,7 @@ false
 contain_any 1
 -----
 _ do [
-    contain_any = _ import .map.contain_any,
+    contain_any = _ import _map.contain_any,
     m = {1 : 2, 3 : 4},
     m which _ contain_any [1, 2]
 ]
@@ -350,7 +350,7 @@ true
 contain_any 2
 -----
 _ do [
-    contain_any = _ import .map.contain_any,
+    contain_any = _ import _map.contain_any,
     m = {1 : 2, 3 : 4},
     m which _ contain_any [2, 4]
 ]
@@ -360,7 +360,7 @@ false
 set 1
 -----
 _ do [
-    set = _ import .map.set,
+    set = _ import _map.set,
     m = {1 : 2, 3 : 4},
     [m which _ set 1 : 3, m]
 ]
@@ -370,7 +370,7 @@ _ do [
 set 2
 -----
 _ do [
-    set = _ import .map.set,
+    set = _ import _map.set,
     m = {1 : 2},
     [m which _ set 2 : 3, m]
 ]
@@ -380,7 +380,7 @@ _ do [
 set_many 1
 -----
 _ do [
-    set_many = _ import .map.set_many,
+    set_many = _ import _map.set_many,
     m = {1 : 2, 2 : 3},
     [m which _ set_many {1 : 3, 3 : 4}, m]
 ]
@@ -390,7 +390,7 @@ _ do [
 get 1
 -----
 _ do [
-    get = _ import .map.get,
+    get = _ import _map.get,
     m = {1 : 2},
     m which _ get 1
 ]
@@ -400,7 +400,7 @@ _ do [
 get 2
 -----
 _ do [
-    get = _ import .map.get,
+    get = _ import _map.get,
     m = {1 : 2},
     m which _ get 2
 ]
@@ -410,7 +410,7 @@ _ do [
 get_many duplicate keys
 -----
 _ do [
-    get_many = _ import .map.get_many,
+    get_many = _ import _map.get_many,
     m = {1 : 2, 2 : 3, 3 : 4},
     m which _ get_many [1, 2, 1, 4]
 ]
@@ -420,7 +420,7 @@ _ do [
 remove 1
 -----
 _ do [
-    remove = _ import .map.remove,
+    remove = _ import _map.remove,
     m = {1 : 2, 3 : 4},
     [m which _ remove 1, m]
 ]
@@ -430,7 +430,7 @@ _ do [
 remove 2
 -----
 _ do [
-    remove = _ import .map.remove,
+    remove = _ import _map.remove,
     m = {1 : 2},
     [m which _ remove 2, m]
 ]
@@ -440,7 +440,7 @@ _ do [
 remove_many 1
 -----
 _ do [
-    remove_many = _ import .map.remove_many,
+    remove_many = _ import _map.remove_many,
     m = {1 : 2, 2 : 3, 3 : 4},
     [m which _ remove_many [1, 3, 5], m]
 ]
@@ -450,7 +450,7 @@ _ do [
 clear 1
 -----
 _ do [
-    clear = _ import .map.clear,
+    clear = _ import _map.clear,
     m = {1 : 2, 2 : 3},
     m which _ clear .,
     m
@@ -461,7 +461,7 @@ _ do [
 new 1
 -----
 _ do [
-    new = _ import .map.new,
+    new = _ import _map.new,
     _ new [1 : 2, 3 : 4]
 ]
 -----
@@ -470,7 +470,7 @@ _ do [
 map duplicate keys
 -----
 _ do [
-    new = _ import .map.new,
+    new = _ import _map.new,
     _ new [1 : 2, 1 : 3]
 ]
 -----
@@ -479,7 +479,7 @@ _ do [
 new_set duplicate keys 1
 -----
 _ do [
-    new_set = _ import .map.new_set,
+    new_set = _ import _map.new_set,
     _ new_set [1, 2, 2, 3]
 ]
 -----
@@ -488,7 +488,7 @@ _ do [
 set duplicate keys 2
 -----
 _ do [
-    new_set = _ import .map.new_set,
+    new_set = _ import _map.new_set,
     _ new_set [1, 2, 1]
 ]
 -----
@@ -497,7 +497,7 @@ _ do [
 multiset 1
 -----
 _ do [
-    multiset = _ import .map.new_multiset,
+    multiset = _ import _map.new_multiset,
     _ multiset ["a", "b", "c", "c", "c", "b"]
 ]
 -----

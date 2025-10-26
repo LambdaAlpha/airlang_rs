@@ -1,9 +1,9 @@
 new repr
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .configuration.new,
-    represent = _ import .configuration.represent,
+    any = _ import _value.any,
+    new = _ import _configuration.new,
+    represent = _ import _configuration.represent,
     c = [
         {a : _ any ., b : _ any .},
         {a : _ any .},
@@ -20,10 +20,10 @@ true
 length
 -----
 _ do [
-    new = _ import .configuration.new,
-    where = _ import .configuration.where,
-    length = _ import .configuration.length,
-    any = _ import .value.any,
+    new = _ import _configuration.new,
+    where = _ import _configuration.where,
+    length = _ import _configuration.length,
+    any = _ import _value.any,
     c = _ new [
         {a : _ any ., b : _ any .},
         {a : _ any .},
@@ -39,12 +39,12 @@ _ do [
 length == snapshot repr length
 -----
 _ do [
-    configuration.length = _ import .configuration.length,
-    map.length = _ import .map.length,
-    snapshot = _ import .configuration.snapshot,
-    represent = _ import .configuration.represent,
-    any = _ import .value.any,
-    where = _ import .configuration.where,
+    configuration.length = _ import _configuration.length,
+    map.length = _ import _map.length,
+    snapshot = _ import _configuration.snapshot,
+    represent = _ import _configuration.represent,
+    any = _ import _value.any,
+    where = _ import _configuration.where,
     c = _ any configuration,
     [m] = _ represent c where _ snapshot _,
     lc = c where _ configuration.length _,
@@ -57,11 +57,11 @@ true
 snapshot
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .configuration.new,
-    snapshot = _ import .configuration.snapshot,
-    where = _ import .configuration.where,
-    represent = _ import .configuration.represent,
+    any = _ import _value.any,
+    new = _ import _configuration.new,
+    snapshot = _ import _configuration.snapshot,
+    where = _ import _configuration.where,
+    represent = _ import _configuration.represent,
     a1 = _ any .,
     a2 = _ any .,
     b1 = _ any .,
@@ -80,10 +80,10 @@ true
 export exist
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     ab = _ any .,
-    .a.b export ab,
-    _ exist .a.b
+    _a.b export ab,
+    _ exist _a.b
 ]
 -----
 true
@@ -91,10 +91,10 @@ true
 export import
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     ab = _ any .,
-    .a.b export ab,
-    ab1 = _ import .a.b,
+    _a.b export ab,
+    ab1 = _ import _a.b,
     ab == ab1
 ]
 -----
@@ -103,12 +103,12 @@ true
 with override
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     a1 = _ any .,
     a2 = _ any .,
     {a : a1} with _ do [
-        a4 = {a : a2} with _ import .a,
-        a3 = _ import .a,
+        a4 = {a : a2} with _ import _a,
+        a3 = _ import _a,
     ],
     (a1 == a3) and (a2 == a4)
 ]
@@ -118,15 +118,15 @@ true
 with exist
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     a = _ any .,
     b = _ any .,
     {a : a} with _ do [
-        c1 = _ exist .a,
-        c2 = {b : b} with _ exist .b,
-        c3 = _ exist .b,
+        c1 = _ exist _a,
+        c2 = {b : b} with _ exist _b,
+        c3 = _ exist _b,
     ],
-    c4 = _ exist .a,
+    c4 = _ exist _a,
     c1 and c2 and (_ not c3) and (_ not c4)
 ]
 -----
@@ -135,12 +135,12 @@ true
 where
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .configuration.new,
-    where = _ import .configuration.where,
+    any = _ import _value.any,
+    new = _ import _configuration.new,
+    where = _ import _configuration.where,
     a = _ any .,
     c = _ new [{a : a}],
-    a1 = c where _ import .a,
+    a1 = c where _ import _a,
     a == a1
 ]
 -----
@@ -149,11 +149,11 @@ true
 cfg func call
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     a0 = _ any .,
     f = _ function {
-        context_access : .free,
-        code : ._ : _ import ..a
+        context_access : _free,
+        code : __ : _ import __a
     },
     a1 = {a : a0} with _ f .,
     a0 == a1

@@ -1,7 +1,7 @@
 == true
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     a = _ any .,
     b = a,
     a == b
@@ -12,7 +12,7 @@ true
 any unit
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     u = _ any unit,
     u which _ type .
 ]
@@ -22,7 +22,7 @@ unit
 any bit
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     b = _ any bit,
     b which _ type .
 ]
@@ -32,7 +32,7 @@ bit
 any symbol
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     s = _ any symbol,
     s which _ type .
 ]
@@ -42,7 +42,7 @@ symbol
 any text
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     t = _ any text,
     t which _ type .
 ]
@@ -52,7 +52,7 @@ text
 any integer
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     i = _ any integer,
     i which _ type .
 ]
@@ -62,7 +62,7 @@ integer
 any number
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     n = _ any number,
     n which _ type .
 ]
@@ -72,7 +72,7 @@ number
 any byte
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     b = _ any byte,
     b which _ type .
 ]
@@ -82,7 +82,7 @@ byte
 any pair
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     p = _ any pair,
     p which _ type .
 ]
@@ -92,7 +92,7 @@ pair
 any call
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     c = _ any call,
     c which _ type .
 ]
@@ -102,7 +102,7 @@ call
 any list
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     a = _ any list,
     a which _ type .
 ]
@@ -112,7 +112,7 @@ list
 any map
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     a = _ any map,
     a which _ type .
 ]
@@ -122,7 +122,7 @@ map
 any link
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     a = _ any link,
     a which _ type .
 ]
@@ -132,7 +132,7 @@ link
 any memory
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     m = _ any memory,
     m which _ type .
 ]
@@ -142,7 +142,7 @@ memory
 any function
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     f = _ any function,
     f which _ type .
 ]
@@ -170,7 +170,7 @@ bit
 type symbol
 -----
 _ do [
-    a = .a,
+    a = _a,
     a which _ type .
 ]
 -----
@@ -251,7 +251,7 @@ map
 type link
 -----
 _ do [
-    new_link = _ import .link.new,
+    new_link = _ import _link.new,
     a = _ new_link .,
     a which _ type .
 ]
@@ -261,7 +261,7 @@ link
 type memory
 -----
 _ do [
-    new_memory = _ import .memory.new,
+    new_memory = _ import _memory.new,
     a = _ new_memory {},
     a which _ type .
 ]
@@ -297,7 +297,7 @@ true
 =====
 == symbol
 -----
-.a == .a
+_a == _a
 -----
 true
 =====
@@ -346,7 +346,7 @@ true
 == link
 -----
 _ do [
-    new_link = _ import .link.new,
+    new_link = _ import _link.new,
     a = _ new_link .,
     b = a,
     a == b
@@ -357,7 +357,7 @@ true
 == memory
 -----
 _ do [
-    new_memory = _ import .memory.new,
+    new_memory = _ import _memory.new,
     a = _ new_memory {},
     b = _ new_memory {},
     (a == b) and _ not a == .
@@ -433,8 +433,8 @@ true
 == special ref
 -----
 _ do [
-    ..a = 1,
-    @.a == 1
+    __a = 1,
+    @_a == 1
 ]
 -----
 true

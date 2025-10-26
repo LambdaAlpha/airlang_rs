@@ -40,7 +40,7 @@ fn generate_load(path: &str) -> String {
     escape_text(&mut path_prefix, env!("CARGO_MANIFEST_DIR"));
     format!(
         "_ do [\
-            load = _ import .build.load,\
+            load = _ import _build.load,\
             _ load \"{path_prefix}{path}\"\
         ]"
     )

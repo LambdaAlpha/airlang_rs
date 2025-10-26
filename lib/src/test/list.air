@@ -1,9 +1,9 @@
 length push
 -----
 _ do [
-    any = _ import .value.any,
-    length = _ import .list.length,
-    push = _ import .list.push,
+    any = _ import _value.any,
+    length = _ import _list.length,
+    push = _ import _list.push,
     a = _ any list,
     l1 = a which _ length .,
     a which _ push .,
@@ -16,9 +16,9 @@ true
 length push_many
 -----
 _ do [
-    any = _ import .value.any,
-    length = _ import .list.length,
-    push_many = _ import .list.push_many,
+    any = _ import _value.any,
+    length = _ import _list.length,
+    push_many = _ import _list.push_many,
     a = _ any list,
     la = a which _ length .,
     b = _ any list,
@@ -33,13 +33,13 @@ true
 length pop_many
 -----
 _ do [
-    any = _ import .value.any,
-    length = _ import .list.length,
-    pop_many = _ import .list.pop_many,
-    % = _ import .integer.remainder,
+    any = _ import _value.any,
+    length = _ import _list.length,
+    pop_many = _ import _list.pop_many,
+    % = _ import _integer.remainder,
     a = _ any list,
     l1 = a which _ length .,
-    (l1 == 0) .return true,
+    (l1 == 0) _return true,
     i = (l1 + (_ any integer) % l1) % l1,
     a which _ pop_many i,
     l2 = a which _ length .,
@@ -51,15 +51,15 @@ true
 set get
 -----
 _ do [
-    any = _ import .value.any,
-    length = _ import .list.length,
-    set = _ import .list.set,
-    get = _ import .list.get,
-    % = _ import .integer.remainder,
+    any = _ import _value.any,
+    length = _ import _list.length,
+    set = _ import _list.set,
+    get = _ import _list.get,
+    % = _ import _integer.remainder,
     a = _ any list,
     b = a,
     l = a which _ length .,
-    (l == 0) .return true,
+    (l == 0) _return true,
     i = (l + (_ any integer) % l) % l,
     v1 = a which _ get i,
     v2 = _ any .,
@@ -74,17 +74,17 @@ true
 set_many get_many
 -----
 _ do [
-    any = _ import .value.any,
-    length = _ import .list.length,
-    get_many = _ import .list.get_many,
-    set_many = _ import .list.set_many,
-    % = _ import .integer.remainder,
+    any = _ import _value.any,
+    length = _ import _list.length,
+    get_many = _ import _list.get_many,
+    set_many = _ import _list.set_many,
+    % = _ import _integer.remainder,
     a = _ any list,
     la = a which _ length .,
-    (la == 0) .return true,
+    (la == 0) _return true,
     b = _ any list,
     lb = b which _ length .,
-    (lb == 0) .return true,
+    (lb == 0) _return true,
     (la < lb) test [
         t = a,
         a = b,
@@ -108,11 +108,11 @@ true
 insert get length
 -----
 _ do [
-    any = _ import .value.any,
-    length = _ import .list.length,
-    insert = _ import .list.insert,
-    get = _ import .list.get,
-    % = _ import .integer.remainder,
+    any = _ import _value.any,
+    length = _ import _list.length,
+    insert = _ import _list.insert,
+    get = _ import _list.get,
+    % = _ import _integer.remainder,
     a = _ any list,
     l = 1 + a which _ length .,
     i = (l + (_ any integer) % l) % l,
@@ -128,11 +128,11 @@ true
 insert remove
 -----
 _ do [
-    any = _ import .value.any,
-    length = _ import .list.length,
-    insert = _ import .list.insert,
-    remove = _ import .list.remove,
-    % = _ import .integer.remainder,
+    any = _ import _value.any,
+    length = _ import _list.length,
+    insert = _ import _list.insert,
+    remove = _ import _list.remove,
+    % = _ import _integer.remainder,
     a = _ any list,
     b = a,
     l = 1 + a which _ length .,
@@ -148,11 +148,11 @@ true
 insert_many get_many length
 -----
 _ do [
-    any = _ import .value.any,
-    length = _ import .list.length,
-    insert_many = _ import .list.insert_many,
-    get_many = _ import .list.get_many,
-    % = _ import .integer.remainder,
+    any = _ import _value.any,
+    length = _ import _list.length,
+    insert_many = _ import _list.insert_many,
+    get_many = _ import _list.get_many,
+    % = _ import _integer.remainder,
     a = _ any list,
     l1 = 1 + a which _ length .,
     i = (l1 + (_ any integer) % l1) % l1,
@@ -169,11 +169,11 @@ true
 insert_many remove_many
 -----
 _ do [
-    any = _ import .value.any,
-    length = _ import .list.length,
-    insert_many = _ import .list.insert_many,
-    remove_many = _ import .list.remove_many,
-    % = _ import .integer.remainder,
+    any = _ import _value.any,
+    length = _ import _list.length,
+    insert_many = _ import _list.insert_many,
+    remove_many = _ import _list.remove_many,
+    % = _ import _integer.remainder,
     a = _ any list,
     b = a,
     l = 1 + a which _ length .,
@@ -190,9 +190,9 @@ true
 push pop
 -----
 _ do [
-    any = _ import .value.any,
-    push = _ import .list.push,
-    pop = _ import .list.pop,
+    any = _ import _value.any,
+    push = _ import _list.push,
+    pop = _ import _list.pop,
     a1 = _ any list,
     a2 = a1,
     v1 = _ any .,
@@ -206,10 +206,10 @@ true
 push_many pop_many
 -----
 _ do [
-    any = _ import .value.any,
-    length = _ import .list.length,
-    push_many = _ import .list.push_many,
-    pop_many = _ import .list.pop_many,
+    any = _ import _value.any,
+    length = _ import _list.length,
+    push_many = _ import _list.push_many,
+    pop_many = _ import _list.pop_many,
     a1 = _ any list,
     a2 = a1,
     b1 = _ any list,
@@ -224,8 +224,8 @@ true
 clear
 -----
 _ do [
-    any = _ import .value.any,
-    clear = _ import .list.clear,
+    any = _ import _value.any,
+    clear = _ import _list.clear,
     a = _ any list,
     a which _ clear .,
     a == []
@@ -236,7 +236,7 @@ true
 length empty
 -----
 _ do [
-    length = _ import .list.length,
+    length = _ import _list.length,
     l = [],
     l which _ length .
 ]
@@ -246,7 +246,7 @@ _ do [
 length else
 -----
 _ do [
-    length = _ import .list.length,
+    length = _ import _list.length,
     l = [1, 2],
     l which _ length .
 ]
@@ -256,7 +256,7 @@ _ do [
 set 1
 -----
 _ do [
-    set = _ import .list.set,
+    set = _ import _list.set,
     a = [1],
     a which _ set 0 : 2,
     a
@@ -267,7 +267,7 @@ _ do [
 set 2
 -----
 _ do [
-    set = _ import .list.set,
+    set = _ import _list.set,
     a = [1, 2],
     a which _ set 1 : 3,
     a
@@ -278,7 +278,7 @@ _ do [
 set length
 -----
 _ do [
-    set = _ import .list.set,
+    set = _ import _list.set,
     a = [],
     a which _ set 1 : 1,
     a
@@ -289,7 +289,7 @@ _ do [
 set_many empty
 -----
 _ do [
-    set_many = _ import .list.set_many,
+    set_many = _ import _list.set_many,
     a = [0, 1, 2],
     a which _ set_many 0 : []
 ]
@@ -299,7 +299,7 @@ _ do [
 set_many 1
 -----
 _ do [
-    set_many = _ import .list.set_many,
+    set_many = _ import _list.set_many,
     a = [0, 1, 2],
     a which _ set_many 0 : [3, 4],
     a
@@ -310,7 +310,7 @@ _ do [
 set_many 2
 -----
 _ do [
-    set_many = _ import .list.set_many,
+    set_many = _ import _list.set_many,
     a = [0, 1, 2],
     a which _ set_many 1 : [3, 4],
     a
@@ -321,7 +321,7 @@ _ do [
 set_many last
 -----
 _ do [
-    set_many = _ import .list.set_many,
+    set_many = _ import _list.set_many,
     a = [0, 1, 2],
     a which _ set_many 2 : [],
     a
@@ -332,7 +332,7 @@ _ do [
 get out of bound
 -----
 _ do [
-    get = _ import .list.get,
+    get = _ import _list.get,
     l = [],
     l which _ get 0
 ]
@@ -342,7 +342,7 @@ _ do [
 get 0
 -----
 _ do [
-    get = _ import .list.get,
+    get = _ import _list.get,
     l = [1],
     l which _ get 0
 ]
@@ -352,7 +352,7 @@ _ do [
 get else
 -----
 _ do [
-    get = _ import .list.get,
+    get = _ import _list.get,
     l = [1, 2],
     l which _ get 1
 ]
@@ -362,7 +362,7 @@ _ do [
 get_many 1
 -----
 _ do [
-    get_many = _ import .list.get_many,
+    get_many = _ import _list.get_many,
     l = [1, 2],
     l which _ get_many 0 : 1
 ]
@@ -372,7 +372,7 @@ _ do [
 get_many 2
 -----
 _ do [
-    get_many = _ import .list.get_many,
+    get_many = _ import _list.get_many,
     l = [1, 2],
     l which _ get_many 1 : 2
 ]
@@ -382,7 +382,7 @@ _ do [
 get_many . 1
 -----
 _ do [
-    get_many = _ import .list.get_many,
+    get_many = _ import _list.get_many,
     l = [1, 2],
     l which _ get_many . : .
 ]
@@ -392,7 +392,7 @@ _ do [
 get_many . 2
 -----
 _ do [
-    get_many = _ import .list.get_many,
+    get_many = _ import _list.get_many,
     l = [1, 2],
     l which _ get_many 1 : .
 ]
@@ -402,7 +402,7 @@ _ do [
 get_many . 3
 -----
 _ do [
-    get_many = _ import .list.get_many,
+    get_many = _ import _list.get_many,
     l = [1, 2],
     l which _ get_many . : 1
 ]
@@ -412,7 +412,7 @@ _ do [
 insert out of bound
 -----
 _ do [
-    insert = _ import .list.insert,
+    insert = _ import _list.insert,
     l = [],
     l which _ insert 1 : 1,
     l
@@ -423,7 +423,7 @@ _ do [
 insert
 -----
 _ do [
-    insert = _ import .list.insert,
+    insert = _ import _list.insert,
     l = [1, 2],
     l which _ insert 1 : 3,
     l
@@ -434,7 +434,7 @@ _ do [
 insert length
 -----
 _ do [
-    insert = _ import .list.insert,
+    insert = _ import _list.insert,
     a = [],
     a which _ insert 0 : 1,
     a
@@ -445,7 +445,7 @@ _ do [
 insert_many
 -----
 _ do [
-    insert_many = _ import .list.insert_many,
+    insert_many = _ import _list.insert_many,
     l = [1, 2],
     l which _ insert_many 1 : [3, 4],
     l
@@ -456,7 +456,7 @@ _ do [
 remove
 -----
 _ do [
-    remove = _ import .list.remove,
+    remove = _ import _list.remove,
     l = [1, 2, 3],
     [l which _ remove 1, l]
 ]
@@ -466,7 +466,7 @@ _ do [
 remove_many
 -----
 _ do [
-    remove_many = _ import .list.remove_many,
+    remove_many = _ import _list.remove_many,
     l = [1, 2, 3],
     [l which _ remove_many 1 : 3, l]
 ]
@@ -476,7 +476,7 @@ _ do [
 remove_many .
 -----
 _ do [
-    remove_many = _ import .list.remove_many,
+    remove_many = _ import _list.remove_many,
     l = [1, 2, 3],
     l which _ remove_many . : .,
     l
@@ -487,7 +487,7 @@ _ do [
 push
 -----
 _ do [
-    push = _ import .list.push,
+    push = _ import _list.push,
     l = [1],
     l which _ push 2,
     l
@@ -498,7 +498,7 @@ _ do [
 push_many
 -----
 _ do [
-    push_many = _ import .list.push_many,
+    push_many = _ import _list.push_many,
     l = [1],
     l which _ push_many [2, 3],
     l
@@ -509,7 +509,7 @@ _ do [
 push_many empty
 -----
 _ do [
-    push_many = _ import .list.push_many,
+    push_many = _ import _list.push_many,
     l = [1],
     l which _ push_many [],
     l
@@ -520,7 +520,7 @@ _ do [
 pop empty
 -----
 _ do [
-    pop = _ import .list.pop,
+    pop = _ import _list.pop,
     l = [],
     [l which _ pop ., l]
 ]
@@ -530,7 +530,7 @@ _ do [
 pop 1
 -----
 _ do [
-    pop = _ import .list.pop,
+    pop = _ import _list.pop,
     l = [1],
     [l which _ pop ., l]
 ]
@@ -540,7 +540,7 @@ _ do [
 pop 2
 -----
 _ do [
-    pop = _ import .list.pop,
+    pop = _ import _list.pop,
     l = [1, 2],
     [l which _ pop ., l]
 ]
@@ -550,7 +550,7 @@ _ do [
 pop_many 0
 -----
 _ do [
-    pop_many = _ import .list.pop_many,
+    pop_many = _ import _list.pop_many,
     l = [1, 2],
     [l which _ pop_many 0, l]
 ]
@@ -560,7 +560,7 @@ _ do [
 pop_many 1
 -----
 _ do [
-    pop_many = _ import .list.pop_many,
+    pop_many = _ import _list.pop_many,
     l = [1, 2],
     [l which _ pop_many 1, l]
 ]
@@ -570,7 +570,7 @@ _ do [
 pop_many else
 -----
 _ do [
-    pop_many = _ import .list.pop_many,
+    pop_many = _ import _list.pop_many,
     l = [1, 2],
     [l which _ pop_many 2, l]
 ]
@@ -580,7 +580,7 @@ _ do [
 pop_many out of bound
 -----
 _ do [
-    pop_many = _ import .list.pop_many,
+    pop_many = _ import _list.pop_many,
     l = [1, 2],
     l which _ pop_many 3,
     l
@@ -591,7 +591,7 @@ _ do [
 clear
 -----
 _ do [
-    clear = _ import .list.clear,
+    clear = _ import _list.clear,
     l = [1, 2],
     l which _ clear .,
     l

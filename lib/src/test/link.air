@@ -1,9 +1,9 @@
 new get
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .link.new,
-    get = _ import .link.get,
+    any = _ import _value.any,
+    new = _ import _link.new,
+    get = _ import _link.get,
     a = _ any .,
     l = _ new a,
     a1 = l get _,
@@ -15,10 +15,10 @@ true
 set get
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .link.new,
-    set = _ import .link.set,
-    get = _ import .link.get,
+    any = _ import _value.any,
+    new = _ import _link.new,
+    set = _ import _link.set,
+    get = _ import _link.get,
     l = _ new _ any .,
     a = _ any .,
     l set a,
@@ -31,10 +31,10 @@ true
 sync
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .link.new,
-    set = _ import .link.set,
-    get = _ import .link.get,
+    any = _ import _value.any,
+    new = _ import _link.new,
+    set = _ import _link.set,
+    get = _ import _link.get,
     l = _ new _ any .,
     l1 = l, a = _ any .,
     l set a,
@@ -47,12 +47,12 @@ true
 leak no panic
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .link.new,
-    set = _ import .link.set,
+    any = _ import _value.any,
+    new = _ import _link.new,
+    set = _ import _link.set,
     l = _ new _ any .,
     l set l,
-    .l move _,
+    _l move _,
     .
 ]
 -----
@@ -61,9 +61,9 @@ _ do [
 cycle recover
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .link.new,
-    set = _ import .link.set,
+    any = _ import _value.any,
+    new = _ import _link.new,
+    set = _ import _link.set,
     l = _ new _ any .,
     l set l,
     l1 = l set _ any .,

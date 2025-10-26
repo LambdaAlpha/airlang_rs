@@ -1,9 +1,9 @@
 length
 -----
 _ do [
-    length = _ import .memory.length,
-    new = _ import .memory.new,
-    any = _ import .value.any,
+    length = _ import _memory.length,
+    new = _ import _memory.new,
+    any = _ import _value.any,
     m = _ new {
         a : . : _ any .,
         b : . : _ any .,
@@ -18,10 +18,10 @@ _ do [
 length == repr length
 -----
 _ do [
-    memory.length = _ import .memory.length,
-    map.length = _ import .map.length,
-    represent = _ import .memory.represent,
-    any = _ import .value.any,
+    memory.length = _ import _memory.length,
+    map.length = _ import _map.length,
+    represent = _ import _memory.represent,
+    any = _ import _value.any,
     m = _ any memory,
     m1 = _ represent m,
     l = m which _ memory.length _,
@@ -34,10 +34,10 @@ true
 read none
 -----
 _ do [
-    any = _ import .value.any,
-    read = _ import .context.read,
+    any = _ import _value.any,
+    read = _ import _context.read,
     a = _ any .,
-    a == .a read _
+    a == _a read _
 ]
 -----
 true
@@ -45,12 +45,12 @@ true
 read final
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .memory.new,
-    read = _ import .context.read,
+    any = _ import _value.any,
+    new = _ import _memory.new,
+    read = _ import _context.read,
     v = _ any .,
     a = _ new {b : final : v},
-    v == a which _ read .b
+    v == a which _ read _b
 ]
 -----
 true
@@ -58,12 +58,12 @@ true
 read still
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .memory.new,
-    read = _ import .context.read,
+    any = _ import _value.any,
+    new = _ import _memory.new,
+    read = _ import _context.read,
     v = _ any .,
     a = _ new {b : still : v},
-    v == a which _ read .b
+    v == a which _ read _b
 ]
 -----
 true
@@ -71,12 +71,12 @@ true
 read static
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .memory.new,
-    read = _ import .context.read,
+    any = _ import _value.any,
+    new = _ import _memory.new,
+    read = _ import _context.read,
     v = _ any .,
     a = _ new {b : static : v},
-    v == a which _ read .b
+    v == a which _ read _b
 ]
 -----
 true
@@ -84,12 +84,12 @@ true
 read const
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .memory.new,
-    read = _ import .context.read,
+    any = _ import _value.any,
+    new = _ import _memory.new,
+    read = _ import _context.read,
     v = _ any .,
     a = _ new {b : constant : v},
-    v == a which _ read .b
+    v == a which _ read _b
 ]
 -----
 true
@@ -97,11 +97,11 @@ true
 move ref
 -----
 _ do [
-    any = _ import .value.any,
-    exist = _ import .memory.exist,
+    any = _ import _value.any,
+    exist = _ import _memory.exist,
     a = _ any .,
     b = a,
-    (b == .a move _) and (_ not .a exist _)
+    (b == _a move _) and (_ not _a exist _)
 ]
 -----
 true
@@ -109,12 +109,12 @@ true
 move indirect
 -----
 _ do [
-    any = _ import .value.any,
-    exist = _ import .memory.exist,
+    any = _ import _value.any,
+    exist = _ import _memory.exist,
     a = _ any .,
-    b = .a,
+    b = _a,
     c = a,
-    (c == b move _) and (_ not .a exist _)
+    (c == b move _) and (_ not _a exist _)
 ]
 -----
 true
@@ -122,12 +122,12 @@ true
 move final
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .memory.new,
-    exist = _ import .memory.exist,
+    any = _ import _value.any,
+    new = _ import _memory.new,
+    exist = _ import _memory.exist,
     v = _ any .,
     a = _ new {b : final : v},
-    (. == a which _ move .b) and (a which _ exist .b)
+    (. == a which _ move _b) and (a which _ exist _b)
 ]
 -----
 true
@@ -135,12 +135,12 @@ true
 move still
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .memory.new,
-    exist = _ import .memory.exist,
+    any = _ import _value.any,
+    new = _ import _memory.new,
+    exist = _ import _memory.exist,
     v = _ any .,
     a = _ new {b : still : v},
-    (v == a which _ move .b) and (_ not a which _ exist .b)
+    (v == a which _ move _b) and (_ not a which _ exist _b)
 ]
 -----
 true
@@ -148,12 +148,12 @@ true
 move static
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .memory.new,
-    exist = _ import .memory.exist,
+    any = _ import _value.any,
+    new = _ import _memory.new,
+    exist = _ import _memory.exist,
     v = _ any .,
     a = _ new {b : static : v},
-    (. == a which _ move .b) and (a which _ exist .b)
+    (. == a which _ move _b) and (a which _ exist _b)
 ]
 -----
 true
@@ -161,12 +161,12 @@ true
 move const
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .memory.new,
-    exist = _ import .memory.exist,
+    any = _ import _value.any,
+    new = _ import _memory.new,
+    exist = _ import _memory.exist,
     v = _ any .,
     a = _ new {b : constant : v},
-    (. == a which _ move .b) and (a which _ exist .b)
+    (. == a which _ move _b) and (a which _ exist _b)
 ]
 -----
 true
@@ -174,9 +174,9 @@ true
 = none
 -----
 _ do [
-    contract = _ import .memory.contract,
+    contract = _ import _memory.contract,
     a = 1,
-    [a, .a contract _]
+    [a, _a contract _]
 ]
 -----
 [1, none]
@@ -184,10 +184,10 @@ _ do [
 = const
 -----
 _ do [
-    set_contract = _ import .memory.set_contract,
-    first = _ import .pair.first,
+    set_contract = _ import _memory.set_contract,
+    first = _ import _pair.first,
     p = 1 : 2,
-    .p set_contract .final,
+    _p set_contract _final,
     p which first = 3,
     p which _ first .
 ]
@@ -197,7 +197,7 @@ _ do [
 none = return
 -----
 _ do [
-    any = _ import .value.any,
+    any = _ import _value.any,
     a = 1,
     1 == a = _ any .
 ]
@@ -207,7 +207,7 @@ true
 none mutate
 -----
 _ do [
-    set_first = _ import .pair.set_first,
+    set_first = _ import _pair.set_first,
     a = 1 : 2,
     a which _ set_first 3,
     a
@@ -218,11 +218,11 @@ _ do [
 final mutate
 -----
 _ do [
-    any = _ import .value.any,
-    set_contract = _ import .memory.set_contract,
-    set_first = _ import .pair.set_first,
+    any = _ import _value.any,
+    set_contract = _ import _memory.set_contract,
+    set_first = _ import _pair.set_first,
     a = 1 : 2,
-    .a set_contract .final,
+    _a set_contract _final,
     a which _ set_first _ any .,
     a
 ]
@@ -232,10 +232,10 @@ _ do [
 final =
 -----
 _ do [
-    any = _ import .value.any,
-    set_contract = _ import .memory.set_contract,
+    any = _ import _value.any,
+    set_contract = _ import _memory.set_contract,
     final_a = 1,
-    .final_a set_contract .final,
+    _final_a set_contract _final,
     final_a = _ any .,
     final_a
 ]
@@ -245,13 +245,13 @@ _ do [
 set_contract still none
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .memory.new,
-    set_contract = _ import .memory.set_contract,
-    contract = _ import .memory.contract,
+    any = _ import _value.any,
+    new = _ import _memory.new,
+    set_contract = _ import _memory.set_contract,
+    contract = _ import _memory.contract,
     c = _ new {a : still : _ any .},
-    c which .a set_contract .none,
-    c which _ contract .a
+    c which _a set_contract _none,
+    c which _ contract _a
 ]
 -----
 none
@@ -259,13 +259,13 @@ none
 set_contract still none
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .memory.new,
-    set_contract = _ import .memory.set_contract,
-    contract = _ import .memory.contract,
+    any = _ import _value.any,
+    new = _ import _memory.new,
+    set_contract = _ import _memory.set_contract,
+    contract = _ import _memory.contract,
     c = _ new {a : still : _ any .},
-    c which .a set_contract .final,
-    c which _ contract .a
+    c which _a set_contract _final,
+    c which _ contract _a
 ]
 -----
 final
@@ -273,12 +273,12 @@ final
 set_contract none final
 -----
 _ do [
-    any = _ import .value.any,
-    set_contract = _ import .memory.set_contract,
-    contract = _ import .memory.contract,
+    any = _ import _value.any,
+    set_contract = _ import _memory.set_contract,
+    contract = _ import _memory.contract,
     a = _ any .,
-    .a set_contract .final,
-    .a contract _
+    _a set_contract _final,
+    _a contract _
 ]
 -----
 final
@@ -286,12 +286,12 @@ final
 set_contract none still
 -----
 _ do [
-    any = _ import .value.any,
-    set_contract = _ import .memory.set_contract,
-    contract = _ import .memory.contract,
+    any = _ import _value.any,
+    set_contract = _ import _memory.set_contract,
+    contract = _ import _memory.contract,
     a = _ any .,
-    .a set_contract .still,
-    .a contract _
+    _a set_contract _still,
+    _a contract _
 ]
 -----
 none
@@ -299,13 +299,13 @@ none
 set_contract final still
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .memory.new,
-    set_contract = _ import .memory.set_contract,
-    contract = _ import .memory.contract,
+    any = _ import _value.any,
+    new = _ import _memory.new,
+    set_contract = _ import _memory.set_contract,
+    contract = _ import _memory.contract,
     c = _ new {a : final : _ any .},
-    c which .a set_contract .still,
-    c which _ contract .a
+    c which _a set_contract _still,
+    c which _ contract _a
 ]
 -----
 final
@@ -313,13 +313,13 @@ final
 set_contract final none
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .memory.new,
-    set_contract = _ import .memory.set_contract,
-    contract = _ import .memory.contract,
+    any = _ import _value.any,
+    new = _ import _memory.new,
+    set_contract = _ import _memory.set_contract,
+    contract = _ import _memory.contract,
     c = _ new {a : final : _ any .},
-    c which .a set_contract .none,
-    c which _ contract .a
+    c which _a set_contract _none,
+    c which _ contract _a
 ]
 -----
 final
@@ -327,13 +327,13 @@ final
 set_contract static const
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .memory.new,
-    set_contract = _ import .memory.set_contract,
-    contract = _ import .memory.contract,
+    any = _ import _value.any,
+    new = _ import _memory.new,
+    set_contract = _ import _memory.set_contract,
+    contract = _ import _memory.contract,
     c = _ new {a : static : _ any .},
-    c which .a set_contract .constant,
-    c which _ contract .a
+    c which _a set_contract _constant,
+    c which _ contract _a
 ]
 -----
 static
@@ -341,13 +341,13 @@ static
 set_contract static still
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .memory.new,
-    set_contract = _ import .memory.set_contract,
-    contract = _ import .memory.contract,
+    any = _ import _value.any,
+    new = _ import _memory.new,
+    set_contract = _ import _memory.set_contract,
+    contract = _ import _memory.contract,
     c = _ new {a : static : _ any .},
-    c which .a set_contract .still,
-    c which _ contract .a
+    c which _a set_contract _still,
+    c which _ contract _a
 ]
 -----
 static
@@ -355,13 +355,13 @@ static
 set_contract static final
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .memory.new,
-    set_contract = _ import .memory.set_contract,
-    contract = _ import .memory.contract,
+    any = _ import _value.any,
+    new = _ import _memory.new,
+    set_contract = _ import _memory.set_contract,
+    contract = _ import _memory.contract,
     c = _ new {a : static : _ any .},
-    c which .a set_contract .final,
-    c which _ contract .a
+    c which _a set_contract _final,
+    c which _ contract _a
 ]
 -----
 static
@@ -369,13 +369,13 @@ static
 set_contract static none
 -----
 _ do [
-    any = _ import .value.any,
-    new = _ import .memory.new,
-    set_contract = _ import .memory.set_contract,
-    contract = _ import .memory.contract,
+    any = _ import _value.any,
+    new = _ import _memory.new,
+    set_contract = _ import _memory.set_contract,
+    contract = _ import _memory.contract,
     c = _ new {a : static : _ any .},
-    c which .a set_contract .none,
-    c which _ contract .a
+    c which _a set_contract _none,
+    c which _ contract _a
 ]
 -----
 static
@@ -383,8 +383,8 @@ static
 exist false
 -----
 _ do [
-    exist = _ import .memory.exist,
-    .a exist _
+    exist = _ import _memory.exist,
+    _a exist _
 ]
 -----
 false
@@ -392,10 +392,10 @@ false
 exist true
 -----
 _ do [
-    any = _ import .value.any,
-    exist = _ import .memory.exist,
+    any = _ import _value.any,
+    exist = _ import _memory.exist,
     a = _ any .,
-    .a exist _
+    _a exist _
 ]
 -----
 true
@@ -403,11 +403,11 @@ true
 static move
 -----
 _ do [
-    new = _ import .memory.new,
-    read = _ import .context.read,
+    new = _ import _memory.new,
+    read = _ import _context.read,
     c = _ new {a : static : 1},
-    c which _ move .a,
-    c which _ read .a
+    c which _ move _a,
+    c which _ read _a
 ]
 -----
 1
@@ -415,11 +415,11 @@ _ do [
 static = to static
 -----
 _ do [
-    new = _ import .memory.new,
-    read = _ import .context.read,
+    new = _ import _memory.new,
+    read = _ import _context.read,
     c = _ new {static_a : static : 1},
     c which static_a = 2,
-    c which _ read .static_a
+    c which _ read _static_a
 ]
 -----
 1
@@ -438,7 +438,7 @@ which free mutate
 _ do [
     u = .,
     a = 1,
-    u which _ move .a,
+    u which _ move _a,
     a
 ]
 -----
@@ -447,8 +447,8 @@ _ do [
 represent default
 -----
 _ do [
-    new = _ import .memory.new,
-    represent = _ import .memory.represent,
+    new = _ import _memory.new,
+    represent = _ import _memory.represent,
     _ represent _ new {}
 ]
 -----
@@ -457,8 +457,8 @@ _ do [
 represent else
 -----
 _ do [
-    new = _ import .memory.new,
-    represent = _ import .memory.represent,
+    new = _ import _memory.new,
+    represent = _ import _memory.represent,
     _ represent _ new {a : constant : 1}
 ]
 -----
@@ -467,12 +467,12 @@ _ do [
 represent non-recursive
 -----
 _ do [
-    new = _ import .memory.new,
-    represent = _ import .memory.represent,
-    remove = _ import .map.remove,
-    second = _ import .pair.second,
+    new = _ import _memory.new,
+    represent = _ import _memory.represent,
+    remove = _ import _map.remove,
+    second = _ import _pair.second,
     m = _ represent _ new {b : . : _ new {}},
-    b = m which _ remove .b,
+    b = m which _ remove _b,
     b = b which _ second .,
     b which _ type .
 ]
@@ -482,8 +482,8 @@ memory
 reverse
 -----
 _ do [
-    new = _ import .memory.new,
-    reverse = _ import .memory.reverse,
+    new = _ import _memory.new,
+    reverse = _ import _memory.reverse,
     c1 = _ new {
         a : none : 1,
         b : still : 2,

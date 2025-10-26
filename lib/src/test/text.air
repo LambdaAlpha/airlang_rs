@@ -1,9 +1,9 @@
 length push
 -----
 _ do [
-    any = _ import .value.any,
-    length = _ import .text.length,
-    push = _ import .text.push,
+    any = _ import _value.any,
+    length = _ import _text.length,
+    push = _ import _text.push,
     t = _ any text,
     l = t which _ length .,
     t which _ push "a",
@@ -16,9 +16,9 @@ true
 length join
 -----
 _ do [
-    any = _ import .value.any,
-    length = _ import .text.length,
-    join = _ import .text.join,
+    any = _ import _value.any,
+    length = _ import _text.length,
+    join = _ import _text.join,
     a = _ any text,
     la = a which _ length .,
     b = _ any text,
@@ -33,7 +33,7 @@ true
 length empty
 -----
 _ do [
-    length = _ import .text.length,
+    length = _ import _text.length,
     t = "",
     t which _ length .
 ]
@@ -43,7 +43,7 @@ _ do [
 length else
 -----
 _ do [
-    length = _ import .text.length,
+    length = _ import _text.length,
     t = "1",
     t which _ length .
 ]
@@ -53,9 +53,9 @@ _ do [
 push join
 -----
 _ do [
-    any = _ import .value.any,
-    push = _ import .text.push,
-    join = _ import .text.join,
+    any = _ import _value.any,
+    push = _ import _text.push,
+    join = _ import _text.join,
     a = _ any text,
     b = _ any text,
     t = a,
@@ -69,7 +69,7 @@ true
 push
 -----
 _ do [
-    push = _ import .text.push,
+    push = _ import _text.push,
     a = "hello",
     b = "world",
     a which _ push " ",
@@ -82,7 +82,7 @@ _ do [
 join empty
 -----
 _ do [
-    join = _ import .text.join,
+    join = _ import _text.join,
     "" join ["1", "2"]
 ]
 -----
@@ -91,7 +91,7 @@ _ do [
 join unit
 -----
 _ do [
-    join = _ import .text.join,
+    join = _ import _text.join,
     a = "1",
     b = "2",
     c = "3",
@@ -103,7 +103,7 @@ _ do [
 join no text
 -----
 _ do [
-    join = _ import .text.join,
+    join = _ import _text.join,
     . join []
 ]
 -----
@@ -112,7 +112,7 @@ _ do [
 join else
 -----
 _ do [
-    join = _ import .text.join,
+    join = _ import _text.join,
     "." join ["1", "2"]
 ]
 -----
@@ -121,9 +121,9 @@ _ do [
 into_utf8 from_utf8
 -----
 _ do [
-    any = _ import .value.any,
-    from_utf8 = _ import .text.from_utf8,
-    into_utf8 = _ import .text.into_utf8,
+    any = _ import _value.any,
+    from_utf8 = _ import _text.from_utf8,
+    into_utf8 = _ import _text.into_utf8,
     t = _ any text,
     t1 = _ from_utf8 _ into_utf8 t,
     t == t1
@@ -134,7 +134,7 @@ true
 into_utf8
 -----
 _ do [
-    into_utf8 = _ import .text.into_utf8,
+    into_utf8 = _ import _text.into_utf8,
     _ into_utf8 "abc"
 ]
 -----
@@ -143,7 +143,7 @@ byte(616263)
 from_utf8
 -----
 _ do [
-    from_utf8 = _ import .text.from_utf8,
+    from_utf8 = _ import _text.from_utf8,
     _ from_utf8 byte(616263)
 ]
 -----

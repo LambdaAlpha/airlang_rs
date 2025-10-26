@@ -2,7 +2,7 @@ recursive call
 -----
 _ do [
     f = _ function {
-        code : (._ : .i) : .i,
+        code : (__ : _i) : _i,
     },
     _ f _ not true
 ]
@@ -13,7 +13,7 @@ call external func
 -----
 _ do [
     f = _ function {
-        code : (._ : .i) : _ not .i
+        code : (__ : _i) : _ not _i
     },
     _ f _ not true
 ]
@@ -23,9 +23,9 @@ true
 call internal func
 -----
 _ do [
-    memory = _ import .memory.new,
+    memory = _ import _memory.new,
     f = _ function {
-        code : (._ : .i) : _ .not .i,
+        code : (__ : _i) : _ _not _i,
         memory : _ memory {
             not : . : not
         },
@@ -38,9 +38,9 @@ true
 call rename
 -----
 _ do [
-    memory = _ import .memory.new,
+    memory = _ import _memory.new,
     f = _ function {
-        code : (._ : .a) : _ .n .a,
+        code : (__ : _a) : _ _n _a,
         memory : _ memory {
             n : . : not
         },
@@ -53,16 +53,16 @@ true
 stateful
 -----
 _ do [
-    memory = _ import .memory.new,
-    new_link = _ import .link.new,
-    link_get = _ import .link.get,
-    link_set = _ import .link.set,
+    memory = _ import _memory.new,
+    new_link = _ import _link.new,
+    link_get = _ import _link.get,
+    link_set = _ import _link.set,
     f = _ function {
-        context_access : .free,
-        code : ._ : _ do [
-            .i = .a link_get _,
-            .a link_set .i + 1,
-            .i
+        context_access : _free,
+        code : __ : _ do [
+            _i = _a link_get _,
+            _a link_set _i + 1,
+            _i
         ],
         memory : _ memory {
             a : . : _ new_link 0
@@ -76,16 +76,16 @@ _ do [
 multiple stateful
 -----
 _ do [
-    memory = _ import .memory.new,
-    new_link = _ import .link.new,
-    link_get = _ import .link.get,
-    link_set = _ import .link.set,
+    memory = _ import _memory.new,
+    new_link = _ import _link.new,
+    link_get = _ import _link.get,
+    link_set = _ import _link.set,
     f = _ form _ function {
-        context_access : .free,
-        code : ._ : _ do [
-            .i = .a link_get _,
-            .a link_set .i + 1,
-            .i
+        context_access : _free,
+        code : __ : _ do [
+            _i = _a link_get _,
+            _a link_set _i + 1,
+            _i
         ],
         memory : _ memory {
             a : . : _ new_link 0
@@ -101,11 +101,11 @@ _ do [
 const const
 -----
 _ do [
-    read = _ import .context.read,
+    read = _ import _context.read,
     a = 1,
     f = _ function {
-        code : (.c : ._) : .c which _ read ..a,
-        context_access : .constant,
+        code : (_c : __) : _c which _ read __a,
+        context_access : _constant,
     },
     _ f .
 ]
@@ -115,11 +115,11 @@ _ do [
 mutable const
 -----
 _ do [
-    read = _ import .context.read,
+    read = _ import _context.read,
     a = 1,
     f = _ function {
-        code : (.c : ._) : .c which _ read ..a,
-        context_access : .mutable,
+        code : (_c : __) : _c which _ read __a,
+        context_access : _mutable,
     },
     _ f .
 ]
@@ -130,11 +130,11 @@ mutable mutate
 -----
 _ do [
     f = _ function {
-        code : (.c : .i) : .c which .@i = 2,
-        context_access : .mutable,
+        code : (_c : _i) : _c which _@i = 2,
+        context_access : _mutable,
     },
     a = 1,
-    _ f .a,
+    _ f _a,
     a
 ]
 -----
@@ -144,11 +144,11 @@ const mutate fail
 -----
 _ do [
     f = _ function {
-        code : (.c : .i) : .c which .@i = 2,
-        context_access : .constant,
+        code : (_c : _i) : _c which _@i = 2,
+        context_access : _constant,
     },
     a = 1,
-    _ f .a,
+    _ f _a,
     a
 ]
 -----
@@ -159,8 +159,8 @@ const free
 _ do [
     a = .,
     f = _ function {
-        code : (._c : ._) : 1,
-        context_access : .constant,
+        code : (__c : __) : 1,
+        context_access : _constant,
     },
     a which _ f .
 ]
@@ -170,11 +170,11 @@ _ do [
 ctx name occupied
 -----
 _ do [
-    memory = _ import .memory.new,
+    memory = _ import _memory.new,
     a = 1,
     f = _ function {
-        code : (.ctx : ._) : 2,
-        context_access : .constant,
+        code : (_ctx : __) : 2,
+        context_access : _constant,
         memory : _ memory {
             ctx : constant : 3
         },
@@ -188,10 +188,10 @@ true
 ctx explicit
 -----
 _ do [
-    set_first = _ import .pair.set_first,
+    set_first = _ import _pair.set_first,
     a = 1 : 2,
     f = _ function {
-        code : (.p : .i) : .p which _ set_first .i,
+        code : (_p : _i) : _p which _ set_first _i,
     },
     a which _ f 3,
     a
@@ -202,9 +202,9 @@ _ do [
 repr
 -----
 _ do [
-    represent = _ import .function.represent,
+    represent = _ import _function.represent,
     _ represent _ function {
-        code : (._ : .i) : .i
+        code : (__ : _i) : _i
     }
 ]
 
@@ -214,7 +214,7 @@ _ do [
 repr primitive free
 -----
 _ do [
-    represent = _ import .function.represent,
+    represent = _ import _function.represent,
     _ represent not
 ]
 -----
@@ -223,10 +223,10 @@ _ do [
 repr const
 -----
 _ do [
-    represent = _ import .function.represent,
+    represent = _ import _function.represent,
     _ represent _ function {
-        code : (._ : .i) : .i,
-        context_access : .constant
+        code : (__ : _i) : _i,
+        context_access : _constant
     }
 ]
 -----
@@ -235,7 +235,7 @@ _ do [
 repr primitive const
 -----
 _ do [
-    represent = _ import .function.represent,
+    represent = _ import _function.represent,
     _ represent ==
 ]
 -----
@@ -244,8 +244,8 @@ _ do [
 repr composite
 -----
 _ do [
-    represent = _ import .function.represent,
-    repr = _ form. {
+    represent = _ import _function.represent,
+    repr = _ form_ {
         id : f,
         code : (ctx : in) : in,
         context_access : constant,
@@ -259,7 +259,7 @@ true
 access free
 -----
 _ do [
-    context_access = _ import .function.context_access,
+    context_access = _ import _function.context_access,
     function which _ context_access .
 ]
 -----
@@ -268,8 +268,8 @@ free
 access const
 -----
 _ do [
-    context_access = _ import .function.context_access,
-    read = _ import .context.read,
+    context_access = _ import _function.context_access,
+    read = _ import _context.read,
     read which _ context_access .
 ]
 -----
@@ -278,7 +278,7 @@ constant
 access mutable
 -----
 _ do [
-    context_access = _ import .function.context_access,
+    context_access = _ import _function.context_access,
     eval@ which _ context_access .
 ]
 -----
@@ -287,7 +287,7 @@ mutable
 access default
 -----
 _ do [
-    context_access = _ import .function.context_access,
+    context_access = _ import _function.context_access,
     f = _ function {},
     f which _ context_access .
 ]
@@ -297,7 +297,7 @@ mutable
 is_primitive primitive
 -----
 _ do [
-    is_primitive = _ import .function.is_primitive,
+    is_primitive = _ import _function.is_primitive,
     not which _ is_primitive .
 ]
 -----
@@ -306,7 +306,7 @@ true
 is_primitive composite
 -----
 _ do [
-    is_primitive = _ import .function.is_primitive,
+    is_primitive = _ import _function.is_primitive,
     f = _ function {},
     f which _ is_primitive .
 ]
@@ -316,7 +316,7 @@ false
 id primitive
 -----
 _ do [
-    id = _ import .function.id,
+    id = _ import _function.id,
     not which _ id .
 ]
 -----
@@ -325,7 +325,7 @@ bit.not
 id rename
 -----
 _ do [
-    id = _ import .function.id,
+    id = _ import _function.id,
     neg = not,
     neg which _ id .
 ]
@@ -335,9 +335,9 @@ bit.not
 code
 -----
 _ do [
-    code = _ import .function.code,
+    code = _ import _function.code,
     f = _ function {
-        code : (.ctx : .i) : .i
+        code : (_ctx : _i) : _i
     },
     f which _ code .
 ]
@@ -347,8 +347,8 @@ _ do [
 ctx
 -----
 _ do [
-    memory.new = _ import .memory.new,
-    function.memory = _ import .function.memory,
+    memory.new = _ import _memory.new,
+    function.memory = _ import _function.memory,
     memo = _ memory.new {
         a : . : 1
     },
@@ -363,7 +363,7 @@ true
 apply free
 -----
 _ do [
-    apply = _ import .function.apply,
+    apply = _ import _function.apply,
     not apply _ not true
 ]
 -----
@@ -372,10 +372,10 @@ true
 apply const
 -----
 _ do [
-    apply = _ import .function.apply,
-    read = _ import .context.read,
+    apply = _ import _function.apply,
+    read = _ import _context.read,
     a = 1,
-    read apply .a
+    read apply _a
 ]
 -----
 1
@@ -383,8 +383,8 @@ _ do [
 apply mut
 -----
 _ do [
-    apply = _ import .function.apply,
-    = apply .a : 1,
+    apply = _ import _function.apply,
+    = apply _a : 1,
     a
 ]
 -----
@@ -393,7 +393,7 @@ _ do [
 apply no adapter
 -----
 _ do [
-    apply = _ import .function.apply,
+    apply = _ import _function.apply,
     test apply true : [a = true] : [b = true],
     a and b
 ]
@@ -403,17 +403,17 @@ true
 recurse
 -----
 _ do [
-    recurse = _ import .function.recurse,
+    recurse = _ import _function.recurse,
     g = _ function {
-        code : .fi : _ do [
-            (.f : .i) = .fi,
-            (.i < 1) test [
+        code : _fi : _ do [
+            (_f : _i) = _fi,
+            (_i < 1) test [
                 0
             ] : [
-                .i + .f .f .i - 1
+                _i + _f _f _i - 1
             ]
         ],
-        context_access : .free,
+        context_access : _free,
     },
     g = _ recurse g,
     _ g 10

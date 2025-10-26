@@ -12,25 +12,25 @@ _ do [a = 1, a]
 =====
 symbol literal
 -----
-.a
+_a
 -----
 a
 =====
 symbol literal special 1
 -----
-..a
+__a
 -----
-.a
+_a
 =====
 symbol literal special 2
 -----
-...a
+___a
 -----
-..a
+__a
 =====
 symbol literal special 3
 -----
-.@a
+_@a
 -----
 @a
 =====
@@ -56,8 +56,8 @@ _ do [
 ref special
 -----
 _ do [
-    ..a = 1,
-    @.a
+    __a = 1,
+    @_a
 ]
 -----
 1
@@ -135,7 +135,7 @@ ctx unit
 -----
 _ do [
     a = 1,
-    . which _ apply .a
+    . which _ apply _a
 ]
 -----
 1
@@ -143,7 +143,7 @@ _ do [
 memo ctx name
 -----
 _ do [
-    first = _ import .pair.first,
+    first = _ import _pair.first,
     p = 1 : 2,
     p which _ first .
 ]
@@ -153,9 +153,9 @@ _ do [
 pair ctx first
 -----
 _ do [
-    self = _ import .context.self,
+    self = _ import _context.self,
     p = 1 : 2,
-    p which _ apply .first which _ self .
+    p which _ apply _first which _ self .
 ]
 -----
 1
@@ -163,9 +163,9 @@ _ do [
 pair ctx second
 -----
 _ do [
-    self = _ import .context.self,
+    self = _ import _context.self,
     p = 1 : 2,
-    p which _ apply .second which _ self .
+    p which _ apply _second which _ self .
 ]
 -----
 2
@@ -173,9 +173,9 @@ _ do [
 call ctx func
 -----
 _ do [
-    self = _ import .context.self,
+    self = _ import _context.self,
     c = _ form _ func input,
-    c which _ apply .function which _ self .
+    c which _ apply _function which _ self .
 ]
 -----
 func
@@ -183,9 +183,9 @@ func
 call ctx input
 -----
 _ do [
-    self = _ import .context.self,
+    self = _ import _context.self,
     t = _ form _ func input,
-    t which _ apply .input which _ self .
+    t which _ apply _input which _ self .
 ]
 -----
 input
@@ -193,7 +193,7 @@ input
 list ctx index int
 -----
 _ do [
-    self = _ import .context.self,
+    self = _ import _context.self,
     l = [0, 2, 4],
     l which _ apply 1 which _ self .
 ]
@@ -203,9 +203,9 @@ _ do [
 list ctx index symbol
 -----
 _ do [
-    self = _ import .context.self,
+    self = _ import _context.self,
     l = [0, 2, 4],
-    l which _ apply .1 which _ self .
+    l which _ apply _1 which _ self .
 ]
 -----
 2
@@ -213,9 +213,9 @@ _ do [
 map ctx key
 -----
 _ do [
-    self = _ import .context.self,
+    self = _ import _context.self,
     m = {a : 1, b : 2},
-    m which _ apply .a which _ self .
+    m which _ apply _a which _ self .
 ]
 -----
 1
@@ -223,7 +223,7 @@ _ do [
 map ctx key .
 -----
 _ do [
-    self = _ import .context.self,
+    self = _ import _context.self,
     m = {a : 1, b : 2},
     m which _ apply . which _ self .
 ]
@@ -233,7 +233,7 @@ _ do [
 map ctx key other
 -----
 _ do [
-    self = _ import .context.self,
+    self = _ import _context.self,
     m = {1 : 2, 2 : 4},
     m which _ apply 1 which _ self .
 ]

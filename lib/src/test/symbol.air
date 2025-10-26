@@ -1,9 +1,9 @@
 length join
 -----
 _ do [
-    any = _ import .value.any,
-    length = _ import .symbol.length,
-    join = _ import .symbol.join,
+    any = _ import _value.any,
+    length = _ import _symbol.length,
+    join = _ import _symbol.join,
     a = _ any symbol,
     la = a which _ length .,
     b = _ any symbol,
@@ -18,7 +18,7 @@ true
 length empty
 -----
 _ do [
-    length = _ import .symbol.length,
+    length = _ import _symbol.length,
     s = _ form '',
     s which _ length .
 ]
@@ -28,8 +28,8 @@ _ do [
 length else
 -----
 _ do [
-    length = _ import .symbol.length,
-    s = .a,
+    length = _ import _symbol.length,
+    s = _a,
     s which _ length .
 ]
 -----
@@ -38,8 +38,8 @@ _ do [
 join empty
 -----
 _ do [
-    join = _ import .symbol.join,
-    '.' join [.a, .b]
+    join = _ import _symbol.join,
+    '.' join [_a, _b]
 ]
 -----
 ab
@@ -47,10 +47,10 @@ ab
 join unit
 -----
 _ do [
-    join = _ import .symbol.join,
-    a = .a1,
-    b = .b1,
-    c = .c1,
+    join = _ import _symbol.join,
+    a = _a1,
+    b = _b1,
+    c = _c1,
     . join [a, b, c]
 ]
 -----
@@ -59,7 +59,7 @@ a1b1c1
 join no symbol
 -----
 _ do [
-    join = _ import .symbol.join,
+    join = _ import _symbol.join,
     . join []
 ]
 -----
@@ -68,8 +68,8 @@ _ do [
 join else
 -----
 _ do [
-    join = _ import .symbol.join,
-    .. join [.a, .b]
+    join = _ import _symbol.join,
+    _. join [_a, _b]
 ]
 -----
 a.b
@@ -77,9 +77,9 @@ a.b
 into_text from_text
 -----
 _ do [
-    any = _ import .value.any,
-    from_text = _ import .symbol.from_text,
-    into_text = _ import .symbol.into_text,
+    any = _ import _value.any,
+    from_text = _ import _symbol.from_text,
+    into_text = _ import _symbol.into_text,
     s = _ any symbol,
     s1 = _ from_text _ into_text s,
     s == s1
@@ -90,7 +90,7 @@ true
 from_text empty
 -----
 _ do [
-    from_text = _ import .symbol.from_text,
+    from_text = _ import _symbol.from_text,
     _ from_text ""
 ]
 -----
@@ -99,7 +99,7 @@ _ do [
 from_text trivial
 -----
 _ do [
-    from_text = _ import .symbol.from_text,
+    from_text = _ import _symbol.from_text,
     _ from_text "hello_world!"
 ]
 -----
@@ -108,7 +108,7 @@ hello_world!
 from_text special
 -----
 _ do [
-    from_text = _ import .symbol.from_text,
+    from_text = _ import _symbol.from_text,
     _ from_text "{}"
 ]
 -----
@@ -117,7 +117,7 @@ _ do [
 into_text empty
 -----
 _ do [
-    into_text = _ import .symbol.into_text,
+    into_text = _ import _symbol.into_text,
     _ into_text _ form ''
 ]
 -----
@@ -126,8 +126,8 @@ _ do [
 into_text trivial
 -----
 _ do [
-    into_text = _ import .symbol.into_text,
-    _ into_text .hello_world!
+    into_text = _ import _symbol.into_text,
+    _ into_text _hello_world!
 ]
 -----
 "hello_world!"

@@ -52,7 +52,7 @@ fn generate_load(path: &str) -> String {
     escape_text(&mut escaped, path);
     format!(
         "_ do [\
-            load = _ import .build.load,\
+            load = _ import _build.load,\
             _ load \"{escaped}\"\
         ]"
     )

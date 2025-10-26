@@ -1,9 +1,9 @@
 get
 -----
 _ do [
-    any = _ import .value.any,
-    first = _ import .pair.first,
-    second = _ import .pair.second,
+    any = _ import _value.any,
+    first = _ import _pair.first,
+    second = _ import _pair.second,
     f = _ any .,
     s = _ any .,
     p = f : s,
@@ -15,11 +15,11 @@ true
 set get
 -----
 _ do [
-    any = _ import .value.any,
-    first = _ import .pair.first,
-    second = _ import .pair.second,
-    set_first = _ import .pair.set_first,
-    set_second = _ import .pair.set_second,
+    any = _ import _value.any,
+    first = _ import _pair.first,
+    second = _ import _pair.second,
+    set_first = _ import _pair.set_first,
+    set_second = _ import _pair.set_second,
     p = _ any pair,
     f = _ any .,
     s = _ any .,
@@ -35,9 +35,9 @@ true
 set return
 -----
 _ do [
-    any = _ import .value.any,
-    set_first = _ import .pair.set_first,
-    set_second = _ import .pair.set_second,
+    any = _ import _value.any,
+    set_first = _ import _pair.set_first,
+    set_second = _ import _pair.set_second,
     f1 = _ any .,
     s1 = _ any .,
     p = f1 : s1,

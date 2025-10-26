@@ -1,9 +1,9 @@
 length push
 -----
 _ do [
-    any = _ import .value.any,
-    length = _ import .byte.length,
-    push = _ import .byte.push,
+    any = _ import _value.any,
+    length = _ import _byte.length,
+    push = _ import _byte.push,
     b = _ any byte,
     l = b which _ length .,
     b which _ push byte(00),
@@ -16,9 +16,9 @@ true
 length join
 -----
 _ do [
-    any = _ import .value.any,
-    length = _ import .byte.length,
-    join = _ import .byte.join,
+    any = _ import _value.any,
+    length = _ import _byte.length,
+    join = _ import _byte.join,
     a = _ any byte,
     la = a which _ length .,
     b = _ any byte,
@@ -33,7 +33,7 @@ true
 length empty
 -----
 _ do [
-    length = _ import .byte.length,
+    length = _ import _byte.length,
     b = byte(),
     b which _ length .
 ]
@@ -43,7 +43,7 @@ _ do [
 length else
 -----
 _ do [
-    length = _ import .byte.length,
+    length = _ import _byte.length,
     b = byte(ff),
     b which _ length .
 ]
@@ -53,9 +53,9 @@ _ do [
 push join
 -----
 _ do [
-    any = _ import .value.any,
-    push = _ import .byte.push,
-    join = _ import .byte.join,
+    any = _ import _value.any,
+    push = _ import _byte.push,
+    join = _ import _byte.join,
     a = _ any byte,
     b = _ any byte,
     ab = a,
@@ -69,7 +69,7 @@ true
 push
 -----
 _ do [
-    push = _ import .byte.push,
+    push = _ import _byte.push,
     a = byte(00),
     b = byte(1122),
     a which _ push b,
@@ -81,7 +81,7 @@ byte(001122)
 join empty
 -----
 _ do [
-    join = _ import .byte.join,
+    join = _ import _byte.join,
     byte() join [byte(1234), byte(56)]
 ]
 -----
@@ -90,7 +90,7 @@ byte(123456)
 join unit
 -----
 _ do [
-    join = _ import .byte.join,
+    join = _ import _byte.join,
     a = byte(1234),
     b = byte(5678),
     c = byte(9abc),
@@ -102,7 +102,7 @@ byte(123456789abc)
 join no byte
 -----
 _ do [
-    join = _ import .byte.join,
+    join = _ import _byte.join,
     . join []
 ]
 -----
@@ -111,7 +111,7 @@ byte()
 join else
 -----
 _ do [
-    join = _ import .byte.join,
+    join = _ import _byte.join,
     byte(00) join [byte(1111), byte(22)]
 ]
 -----

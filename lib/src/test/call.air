@@ -1,9 +1,9 @@
 get
 -----
 _ do [
-    any = _ import .value.any,
-    function = _ import .call.function,
-    input = _ import .call.input,
+    any = _ import _value.any,
+    function = _ import _call.function,
+    input = _ import _call.input,
     f = _ any .,
     i = _ any .,
     c = _ form@ _ f i,
@@ -15,11 +15,11 @@ true
 set get
 -----
 _ do [
-    any = _ import .value.any,
-    function = _ import .call.function,
-    input = _ import .call.input,
-    set_function = _ import .call.set_function,
-    set_input = _ import .call.set_input,
+    any = _ import _value.any,
+    function = _ import _call.function,
+    input = _ import _call.input,
+    set_function = _ import _call.set_function,
+    set_input = _ import _call.set_input,
     c = _ any call,
     f = _ any .,
     i = _ any .,
@@ -33,9 +33,9 @@ true
 set return
 -----
 _ do [
-    any = _ import .value.any,
-    set_function = _ import .call.set_function,
-    set_input = _ import .call.set_input,
+    any = _ import _value.any,
+    set_function = _ import _call.set_function,
+    set_input = _ import _call.set_input,
     f1 = _ any .,
     i1 = _ any .,
     c = _ form@ _ f1 i1,

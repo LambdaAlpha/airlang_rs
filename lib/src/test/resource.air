@@ -1,7 +1,7 @@
 steps
 -----
 _ do [
-    steps = _ import .resource.steps,
+    steps = _ import _resource.steps,
     _ steps _
 ]
 -----
@@ -10,7 +10,7 @@ _ do [
 measure_steps 1
 -----
 _ do [
-    measure_steps = _ import .resource.measure_steps,
+    measure_steps = _ import _resource.measure_steps,
     (v : s) = _ measure_steps true,
     s
 ]
@@ -20,7 +20,7 @@ _ do [
 measure_steps ref + form + call
 -----
 _ do [
-    measure_steps = _ import .resource.measure_steps,
+    measure_steps = _ import _resource.measure_steps,
     a = true,
     b = false,
     (v : s) = _ measure_steps a and b,
