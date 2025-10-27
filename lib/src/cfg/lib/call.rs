@@ -38,9 +38,9 @@ pub fn func() -> ConstPrimFuncVal {
     DynPrimFn { id: "call.function", f: const_impl(fn_func) }.const_()
 }
 
-fn fn_func(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_func(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Call(call) = &*ctx else {
-        return illegal_ctx();
+        return illegal_ctx(cfg);
     };
     call.func.clone()
 }
@@ -49,9 +49,9 @@ pub fn set_func() -> MutPrimFuncVal {
     DynPrimFn { id: "call.set_function", f: mut_impl(fn_set_func) }.mut_()
 }
 
-fn fn_set_func(_cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
+fn fn_set_func(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Call(call) = ctx else {
-        return illegal_ctx();
+        return illegal_ctx(cfg);
     };
     swap(&mut call.func, &mut input);
     input
@@ -61,9 +61,9 @@ pub fn input() -> ConstPrimFuncVal {
     DynPrimFn { id: "call.input", f: const_impl(fn_input) }.const_()
 }
 
-fn fn_input(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_input(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Call(call) = &*ctx else {
-        return illegal_ctx();
+        return illegal_ctx(cfg);
     };
     call.input.clone()
 }
@@ -72,9 +72,9 @@ pub fn set_input() -> MutPrimFuncVal {
     DynPrimFn { id: "call.set_input", f: mut_impl(fn_set_input) }.mut_()
 }
 
-fn fn_set_input(_cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
+fn fn_set_input(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Call(call) = ctx else {
-        return illegal_ctx();
+        return illegal_ctx(cfg);
     };
     swap(&mut call.input, &mut input);
     input

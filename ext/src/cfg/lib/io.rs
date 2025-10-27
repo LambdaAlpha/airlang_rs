@@ -57,10 +57,10 @@ pub fn read_line() -> MutPrimFuncVal {
     DynPrimFn { id: "io.read_line", f: mut_impl(fn_read_line) }.mut_()
 }
 
-fn fn_read_line(_cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
+fn fn_read_line(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
     let Val::Text(t) = ctx else {
         error!("ctx {ctx:?} should be a text");
-        return illegal_ctx();
+        return illegal_ctx(cfg);
     };
     let _ = stdin().read_line(t);
     Val::default()
@@ -70,10 +70,10 @@ pub fn print() -> FreePrimFuncVal {
     FreePrimFn { id: "io.print", f: free_impl(fn_print) }.free()
 }
 
-fn fn_print(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_print(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
         error!("input {input:?} should be a text");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     print!("{}", &**t);
     Val::default()
@@ -83,10 +83,10 @@ pub fn print_line() -> FreePrimFuncVal {
     FreePrimFn { id: "io.print_line", f: free_impl(fn_print_line) }.free()
 }
 
-fn fn_print_line(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_print_line(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
         error!("input {input:?} should be a text");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     println!("{}", &**t);
     Val::default()
@@ -105,10 +105,10 @@ pub fn error_print() -> FreePrimFuncVal {
     FreePrimFn { id: "io.error_print", f: free_impl(fn_error_print) }.free()
 }
 
-fn fn_error_print(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_error_print(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
         error!("input {input:?} should be a text");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     eprint!("{}", &**t);
     Val::default()
@@ -118,10 +118,10 @@ pub fn error_print_line() -> FreePrimFuncVal {
     FreePrimFn { id: "io.error_print_line", f: free_impl(fn_error_print_line) }.free()
 }
 
-fn fn_error_print_line(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_error_print_line(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
         error!("input {input:?} should be a text");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     eprintln!("{}", &**t);
     Val::default()

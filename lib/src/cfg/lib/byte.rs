@@ -43,10 +43,10 @@ pub fn length() -> ConstPrimFuncVal {
     DynPrimFn { id: "byte.length", f: const_impl(fn_length) }.const_()
 }
 
-fn fn_length(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Byte(byte) = &*ctx else {
         error!("ctx {ctx:?} should be a byte");
-        return illegal_ctx();
+        return illegal_ctx(cfg);
     };
     let len: Int = byte.len().into();
     Val::Int(len.into())
@@ -56,14 +56,14 @@ pub fn push() -> MutPrimFuncVal {
     DynPrimFn { id: "byte.push", f: mut_impl(fn_push) }.mut_()
 }
 
-fn fn_push(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Byte(byte) = ctx else {
         error!("ctx {ctx:?} should be a byte");
-        return illegal_ctx();
+        return illegal_ctx(cfg);
     };
     let Val::Byte(b) = input else {
         error!("input {input:?} should be a byte");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     byte.push(&b);
     Val::default()
@@ -74,22 +74,22 @@ pub fn join() -> FreePrimFuncVal {
     FreePrimFn { id: "byte.join", f: free_impl(fn_join) }.free()
 }
 
-fn fn_join(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_join(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let separator: &[u8] = match &pair.first {
         Val::Unit(_) => &[],
         Val::Byte(b) => b,
         s => {
             error!("separator {s:?} should be a unit or a byte");
-            return illegal_input();
+            return illegal_input(cfg);
         }
     };
     let Val::List(bytes) = &pair.second else {
         error!("input.second {:?} should be a list", pair.second);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let bytes: Option<Vec<&[u8]>> = bytes
         .iter()
@@ -103,7 +103,7 @@ fn fn_join(_cfg: &mut Cfg, input: Val) -> Val {
         })
         .collect();
     let Some(bytes) = bytes else {
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let byte = bytes.join(separator);
     Val::Byte(Byte::from(byte).into())

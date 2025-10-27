@@ -76,45 +76,45 @@ pub fn new() -> FreePrimFuncVal {
     FreePrimFn { id: "configuration.new", f: free_impl(fn_new) }.free()
 }
 
-fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
     let Val::List(list) = input else {
         error!("input {input:?} should be a list");
-        return illegal_input();
+        return illegal_input(cfg);
     };
-    let mut cfg = Cfg::default();
+    let mut new_cfg = Cfg::default();
     let list = List::from(list);
     for val in list {
         let Val::Map(map) = val else {
             error!("list.item {val:?} should be a map");
-            return illegal_input();
+            return illegal_input(cfg);
         };
         let map = Map::from(map);
         for (k, v) in map {
             let Val::Symbol(name) = k else {
                 error!("list.item.key {k:?} should be a symbol");
-                return illegal_input();
+                return illegal_input(cfg);
             };
-            cfg.extend_scope(name, v);
+            new_cfg.extend_scope(name, v);
         }
-        cfg.begin_scope();
+        new_cfg.begin_scope();
     }
-    cfg.end_scope();
-    Val::Cfg(cfg.into())
+    new_cfg.end_scope();
+    Val::Cfg(new_cfg.into())
 }
 
 pub fn repr() -> FreePrimFuncVal {
     FreePrimFn { id: "configuration.represent", f: free_impl(fn_repr) }.free()
 }
 
-fn fn_repr(_cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Cfg(cfg) = input else {
+fn fn_repr(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Cfg(new_cfg) = input else {
         error!("input {input:?} should be a cfg");
-        return illegal_input();
+        return illegal_input(cfg);
     };
-    let cfg = Cfg::from(cfg);
-    let scope_level = cfg.scope_level();
+    let new_cfg = Cfg::from(new_cfg);
+    let scope_level = new_cfg.scope_level();
     let mut map_scopes = HashMap::new();
-    for (name, scopes) in cfg {
+    for (name, scopes) in new_cfg {
         for (scope, val) in scopes {
             let map = map_scopes.entry(scope).or_insert_with(Map::default);
             map.insert(Val::Symbol(name.clone()), val);
@@ -151,7 +151,7 @@ pub fn exist() -> FreePrimFuncVal {
 fn fn_exist(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Symbol(name) = input else {
         error!("input {input:?} should be a symbol");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let exist = cfg.exist(name);
     Val::Bit(Bit::from(exist))
@@ -164,7 +164,7 @@ pub fn import() -> FreePrimFuncVal {
 fn fn_import(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Symbol(name) = input else {
         error!("input {input:?} should be a symbol");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     cfg.import(name).unwrap_or_default()
 }
@@ -176,12 +176,12 @@ pub fn export() -> FreePrimFuncVal {
 fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
     let Val::Symbol(name) = pair.first else {
         error!("input.first {:?} should be a symbol", pair.first);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     cfg.export(name, pair.second);
     Val::default()
@@ -196,18 +196,18 @@ fn fn_with(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let output = 'scope: {
         let Val::Pair(pair) = input else {
             error!("input {input:?} should be a pair");
-            break 'scope illegal_input();
+            break 'scope illegal_input(cfg);
         };
         let pair = Pair::from(pair);
         let Val::Map(map) = pair.first else {
             error!("input.first {:?} should be a map", pair.first);
-            break 'scope illegal_input();
+            break 'scope illegal_input(cfg);
         };
         let map = Map::from(map);
         for (k, v) in map {
             let Val::Symbol(name) = k else {
                 error!("input.first.key {k:?} should be a symbol");
-                break 'scope illegal_input();
+                break 'scope illegal_input(cfg);
             };
             cfg.extend_scope(name, v);
         }
@@ -221,16 +221,16 @@ pub fn where_() -> MutPrimFuncVal {
     DynPrimFn { id: "configuration.where", f: mut_impl(fn_where) }.mut_()
 }
 
-fn fn_where(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+fn fn_where(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Cfg(cfg) = pair.first else {
+    let Val::Cfg(new_cfg) = pair.first else {
         error!("input.first {:?} should be a cfg", pair.first);
-        return illegal_input();
+        return illegal_input(cfg);
     };
-    let mut cfg = Cfg::from(cfg);
-    Eval.mut_call(&mut cfg, ctx, pair.second)
+    let mut new_cfg = Cfg::from(new_cfg);
+    Eval.mut_call(&mut new_cfg, ctx, pair.second)
 }

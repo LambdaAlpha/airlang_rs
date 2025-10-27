@@ -44,10 +44,10 @@ pub fn get() -> FreePrimFuncVal {
     FreePrimFn { id: "link.get", f: free_impl(fn_get) }.free()
 }
 
-fn fn_get(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_get(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Link(link) = input else {
         error!("input {input:?} should be a link");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     link.get_clone()
 }
@@ -56,15 +56,15 @@ pub fn set() -> FreePrimFuncVal {
     FreePrimFn { id: "link.set", f: free_impl(fn_set) }.free()
 }
 
-fn fn_set(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_set(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
     let Val::Link(mut link) = pair.first else {
         error!("input.first {:?} should be a link", pair.first);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     link.set(pair.second)
 }

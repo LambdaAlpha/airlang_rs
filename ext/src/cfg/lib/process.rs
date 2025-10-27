@@ -42,28 +42,28 @@ pub fn call() -> FreePrimFuncVal {
     FreePrimFn { id: "process.call", f: free_impl(fn_call) }.free()
 }
 
-fn fn_call(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_call(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Map(mut map) = input else {
         error!("input {input:?} should be a map");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let program_key = Val::Symbol(Symbol::from_str_unchecked(PROGRAM));
     let Some(program) = map.remove(&program_key) else {
         error!("program name should be provided");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let Val::Text(program) = program else {
         error!("program {program:?} should be a text");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let arguments_key = Val::Symbol(Symbol::from_str_unchecked(ARGUMENTS));
     let Some(arguments) = map.remove(&arguments_key) else {
         error!("arguments should be provided");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let Val::List(arguments) = arguments else {
         error!("arguments {arguments:?} should be a list");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let arguments = List::from(arguments);
     let arguments = arguments
@@ -78,7 +78,7 @@ fn fn_call(_cfg: &mut Cfg, input: Val) -> Val {
         })
         .collect::<Option<Vec<String>>>();
     let Some(arguments) = arguments else {
-        return illegal_input();
+        return illegal_input(cfg);
     };
 
     let output = Command::new(&**program).args(arguments).output();
@@ -86,7 +86,7 @@ fn fn_call(_cfg: &mut Cfg, input: Val) -> Val {
         Ok(output) => output,
         Err(e) => {
             error!("call program failed: {e}");
-            return fail();
+            return fail(cfg);
         }
     };
 

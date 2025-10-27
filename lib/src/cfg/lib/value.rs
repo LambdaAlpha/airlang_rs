@@ -81,7 +81,7 @@ pub fn any() -> FreePrimFuncVal {
     FreePrimFn { id: "value.any", f: free_impl(fn_any) }.free()
 }
 
-fn fn_any(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
     const DEPTH: usize = 0;
     let mut rng = SmallRng::from_os_rng();
     let rng = &mut rng;
@@ -103,11 +103,11 @@ fn fn_any(_cfg: &mut Cfg, input: Val) -> Val {
             CFG => Val::Cfg(Cfg::any(rng, DEPTH).into()),
             MEMO => Val::Memo(Memo::any(rng, DEPTH).into()),
             FUNC => Val::Func(FuncVal::any(rng, DEPTH)),
-            _ => fail(),
+            _ => fail(cfg),
         },
         v => {
             error!("input {v:?} should be a symbol or a unit");
-            illegal_input()
+            illegal_input(cfg)
         }
     }
 }
@@ -143,10 +143,10 @@ pub fn equal() -> FreePrimFuncVal {
     FreePrimFn { id: "value.equal", f: free_impl(fn_equal) }.free()
 }
 
-fn fn_equal(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_equal(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     Val::Bit(Bit::from(pair.first == pair.second))
 }

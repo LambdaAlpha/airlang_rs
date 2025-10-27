@@ -30,19 +30,19 @@ pub fn read_to_text() -> FreePrimFuncVal {
     FreePrimFn { id: "file.read_to_text", f: free_impl(fn_read_to_text) }.free()
 }
 
-fn fn_read_to_text(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_read_to_text(cfg: &mut Cfg, input: Val) -> Val {
     let result = match input {
         Val::Text(path) => std::fs::read_to_string(&**path),
         v => {
             error!("input {v:?} should be a text");
-            return illegal_input();
+            return illegal_input(cfg);
         }
     };
     match result {
         Ok(content) => Val::Text(Text::from(content).into()),
         Err(err) => {
             eprintln!("{err}");
-            fail()
+            fail(cfg)
         }
     }
 }

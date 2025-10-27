@@ -63,19 +63,19 @@ pub fn add() -> FreePrimFuncVal {
     FreePrimFn { id: "integer.add", f: free_impl(fn_add) }.free()
 }
 
-fn fn_add(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_add(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         error!("input.first {:?} should be a int", pair.first);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let Val::Int(i2) = pair.second else {
         error!("input.second {:?} should be a int", pair.second);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let i1 = Int::from(i1);
     let i2 = Int::from(i2);
@@ -86,19 +86,19 @@ pub fn subtract() -> FreePrimFuncVal {
     FreePrimFn { id: "integer.subtract", f: free_impl(fn_subtract) }.free()
 }
 
-fn fn_subtract(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_subtract(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         error!("input.first {:?} should be a int", pair.first);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let Val::Int(i2) = pair.second else {
         error!("input.second {:?} should be a int", pair.second);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let i1 = Int::from(i1);
     let i2 = Int::from(i2);
@@ -109,19 +109,19 @@ pub fn multiply() -> FreePrimFuncVal {
     FreePrimFn { id: "integer.multiply", f: free_impl(fn_multiply) }.free()
 }
 
-fn fn_multiply(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_multiply(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         error!("input.first {:?} should be a int", pair.first);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let Val::Int(i2) = pair.second else {
         error!("input.second {:?} should be a int", pair.second);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let i1 = Int::from(i1);
     let i2 = Int::from(i2);
@@ -132,24 +132,24 @@ pub fn divide() -> FreePrimFuncVal {
     FreePrimFn { id: "integer.divide", f: free_impl(fn_divide) }.free()
 }
 
-fn fn_divide(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_divide(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         error!("input.first {:?} should be a int", pair.first);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let Val::Int(i2) = pair.second else {
         error!("input.second {:?} should be a int", pair.second);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let i1 = Int::from(i1);
     let i2 = Int::from(i2);
     let Some(i) = i1.divide(i2) else {
-        return illegal_input();
+        return illegal_input(cfg);
     };
     Val::Int(i.into())
 }
@@ -158,24 +158,24 @@ pub fn remainder() -> FreePrimFuncVal {
     FreePrimFn { id: "integer.remainder", f: free_impl(fn_remainder) }.free()
 }
 
-fn fn_remainder(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_remainder(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         error!("input.first {:?} should be a int", pair.first);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let Val::Int(i2) = pair.second else {
         error!("input.second {:?} should be a int", pair.second);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let i1 = Int::from(i1);
     let i2 = Int::from(i2);
     let Some(i) = i1.remainder(i2) else {
-        return illegal_input();
+        return illegal_input(cfg);
     };
     Val::Int(i.into())
 }
@@ -184,24 +184,24 @@ pub fn divide_remainder() -> FreePrimFuncVal {
     FreePrimFn { id: "integer.divide_remainder", f: free_impl(fn_divide_remainder) }.free()
 }
 
-fn fn_divide_remainder(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_divide_remainder(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         error!("input.first {:?} should be a int", pair.first);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let Val::Int(i2) = pair.second else {
         error!("input.second {:?} should be a int", pair.second);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let i1 = Int::from(i1);
     let i2 = Int::from(i2);
     let Some((quotient, rem)) = i1.divide_remainder(i2) else {
-        return illegal_input();
+        return illegal_input(cfg);
     };
     Val::Pair(Pair::new(Val::Int(quotient.into()), Val::Int(rem.into())).into())
 }
@@ -210,19 +210,19 @@ pub fn less_than() -> FreePrimFuncVal {
     FreePrimFn { id: "integer.less", f: free_impl(fn_less_than) }.free()
 }
 
-fn fn_less_than(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_less_than(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         error!("input.first {:?} should be a int", pair.first);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let Val::Int(i2) = pair.second else {
         error!("input.second {:?} should be a int", pair.second);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     Val::Bit(i1.less_than(&i2))
 }
@@ -231,19 +231,19 @@ pub fn less_equal() -> FreePrimFuncVal {
     FreePrimFn { id: "integer.less_equal", f: free_impl(fn_less_equal) }.free()
 }
 
-fn fn_less_equal(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_less_equal(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         error!("input.first {:?} should be a int", pair.first);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let Val::Int(i2) = pair.second else {
         error!("input.second {:?} should be a int", pair.second);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     Val::Bit(i1.less_equal(&i2))
 }
@@ -252,19 +252,19 @@ pub fn greater_than() -> FreePrimFuncVal {
     FreePrimFn { id: "integer.greater", f: free_impl(fn_greater_than) }.free()
 }
 
-fn fn_greater_than(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_greater_than(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         error!("input.first {:?} should be a int", pair.first);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let Val::Int(i2) = pair.second else {
         error!("input.second {:?} should be a int", pair.second);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     Val::Bit(i1.greater_than(&i2))
 }
@@ -273,19 +273,19 @@ pub fn greater_equal() -> FreePrimFuncVal {
     FreePrimFn { id: "integer.greater_equal", f: free_impl(fn_greater_equal) }.free()
 }
 
-fn fn_greater_equal(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_greater_equal(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         error!("input.first {:?} should be a int", pair.first);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let Val::Int(i2) = pair.second else {
         error!("input.second {:?} should be a int", pair.second);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     Val::Bit(i1.greater_equal(&i2))
 }
@@ -294,19 +294,19 @@ pub fn less_greater() -> FreePrimFuncVal {
     FreePrimFn { id: "integer.less_greater", f: free_impl(fn_less_greater) }.free()
 }
 
-fn fn_less_greater(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_less_greater(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.first else {
         error!("input.first {:?} should be a int", pair.first);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let Val::Int(i2) = pair.second else {
         error!("input.second {:?} should be a int", pair.second);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     Val::Bit(i1.less_greater(&i2))
 }

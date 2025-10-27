@@ -44,15 +44,15 @@ pub fn from_text() -> FreePrimFuncVal {
     FreePrimFn { id: "symbol.from_text", f: free_impl(fn_from_text) }.free()
 }
 
-fn fn_from_text(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_from_text(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
         error!("input {input:?} should be a text");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let is_symbol = t.chars().all(Symbol::is_symbol);
     if !is_symbol {
         error!("every character of input {t:?} text should be a symbol");
-        return illegal_input();
+        return illegal_input(cfg);
     }
     let symbol = Symbol::from_string_unchecked(t.to_string());
     Val::Symbol(symbol)
@@ -62,10 +62,10 @@ pub fn into_text() -> FreePrimFuncVal {
     FreePrimFn { id: "symbol.into_text", f: free_impl(fn_into_text) }.free()
 }
 
-fn fn_into_text(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_into_text(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Symbol(s) = input else {
         error!("input {input:?} should be a symbol");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     Val::Text(Text::from(String::from(s)).into())
 }
@@ -74,10 +74,10 @@ pub fn length() -> ConstPrimFuncVal {
     DynPrimFn { id: "symbol.length", f: const_impl(fn_length) }.const_()
 }
 
-fn fn_length(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Symbol(symbol) = &*ctx else {
         error!("ctx {ctx:?} should be a symbol");
-        return illegal_ctx();
+        return illegal_ctx(cfg);
     };
     let len: Int = symbol.len().into();
     Val::Int(len.into())
@@ -88,22 +88,22 @@ pub fn join() -> FreePrimFuncVal {
     FreePrimFn { id: "symbol.join", f: free_impl(fn_join) }.free()
 }
 
-fn fn_join(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_join(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let separator = match &pair.first {
         Val::Unit(_) => "",
         Val::Symbol(s) => s,
         s => {
             error!("separator {s:?} should be a unit or a symbol");
-            return illegal_input();
+            return illegal_input(cfg);
         }
     };
     let Val::List(symbols) = &pair.second else {
         error!("input.second {:?} should be a list", pair.second);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let symbols: Option<Vec<&str>> = symbols
         .iter()
@@ -117,7 +117,7 @@ fn fn_join(_cfg: &mut Cfg, input: Val) -> Val {
         })
         .collect();
     let Some(symbols) = symbols else {
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let symbol = symbols.join(separator);
     Val::Symbol(Symbol::from_string_unchecked(symbol))

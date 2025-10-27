@@ -83,10 +83,10 @@ pub fn new() -> FreePrimFuncVal {
     FreePrimFn { id: "function.new", f: free_impl(fn_new) }.free()
 }
 
-fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
     let Some(func) = parse_func(input) else {
         error!("parse func failed");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     Val::Func(func)
 }
@@ -95,10 +95,10 @@ pub fn repr() -> FreePrimFuncVal {
     FreePrimFn { id: "function.represent", f: free_impl(fn_repr) }.free()
 }
 
-fn fn_repr(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_repr(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Func(func) = input else {
         error!("input {input:?} should be a function");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     generate_func(func)
 }
@@ -111,12 +111,12 @@ pub fn apply() -> MutPrimFuncVal {
 fn fn_apply_free(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
     let Val::Func(func) = pair.first else {
         error!("input.first {:?} should be a func", pair.first);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     func.free_call(cfg, pair.second)
 }
@@ -124,12 +124,12 @@ fn fn_apply_free(cfg: &mut Cfg, input: Val) -> Val {
 fn fn_apply_const(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
     let Val::Func(func) = pair.first else {
         error!("input.first {:?} should be a func", pair.first);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     func.const_call(cfg, ctx, pair.second)
 }
@@ -137,12 +137,12 @@ fn fn_apply_const(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 fn fn_apply_mut(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
     let Val::Func(func) = pair.first else {
         error!("input.first {:?} should be a func", pair.first);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     func.mut_call(cfg, ctx, pair.second)
 }
@@ -151,10 +151,10 @@ pub fn recurse() -> FreePrimFuncVal {
     FreePrimFn { id: "function.recurse", f: free_impl(fn_recurse) }.free()
 }
 
-fn fn_recurse(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_recurse(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Func(func) = input else {
         error!("input {input:?} should be a func");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let recurse = Recurse(func.clone());
     let id = format!("function.recurse.{}", &*func.id());
@@ -194,10 +194,10 @@ pub fn ctx_access() -> ConstPrimFuncVal {
     DynPrimFn { id: "function.context_access", f: const_impl(fn_ctx_access) }.const_()
 }
 
-fn fn_ctx_access(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_ctx_access(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
-        return illegal_ctx();
+        return illegal_ctx(cfg);
     };
     let access = generate_ctx_access(func.ctx_access());
     Val::Symbol(Symbol::from_str_unchecked(access))
@@ -207,10 +207,10 @@ pub fn is_primitive() -> ConstPrimFuncVal {
     DynPrimFn { id: "function.is_primitive", f: const_impl(fn_is_primitive) }.const_()
 }
 
-fn fn_is_primitive(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_is_primitive(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
-        return illegal_ctx();
+        return illegal_ctx(cfg);
     };
     let is_primitive = func.is_primitive();
     Val::Bit(Bit::from(is_primitive))
@@ -220,10 +220,10 @@ pub fn id() -> ConstPrimFuncVal {
     DynPrimFn { id: "function.id", f: const_impl(fn_id) }.const_()
 }
 
-fn fn_id(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_id(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
-        return illegal_ctx();
+        return illegal_ctx(cfg);
     };
     Val::Symbol(func.id())
 }
@@ -232,14 +232,14 @@ pub fn code() -> ConstPrimFuncVal {
     DynPrimFn { id: "function.code", f: const_impl(fn_code) }.const_()
 }
 
-fn fn_code(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_code(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
-        return illegal_ctx();
+        return illegal_ctx(cfg);
     };
     let Some(code) = generate_code(func) else {
         error!("func {func:?} should have code");
-        return illegal_ctx();
+        return illegal_ctx(cfg);
     };
     code
 }
@@ -248,14 +248,14 @@ pub fn memo() -> ConstPrimFuncVal {
     DynPrimFn { id: "function.memory", f: const_impl(fn_memo) }.const_()
 }
 
-fn fn_memo(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_memo(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
-        return illegal_ctx();
+        return illegal_ctx(cfg);
     };
     let Some(memo) = func.memo() else {
         error!("func {func:?} should have an inner memory");
-        return illegal_ctx();
+        return illegal_ctx(cfg);
     };
     Val::Memo(MemoVal::from(memo.clone()))
 }

@@ -46,7 +46,7 @@ const CUR_URL_KEY: &str = "build.this_url";
 fn fn_load(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(url) = input else {
         error!("input {input:?} should be a text");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let url = Text::from(url);
     let cur_url_key = Symbol::from_str_unchecked(CUR_URL_KEY);
@@ -62,17 +62,17 @@ fn load_from_url(cfg: &mut Cfg, url: String) -> Val {
         Ok(content) => content,
         Err(err) => {
             eprintln!("failed to read {url}: {err}");
-            return fail();
+            return fail(cfg);
         }
     };
     let Ok(val) = parse(content) else {
         error!("{content} should be a valid air source code");
-        return fail();
+        return fail(cfg);
     };
 
     let Some(mut mod_air) = Air::new(cfg.clone()) else {
         error!("prelude should exist in cfg");
-        return fail();
+        return fail(cfg);
     };
     let cur_url_key = Symbol::from_str_unchecked(CUR_URL_KEY);
     mod_air.cfg_mut().begin_scope();

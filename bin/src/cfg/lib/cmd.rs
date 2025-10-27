@@ -40,22 +40,22 @@ pub fn call() -> FreePrimFuncVal {
     FreePrimFn { id: "command.call", f: free_impl(fn_call) }.free()
 }
 
-fn fn_call(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_call(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let program: &str = match &pair.first {
         Val::Text(program) => program,
         Val::Symbol(symbol) => symbol,
         v => {
             error!("program {v:?} should be a text or a symbol");
-            return illegal_input();
+            return illegal_input(cfg);
         }
     };
     let Val::List(arguments) = &pair.second else {
         error!("arguments {:?} should be a list", pair.second);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let arguments = arguments
         .iter()
@@ -72,16 +72,16 @@ fn fn_call(_cfg: &mut Cfg, input: Val) -> Val {
         })
         .collect::<Option<Vec<&str>>>();
     let Some(arguments) = arguments else {
-        return illegal_input();
+        return illegal_input(cfg);
     };
 
     let child = Command::new(program).args(arguments).spawn();
     let Ok(mut child) = child else {
         eprintln!("failed to execute program");
-        return fail();
+        return fail(cfg);
     };
     let Ok(status) = child.wait() else {
-        return fail();
+        return fail(cfg);
     };
 
     if let Some(status) = status.code()

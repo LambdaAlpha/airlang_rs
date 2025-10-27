@@ -56,9 +56,9 @@ pub fn new() -> FreePrimFuncVal {
     FreePrimFn { id: "adapter.new", f: free_impl(fn_new) }.free()
 }
 
-fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
     let Some(adapter) = parse(input) else {
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let func = adapter_func(adapter);
     Val::Func(func)

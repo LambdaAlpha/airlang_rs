@@ -39,14 +39,14 @@ pub fn parse() -> FreePrimFuncVal {
     FreePrimFn { id: "syntax.parse", f: free_impl(fn_parse) }.free()
 }
 
-fn fn_parse(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_parse(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(input) = input else {
         error!("input {input:?} should be a text");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let Ok(val) = crate::syntax::parse(&input) else {
         error!("parse {input:?} failed");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     val
 }
@@ -55,10 +55,10 @@ pub fn generate() -> FreePrimFuncVal {
     FreePrimFn { id: "syntax.generate", f: free_impl(fn_generate) }.free()
 }
 
-fn fn_generate(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_generate(cfg: &mut Cfg, input: Val) -> Val {
     let Ok(repr) = (&input).try_into() else {
         error!("generate {input:?} failed");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let str = generate_pretty(repr);
     Val::Text(Text::from(str).into())

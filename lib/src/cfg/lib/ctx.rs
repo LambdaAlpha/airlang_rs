@@ -75,14 +75,14 @@ pub fn read() -> ConstPrimFuncVal {
     DynPrimFn { id: "context.read", f: const_impl(fn_read) }.const_()
 }
 
-fn fn_read(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_read(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Memo(memo) = &*ctx else {
         error!("ctx {ctx:?} should be a memo");
-        return illegal_ctx();
+        return illegal_ctx(cfg);
     };
     let Val::Symbol(s) = input else {
         error!("input {input:?} should be a symbol");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     memo.get_ref(s).cloned().unwrap_or_default()
 }
@@ -91,18 +91,18 @@ pub fn assign() -> MutPrimFuncVal {
     DynPrimFn { id: "context.assign", f: mut_impl(fn_assign) }.mut_()
 }
 
-fn fn_assign(_cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+fn fn_assign(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
     let Some(pattern) = pair.first.parse() else {
         error!("parse pattern failed");
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let val = pair.second;
-    if pattern.match_(&val) { pattern.assign(ctx, val) } else { fail() }
+    if pattern.match_(&val) { pattern.assign(ctx, val) } else { fail(cfg) }
 }
 
 pub fn is_const() -> MutPrimFuncVal {
@@ -133,25 +133,25 @@ pub fn which() -> MutPrimFuncVal {
 fn fn_which(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input: {:?} should be a pair", input);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
     let Val::Call(call) = pair.second else {
         error!("input.second {:?} should be a call", pair.second);
-        return illegal_input();
+        return illegal_input(cfg);
     };
     let call = Call::from(call);
     let Val::Func(func) = Eval.mut_call(cfg, ctx, call.func) else {
         error!("input.second.func should be a func");
-        return fail();
+        return fail(cfg);
     };
     let Some(adapter) = import_adapter(cfg, func.id()) else {
-        return fail();
+        return fail(cfg);
     };
     let input = adapter.mut_call(cfg, ctx, call.input);
     let Some(ctx) = ctx.ref_(pair.first) else {
         error!("input.first should be a valid reference");
-        return fail();
+        return fail(cfg);
     };
     func.dyn_call(cfg, ctx, input)
 }

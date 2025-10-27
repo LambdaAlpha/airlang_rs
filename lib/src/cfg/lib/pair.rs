@@ -45,10 +45,10 @@ pub fn first() -> ConstPrimFuncVal {
     DynPrimFn { id: "pair.first", f: const_impl(fn_first) }.const_()
 }
 
-fn fn_first(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_first(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Pair(pair) = &*ctx else {
         error!("ctx {ctx:?} should be a pair");
-        return illegal_ctx();
+        return illegal_ctx(cfg);
     };
     pair.first.clone()
 }
@@ -57,10 +57,10 @@ pub fn set_first() -> MutPrimFuncVal {
     DynPrimFn { id: "pair.set_first", f: mut_impl(fn_set_first) }.mut_()
 }
 
-fn fn_set_first(_cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
+fn fn_set_first(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Pair(pair) = ctx else {
         error!("ctx {ctx:?} should be a pair");
-        return illegal_ctx();
+        return illegal_ctx(cfg);
     };
     swap(&mut pair.first, &mut input);
     input
@@ -70,10 +70,10 @@ pub fn second() -> ConstPrimFuncVal {
     DynPrimFn { id: "pair.second", f: const_impl(fn_second) }.const_()
 }
 
-fn fn_second(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_second(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Pair(pair) = &*ctx else {
         error!("ctx {ctx:?} should be a pair");
-        return illegal_ctx();
+        return illegal_ctx(cfg);
     };
     pair.second.clone()
 }
@@ -82,10 +82,10 @@ pub fn set_second() -> MutPrimFuncVal {
     DynPrimFn { id: "pair.set_second", f: mut_impl(fn_set_second) }.mut_()
 }
 
-fn fn_set_second(_cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
+fn fn_set_second(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Pair(pair) = ctx else {
         error!("ctx {ctx:?} should be a pair");
-        return illegal_ctx();
+        return illegal_ctx(cfg);
     };
     swap(&mut pair.second, &mut input);
     input
