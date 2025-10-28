@@ -10,6 +10,7 @@ use crate::semantics::memo::MemoValue;
 use crate::semantics::val::Val;
 use crate::type_::DynRef;
 use crate::type_::Symbol;
+use crate::utils::gurad::guard;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) struct FreeComposite {
@@ -43,13 +44,17 @@ impl DynComposite {
 }
 
 pub(crate) fn composite_call(cfg: &mut Cfg, memo: &mut Memo, body: Val) -> Val {
-    let mut memo_val = Val::Memo(take(memo).into());
-    let output = Eval.mut_call(cfg, &mut memo_val, body);
-    let Val::Memo(memo_val) = memo_val else {
-        unreachable!("composite_call ctx invariant is broken!!!")
-    };
-    *memo = memo_val.into();
-    output
+    let memo_val = Val::Memo(take(memo).into());
+    guard(
+        (cfg, memo_val),
+        move |(cfg, memo_val)| Eval.mut_call(&mut **cfg, memo_val, body),
+        |(_cfg, memo_val)| {
+            let Val::Memo(memo_val) = memo_val else {
+                unreachable!("composite_call ctx invariant is broken!!!")
+            };
+            *memo = memo_val.into();
+        },
+    )
 }
 
 fn put_input(memo: &mut Memo, input_name: Symbol, input: Val) -> Result<(), MemoError> {
@@ -64,9 +69,13 @@ fn with_ctx(
         return Val::default();
     }
     keep_ctx(memo, ctx.reborrow(), name.clone());
-    let output = f(memo);
-    restore_ctx(memo, ctx.unwrap(), name);
-    output
+    guard(
+        (memo, ctx, name),
+        move |(memo, _ctx, _name)| f(memo),
+        |(memo, ctx, name)| {
+            restore_ctx(memo, ctx.unwrap(), name);
+        },
+    )
 }
 
 fn keep_ctx(memo: &mut Memo, ctx: DynRef<Val>, name: Symbol) {

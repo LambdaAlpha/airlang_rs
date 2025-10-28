@@ -185,6 +185,24 @@ _ do [
 -----
 true
 =====
+ctx panic safe
+-----
+_ do [
+    limit_steps = _ import _resource.limit_steps,
+    f = _ function {
+        context_access : _constant,
+        code : (_ctx : __) : _ do [
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            11
+        ],
+    },
+    p = 1 : 2,
+    10 limit_steps p which _ f .,
+    p
+]
+-----
+1 : 2
+=====
 ctx explicit
 -----
 _ do [

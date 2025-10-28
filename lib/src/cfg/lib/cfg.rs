@@ -13,6 +13,7 @@ use crate::cfg::lib::FreePrimFn;
 use crate::cfg::lib::free_impl;
 use crate::cfg::lib::mut_impl;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::cfg::StepsExceed;
 use crate::semantics::core::Eval;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::FreePrimFuncVal;
@@ -232,5 +233,5 @@ fn fn_where(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let mut new_cfg = Cfg::from(new_cfg);
-    Eval.mut_call(&mut new_cfg, ctx, pair.second)
+    StepsExceed::catch(|| Eval.mut_call(&mut new_cfg, ctx, pair.second)).unwrap_or_default()
 }

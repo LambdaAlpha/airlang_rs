@@ -3,6 +3,10 @@ use std::hash::BuildHasher;
 use std::hash::Hash;
 use std::hash::Hasher;
 use std::ops::Deref;
+use std::panic::AssertUnwindSafe;
+use std::panic::catch_unwind;
+use std::panic::panic_any;
+use std::panic::resume_unwind;
 
 use derive_more::Deref;
 use derive_more::DerefMut;
@@ -13,13 +17,16 @@ use crate::semantics::val::Val;
 use crate::type_::Symbol;
 
 // todo design invariant
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Cfg {
     steps: u128,
     max_scope: usize,
     // box is required for StableDeref, which is required for insert
     map: OnceMap<Symbol, Box<OnceMap<usize /*scope*/, Box<Val>>>>,
 }
+
+#[derive(Copy, Clone)]
+pub struct StepsExceed;
 
 #[derive(Debug, Default, Deref, DerefMut)]
 struct OnceMap<K, V>(once_map::unsync::OnceMap<K, V, FxBuildHasher>);
@@ -96,17 +103,56 @@ impl Cfg {
                 (k.clone(), Box::new(new_scopes))
             })
             .collect();
-        Self { steps: 0, max_scope: 0, map }
+        Self { steps: u128::MAX, max_scope: 0, map }
     }
 
     #[inline(always)]
-    pub(crate) fn step(&mut self) {
-        self.steps += 1;
+    pub fn step(&mut self) {
+        if self.steps == 0 {
+            panic_any(StepsExceed);
+        }
+        self.steps -= 1;
     }
 
     #[inline(always)]
+    pub fn step_n(&mut self, n: u128) {
+        if self.steps < n {
+            panic_any(StepsExceed);
+        }
+        self.steps -= n;
+    }
+
+    pub fn set_steps(&mut self, n: u128) {
+        if self.steps < n {
+            return;
+        }
+        self.steps = n;
+    }
+
+    pub(crate) fn set_steps_unchecked(&mut self, n: u128) {
+        self.steps = n;
+    }
+
     pub fn steps(&self) -> u128 {
         self.steps
+    }
+}
+
+impl StepsExceed {
+    pub fn catch<V: Default, F: FnOnce() -> V>(f: F) -> Option<V> {
+        match catch_unwind(AssertUnwindSafe(f)) {
+            Ok(val) => Some(val),
+            Err(err) => match err.downcast::<StepsExceed>() {
+                Ok(_) => None,
+                Err(err) => resume_unwind(err),
+            },
+        }
+    }
+}
+
+impl Default for Cfg {
+    fn default() -> Self {
+        Self { steps: u128::MAX, max_scope: 0, map: OnceMap::default() }
     }
 }
 

@@ -1,11 +1,13 @@
-steps
+available_steps
 -----
 _ do [
-    steps = _ import _resource.steps,
-    _ steps _
+    steps = _ import _resource.available_steps,
+    s1 = _ steps _,
+    s2 = _ steps _,
+    s1 - s2
 ]
 -----
-13
+7
 =====
 measure_steps 1
 -----
@@ -28,3 +30,15 @@ _ do [
 ]
 -----
 5
+=====
+limit_steps
+-----
+_ do [
+    limit_steps = _ import _resource.limit_steps,
+    a4 = 4 limit_steps 1 + 1,
+    a5 = 5 limit_steps 1 + 1,
+    a6 = 6 limit_steps 1 + 1,
+    (a4 == .) and (a5 == 2) and (a6 == 2)
+]
+-----
+true
