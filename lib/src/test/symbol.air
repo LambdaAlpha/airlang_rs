@@ -4,9 +4,9 @@ _ do [
     any = _ import _value.any,
     length = _ import _symbol.length,
     join = _ import _symbol.join,
-    a = _ any symbol,
+    a = _ any _symbol,
     la = a which _ length .,
-    b = _ any symbol,
+    b = _ any _symbol,
     lb = b which _ length .,
     ab = . join [a, b],
     lab = ab which _ length .,
@@ -80,7 +80,7 @@ _ do [
     any = _ import _value.any,
     from_text = _ import _symbol.from_text,
     into_text = _ import _symbol.into_text,
-    s = _ any symbol,
+    s = _ any _symbol,
     s1 = _ from_text _ into_text s,
     s == s1
 ]

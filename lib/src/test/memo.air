@@ -22,7 +22,7 @@ _ do [
     map.length = _ import _map.length,
     represent = _ import _memory.represent,
     any = _ import _value.any,
-    m = _ any memory,
+    m = _ any _memory,
     m1 = _ represent m,
     l = m which _ memory.length _,
     l1 = m1 which _ map.length _,

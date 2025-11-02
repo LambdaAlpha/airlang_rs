@@ -20,7 +20,7 @@ _ do [
     second = _ import _pair.second,
     set_first = _ import _pair.set_first,
     set_second = _ import _pair.set_second,
-    p = _ any pair,
+    p = _ any _pair,
     f = _ any .,
     s = _ any .,
     p which _ set_first f,

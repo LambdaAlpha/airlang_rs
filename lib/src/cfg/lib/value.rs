@@ -11,10 +11,6 @@ use super::FreePrimFn;
 use super::const_impl;
 use super::free_impl;
 use crate::cfg::CfgMod;
-use crate::cfg::CoreCfg;
-use crate::cfg::adapter::CallPrimAdapter;
-use crate::cfg::adapter::SymbolAdapter;
-use crate::cfg::adapter::prim_adapter;
 use crate::cfg::exception::fail;
 use crate::cfg::exception::illegal_input;
 use crate::semantics::cfg::Cfg;
@@ -68,8 +64,6 @@ impl Default for ValueLib {
 
 impl CfgMod for ValueLib {
     fn extend(self, cfg: &Cfg) {
-        let any_adapter = prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Form);
-        CoreCfg::extend_adapter(cfg, &self.any.id, any_adapter);
         self.any.extend(cfg);
         self.type_.extend(cfg);
         self.equal.extend(cfg);

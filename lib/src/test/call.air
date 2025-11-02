@@ -20,7 +20,7 @@ _ do [
     input = _ import _call.input,
     set_function = _ import _call.set_function,
     set_input = _ import _call.set_input,
-    c = _ any call,
+    c = _ any _call,
     f = _ any .,
     i = _ any .,
     c which _ set_function f,

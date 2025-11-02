@@ -13,7 +13,7 @@ any unit
 -----
 _ do [
     any = _ import _value.any,
-    u = _ any unit,
+    u = _ any _unit,
     u which _ type .
 ]
 -----
@@ -23,7 +23,7 @@ any bit
 -----
 _ do [
     any = _ import _value.any,
-    b = _ any bit,
+    b = _ any _bit,
     b which _ type .
 ]
 -----
@@ -33,7 +33,7 @@ any symbol
 -----
 _ do [
     any = _ import _value.any,
-    s = _ any symbol,
+    s = _ any _symbol,
     s which _ type .
 ]
 -----
@@ -43,7 +43,7 @@ any text
 -----
 _ do [
     any = _ import _value.any,
-    t = _ any text,
+    t = _ any _text,
     t which _ type .
 ]
 -----
@@ -53,7 +53,7 @@ any integer
 -----
 _ do [
     any = _ import _value.any,
-    i = _ any integer,
+    i = _ any _integer,
     i which _ type .
 ]
 -----
@@ -63,7 +63,7 @@ any number
 -----
 _ do [
     any = _ import _value.any,
-    n = _ any number,
+    n = _ any _number,
     n which _ type .
 ]
 -----
@@ -73,7 +73,7 @@ any byte
 -----
 _ do [
     any = _ import _value.any,
-    b = _ any byte,
+    b = _ any _byte,
     b which _ type .
 ]
 -----
@@ -83,7 +83,7 @@ any pair
 -----
 _ do [
     any = _ import _value.any,
-    p = _ any pair,
+    p = _ any _pair,
     p which _ type .
 ]
 -----
@@ -93,7 +93,7 @@ any call
 -----
 _ do [
     any = _ import _value.any,
-    c = _ any call,
+    c = _ any _call,
     c which _ type .
 ]
 -----
@@ -103,7 +103,7 @@ any list
 -----
 _ do [
     any = _ import _value.any,
-    a = _ any list,
+    a = _ any _list,
     a which _ type .
 ]
 -----
@@ -113,7 +113,7 @@ any map
 -----
 _ do [
     any = _ import _value.any,
-    a = _ any map,
+    a = _ any _map,
     a which _ type .
 ]
 -----
@@ -123,7 +123,7 @@ any link
 -----
 _ do [
     any = _ import _value.any,
-    a = _ any link,
+    a = _ any _link,
     a which _ type .
 ]
 -----
@@ -133,7 +133,7 @@ any memory
 -----
 _ do [
     any = _ import _value.any,
-    m = _ any memory,
+    m = _ any _memory,
     m which _ type .
 ]
 -----
@@ -143,7 +143,7 @@ any function
 -----
 _ do [
     any = _ import _value.any,
-    f = _ any function,
+    f = _ any _function,
     f which _ type .
 ]
 -----

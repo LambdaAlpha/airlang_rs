@@ -45,7 +45,7 @@ _ do [
     represent = _ import _configuration.represent,
     any = _ import _value.any,
     where = _ import _configuration.where,
-    c = _ any configuration,
+    c = _ any _configuration,
     [m] = _ represent c where _ snapshot _,
     lc = c where _ configuration.length _,
     lm = m which _ map.length _,
