@@ -17,7 +17,6 @@ use crate::cfg::adapter::id_adapter;
 use crate::cfg::adapter::pair_adapter;
 use crate::cfg::adapter::prim_adapter;
 use crate::cfg::exception::fail;
-use crate::cfg::exception::illegal_ctx;
 use crate::cfg::exception::illegal_input;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
@@ -35,7 +34,8 @@ use crate::type_::Pair;
 
 #[derive(Clone)]
 pub struct CtxLib {
-    pub read: ConstPrimFuncVal,
+    pub get: ConstPrimFuncVal,
+    pub set: MutPrimFuncVal,
     pub assign: MutPrimFuncVal,
     pub is_const: MutPrimFuncVal,
     pub self_: ConstPrimFuncVal,
@@ -45,7 +45,8 @@ pub struct CtxLib {
 impl Default for CtxLib {
     fn default() -> Self {
         CtxLib {
-            read: read(),
+            get: get(),
+            set: set(),
             assign: assign(),
             is_const: is_const(),
             self_: self_(),
@@ -56,7 +57,8 @@ impl Default for CtxLib {
 
 impl CfgMod for CtxLib {
     fn extend(self, cfg: &Cfg) {
-        self.read.extend(cfg);
+        self.get.extend(cfg);
+        self.set.extend(cfg);
         let assign_adapter = pair_adapter(
             Map::default(),
             prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Form),
@@ -71,20 +73,29 @@ impl CfgMod for CtxLib {
     }
 }
 
-pub fn read() -> ConstPrimFuncVal {
-    DynPrimFn { id: "context.read", f: const_impl(fn_read) }.const_()
+pub fn get() -> ConstPrimFuncVal {
+    DynPrimFn { id: "context.get", f: const_impl(fn_get) }.const_()
 }
 
-fn fn_read(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::Memo(memo) = &*ctx else {
-        error!("ctx {ctx:?} should be a memo");
-        return illegal_ctx(cfg);
-    };
-    let Val::Symbol(s) = input else {
-        error!("input {input:?} should be a symbol");
+fn fn_get(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
+    match ctx.unwrap().ref_(input) {
+        Some(val) => val.unwrap().clone(),
+        None => Val::default(),
+    }
+}
+
+pub fn set() -> MutPrimFuncVal {
+    DynPrimFn { id: "context.set", f: mut_impl(fn_set) }.mut_()
+}
+
+fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return illegal_input(cfg);
     };
-    memo.get_ref(s).cloned().unwrap_or_default()
+    let pair = Pair::from(pair);
+    let output = ctx.set(pair.first, pair.second);
+    output.unwrap_or_default()
 }
 
 pub fn assign() -> MutPrimFuncVal {

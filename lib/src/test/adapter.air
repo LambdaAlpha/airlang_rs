@@ -484,8 +484,7 @@ access const
 _ do [
     new = _ import _adapter.new,
     context_access = _ import _function.context_access,
-    read = _ import _context.read,
-    f = _ new .read,
+    f = _ new .get,
     f which _ context_access .
 ]
 -----

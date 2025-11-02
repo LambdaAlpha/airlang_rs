@@ -31,65 +31,60 @@ _ do [
 -----
 true
 =====
-read none
+get none
 -----
 _ do [
     any = _ import _value.any,
-    read = _ import _context.read,
     a = _ any .,
-    a == _a read _
+    a == _a get _
 ]
 -----
 true
 =====
-read final
+get final
 -----
 _ do [
     any = _ import _value.any,
     new = _ import _memory.new,
-    read = _ import _context.read,
     v = _ any .,
     a = _ new {b : final : v},
-    v == a which _ read _b
+    v == a which _ get _b
 ]
 -----
 true
 =====
-read still
+get still
 -----
 _ do [
     any = _ import _value.any,
     new = _ import _memory.new,
-    read = _ import _context.read,
     v = _ any .,
     a = _ new {b : still : v},
-    v == a which _ read _b
+    v == a which _ get _b
 ]
 -----
 true
 =====
-read static
+get static
 -----
 _ do [
     any = _ import _value.any,
     new = _ import _memory.new,
-    read = _ import _context.read,
     v = _ any .,
     a = _ new {b : static : v},
-    v == a which _ read _b
+    v == a which _ get _b
 ]
 -----
 true
 =====
-read const
+get const
 -----
 _ do [
     any = _ import _value.any,
     new = _ import _memory.new,
-    read = _ import _context.read,
     v = _ any .,
     a = _ new {b : constant : v},
-    v == a which _ read _b
+    v == a which _ get _b
 ]
 -----
 true
@@ -404,10 +399,9 @@ static move
 -----
 _ do [
     new = _ import _memory.new,
-    read = _ import _context.read,
     c = _ new {a : static : 1},
     c which _ move _a,
-    c which _ read _a
+    c which _ get _a
 ]
 -----
 1
@@ -416,10 +410,9 @@ static = to static
 -----
 _ do [
     new = _ import _memory.new,
-    read = _ import _context.read,
     c = _ new {static_a : static : 1},
     c which static_a = 2,
-    c which _ read _static_a
+    c which _ get _static_a
 ]
 -----
 1

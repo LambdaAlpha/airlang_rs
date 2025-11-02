@@ -1,31 +1,29 @@
-read ref
+get ref
 -----
 _ do [
     any = _ import _value.any,
-    read = _ import _context.read,
     a = _ any .,
-    a == _a read _
+    a == _a get _
 ]
 -----
 true
 =====
-read indirect
+get indirect
 -----
 _ do [
     any = _ import _value.any,
-    read = _ import _context.read,
     a = _ any .,
     b = _a,
-    a == b read _
+    a == b get _
 ]
 -----
 true
 =====
-= read
+set get
 -----
 _ do [
-    a = 1,
-    a
+    _a set 1,
+    _a get _
 ]
 -----
 1

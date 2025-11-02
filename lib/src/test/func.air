@@ -101,10 +101,9 @@ _ do [
 const const
 -----
 _ do [
-    read = _ import _context.read,
     a = 1,
     f = _ function {
-        code : (_c : __) : _c which _ read __a,
+        code : (_c : __) : _c which _ get __a,
         context_access : _constant,
     },
     _ f .
@@ -115,10 +114,9 @@ _ do [
 mutable const
 -----
 _ do [
-    read = _ import _context.read,
     a = 1,
     f = _ function {
-        code : (_c : __) : _c which _ read __a,
+        code : (_c : __) : _c which _ get __a,
         context_access : _mutable,
     },
     _ f .
@@ -287,8 +285,7 @@ access const
 -----
 _ do [
     context_access = _ import _function.context_access,
-    read = _ import _context.read,
-    read which _ context_access .
+    get which _ context_access .
 ]
 -----
 constant
@@ -391,9 +388,8 @@ apply const
 -----
 _ do [
     apply = _ import _function.apply,
-    read = _ import _context.read,
     a = 1,
-    read apply _a
+    get apply _a
 ]
 -----
 1
