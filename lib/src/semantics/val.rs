@@ -167,7 +167,9 @@ macro_rules! match_val {
     };
 }
 
-#[expect(redundant_imports)]
+// clippy stable: redundant_imports
+// clippy nightly: unused_imports
+#[allow(unused_imports, redundant_imports)]
 pub(crate) use match_val;
 
 impl Debug for Val {
