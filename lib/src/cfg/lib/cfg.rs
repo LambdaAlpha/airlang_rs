@@ -24,6 +24,7 @@ use crate::type_::Int;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
+use crate::utils::gurad::guard;
 
 // todo design more
 #[derive(Clone)]
@@ -194,28 +195,30 @@ pub fn with() -> MutPrimFuncVal {
 
 fn fn_with(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     cfg.begin_scope();
-    let output = 'scope: {
-        let Val::Pair(pair) = input else {
-            error!("input {input:?} should be a pair");
-            break 'scope illegal_input(cfg);
-        };
-        let pair = Pair::from(pair);
-        let Val::Map(map) = pair.first else {
-            error!("input.first {:?} should be a map", pair.first);
-            break 'scope illegal_input(cfg);
-        };
-        let map = Map::from(map);
-        for (k, v) in map {
-            let Val::Symbol(name) = k else {
-                error!("input.first.key {k:?} should be a symbol");
-                break 'scope illegal_input(cfg);
+    guard(
+        cfg,
+        |cfg| {
+            let Val::Pair(pair) = input else {
+                error!("input {input:?} should be a pair");
+                return illegal_input(cfg);
             };
-            cfg.extend_scope(name, v);
-        }
-        Eval.mut_call(cfg, ctx, pair.second)
-    };
-    cfg.end_scope();
-    output
+            let pair = Pair::from(pair);
+            let Val::Map(map) = pair.first else {
+                error!("input.first {:?} should be a map", pair.first);
+                return illegal_input(cfg);
+            };
+            let map = Map::from(map);
+            for (k, v) in map {
+                let Val::Symbol(name) = k else {
+                    error!("input.first.key {k:?} should be a symbol");
+                    return illegal_input(cfg);
+                };
+                cfg.extend_scope(name, v);
+            }
+            Eval.mut_call(&mut **cfg, ctx, pair.second)
+        },
+        Cfg::end_scope,
+    )
 }
 
 pub fn where_() -> MutPrimFuncVal {
