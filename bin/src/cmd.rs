@@ -4,12 +4,11 @@ use std::io::stderr;
 use std::io::stdout;
 
 use airlang::Air;
-use airlang::cfg::cfg_repr;
 use airlang::syntax::escape_text;
 use airlang::syntax::generate_pretty;
 use airlang::syntax::parse;
 
-use crate::cfg::BinCfg;
+use crate::cfg2::BinCfg2;
 use crate::repl::Repl;
 
 pub fn main() -> std::io::Result<()> {
@@ -25,7 +24,7 @@ pub fn main() -> std::io::Result<()> {
 
 pub fn interpret_file(path: &str) -> std::io::Result<()> {
     let source = generate_load(path);
-    let mut air = Air::new(cfg_repr(BinCfg::default())).unwrap();
+    let mut air = Air::new(BinCfg2::generate()).unwrap();
     match parse(&source) {
         Ok(val) => {
             let output = air.interpret(val);

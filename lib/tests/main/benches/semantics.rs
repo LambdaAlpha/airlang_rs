@@ -1,8 +1,7 @@
 use std::error::Error;
 
 use airlang::Air;
-use airlang::cfg::CoreCfg;
-use airlang::cfg::cfg_repr;
+use airlang::cfg2::CoreCfg2;
 use airlang::semantics::val::Val;
 use airlang::syntax::generate_pretty;
 use airlang::syntax::parse;
@@ -10,7 +9,7 @@ use airlang::type_::Int;
 
 #[test]
 fn test_interpret() -> Result<(), Box<dyn Error>> {
-    let mut air = Air::new(cfg_repr(CoreCfg::default())).unwrap();
+    let mut air = Air::new(CoreCfg2::generate()).unwrap();
     let s = include_str!("../../../benches/main/interpret.air");
     let src_val = parse(s)?;
     let output = air.interpret(src_val);

@@ -1,3 +1,4 @@
+use log::error;
 use log::info;
 
 use self::adapter::CoreAdapter;
@@ -7,11 +8,13 @@ use crate::cfg::prelude::CorePrelude;
 use crate::cfg::prelude::prelude_repr;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::CFG_ADAPTER;
+use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
+use crate::type_::Link;
 use crate::type_::Symbol;
 
 pub trait CfgMod {
@@ -37,7 +40,8 @@ impl CfgMod for CoreCfg {
         self.lib.extend(cfg);
         let prelude = prelude_repr(self.prelude);
         info!("core prelude len {}", prelude.len());
-        cfg.extend_scope(Symbol::from_str_unchecked(Self::PRELUDE), Val::Memo(prelude.into()));
+        let prelude = Val::Link(Link::new(Val::Memo(prelude.into())));
+        cfg.extend_scope(Symbol::from_str_unchecked(Self::PRELUDE), prelude);
     }
 }
 
@@ -51,12 +55,24 @@ impl CoreCfg {
         let adapter = Val::Func(adapter_func(adapter));
         cfg.extend_scope(Symbol::from_string_unchecked(id), adapter)
     }
-}
 
-pub fn cfg_repr<T: CfgMod>(t: T) -> Cfg {
-    let cfg = Cfg::default();
-    t.extend(&cfg);
-    cfg
+    pub fn prelude(cfg: &Cfg) -> Option<Memo> {
+        let prelude = cfg.import(Symbol::from_str_unchecked(Self::PRELUDE));
+        let Some(prelude) = prelude else {
+            error!("prelude should exist in cfg");
+            return None;
+        };
+        let Val::Link(link) = prelude else {
+            error!("prelude in cfg should be a link");
+            return None;
+        };
+        let prelude = link.get_clone();
+        let Val::Memo(prelude) = prelude else {
+            error!("prelude in cfg should be a link of memo");
+            return None;
+        };
+        Some(Memo::from(prelude))
+    }
 }
 
 pub(crate) trait Named {

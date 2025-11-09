@@ -6,8 +6,11 @@ macro_rules! _____ {
     () => {};
 }
 
-// use cfg, semantics, syntax, type, trait
+// use cfg2, cfg, semantics, syntax, type, trait
 mod pub_;
+
+// use cfg, semantics, syntax, type, trait
+pub mod cfg2;
 
 // use semantics, syntax, type, trait
 pub mod cfg;

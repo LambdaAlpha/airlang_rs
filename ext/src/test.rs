@@ -1,7 +1,6 @@
 use std::error::Error;
 
 use airlang::Air;
-use airlang::cfg::cfg_repr;
 use airlang::semantics::val::Val;
 use airlang::syntax::escape_text;
 use airlang::syntax::parse;
@@ -9,7 +8,7 @@ use airlang::type_::Bit;
 use airlang::type_::Int;
 use airlang_dev::init_logger;
 
-use crate::cfg::StdCfg;
+use crate::cfg2::StdCfg2;
 
 #[test]
 fn test_build_load_nest() -> Result<(), Box<dyn Error>> {
@@ -29,7 +28,7 @@ fn test_build_load(path: &str, expect: Val) -> Result<(), Box<dyn Error>> {
     init_logger();
     let src = generate_load(path);
     let src = parse(&src)?;
-    let mut air = Air::new(cfg_repr(StdCfg::default())).unwrap();
+    let mut air = Air::new(StdCfg2::generate()).unwrap();
     let output = air.interpret(src);
     assert_eq!(output, expect);
     Ok(())
