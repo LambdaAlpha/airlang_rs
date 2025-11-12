@@ -41,6 +41,8 @@ impl CoreCfg2 {
             .unwrap();
         Self::run(cfg, ctx, include_str!("air/lib/memory.air"), "/lib/memory").unwrap();
         Self::run(cfg, ctx, include_str!("air/lib/function.air"), "/lib/function").unwrap();
+
+        Self::run(cfg, ctx, include_str!("air/lib/language.air"), "/lib/language").unwrap();
         // } don't depend on the execution order
 
         Self::run(cfg, ctx, include_str!("air/last.air"), "/last").unwrap();

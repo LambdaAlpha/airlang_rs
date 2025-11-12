@@ -180,5 +180,5 @@ fn test_resource() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn test_syntax() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/syntax.air"), "test/syntax.air")
+    test(include_str!("test/lang.air"), "test/lang.air")
 }

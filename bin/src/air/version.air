@@ -1,6 +1,6 @@
 _ do [
     version = _ import _language.version,
-    generate = _ import _syntax.generate,
+    generate = _ import _language.syntax.generate,
     join = _ import _text.join,
     [major, minor, patch] = version,
     major = _ generate major,

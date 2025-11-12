@@ -2,8 +2,8 @@ parse generate
 -----
 _ do [
     any = _ import _value.any,
-    parse = _ import _syntax.parse,
-    generate = _ import _syntax.generate,
+    parse = _ import _language.syntax.parse,
+    generate = _ import _language.syntax.generate,
     get = _ import _list.get,
     % = _ import _integer.remainder,
     atom = [_unit, _bit, _symbol, _text, _integer, _number, _byte],
@@ -36,7 +36,7 @@ true
 parse
 -----
 _ do [
-    parse = _ import _syntax.parse,
+    parse = _ import _language.syntax.parse,
     _ parse "[1, 2]"
 ]
 -----
@@ -45,7 +45,7 @@ _ do [
 parse no eval
 -----
 _ do [
-    parse = _ import _syntax.parse,
+    parse = _ import _language.syntax.parse,
     a = 1,
     _ parse "a"
 ]
@@ -55,7 +55,7 @@ a
 parse text
 -----
 _ do [
-    parse = _ import _syntax.parse,
+    parse = _ import _language.syntax.parse,
     _ parse "\`1\`"
 ]
 -----
@@ -64,7 +64,7 @@ _ do [
 generate text
 -----
 _ do [
-    generate = _ import _syntax.generate,
+    generate = _ import _language.syntax.generate,
     _ generate "1"
 ]
 -----

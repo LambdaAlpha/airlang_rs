@@ -18,7 +18,6 @@ use self::number::NumberLib;
 use self::pair::PairLib;
 use self::resource::ResourceLib;
 use self::symbol::SymbolLib;
-use self::syntax::SyntaxLib;
 use self::text::TextLib;
 use self::unit::UnitLib;
 use self::value::ValueLib;
@@ -60,7 +59,6 @@ pub struct CoreLib {
     pub ctrl: CtrlLib,
     pub value: ValueLib,
     pub resource: ResourceLib,
-    pub syntax: SyntaxLib,
     pub lang: LangLib,
 }
 
@@ -86,7 +84,6 @@ impl CfgMod for CoreLib {
         self.ctrl.extend(cfg);
         self.value.extend(cfg);
         self.resource.extend(cfg);
-        self.syntax.extend(cfg);
         self.lang.extend(cfg);
     }
 }
@@ -262,7 +259,5 @@ pub mod ctrl;
 pub mod value;
 
 pub mod resource;
-
-pub mod syntax;
 
 pub mod lang;
