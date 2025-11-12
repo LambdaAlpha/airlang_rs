@@ -1,4 +1,4 @@
-use crate::cfg::adapter::core::CoreAdapter;
+use crate::cfg::lib::adapter::CoreAdapter;
 use crate::semantics::core::CallEval;
 use crate::semantics::core::CallForm;
 

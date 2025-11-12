@@ -1,8 +1,8 @@
 use derive_more::Constructor;
 
-use super::CallPrimAdapter;
-use super::SymbolAdapter;
-use crate::cfg::adapter::core::CoreAdapter;
+use crate::cfg::lib::adapter::CallPrimAdapter;
+use crate::cfg::lib::adapter::CoreAdapter;
+use crate::cfg::lib::adapter::SymbolAdapter;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::CallEval;
 use crate::semantics::core::CallForm;
@@ -34,7 +34,7 @@ impl PrimAdapter {
         Self { symbol: SymbolAdapter::Id, call: CallPrimAdapter::Form }
     }
 
-    pub const fn is_id(&self) -> bool {
+    pub const fn is_id(self) -> bool {
         matches!(self.symbol, SymbolAdapter::Id) && matches!(self.call, CallPrimAdapter::Form)
     }
 }

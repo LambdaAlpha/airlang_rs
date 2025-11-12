@@ -1,11 +1,11 @@
 use log::error;
 
-use crate::cfg::adapter::CallPrimAdapter;
-use crate::cfg::adapter::CoreAdapter;
-use crate::cfg::adapter::SymbolAdapter;
-use crate::cfg::adapter::default_adapter;
-use crate::cfg::adapter::map_adapter;
-use crate::cfg::adapter::prim_adapter;
+use crate::cfg::lib::adapter::CallPrimAdapter;
+use crate::cfg::lib::adapter::CoreAdapter;
+use crate::cfg::lib::adapter::SymbolAdapter;
+use crate::cfg::lib::adapter::default_adapter;
+use crate::cfg::lib::adapter::map_adapter;
+use crate::cfg::lib::adapter::prim_adapter;
 use crate::cfg::utils::map_remove;
 use crate::cfg::utils::symbol;
 use crate::semantics::ctx::CtxAccess;

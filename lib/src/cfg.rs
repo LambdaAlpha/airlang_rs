@@ -1,9 +1,9 @@
 use log::error;
 use log::info;
 
-use self::adapter::CoreAdapter;
 use self::lib::CoreLib;
-use crate::cfg::adapter::adapter_func;
+use crate::cfg::lib::adapter::CoreAdapter;
+use crate::cfg::lib::adapter::adapter_func;
 use crate::cfg::prelude::CorePrelude;
 use crate::cfg::prelude::prelude_repr;
 use crate::semantics::cfg::Cfg;
@@ -102,8 +102,6 @@ impl<F: Named + Into<FuncVal>> CfgMod for F {
         cfg.extend_scope(self.name(), Val::Func(self.into()));
     }
 }
-
-pub mod adapter;
 
 pub mod lib;
 

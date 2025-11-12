@@ -1,5 +1,5 @@
-use crate::cfg::adapter::CompAdapter;
-use crate::cfg::adapter::PrimAdapter;
+use crate::cfg::lib::adapter::CompAdapter;
+use crate::cfg::lib::adapter::PrimAdapter;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;

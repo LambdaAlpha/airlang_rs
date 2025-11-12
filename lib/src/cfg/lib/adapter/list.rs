@@ -1,4 +1,4 @@
-use crate::cfg::adapter::core::CoreAdapter;
+use crate::cfg::lib::adapter::CoreAdapter;
 use crate::semantics::core::ListForm;
 use crate::type_::List;
 

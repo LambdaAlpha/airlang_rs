@@ -4,12 +4,12 @@ use log::error;
 
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
-use crate::cfg::adapter::default_adapter;
-use crate::cfg::adapter::id_adapter;
-use crate::cfg::adapter::pair_adapter;
 use crate::cfg::exception::illegal_input;
 use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::FreePrimFn;
+use crate::cfg::lib::adapter::default_adapter;
+use crate::cfg::lib::adapter::id_adapter;
+use crate::cfg::lib::adapter::pair_adapter;
 use crate::cfg::lib::free_impl;
 use crate::cfg::lib::mut_impl;
 use crate::semantics::cfg::Cfg;

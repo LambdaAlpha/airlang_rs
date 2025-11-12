@@ -2,12 +2,12 @@ use std::process::Command;
 
 use airlang::cfg::CfgMod;
 use airlang::cfg::CoreCfg;
-use airlang::cfg::adapter::CallPrimAdapter;
-use airlang::cfg::adapter::SymbolAdapter;
-use airlang::cfg::adapter::prim_adapter;
 use airlang::cfg::exception::fail;
 use airlang::cfg::exception::illegal_input;
 use airlang::cfg::lib::FreePrimFn;
+use airlang::cfg::lib::adapter::CallPrimAdapter;
+use airlang::cfg::lib::adapter::SymbolAdapter;
+use airlang::cfg::lib::adapter::prim_adapter;
 use airlang::cfg::lib::free_impl;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::val::FreePrimFuncVal;
