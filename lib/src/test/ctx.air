@@ -334,7 +334,7 @@ _ do [
     set_first = _ import _pair.set_first,
     a = _ new {p : . : 1 : 2},
     b = 3,
-    a which _ apply _p which _ set_first b,
+    a which _ eval _p which _ set_first b,
     a which _ move _p,
 ]
 -----
@@ -349,7 +349,7 @@ _ do [
         p : . : 1 : 2,
         b : . : 3,
     },
-    a which _ apply _p which _ set_first _b,
+    a which _ eval _p which _ set_first _b,
     a which _ move _p,
 ]
 -----
@@ -365,7 +365,7 @@ _ do [
         p : . : 1 : 2,
         b : . : 3,
     },
-    a which _ apply _p which _ _set_first _b,
+    a which _ eval _p which _ _set_first _b,
     a which _ move _p,
 ]
 -----
@@ -376,7 +376,7 @@ which recursive
 _ do [
     new = _ import _memory.new,
     a = _ new {b : . : _ new {c : . : 1}},
-    a which _ apply _b which _ apply __c
+    a which _ eval _b which _ eval __c
 ]
 -----
 1
@@ -397,7 +397,7 @@ _ do [
     self = _ import _context.self,
     a = 1,
     b = _ self .,
-    b which _ apply _a
+    b which _ eval _a
 ]
 -----
 1

@@ -1,11 +1,18 @@
 use log::error;
 
 use crate::cfg::CfgMod;
+use crate::cfg::CoreCfg;
 use crate::cfg::exception::illegal_input;
+use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::FreePrimFn;
+use crate::cfg::lib::adapter::CallPrimAdapter;
+use crate::cfg::lib::adapter::SymbolAdapter;
+use crate::cfg::lib::adapter::prim_adapter;
 use crate::cfg::lib::free_impl;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::Eval;
 use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::syntax::GenRepr;
 use crate::syntax::ParseRepr;
@@ -18,21 +25,29 @@ use crate::type_::Text;
 
 #[derive(Clone)]
 pub struct LangLib {
+    pub eval: MutPrimFuncVal,
     pub parse: FreePrimFuncVal,
     pub generate: FreePrimFuncVal,
 }
 
 impl Default for LangLib {
     fn default() -> Self {
-        LangLib { parse: parse(), generate: generate() }
+        LangLib { eval: eval(), parse: parse(), generate: generate() }
     }
 }
 
 impl CfgMod for LangLib {
     fn extend(self, cfg: &Cfg) {
+        let eval_adapter = prim_adapter(SymbolAdapter::Ref, CallPrimAdapter::Data);
+        CoreCfg::extend_adapter(cfg, &self.eval.id, eval_adapter);
+        self.eval.extend(cfg);
         self.parse.extend(cfg);
         self.generate.extend(cfg);
     }
+}
+
+pub fn eval() -> MutPrimFuncVal {
+    DynPrimFn { id: "language.semantics.eval", f: Eval }.mut_()
 }
 
 pub fn parse() -> FreePrimFuncVal {

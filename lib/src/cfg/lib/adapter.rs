@@ -24,14 +24,12 @@ _____!();
 use std::rc::Rc;
 
 use self::repr::parse;
-use super::DynPrimFn;
 use super::FreePrimFn;
 use super::free_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
 use crate::cfg::exception::illegal_input;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::Eval;
 use crate::semantics::ctx::CtxAccess;
 use crate::semantics::func::ConstPrimFunc;
 use crate::semantics::func::FreePrimFunc;
@@ -48,12 +46,11 @@ use crate::type_::Symbol;
 #[derive(Clone)]
 pub struct AdapterLib {
     pub new: FreePrimFuncVal,
-    pub apply: MutPrimFuncVal,
 }
 
 impl Default for AdapterLib {
     fn default() -> Self {
-        Self { new: new(), apply: apply() }
+        Self { new: new() }
     }
 }
 
@@ -63,9 +60,6 @@ impl CfgMod for AdapterLib {
         CoreCfg::extend_adapter(cfg, &self.new.id, new_adapter);
         self.new.extend(cfg);
         CoreCfg::extend_adapter(cfg, ADAPTER_FUNC_ID, id_adapter());
-        let apply_adapter = prim_adapter(SymbolAdapter::Ref, CallPrimAdapter::Data);
-        CoreCfg::extend_adapter(cfg, &self.apply.id, apply_adapter);
-        self.apply.extend(cfg);
     }
 }
 
@@ -79,10 +73,6 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
     };
     let func = adapter_func(adapter);
     Val::Func(func)
-}
-
-pub fn apply() -> MutPrimFuncVal {
-    DynPrimFn { id: "adapter.apply", f: Eval }.mut_()
 }
 
 const DEFAULT_ADAPTER: PrimAdapter =

@@ -52,8 +52,6 @@ pub struct CorePrelude {
     pub assign: MutPrimFuncVal,
     pub which: MutPrimFuncVal,
 
-    pub apply: MutPrimFuncVal,
-
     pub do_: MutPrimFuncVal,
     pub test: MutPrimFuncVal,
     pub switch: MutPrimFuncVal,
@@ -63,6 +61,8 @@ pub struct CorePrelude {
 
     pub type_: ConstPrimFuncVal,
     pub equal: FreePrimFuncVal,
+
+    pub eval: MutPrimFuncVal,
 
     pub form_id: FreePrimFuncVal,
     pub form_literal: MutPrimFuncVal,
@@ -110,8 +110,6 @@ impl CorePrelude {
             assign: lib.ctx.assign.clone(),
             which: lib.ctx.which.clone(),
 
-            apply: lib.adapter.apply.clone(),
-
             do_: lib.ctrl.do_.clone(),
             test: lib.ctrl.test.clone(),
             switch: lib.ctrl.switch.clone(),
@@ -121,6 +119,8 @@ impl CorePrelude {
 
             type_: lib.value.type_.clone(),
             equal: lib.value.equal.clone(),
+
+            eval: lib.lang.eval.clone(),
 
             form_id: form_id(),
             form_literal: form_literal(),
@@ -165,8 +165,6 @@ impl Prelude for CorePrelude {
         memo_put_func(memo, "=", &self.assign);
         memo_put_func(memo, "which", &self.which);
 
-        memo_put_func(memo, "apply", &self.apply);
-
         memo_put_func(memo, "do", &self.do_);
         memo_put_func(memo, "test", &self.test);
         memo_put_func(memo, "switch", &self.switch);
@@ -176,6 +174,8 @@ impl Prelude for CorePrelude {
 
         memo_put_func(memo, "type", &self.type_);
         memo_put_func(memo, "==", &self.equal);
+
+        memo_put_func(memo, "eval", &self.eval);
 
         memo_put_func(memo, DATA_ID, &self.form_id);
         memo_put_func(memo, DATA_LITERAL, &self.form_literal);

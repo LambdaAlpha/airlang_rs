@@ -24,7 +24,7 @@ _ do [
         id : _c_for,
         code : (_ctx : _args) : _ do [
             [_init, _condition, _next, _body] = _args,
-            _ctx which _ apply _ do [
+            _ctx which _ eval _ do [
                 _init,
                 _condition loop [
                     _body,
