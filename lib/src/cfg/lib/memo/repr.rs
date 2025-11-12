@@ -29,7 +29,7 @@ pub(in crate::cfg) fn parse_adapter() -> CoreAdapter {
         Map::default(),
         pair_adapter(
             Map::default(),
-            prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Eval),
+            prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Code),
             default_adapter(),
         ),
     )

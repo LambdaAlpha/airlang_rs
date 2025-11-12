@@ -130,29 +130,29 @@ impl ParseAdapter<Val> for PrimAdapter {
 }
 
 // todo rename
-pub(in crate::cfg) const FORM: &str = "form";
-pub(in crate::cfg) const EVAL: &str = "eval";
+pub(in crate::cfg) const DATA: &str = "data";
+pub(in crate::cfg) const CODE: &str = "code";
 pub(in crate::cfg) const SYMBOL_ID: &str = "";
-pub(in crate::cfg) const FORM_ID: &str = concatcp!(FORM, SYMBOL_ID);
-pub(in crate::cfg) const FORM_LITERAL: &str = concatcp!(FORM, SYMBOL_LITERAL_CHAR);
-pub(in crate::cfg) const FORM_REF: &str = concatcp!(FORM, SYMBOL_REF_CHAR);
-pub(in crate::cfg) const FORM_EVAL: &str = concatcp!(FORM, SYMBOL_EVAL_CHAR);
-pub(in crate::cfg) const EVAL_ID: &str = concatcp!(EVAL, SYMBOL_ID);
-pub(in crate::cfg) const EVAL_LITERAL: &str = concatcp!(EVAL, SYMBOL_LITERAL_CHAR);
-pub(in crate::cfg) const EVAL_REF: &str = concatcp!(EVAL, SYMBOL_REF_CHAR);
-pub(in crate::cfg) const EVAL_EVAL: &str = concatcp!(EVAL, SYMBOL_EVAL_CHAR);
+pub(in crate::cfg) const DATA_ID: &str = concatcp!(DATA, SYMBOL_ID);
+pub(in crate::cfg) const DATA_LITERAL: &str = concatcp!(DATA, SYMBOL_LITERAL_CHAR);
+pub(in crate::cfg) const DATA_REF: &str = concatcp!(DATA, SYMBOL_REF_CHAR);
+pub(in crate::cfg) const DATA_EVAL: &str = concatcp!(DATA, SYMBOL_EVAL_CHAR);
+pub(in crate::cfg) const CODE_ID: &str = concatcp!(CODE, SYMBOL_ID);
+pub(in crate::cfg) const CODE_LITERAL: &str = concatcp!(CODE, SYMBOL_LITERAL_CHAR);
+pub(in crate::cfg) const CODE_REF: &str = concatcp!(CODE, SYMBOL_REF_CHAR);
+pub(in crate::cfg) const CODE_EVAL: &str = concatcp!(CODE, SYMBOL_EVAL_CHAR);
 
 impl ParseAdapter<Symbol> for PrimAdapter {
     fn parse(adapter: Symbol) -> Option<Self> {
         let adapter = match &*adapter {
-            FORM_ID => PrimAdapter::new(SymbolAdapter::Id, CallPrimAdapter::Form),
-            FORM_LITERAL => PrimAdapter::new(SymbolAdapter::Literal, CallPrimAdapter::Form),
-            FORM_REF => PrimAdapter::new(SymbolAdapter::Ref, CallPrimAdapter::Form),
-            FORM_EVAL => PrimAdapter::new(SymbolAdapter::Eval, CallPrimAdapter::Form),
-            EVAL_ID => PrimAdapter::new(SymbolAdapter::Id, CallPrimAdapter::Eval),
-            EVAL_LITERAL => PrimAdapter::new(SymbolAdapter::Literal, CallPrimAdapter::Eval),
-            EVAL_REF => PrimAdapter::new(SymbolAdapter::Ref, CallPrimAdapter::Eval),
-            EVAL_EVAL => PrimAdapter::new(SymbolAdapter::Eval, CallPrimAdapter::Eval),
+            DATA_ID => PrimAdapter::new(SymbolAdapter::Id, CallPrimAdapter::Data),
+            DATA_LITERAL => PrimAdapter::new(SymbolAdapter::Literal, CallPrimAdapter::Data),
+            DATA_REF => PrimAdapter::new(SymbolAdapter::Ref, CallPrimAdapter::Data),
+            DATA_EVAL => PrimAdapter::new(SymbolAdapter::Eval, CallPrimAdapter::Data),
+            CODE_ID => PrimAdapter::new(SymbolAdapter::Id, CallPrimAdapter::Code),
+            CODE_LITERAL => PrimAdapter::new(SymbolAdapter::Literal, CallPrimAdapter::Code),
+            CODE_REF => PrimAdapter::new(SymbolAdapter::Ref, CallPrimAdapter::Code),
+            CODE_EVAL => PrimAdapter::new(SymbolAdapter::Eval, CallPrimAdapter::Code),
             s => {
                 error!("{s} should be a symbol representing a primitive adapter");
                 return None;
@@ -168,14 +168,14 @@ impl GenerateAdapter<Val> for PrimAdapter {
             return Val::default();
         }
         let s = match (self.call, self.symbol) {
-            (CallPrimAdapter::Form, SymbolAdapter::Id) => FORM_ID,
-            (CallPrimAdapter::Form, SymbolAdapter::Literal) => FORM_LITERAL,
-            (CallPrimAdapter::Form, SymbolAdapter::Ref) => FORM_REF,
-            (CallPrimAdapter::Form, SymbolAdapter::Eval) => FORM_EVAL,
-            (CallPrimAdapter::Eval, SymbolAdapter::Id) => EVAL_ID,
-            (CallPrimAdapter::Eval, SymbolAdapter::Literal) => EVAL_LITERAL,
-            (CallPrimAdapter::Eval, SymbolAdapter::Ref) => EVAL_REF,
-            (CallPrimAdapter::Eval, SymbolAdapter::Eval) => EVAL_EVAL,
+            (CallPrimAdapter::Data, SymbolAdapter::Id) => DATA_ID,
+            (CallPrimAdapter::Data, SymbolAdapter::Literal) => DATA_LITERAL,
+            (CallPrimAdapter::Data, SymbolAdapter::Ref) => DATA_REF,
+            (CallPrimAdapter::Data, SymbolAdapter::Eval) => DATA_EVAL,
+            (CallPrimAdapter::Code, SymbolAdapter::Id) => CODE_ID,
+            (CallPrimAdapter::Code, SymbolAdapter::Literal) => CODE_LITERAL,
+            (CallPrimAdapter::Code, SymbolAdapter::Ref) => CODE_REF,
+            (CallPrimAdapter::Code, SymbolAdapter::Eval) => CODE_EVAL,
         };
         symbol(s)
     }

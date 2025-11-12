@@ -339,7 +339,7 @@ impl Match {
 
     fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
         let val = Eval.mut_call(cfg, ctx, self.val);
-        let adapter = PrimAdapter::new(SymbolAdapter::Literal, CallPrimAdapter::Form);
+        let adapter = PrimAdapter::new(SymbolAdapter::Literal, CallPrimAdapter::Data);
         for (pattern, block) in self.arms {
             let pattern = adapter.mut_call(cfg, ctx, pattern);
             let Some(pattern) = pattern.parse() else {

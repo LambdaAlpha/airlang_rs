@@ -74,7 +74,7 @@ _ do [
 call ref
 -----
 _ do [
-    t = _ form _ func input,
+    t = _ data _ func input,
     t which _ do [function : input]
 ]
 -----
@@ -101,7 +101,7 @@ _ do [
 eval
 -----
 _ do [
-    a = _ form _ not true,
+    a = _ data _ not true,
     $a
 ]
 -----
@@ -174,7 +174,7 @@ call ctx func
 -----
 _ do [
     self = _ import _context.self,
-    c = _ form _ func input,
+    c = _ data _ func input,
     c which _ apply _function which _ self .
 ]
 -----
@@ -184,7 +184,7 @@ call ctx input
 -----
 _ do [
     self = _ import _context.self,
-    t = _ form _ func input,
+    t = _ data _ func input,
     t which _ apply _input which _ self .
 ]
 -----

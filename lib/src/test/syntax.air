@@ -14,7 +14,7 @@ _ do [
             i = 3 + (_ any _integer) % 4,
             b = atom which _ get i,
             i = (4 + (_ any _integer) % 4) % 4,
-            a = (_ any _bit) test [a : b] : [_ form. _ a b],
+            a = (_ any _bit) test [a : b] : [_ data. _ a b],
         ] : [
             (_ any _bit) test [
                 i = 3 + (_ any _integer) % 4,

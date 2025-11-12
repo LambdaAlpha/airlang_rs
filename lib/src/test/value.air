@@ -224,7 +224,7 @@ pair
 type call
 -----
 _ do [
-    a = _ form _ f a,
+    a = _ data _ f a,
     a which _ type .
 ]
 -----
@@ -327,7 +327,7 @@ true
 =====
 == call
 -----
-(_ form _ 1 2) == (_ form _ 1 2)
+(_ data _ 1 2) == (_ data _ 1 2)
 -----
 true
 =====

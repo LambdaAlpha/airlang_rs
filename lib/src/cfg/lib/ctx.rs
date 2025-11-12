@@ -61,7 +61,7 @@ impl CfgMod for CtxLib {
         self.set.extend(cfg);
         let assign_adapter = pair_adapter(
             Map::default(),
-            prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Form),
+            prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Data),
             default_adapter(),
         );
         CoreCfg::extend_adapter(cfg, &self.assign.id, assign_adapter);

@@ -349,7 +349,7 @@ _ do [
 match symbol
 -----
 _ do [
-    a = _ form a,
+    a = _ data a,
     a match [
         *a : [1],
         *b : [2]

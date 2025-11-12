@@ -16,7 +16,7 @@ _ do [
             ],
         ],
     },
-    _adapter@c_for export form, 
+    _adapter@c_for export data, 
     _ c_for [[i = 1, sum = 0], i <= 10, i = i + 1, sum = sum + i],
     sum
 ]

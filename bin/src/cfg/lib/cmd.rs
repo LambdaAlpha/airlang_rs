@@ -27,7 +27,7 @@ impl Default for CmdLib {
 
 impl CfgMod for CmdLib {
     fn extend(self, cfg: &Cfg) {
-        let call_adapter = prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Eval);
+        let call_adapter = prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Code);
         CoreCfg::extend_adapter(cfg, &self.call.id(), call_adapter);
         self.call.extend(cfg);
     }

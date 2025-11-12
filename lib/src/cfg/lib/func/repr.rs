@@ -41,7 +41,7 @@ const MUTABLE: &str = "mutable";
 
 pub(in crate::cfg) fn parse_adapter() -> CoreAdapter {
     let mut map = Map::default();
-    map.insert(symbol(CODE), prim_adapter(SymbolAdapter::Ref, CallPrimAdapter::Form));
+    map.insert(symbol(CODE), prim_adapter(SymbolAdapter::Ref, CallPrimAdapter::Data));
     map_adapter(map, default_adapter())
 }
 

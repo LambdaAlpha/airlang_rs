@@ -31,11 +31,11 @@ pub struct PrimAdapter {
 
 impl PrimAdapter {
     pub const fn id() -> Self {
-        Self { symbol: SymbolAdapter::Id, call: CallPrimAdapter::Form }
+        Self { symbol: SymbolAdapter::Id, call: CallPrimAdapter::Data }
     }
 
     pub const fn is_id(self) -> bool {
-        matches!(self.symbol, SymbolAdapter::Id) && matches!(self.call, CallPrimAdapter::Form)
+        matches!(self.symbol, SymbolAdapter::Id) && matches!(self.call, CallPrimAdapter::Data)
     }
 }
 
@@ -132,8 +132,8 @@ impl FreeFn<Cfg, CallVal, Val> for PrimAdapter {
             return Form.free_call(cfg, Val::Call(input));
         }
         match self.call {
-            CallPrimAdapter::Form => CallForm { func: self, input: self }.free_call(cfg, input),
-            CallPrimAdapter::Eval => CallEval { func: self }.free_call(cfg, input),
+            CallPrimAdapter::Data => CallForm { func: self, input: self }.free_call(cfg, input),
+            CallPrimAdapter::Code => CallEval { func: self }.free_call(cfg, input),
         }
     }
 }
@@ -144,10 +144,10 @@ impl ConstFn<Cfg, Val, CallVal, Val> for PrimAdapter {
             return Form.const_call(cfg, ctx, Val::Call(input));
         }
         match self.call {
-            CallPrimAdapter::Form => {
+            CallPrimAdapter::Data => {
                 CallForm { func: self, input: self }.const_call(cfg, ctx, input)
             }
-            CallPrimAdapter::Eval => CallEval { func: self }.const_call(cfg, ctx, input),
+            CallPrimAdapter::Code => CallEval { func: self }.const_call(cfg, ctx, input),
         }
     }
 }
@@ -158,8 +158,8 @@ impl MutFn<Cfg, Val, CallVal, Val> for PrimAdapter {
             return Form.mut_call(cfg, ctx, Val::Call(input));
         }
         match self.call {
-            CallPrimAdapter::Form => CallForm { func: self, input: self }.mut_call(cfg, ctx, input),
-            CallPrimAdapter::Eval => CallEval { func: self }.mut_call(cfg, ctx, input),
+            CallPrimAdapter::Data => CallForm { func: self, input: self }.mut_call(cfg, ctx, input),
+            CallPrimAdapter::Code => CallEval { func: self }.mut_call(cfg, ctx, input),
         }
     }
 }

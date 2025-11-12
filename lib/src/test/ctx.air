@@ -137,7 +137,7 @@ _ do [
 = destruct call
 -----
 _ do [
-    (_ f a) = _ form _ 1 2,
+    (_ f a) = _ data _ 1 2,
     [f, a]
 ]
 -----
@@ -146,7 +146,7 @@ _ do [
 = destruct infix
 -----
 _ do [
-    (a b c) = _ form 1 2 3,
+    (a b c) = _ data 1 2 3,
     [a, b, c]
 ]
 -----
@@ -254,7 +254,7 @@ _ do [
 -----
 _ do [
     function = _ import _call.function,
-    t = _ form _ func input,
+    t = _ data _ func input,
     t which function = _c,
     t which _ function .
 ]

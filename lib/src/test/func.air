@@ -80,7 +80,7 @@ _ do [
     new_link = _ import _link.new,
     link_get = _ import _link.get,
     link_set = _ import _link.set,
-    f = _ form _ function {
+    f = _ data _ function {
         context_access : _free,
         code : __ : _ do [
             _i = _a link_get _,
@@ -261,7 +261,7 @@ repr composite
 -----
 _ do [
     represent = _ import _function.represent,
-    repr = _ form_ {
+    repr = _ data_ {
         id : f,
         code : (ctx : in) : in,
         context_access : constant,
@@ -294,7 +294,7 @@ access mutable
 -----
 _ do [
     context_access = _ import _function.context_access,
-    eval. which _ context_access .
+    code. which _ context_access .
 ]
 -----
 mutable

@@ -116,8 +116,8 @@ impl FreeFn<Cfg, CallVal, Val> for CompAdapter {
             return self.default.free_call(cfg, input);
         };
         match self.default.call {
-            CallPrimAdapter::Form => call.form().free_call(cfg, input),
-            CallPrimAdapter::Eval => call.eval().free_call(cfg, input),
+            CallPrimAdapter::Data => call.form().free_call(cfg, input),
+            CallPrimAdapter::Code => call.eval().free_call(cfg, input),
         }
     }
 }
@@ -128,8 +128,8 @@ impl ConstFn<Cfg, Val, CallVal, Val> for CompAdapter {
             return self.default.const_call(cfg, ctx, input);
         };
         match self.default.call {
-            CallPrimAdapter::Form => call.form().const_call(cfg, ctx, input),
-            CallPrimAdapter::Eval => call.eval().const_call(cfg, ctx, input),
+            CallPrimAdapter::Data => call.form().const_call(cfg, ctx, input),
+            CallPrimAdapter::Code => call.eval().const_call(cfg, ctx, input),
         }
     }
 }
@@ -140,8 +140,8 @@ impl MutFn<Cfg, Val, CallVal, Val> for CompAdapter {
             return self.default.mut_call(cfg, ctx, input);
         };
         match self.default.call {
-            CallPrimAdapter::Form => call.form().mut_call(cfg, ctx, input),
-            CallPrimAdapter::Eval => call.eval().mut_call(cfg, ctx, input),
+            CallPrimAdapter::Data => call.form().mut_call(cfg, ctx, input),
+            CallPrimAdapter::Code => call.eval().mut_call(cfg, ctx, input),
         }
     }
 }

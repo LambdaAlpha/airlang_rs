@@ -1,13 +1,13 @@
 use crate::cfg::lib::CoreLib;
+use crate::cfg::lib::adapter::CODE_EVAL;
+use crate::cfg::lib::adapter::CODE_ID;
+use crate::cfg::lib::adapter::CODE_LITERAL;
+use crate::cfg::lib::adapter::CODE_REF;
 use crate::cfg::lib::adapter::CallPrimAdapter;
-use crate::cfg::lib::adapter::EVAL_EVAL;
-use crate::cfg::lib::adapter::EVAL_ID;
-use crate::cfg::lib::adapter::EVAL_LITERAL;
-use crate::cfg::lib::adapter::EVAL_REF;
-use crate::cfg::lib::adapter::FORM_EVAL;
-use crate::cfg::lib::adapter::FORM_ID;
-use crate::cfg::lib::adapter::FORM_LITERAL;
-use crate::cfg::lib::adapter::FORM_REF;
+use crate::cfg::lib::adapter::DATA_EVAL;
+use crate::cfg::lib::adapter::DATA_ID;
+use crate::cfg::lib::adapter::DATA_LITERAL;
+use crate::cfg::lib::adapter::DATA_REF;
 use crate::cfg::lib::adapter::SymbolAdapter;
 use crate::cfg::lib::adapter::adapter_free_func;
 use crate::cfg::lib::adapter::adapter_mut_func;
@@ -177,14 +177,14 @@ impl Prelude for CorePrelude {
         memo_put_func(memo, "type", &self.type_);
         memo_put_func(memo, "==", &self.equal);
 
-        memo_put_func(memo, FORM_ID, &self.form_id);
-        memo_put_func(memo, FORM_LITERAL, &self.form_literal);
-        memo_put_func(memo, FORM_REF, &self.form_ref);
-        memo_put_func(memo, FORM_EVAL, &self.form_eval);
-        memo_put_func(memo, EVAL_ID, &self.eval_id);
-        memo_put_func(memo, EVAL_LITERAL, &self.eval_literal);
-        memo_put_func(memo, EVAL_REF, &self.eval_ref);
-        memo_put_func(memo, EVAL_EVAL, &self.eval_eval);
+        memo_put_func(memo, DATA_ID, &self.form_id);
+        memo_put_func(memo, DATA_LITERAL, &self.form_literal);
+        memo_put_func(memo, DATA_REF, &self.form_ref);
+        memo_put_func(memo, DATA_EVAL, &self.form_eval);
+        memo_put_func(memo, CODE_ID, &self.eval_id);
+        memo_put_func(memo, CODE_LITERAL, &self.eval_literal);
+        memo_put_func(memo, CODE_REF, &self.eval_ref);
+        memo_put_func(memo, CODE_EVAL, &self.eval_eval);
     }
 }
 
@@ -201,41 +201,41 @@ pub fn prelude_repr<T: Prelude>(t: T) -> Memo {
 }
 
 pub fn form_id() -> FreePrimFuncVal {
-    let adapter = prim_adapter(SymbolAdapter::Id, CallPrimAdapter::Form);
+    let adapter = prim_adapter(SymbolAdapter::Id, CallPrimAdapter::Data);
     adapter_free_func(adapter)
 }
 
 pub fn form_literal() -> MutPrimFuncVal {
-    let adapter = prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Form);
+    let adapter = prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Data);
     adapter_mut_func(adapter)
 }
 
 pub fn form_ref() -> MutPrimFuncVal {
-    let adapter = prim_adapter(SymbolAdapter::Ref, CallPrimAdapter::Form);
+    let adapter = prim_adapter(SymbolAdapter::Ref, CallPrimAdapter::Data);
     adapter_mut_func(adapter)
 }
 
 pub fn form_eval() -> MutPrimFuncVal {
-    let adapter = prim_adapter(SymbolAdapter::Eval, CallPrimAdapter::Form);
+    let adapter = prim_adapter(SymbolAdapter::Eval, CallPrimAdapter::Data);
     adapter_mut_func(adapter)
 }
 
 pub fn eval_id() -> MutPrimFuncVal {
-    let adapter = prim_adapter(SymbolAdapter::Id, CallPrimAdapter::Eval);
+    let adapter = prim_adapter(SymbolAdapter::Id, CallPrimAdapter::Code);
     adapter_mut_func(adapter)
 }
 
 pub fn eval_literal() -> MutPrimFuncVal {
-    let adapter = prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Eval);
+    let adapter = prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Code);
     adapter_mut_func(adapter)
 }
 
 pub fn eval_ref() -> MutPrimFuncVal {
-    let adapter = prim_adapter(SymbolAdapter::Ref, CallPrimAdapter::Eval);
+    let adapter = prim_adapter(SymbolAdapter::Ref, CallPrimAdapter::Code);
     adapter_mut_func(adapter)
 }
 
 pub fn eval_eval() -> MutPrimFuncVal {
-    let adapter = prim_adapter(SymbolAdapter::Eval, CallPrimAdapter::Eval);
+    let adapter = prim_adapter(SymbolAdapter::Eval, CallPrimAdapter::Code);
     adapter_mut_func(adapter)
 }

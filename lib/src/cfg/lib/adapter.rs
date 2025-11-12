@@ -10,14 +10,14 @@ pub use self::symbol::SymbolAdapter;
 
 _____!();
 
-pub(in crate::cfg) use self::repr::EVAL_EVAL;
-pub(in crate::cfg) use self::repr::EVAL_ID;
-pub(in crate::cfg) use self::repr::EVAL_LITERAL;
-pub(in crate::cfg) use self::repr::EVAL_REF;
-pub(in crate::cfg) use self::repr::FORM_EVAL;
-pub(in crate::cfg) use self::repr::FORM_ID;
-pub(in crate::cfg) use self::repr::FORM_LITERAL;
-pub(in crate::cfg) use self::repr::FORM_REF;
+pub(in crate::cfg) use self::repr::CODE_EVAL;
+pub(in crate::cfg) use self::repr::CODE_ID;
+pub(in crate::cfg) use self::repr::CODE_LITERAL;
+pub(in crate::cfg) use self::repr::CODE_REF;
+pub(in crate::cfg) use self::repr::DATA_EVAL;
+pub(in crate::cfg) use self::repr::DATA_ID;
+pub(in crate::cfg) use self::repr::DATA_LITERAL;
+pub(in crate::cfg) use self::repr::DATA_REF;
 
 _____!();
 
@@ -59,11 +59,11 @@ impl Default for AdapterLib {
 
 impl CfgMod for AdapterLib {
     fn extend(self, cfg: &Cfg) {
-        let new_adapter = prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Form);
+        let new_adapter = prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Data);
         CoreCfg::extend_adapter(cfg, &self.new.id, new_adapter);
         self.new.extend(cfg);
         CoreCfg::extend_adapter(cfg, ADAPTER_FUNC_ID, id_adapter());
-        let apply_adapter = prim_adapter(SymbolAdapter::Ref, CallPrimAdapter::Form);
+        let apply_adapter = prim_adapter(SymbolAdapter::Ref, CallPrimAdapter::Data);
         CoreCfg::extend_adapter(cfg, &self.apply.id, apply_adapter);
         self.apply.extend(cfg);
     }
@@ -86,7 +86,7 @@ pub fn apply() -> MutPrimFuncVal {
 }
 
 const DEFAULT_ADAPTER: PrimAdapter =
-    PrimAdapter { symbol: SymbolAdapter::Ref, call: CallPrimAdapter::Eval };
+    PrimAdapter { symbol: SymbolAdapter::Ref, call: CallPrimAdapter::Code };
 
 pub(crate) const ADAPTER_FUNC_ID: &str = "adapter.object";
 
@@ -203,8 +203,8 @@ impl GetCtxAccess for SymbolAdapter {
 impl GetCtxAccess for CallPrimAdapter {
     fn ctx_access(&self) -> CtxAccess {
         match self {
-            CallPrimAdapter::Form => CtxAccess::Free,
-            CallPrimAdapter::Eval => CtxAccess::Mut,
+            CallPrimAdapter::Data => CtxAccess::Free,
+            CallPrimAdapter::Code => CtxAccess::Mut,
         }
     }
 }

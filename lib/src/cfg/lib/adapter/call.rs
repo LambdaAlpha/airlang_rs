@@ -10,8 +10,8 @@ pub struct CallAdapter {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum CallPrimAdapter {
-    Form,
-    Eval,
+    Data,
+    Code,
 }
 
 impl CallAdapter {

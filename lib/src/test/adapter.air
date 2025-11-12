@@ -1,239 +1,239 @@
-form trivial
+data trivial
 -----
-_ form a
+_ data a
 -----
 a
 =====
-form _
+data _
 -----
-_ form _a
+_ data _a
 -----
 _a
 =====
-form .
+data .
 -----
-_ form .a
------
-.a
-=====
-form_ trivial
------
-_ form_ a
------
-a
-=====
-form_ _
------
-_ form_ _a
------
-a
-=====
-form_ _ special
------
-_ form_ _.a
+_ data .a
 -----
 .a
 =====
-form_ .
+data_ trivial
+-----
+_ data_ a
+-----
+a
+=====
+data_ _
+-----
+_ data_ _a
+-----
+a
+=====
+data_ _ special
+-----
+_ data_ _.a
+-----
+.a
+=====
+data_ .
 -----
 _ do [
     a = 1,
-    [_ form_ .a, a]
+    [_ data_ .a, a]
 ]
 -----
 [1, 1]
 =====
-form_ . special
+data_ . special
 -----
 _ do [
     __a = 1,
-    [_ form_ ._a, ._a]
+    [_ data_ ._a, ._a]
 ]
 -----
 [1, 1]
 =====
-form_ $
+data_ $
 -----
 _ do [
-    a = _ form _ not true,
-    _ form_ $a
+    a = _ data _ not true,
+    _ data_ $a
 ]
 -----
 false
 =====
-form. trivial
+data. trivial
 -----
 _ do [
     a = 1,
-    [_ form. a, a]
+    [_ data. a, a]
 ]
 -----
 [1, 1]
 =====
-form. _
+data. _
 -----
-_ form. _a
+_ data. _a
 -----
 a
 =====
-form. .
+data. .
 -----
 _ do [
     a = 1,
-    [_ form. .a, a]
+    [_ data. .a, a]
 ]
 -----
 [1, 1]
 =====
-form. $
+data. $
 -----
 _ do [
-    a = _ form _ not true,
-    _ form. $a
+    a = _ data _ not true,
+    _ data. $a
 ]
 -----
 false
 =====
-form$ trivial
+data$ trivial
 -----
 _ do [
-    a = _ form _ not true,
-    _ form$ a
+    a = _ data _ not true,
+    _ data$ a
 ]
 -----
 false
 =====
-form$ _
+data$ _
 -----
-_ form$ _a
+_ data$ _a
 -----
 a
 =====
-form$ .
+data$ .
 -----
 _ do [
     a = 1,
-    [_ form$ .a, a]
+    [_ data$ .a, a]
 ]
 -----
 [1, 1]
 =====
-form$ $
+data$ $
 -----
 _ do [
-    a = _ form _ not true,
-    _ form$ $a
+    a = _ data _ not true,
+    _ data$ $a
 ]
 -----
 false
 =====
-eval call
+code call
 -----
 _ do [
-    a = _ form. _ eval _ not true,
+    a = _ data. _ code _ not true,
     $a
 ]
 -----
 false
 =====
-eval symbol
+code symbol
 -----
-_ eval $a
+_ code $a
 -----
 $a
 =====
-eval_ trivial
+code_ trivial
 -----
-_ eval_ a
------
-a
-=====
-eval_ _
------
-_ eval_ _a
+_ code_ a
 -----
 a
 =====
-eval_ .
+code_ _
+-----
+_ code_ _a
+-----
+a
+=====
+code_ .
 -----
 _ do [
     a = 1,
-    [_ eval_ .a, a]
+    [_ code_ .a, a]
 ]
 -----
 [1, 1]
 =====
-eval_ $
+code_ $
 -----
 _ do [
-    a = _ form _ not true,
-    _ eval_ $a
+    a = _ data _ not true,
+    _ code_ $a
 ]
 -----
 false
 =====
-eval. trivial
+code. trivial
 -----
 _ do [
     a = 1,
-    [_ eval. a, a]
+    [_ code. a, a]
 ]
 -----
 [1, 1]
 =====
-eval. _
+code. _
 -----
-_ eval. _a
+_ code. _a
 -----
 a
 =====
-eval. .
+code. .
 -----
 _ do [
     a = 1,
-    [_ eval. .a, a]
+    [_ code. .a, a]
 ]
 -----
 [1, 1]
 =====
-eval. $
+code. $
 -----
 _ do [
-    a = _ form _ not true,
-    _ eval. $a
+    a = _ data _ not true,
+    _ code. $a
 ]
 -----
 false
 =====
-eval$ trivial
+code$ trivial
 -----
 _ do [
-    a = _ form _ not true,
-    _ eval$ a
+    a = _ data _ not true,
+    _ code$ a
 ]
 -----
 false
 =====
-eval$ _
+code$ _
 -----
-_ eval$ _a
+_ code$ _a
 -----
 a
 =====
-eval$ .
+code$ .
 -----
 _ do [
     a = 1,
-    [_ eval$ .a, a]
+    [_ code$ .a, a]
 ]
 -----
 [1, 1]
 =====
-eval$ $
+code$ $
 -----
 _ do [
-    a = _ form _ not true,
-    _ eval$ $a
+    a = _ data _ not true,
+    _ code$ $a
 ]
 -----
 false
@@ -252,7 +252,7 @@ new primitive from symbol 1
 -----
 _ do [
     new = _ import _adapter.new,
-    f = _ new form_,
+    f = _ new data_,
     _ f _ a _b
 ]
 -----
@@ -262,92 +262,92 @@ new primitive from symbol 2
 -----
 _ do [
     new = _ import _adapter.new,
-    f = _ new eval.,
+    f = _ new code.,
     _ f _ not true
 ]
 -----
 false
 =====
-new primitive form
+new primitive data
 -----
 _ do [
     new = _ import _adapter.new,
-    f = _ new {default : form},
+    f = _ new {default : data},
     _ f [.a, _ f a]
 ]
 -----
 [.a, _ f a]
 =====
-new primitive form_
+new primitive data_
 -----
 _ do [
     new = _ import _adapter.new,
-    f = _ new {default : form_},
+    f = _ new {default : data_},
     _ f [_a, _ f a]
 ]
 -----
 [a, _ f a]
 =====
-new primitive form.
+new primitive data.
 -----
 _ do [
     new = _ import _adapter.new,
     a = 1,
-    f = _ new {default : form.},
+    f = _ new {default : data.},
     _ f [a, _ _a a]
 ]
 -----
 [1, _ a 1]
 =====
-new primitive form$
+new primitive data$
 -----
 _ do [
     new = _ import _adapter.new,
-    a = _ form _ not true,
-    f = _ new {default : form$},
+    a = _ data _ not true,
+    f = _ new {default : data$},
     _ f [a, _ _a a]
 ]
 -----
 [false, _ a false]
 =====
-new primitive eval
+new primitive code
 -----
 _ do [
     new = _ import _adapter.new,
-    f = _ new {default : eval},
-    b = _ form. _ f [_a, _ not true],
+    f = _ new {default : code},
+    b = _ data. _ f [_a, _ not true],
     $b
 ]
 -----
 [a, false]
 =====
-new primitive eval_
+new primitive code_
 -----
 _ do [
     new = _ import _adapter.new,
-    f = _ new {default : eval_},
+    f = _ new {default : code_},
     _ f [a, _ .not true]
 ]
 -----
 [a, false]
 =====
-new primitive eval.
+new primitive code.
 -----
 _ do [
     new = _ import _adapter.new,
     a = 1,
-    f = _ new {default : eval.},
+    f = _ new {default : code.},
     _ f [a, _ not true]
 ]
 -----
 [1, false]
 =====
-new primitive eval$
+new primitive code$
 -----
 _ do [
     new = _ import _adapter.new,
-    a = _ form _ not true,
-    f = _ new {default : eval$},
+    a = _ data _ not true,
+    f = _ new {default : code$},
     _ f [a, _ .not true]
 ]
 -----
@@ -360,8 +360,8 @@ _ do [
     f = _ new {
         pair : {
             this : {},
-            that : form_,
-        } : eval. : {pair : .}
+            that : data_,
+        } : code. : {pair : .}
     },
     [
         _ f this : _ not true,
@@ -379,7 +379,7 @@ _ do [
     c = 1,
     d = 2,
     f = _ new {
-        pair : {} : form_ : {pair : form_}
+        pair : {} : data_ : {pair : data_}
     },
     _ f a : _b : _ .c $d
 ]
@@ -391,7 +391,7 @@ new call
 _ do [
     new = _ import _adapter.new,
     f = _ new {
-        call : _ eval. eval.
+        call : _ code. code.
     },
     _ f _ _g _ not true
 ]
@@ -403,7 +403,7 @@ new list list
 _ do [
     new = _ import _adapter.new,
     f = _ new {
-        list : [form, eval_]
+        list : [data, code_]
     },
     _ f [_ not true, _ .not true, _ _not true]
 ]
@@ -415,7 +415,7 @@ new list head tail
 _ do [
     new = _ import _adapter.new,
     f = _ new {
-        list : [form, eval_] : form_
+        list : [data, code_] : data_
     },
     _ f [_ not true, _ .not true, _ _not true]
 ]
@@ -428,8 +428,8 @@ _ do [
     new = _ import _adapter.new,
     f = _ new {
         map : {
-            a : form,
-            b : eval_,
+            a : data,
+            b : code_,
         }
     },
     _ f {
@@ -447,9 +447,9 @@ _ do [
     new = _ import _adapter.new,
     f = _ new {
         map : {
-            a : form,
-            b : eval_,
-        } : form_
+            a : data,
+            b : code_,
+        } : data_
     },
     _ f {
         a : _ not true,
@@ -474,7 +474,7 @@ access free
 -----
 _ do [
     context_access = _ import _function.context_access,
-    form which _ context_access .
+    data which _ context_access .
 ]
 -----
 free
@@ -494,7 +494,7 @@ access mutable
 -----
 _ do [
     context_access = _ import _function.context_access,
-    eval. which _ context_access .
+    code. which _ context_access .
 ]
 -----
 mutable

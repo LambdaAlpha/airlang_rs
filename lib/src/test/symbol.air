@@ -19,7 +19,7 @@ length empty
 -----
 _ do [
     length = _ import _symbol.length,
-    s = _ form '',
+    s = _ data '',
     s which _ length .
 ]
 -----
@@ -118,7 +118,7 @@ into_text empty
 -----
 _ do [
     into_text = _ import _symbol.into_text,
-    _ into_text _ form ''
+    _ into_text _ data ''
 ]
 -----
 ""

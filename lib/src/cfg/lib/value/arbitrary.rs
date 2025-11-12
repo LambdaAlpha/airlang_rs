@@ -291,7 +291,7 @@ impl<T: Arbitrary> Arbitrary for Box<T> {
 
 impl Arbitrary for CallPrimAdapter {
     fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
-        const ADAPTERS: [CallPrimAdapter; 2] = [CallPrimAdapter::Form, CallPrimAdapter::Eval];
+        const ADAPTERS: [CallPrimAdapter; 2] = [CallPrimAdapter::Data, CallPrimAdapter::Code];
         *(ADAPTERS.choose(rng).unwrap())
     }
 }
