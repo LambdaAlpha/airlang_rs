@@ -1,1 +1,10 @@
-.
+_ do [
+    _prelude_link set _ import _prelude,
+    _link_set set _ import _link.set,
+    _prelude set prelude_link link_set .,
+    _apply set _ import _function.apply,
+    
+    prelude which set apply _empty : _ data '',
+    
+    prelude_link link_set _ move _prelude,
+]

@@ -19,8 +19,7 @@ length empty
 -----
 _ do [
     length = _ import _symbol.length,
-    s = _ data '',
-    s which _ length .
+    empty which _ length .
 ]
 -----
 0
@@ -39,7 +38,7 @@ join empty
 -----
 _ do [
     join = _ import _symbol.join,
-    '.' join [_a, _b]
+    empty join [_a, _b]
 ]
 -----
 ab
@@ -118,7 +117,7 @@ into_text empty
 -----
 _ do [
     into_text = _ import _symbol.into_text,
-    _ into_text _ data ''
+    _ into_text empty
 ]
 -----
 ""
