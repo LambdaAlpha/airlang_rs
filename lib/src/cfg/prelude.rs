@@ -38,6 +38,8 @@ pub struct CorePrelude {
     pub greater_than: FreePrimFuncVal,
     pub greater_equal: FreePrimFuncVal,
 
+    pub call: FreePrimFuncVal,
+
     pub exist: FreePrimFuncVal,
     pub import: FreePrimFuncVal,
     pub export: FreePrimFuncVal,
@@ -96,6 +98,8 @@ impl CorePrelude {
             greater_than: lib.int.greater_than.clone(),
             greater_equal: lib.int.greater_equal.clone(),
 
+            call: lib.call.new.clone(),
+
             exist: lib.cfg.exist.clone(),
             import: lib.cfg.import.clone(),
             export: lib.cfg.export.clone(),
@@ -150,6 +154,8 @@ impl Prelude for CorePrelude {
         memo_put_func(memo, "<=", &self.less_equal);
         memo_put_func(memo, ">", &self.greater_than);
         memo_put_func(memo, ">=", &self.greater_equal);
+
+        memo_put_func(memo, "call", &self.call);
 
         memo_put_func(memo, "exist", &self.exist);
         memo_put_func(memo, "import", &self.import);

@@ -1,3 +1,16 @@
+new
+-----
+_ do [
+    _any set _ import _value.any,
+    _f set _ any .,
+    _i set _ any .,
+    _c1 set f call i,
+    _c2 set _ data. _ f i,
+    c1 == c2
+]
+-----
+true
+=====
 get
 -----
 _ do [

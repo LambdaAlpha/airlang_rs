@@ -1,18 +1,27 @@
 use std::mem::swap;
 
+use log::error;
+
 use super::DynPrimFn;
+use super::FreePrimFn;
 use super::const_impl;
+use super::free_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::exception::illegal_ctx;
+use crate::cfg::exception::illegal_input;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::ConstPrimFuncVal;
+use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
+use crate::type_::Call;
 use crate::type_::ConstRef;
+use crate::type_::Pair;
 
 #[derive(Clone)]
 pub struct CallLib {
+    pub new: FreePrimFuncVal,
     pub func: ConstPrimFuncVal,
     pub set_func: MutPrimFuncVal,
     pub input: ConstPrimFuncVal,
@@ -21,17 +30,37 @@ pub struct CallLib {
 
 impl Default for CallLib {
     fn default() -> Self {
-        CallLib { func: func(), set_func: set_func(), input: input(), set_input: set_input() }
+        CallLib {
+            new: new(),
+            func: func(),
+            set_func: set_func(),
+            input: input(),
+            set_input: set_input(),
+        }
     }
 }
 
 impl CfgMod for CallLib {
     fn extend(self, cfg: &Cfg) {
+        self.new.extend(cfg);
         self.func.extend(cfg);
         self.set_func.extend(cfg);
         self.input.extend(cfg);
         self.set_input.extend(cfg);
     }
+}
+
+pub fn new() -> FreePrimFuncVal {
+    FreePrimFn { id: "call.new", f: free_impl(fn_new) }.free()
+}
+
+fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
+        return illegal_input(cfg);
+    };
+    let pair = Pair::from(pair);
+    Val::Call(Call::new(pair.first, pair.second).into())
 }
 
 pub fn func() -> ConstPrimFuncVal {
