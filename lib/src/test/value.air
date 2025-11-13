@@ -1,9 +1,9 @@
 == true
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any .,
-    b = a,
+    _any set _ import _value.any,
+    _a set _ any .,
+    _b set a,
     a == b
 ]
 -----
@@ -12,8 +12,8 @@ true
 any unit
 -----
 _ do [
-    any = _ import _value.any,
-    u = _ any _unit,
+    _any set _ import _value.any,
+    _u set _ any _unit,
     u which _ type .
 ]
 -----
@@ -22,8 +22,8 @@ unit
 any bit
 -----
 _ do [
-    any = _ import _value.any,
-    b = _ any _bit,
+    _any set _ import _value.any,
+    _b set _ any _bit,
     b which _ type .
 ]
 -----
@@ -32,8 +32,8 @@ bit
 any symbol
 -----
 _ do [
-    any = _ import _value.any,
-    s = _ any _symbol,
+    _any set _ import _value.any,
+    _s set _ any _symbol,
     s which _ type .
 ]
 -----
@@ -42,8 +42,8 @@ symbol
 any text
 -----
 _ do [
-    any = _ import _value.any,
-    t = _ any _text,
+    _any set _ import _value.any,
+    _t set _ any _text,
     t which _ type .
 ]
 -----
@@ -52,8 +52,8 @@ text
 any integer
 -----
 _ do [
-    any = _ import _value.any,
-    i = _ any _integer,
+    _any set _ import _value.any,
+    _i set _ any _integer,
     i which _ type .
 ]
 -----
@@ -62,8 +62,8 @@ integer
 any number
 -----
 _ do [
-    any = _ import _value.any,
-    n = _ any _number,
+    _any set _ import _value.any,
+    _n set _ any _number,
     n which _ type .
 ]
 -----
@@ -72,8 +72,8 @@ number
 any byte
 -----
 _ do [
-    any = _ import _value.any,
-    b = _ any _byte,
+    _any set _ import _value.any,
+    _b set _ any _byte,
     b which _ type .
 ]
 -----
@@ -82,8 +82,8 @@ byte
 any pair
 -----
 _ do [
-    any = _ import _value.any,
-    p = _ any _pair,
+    _any set _ import _value.any,
+    _p set _ any _pair,
     p which _ type .
 ]
 -----
@@ -92,8 +92,8 @@ pair
 any call
 -----
 _ do [
-    any = _ import _value.any,
-    c = _ any _call,
+    _any set _ import _value.any,
+    _c set _ any _call,
     c which _ type .
 ]
 -----
@@ -102,8 +102,8 @@ call
 any list
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _list,
+    _any set _ import _value.any,
+    _a set _ any _list,
     a which _ type .
 ]
 -----
@@ -112,8 +112,8 @@ list
 any map
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _map,
+    _any set _ import _value.any,
+    _a set _ any _map,
     a which _ type .
 ]
 -----
@@ -122,8 +122,8 @@ map
 any link
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _link,
+    _any set _ import _value.any,
+    _a set _ any _link,
     a which _ type .
 ]
 -----
@@ -132,8 +132,8 @@ link
 any memory
 -----
 _ do [
-    any = _ import _value.any,
-    m = _ any _memory,
+    _any set _ import _value.any,
+    _m set _ any _memory,
     m which _ type .
 ]
 -----
@@ -142,8 +142,8 @@ memory
 any function
 -----
 _ do [
-    any = _ import _value.any,
-    f = _ any _function,
+    _any set _ import _value.any,
+    _f set _ any _function,
     f which _ type .
 ]
 -----
@@ -152,7 +152,7 @@ function
 type unit
 -----
 _ do [
-    a = .,
+    _a set .,
     a which _ type .
 ]
 -----
@@ -161,7 +161,7 @@ unit
 type bit
 -----
 _ do [
-    a = true,
+    _a set true,
     a which _ type .
 ]
 -----
@@ -170,7 +170,7 @@ bit
 type symbol
 -----
 _ do [
-    a = _a,
+    _a set _a,
     a which _ type .
 ]
 -----
@@ -179,7 +179,7 @@ symbol
 type text
 -----
 _ do [
-    a = "",
+    _a set "",
     a which _ type .
 ]
 -----
@@ -188,7 +188,7 @@ text
 type integer
 -----
 _ do [
-    a = 1,
+    _a set 1,
     a which _ type .
 ]
 -----
@@ -197,7 +197,7 @@ integer
 type number
 -----
 _ do [
-    a = 1.0,
+    _a set 1.0,
     a which _ type .
 ]
 -----
@@ -206,7 +206,7 @@ number
 type byte
 -----
 _ do [
-    a = byte(ff),
+    _a set byte(ff),
     a which _ type .
 ]
 -----
@@ -215,7 +215,7 @@ byte
 type pair
 -----
 _ do [
-    a = 1 : 2,
+    _a set 1 : 2,
     a which _ type .
 ]
 -----
@@ -224,7 +224,7 @@ pair
 type call
 -----
 _ do [
-    a = _ data _ f a,
+    _a set _ data _ f a,
     a which _ type .
 ]
 -----
@@ -233,7 +233,7 @@ call
 type list
 -----
 _ do [
-    a = [],
+    _a set [],
     a which _ type .
 ]
 -----
@@ -242,7 +242,7 @@ list
 type map
 -----
 _ do [
-    a = {},
+    _a set {},
     a which _ type .
 ]
 -----
@@ -251,8 +251,8 @@ map
 type link
 -----
 _ do [
-    new_link = _ import _link.new,
-    a = _ new_link .,
+    _new_link set _ import _link.new,
+    _a set _ new_link .,
     a which _ type .
 ]
 -----
@@ -261,8 +261,8 @@ link
 type memory
 -----
 _ do [
-    new_memory = _ import _memory.new,
-    a = _ new_memory {},
+    _new_memory set _ import _memory.new,
+    _a set _ new_memory {},
     a which _ type .
 ]
 -----
@@ -271,7 +271,7 @@ memory
 type function
 -----
 _ do [
-    a = _ function {},
+    _a set _ function {},
     a which _ type .
 ]
 -----
@@ -346,9 +346,9 @@ true
 == link
 -----
 _ do [
-    new_link = _ import _link.new,
-    a = _ new_link .,
-    b = a,
+    _new_link set _ import _link.new,
+    _a set _ new_link .,
+    _b set a,
     a == b
 ]
 -----
@@ -357,9 +357,9 @@ true
 == memory
 -----
 _ do [
-    new_memory = _ import _memory.new,
-    a = _ new_memory {},
-    b = _ new_memory {},
+    _new_memory set _ import _memory.new,
+    _a set _ new_memory {},
+    _b set _ new_memory {},
     (a == b) and _ not a == .
 ]
 -----
@@ -368,8 +368,8 @@ true
 == function
 -----
 _ do [
-    a = _ function {},
-    b = _ function {},
+    _a set _ function {},
+    _b set _ function {},
     (a == b) and _ not a == .
 ]
 -----
@@ -390,7 +390,7 @@ false
 == ref val
 -----
 _ do [
-    a = 1,
+    _a set 1,
     a == 1
 ]
 -----
@@ -399,7 +399,7 @@ true
 == val ref
 -----
 _ do [
-    a = 1,
+    _a set 1,
     1 == a
 ]
 -----
@@ -408,8 +408,8 @@ true
 == ref ref
 -----
 _ do [
-    a = 1,
-    b = 1,
+    _a set 1,
+    _b set 1,
     a == b
 ]
 -----
@@ -418,7 +418,7 @@ true
 == same ref
 -----
 _ do [
-    a = 1,
+    _a set 1,
     a == a
 ]
 -----
@@ -433,7 +433,7 @@ true
 == special ref
 -----
 _ do [
-    __a = 1,
+    __a set 1,
     ._a == 1
 ]
 -----

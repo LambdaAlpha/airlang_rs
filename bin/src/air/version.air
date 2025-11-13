@@ -1,10 +1,10 @@
 _ do [
-    version = _ import _language.version,
-    generate = _ import _language.syntax.generate,
-    join = _ import _text.join,
+    _version set _ import _language.version,
+    _generate set _ import _language.syntax.generate,
+    _join set _ import _text.join,
     [major, minor, patch] = version,
-    major = _ generate major,
-    minor = _ generate minor,
-    patch = _ generate patch,
+    _major set _ generate major,
+    _minor set _ generate minor,
+    _patch set _ generate patch,
     "" join ["v", major, ".", minor, ".", patch]
 ]

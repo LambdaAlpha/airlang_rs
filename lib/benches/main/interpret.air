@@ -1,13 +1,13 @@
 _("bench interpret")
 
 _ do [
-    % = _ import _integer.remainder,
-    f = _ function {
+    _% set _ import _integer.remainder,
+    _f set _ function {
         code : _n : _ do [
-            _sum = 0,
+            __sum set 0,
             _n iterate _i : [
                 (0 == _i % 3) __continue .,
-                _sum = _sum + _i,
+                __sum set _sum + _i,
             ],
             _sum
         ],

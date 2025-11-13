@@ -6,7 +6,7 @@ true
 =====
 assign and get
 -----
-_ do [a = 1, a]
+_ do [_a set 1, a]
 -----
 1
 =====
@@ -37,7 +37,7 @@ _.a
 ctx ref
 -----
 _ do [
-    a = 1,
+    _a set 1,
     .a
 ]
 -----
@@ -46,7 +46,7 @@ _ do [
 ref will not remove
 -----
 _ do [
-    a = 1,
+    _a set 1,
     .a,
     a
 ]
@@ -56,7 +56,7 @@ _ do [
 ref special
 -----
 _ do [
-    __a = 1,
+    __a set 1,
     ._a
 ]
 -----
@@ -65,7 +65,7 @@ _ do [
 pair ref
 -----
 _ do [
-    p = 1 : 2,
+    _p set 1 : 2,
     p which _ do [first : second]
 ]
 -----
@@ -74,7 +74,7 @@ _ do [
 call ref
 -----
 _ do [
-    t = _ data _ func input,
+    _t set _ data _ func input,
     t which _ do [function : input]
 ]
 -----
@@ -83,7 +83,7 @@ func : input
 list ref
 -----
 _ do [
-    l = [0, 3, 6],
+    _l set [0, 3, 6],
     l which _ do [.0 : .1 : .2]
 ]
 -----
@@ -92,7 +92,7 @@ _ do [
 map ref
 -----
 _ do [
-    m = {a : 1, b : 2},
+    _m set {a : 1, b : 2},
     m which _ do [a : b]
 ]
 -----
@@ -101,7 +101,7 @@ _ do [
 eval
 -----
 _ do [
-    a = _ data _ not true,
+    _a set _ data _ not true,
     $a
 ]
 -----
@@ -134,7 +134,7 @@ true
 ctx unit
 -----
 _ do [
-    a = 1,
+    _a set 1,
     . which _ eval _a
 ]
 -----
@@ -143,8 +143,8 @@ _ do [
 memo ctx name
 -----
 _ do [
-    first = _ import _pair.first,
-    p = 1 : 2,
+    _first set _ import _pair.first,
+    _p set 1 : 2,
     p which _ first .
 ]
 -----
@@ -153,8 +153,8 @@ _ do [
 pair ctx first
 -----
 _ do [
-    self = _ import _context.self,
-    p = 1 : 2,
+    _self set _ import _context.self,
+    _p set 1 : 2,
     p which _ eval _first which _ self .
 ]
 -----
@@ -163,8 +163,8 @@ _ do [
 pair ctx second
 -----
 _ do [
-    self = _ import _context.self,
-    p = 1 : 2,
+    _self set _ import _context.self,
+    _p set 1 : 2,
     p which _ eval _second which _ self .
 ]
 -----
@@ -173,8 +173,8 @@ _ do [
 call ctx func
 -----
 _ do [
-    self = _ import _context.self,
-    c = _ data _ func input,
+    _self set _ import _context.self,
+    _c set _ data _ func input,
     c which _ eval _function which _ self .
 ]
 -----
@@ -183,8 +183,8 @@ func
 call ctx input
 -----
 _ do [
-    self = _ import _context.self,
-    t = _ data _ func input,
+    _self set _ import _context.self,
+    _t set _ data _ func input,
     t which _ eval _input which _ self .
 ]
 -----
@@ -193,8 +193,8 @@ input
 list ctx index int
 -----
 _ do [
-    self = _ import _context.self,
-    l = [0, 2, 4],
+    _self set _ import _context.self,
+    _l set [0, 2, 4],
     l which _ eval 1 which _ self .
 ]
 -----
@@ -203,8 +203,8 @@ _ do [
 list ctx index symbol
 -----
 _ do [
-    self = _ import _context.self,
-    l = [0, 2, 4],
+    _self set _ import _context.self,
+    _l set [0, 2, 4],
     l which _ eval _1 which _ self .
 ]
 -----
@@ -213,8 +213,8 @@ _ do [
 map ctx key
 -----
 _ do [
-    self = _ import _context.self,
-    m = {a : 1, b : 2},
+    _self set _ import _context.self,
+    _m set {a : 1, b : 2},
     m which _ eval _a which _ self .
 ]
 -----
@@ -223,8 +223,8 @@ _ do [
 map ctx key .
 -----
 _ do [
-    self = _ import _context.self,
-    m = {a : 1, b : 2},
+    _self set _ import _context.self,
+    _m set {a : 1, b : 2},
     m which _ eval . which _ self .
 ]
 -----
@@ -233,8 +233,8 @@ _ do [
 map ctx key other
 -----
 _ do [
-    self = _ import _context.self,
-    m = {1 : 2, 2 : 4},
+    _self set _ import _context.self,
+    _m set {1 : 2, 2 : 4},
     m which _ eval 1 which _ self .
 ]
 -----

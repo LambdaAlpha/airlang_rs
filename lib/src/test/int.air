@@ -1,8 +1,8 @@
 + 0
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
+    _any set _ import _value.any,
+    _a set _ any _integer,
     a == a + 0
 ]
 -----
@@ -11,8 +11,8 @@ true
 - 0
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
+    _any set _ import _value.any,
+    _a set _ any _integer,
     a == a - 0
 ]
 -----
@@ -21,9 +21,9 @@ true
 + -
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
-    b = _ any _integer,
+    _any set _ import _value.any,
+    _a set _ any _integer,
+    _b set _ any _integer,
     a == <(a + b - b)
 ]
 -----
@@ -32,9 +32,9 @@ true
 - +
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
-    b = _ any _integer,
+    _any set _ import _value.any,
+    _a set _ any _integer,
+    _b set _ any _integer,
     a == <(a - b + b)
 ]
 -----
@@ -55,8 +55,8 @@ true
 * 0
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
+    _any set _ import _value.any,
+    _a set _ any _integer,
     0 == a * 0
 ]
 -----
@@ -65,8 +65,8 @@ true
 * 1
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
+    _any set _ import _value.any,
+    _a set _ any _integer,
     a == a * 1
 ]
 -----
@@ -75,8 +75,8 @@ true
 * -1
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
+    _any set _ import _value.any,
+    _a set _ any _integer,
     0 == a + a * 0-1
 ]
 -----
@@ -85,8 +85,8 @@ true
 / 0
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
+    _any set _ import _value.any,
+    _a set _ any _integer,
     . == a / 0
 ]
 -----
@@ -95,8 +95,8 @@ true
 / 1
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
+    _any set _ import _value.any,
+    _a set _ any _integer,
     a == a / 1
 ]
 -----
@@ -105,8 +105,8 @@ true
 / -1
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
+    _any set _ import _value.any,
+    _a set _ any _integer,
     0 == a + a / 0-1
 ]
 -----
@@ -115,8 +115,8 @@ true
 0 /
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
+    _any set _ import _value.any,
+    _a set _ any _integer,
     (a == 0) _return true,
     0 == 0 / a
 ]
@@ -126,10 +126,10 @@ true
 0 remainder
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
+    _any set _ import _value.any,
+    _a set _ any _integer,
     (a == 0) _return true,
-    % = _ import _integer.remainder,
+    _% set _ import _integer.remainder,
     0 == 0 % a
 ]
 -----
@@ -138,9 +138,9 @@ true
 remainder 0
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
-    % = _ import _integer.remainder,
+    _any set _ import _value.any,
+    _a set _ any _integer,
+    _% set _ import _integer.remainder,
     . == a % 0
 ]
 -----
@@ -149,9 +149,9 @@ true
 remainder 1
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
-    % = _ import _integer.remainder,
+    _any set _ import _value.any,
+    _a set _ any _integer,
+    _% set _ import _integer.remainder,
     0 == a % 1
 ]
 -----
@@ -160,11 +160,11 @@ true
 remainder exact
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
-    b = _ any _integer,
+    _any set _ import _value.any,
+    _a set _ any _integer,
+    _b set _ any _integer,
     (b == 0) _return true,
-    % = _ import _integer.remainder,
+    _% set _ import _integer.remainder,
     0 == (a * b) % b
 ]
 -----
@@ -173,11 +173,11 @@ true
 sign(a remainder b) == sign(a)
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
-    b = _ any _integer,
+    _any set _ import _value.any,
+    _a set _ any _integer,
+    _b set _ any _integer,
     (b == 0) _return true,
-    % = _ import _integer.remainder,
+    _% set _ import _integer.remainder,
     (0 <= a) == 0 <= a % b
 ]
 -----
@@ -186,11 +186,11 @@ true
 abs(a remainder b) < abs(b)
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
-    b = _ any _integer,
+    _any set _ import _value.any,
+    _a set _ any _integer,
+    _b set _ any _integer,
     (b == 0) _return true,
-    % = _ import _integer.remainder,
+    _% set _ import _integer.remainder,
     (0 <= b) == 0 <= b + a % b
 ]
 -----
@@ -199,9 +199,9 @@ true
 * /
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
-    b = _ any _integer,
+    _any set _ import _value.any,
+    _a set _ any _integer,
+    _b set _ any _integer,
     (b == 0) _return true,
     a == <(a * b / b)
 ]
@@ -211,11 +211,11 @@ true
 exact / *
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
-    b = _ any _integer,
+    _any set _ import _value.any,
+    _a set _ any _integer,
+    _b set _ any _integer,
     (b == 0) _return true,
-    c = a * b,
+    _c set a * b,
     c == <(c / b * b)
 ]
 -----
@@ -224,9 +224,9 @@ true
 inexact / abs(a) > abs(a / b * b)
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
-    b = _ any _integer,
+    _any set _ import _value.any,
+    _a set _ any _integer,
+    _b set _ any _integer,
     (b == 0) _return true,
     (0 <= a) == 0 <= a - a / b * b
 ]
@@ -236,11 +236,11 @@ true
 a == b * a / b + a remainder b
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
-    b = _ any _integer,
+    _any set _ import _value.any,
+    _a set _ any _integer,
+    _b set _ any _integer,
     (b == 0) _return true,
-    % = _ import _integer.remainder,
+    _% set _ import _integer.remainder,
     a == (b * a / b) + a % b
 ]
 -----
@@ -291,7 +291,7 @@ true
 remainder exact
 -----
 _ do [
-    % = _ import _integer.remainder,
+    _% set _ import _integer.remainder,
     6 % 3
 ]
 -----
@@ -300,7 +300,7 @@ _ do [
 remainder inexact smaller
 -----
 _ do [
-    % = _ import _integer.remainder,
+    _% set _ import _integer.remainder,
     5 % 3
 ]
 -----
@@ -309,7 +309,7 @@ _ do [
 remainder inexact bigger
 -----
 _ do [
-    % = _ import _integer.remainder,
+    _% set _ import _integer.remainder,
     7 % 3
 ]
 -----
@@ -318,7 +318,7 @@ _ do [
 remainder inexact negative 1
 -----
 _ do [
-    % = _ import _integer.remainder,
+    _% set _ import _integer.remainder,
     7 % 0-3
 ]
 -----
@@ -327,7 +327,7 @@ _ do [
 remainder inexact negative 2
 -----
 _ do [
-    % = _ import _integer.remainder,
+    _% set _ import _integer.remainder,
     0-7 % 3
 ]
 -----
@@ -336,7 +336,7 @@ _ do [
 remainder inexact negative 3
 -----
 _ do [
-    % = _ import _integer.remainder,
+    _% set _ import _integer.remainder,
     0-7 % 0-3
 ]
 -----
@@ -345,12 +345,12 @@ _ do [
 a divide_remainder b == (a / b) : (a remainder b)
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
-    b = _ any _integer,
+    _any set _ import _value.any,
+    _a set _ any _integer,
+    _b set _ any _integer,
     (b == 0) _return true,
-    % = _ import _integer.remainder,
-    /% = _ import _integer.divide_remainder,
+    _% set _ import _integer.remainder,
+    _/% set _ import _integer.divide_remainder,
     (a /% b) == (a / b) : (a % b)
 ]
 -----
@@ -359,7 +359,7 @@ true
 divide_remainder both positive
 -----
 _ do [
-    /% = _ import _integer.divide_remainder,
+    _/% set _ import _integer.divide_remainder,
     7 /% 3
 ]
 -----
@@ -368,7 +368,7 @@ _ do [
 divide_remainder positive negative
 -----
 _ do [
-    /% = _ import _integer.divide_remainder,
+    _/% set _ import _integer.divide_remainder,
     7 /% 0-3
 ]
 -----
@@ -377,7 +377,7 @@ _ do [
 divide_remainder negative positive
 -----
 _ do [
-    /% = _ import _integer.divide_remainder,
+    _/% set _ import _integer.divide_remainder,
     0-7 /% 3
 ]
 -----
@@ -386,7 +386,7 @@ _ do [
 divide_remainder negative negative
 -----
 _ do [
-    /% = _ import _integer.divide_remainder,
+    _/% set _ import _integer.divide_remainder,
     0-7 /% 0-3
 ]
 -----
@@ -395,11 +395,11 @@ _ do [
 order relations
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any _integer,
-    b = _ any _integer,
-    c = _ any _integer,
-    <> = _ import _integer.less_greater,
+    _any set _ import _value.any,
+    _a set _ any _integer,
+    _b set _ any _integer,
+    _c set _ any _integer,
+    _<> set _ import _integer.less_greater,
     [
         (a > b) == (b < a),
         (a < b) == (b > a),
@@ -420,7 +420,7 @@ _ do [
 order trivial
 -----
 _ do [
-    <> = _ import _integer.less_greater,
+    _<> set _ import _integer.less_greater,
     (0 < 1) and (0 <= 1) and (1 <= 1) and (0 <> 1) and (2 > 1) and (2 >= 1) and (2 >= 2) and (2 == 2)
 ]
 -----

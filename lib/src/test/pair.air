@@ -1,12 +1,12 @@
 get
 -----
 _ do [
-    any = _ import _value.any,
-    first = _ import _pair.first,
-    second = _ import _pair.second,
-    f = _ any .,
-    s = _ any .,
-    p = f : s,
+    _any set _ import _value.any,
+    _first set _ import _pair.first,
+    _second set _ import _pair.second,
+    _f set _ any .,
+    _s set _ any .,
+    _p set f : s,
     (f == p which _ first .) and (s == p which _ second .)
 ]
 -----
@@ -15,18 +15,18 @@ true
 set get
 -----
 _ do [
-    any = _ import _value.any,
-    first = _ import _pair.first,
-    second = _ import _pair.second,
-    set_first = _ import _pair.set_first,
-    set_second = _ import _pair.set_second,
-    p = _ any _pair,
-    f = _ any .,
-    s = _ any .,
+    _any set _ import _value.any,
+    _first set _ import _pair.first,
+    _second set _ import _pair.second,
+    _set_first set _ import _pair.set_first,
+    _set_second set _ import _pair.set_second,
+    _p set _ any _pair,
+    _f set _ any .,
+    _s set _ any .,
     p which _ set_first f,
     p which _ set_second s,
-    f1 = p which _ first .,
-    s1 = p which _ second .,
+    _f1 set p which _ first .,
+    _s1 set p which _ second .,
     (f == f1) and (s == s1)
 ]
 -----
@@ -35,14 +35,14 @@ true
 set return
 -----
 _ do [
-    any = _ import _value.any,
-    set_first = _ import _pair.set_first,
-    set_second = _ import _pair.set_second,
-    f1 = _ any .,
-    s1 = _ any .,
-    p = f1 : s1,
-    f2 = p which _ set_first _ any .,
-    s2 = p which _ set_second _ any .,
+    _any set _ import _value.any,
+    _set_first set _ import _pair.set_first,
+    _set_second set _ import _pair.set_second,
+    _f1 set _ any .,
+    _s1 set _ any .,
+    _p set f1 : s1,
+    _f2 set p which _ set_first _ any .,
+    _s2 set p which _ set_second _ any .,
     (f1 == f2) and s1 == s2
 ]
 -----

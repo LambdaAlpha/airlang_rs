@@ -32,7 +32,7 @@ and not short-circuit
 -----
 _ do [
     false and _ do [
-        a = 1,
+        _a set 1,
         true
     ],
     a
@@ -62,7 +62,7 @@ or not short-circuit
 -----
 _ do [
     true or _ do [
-        a = 1,
+        _a set 1,
         false
     ],
     a

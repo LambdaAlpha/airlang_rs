@@ -1,13 +1,13 @@
 length push
 -----
 _ do [
-    any = _ import _value.any,
-    length = _ import _text.length,
-    push = _ import _text.push,
-    t = _ any _text,
-    l = t which _ length .,
+    _any set _ import _value.any,
+    _length set _ import _text.length,
+    _push set _ import _text.push,
+    _t set _ any _text,
+    _l set t which _ length .,
     t which _ push "a",
-    l1 = t which _ length .,
+    _l1 set t which _ length .,
     l1 == l + 1
 ]
 -----
@@ -16,15 +16,15 @@ true
 length join
 -----
 _ do [
-    any = _ import _value.any,
-    length = _ import _text.length,
-    join = _ import _text.join,
-    a = _ any _text,
-    la = a which _ length .,
-    b = _ any _text,
-    lb = b which _ length .,
-    ab = . join [a, b],
-    lab = ab which _ length .,
+    _any set _ import _value.any,
+    _length set _ import _text.length,
+    _join set _ import _text.join,
+    _a set _ any _text,
+    _la set a which _ length .,
+    _b set _ any _text,
+    _lb set b which _ length .,
+    _ab set . join [a, b],
+    _lab set ab which _ length .,
     lab == la + lb
 ]
 -----
@@ -33,8 +33,8 @@ true
 length empty
 -----
 _ do [
-    length = _ import _text.length,
-    t = "",
+    _length set _ import _text.length,
+    _t set "",
     t which _ length .
 ]
 -----
@@ -43,8 +43,8 @@ _ do [
 length else
 -----
 _ do [
-    length = _ import _text.length,
-    t = "1",
+    _length set _ import _text.length,
+    _t set "1",
     t which _ length .
 ]
 -----
@@ -53,14 +53,14 @@ _ do [
 push join
 -----
 _ do [
-    any = _ import _value.any,
-    push = _ import _text.push,
-    join = _ import _text.join,
-    a = _ any _text,
-    b = _ any _text,
-    t = a,
+    _any set _ import _value.any,
+    _push set _ import _text.push,
+    _join set _ import _text.join,
+    _a set _ any _text,
+    _b set _ any _text,
+    _t set a,
     t which _ push b,
-    t1 = . join [a, b],
+    _t1 set . join [a, b],
     t == t1
 ]
 -----
@@ -69,9 +69,9 @@ true
 push
 -----
 _ do [
-    push = _ import _text.push,
-    a = "hello",
-    b = "world",
+    _push set _ import _text.push,
+    _a set "hello",
+    _b set "world",
     a which _ push " ",
     a which _ push b,
     a
@@ -82,7 +82,7 @@ _ do [
 join empty
 -----
 _ do [
-    join = _ import _text.join,
+    _join set _ import _text.join,
     "" join ["1", "2"]
 ]
 -----
@@ -91,10 +91,10 @@ _ do [
 join unit
 -----
 _ do [
-    join = _ import _text.join,
-    a = "1",
-    b = "2",
-    c = "3",
+    _join set _ import _text.join,
+    _a set "1",
+    _b set "2",
+    _c set "3",
     . join [a, b, c]
 ]
 -----
@@ -103,7 +103,7 @@ _ do [
 join no text
 -----
 _ do [
-    join = _ import _text.join,
+    _join set _ import _text.join,
     . join []
 ]
 -----
@@ -112,7 +112,7 @@ _ do [
 join else
 -----
 _ do [
-    join = _ import _text.join,
+    _join set _ import _text.join,
     "." join ["1", "2"]
 ]
 -----
@@ -121,11 +121,11 @@ _ do [
 into_utf8 from_utf8
 -----
 _ do [
-    any = _ import _value.any,
-    from_utf8 = _ import _text.from_utf8,
-    into_utf8 = _ import _text.into_utf8,
-    t = _ any _text,
-    t1 = _ from_utf8 _ into_utf8 t,
+    _any set _ import _value.any,
+    _from_utf8 set _ import _text.from_utf8,
+    _into_utf8 set _ import _text.into_utf8,
+    _t set _ any _text,
+    _t1 set _ from_utf8 _ into_utf8 t,
     t == t1
 ]
 -----
@@ -134,7 +134,7 @@ true
 into_utf8
 -----
 _ do [
-    into_utf8 = _ import _text.into_utf8,
+    _into_utf8 set _ import _text.into_utf8,
     _ into_utf8 "abc"
 ]
 -----
@@ -143,7 +143,7 @@ byte(616263)
 from_utf8
 -----
 _ do [
-    from_utf8 = _ import _text.from_utf8,
+    _from_utf8 set _ import _text.from_utf8,
     _ from_utf8 byte(616263)
 ]
 -----

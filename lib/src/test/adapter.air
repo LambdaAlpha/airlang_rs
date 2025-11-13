@@ -37,7 +37,7 @@ _ data_ _.a
 data_ .
 -----
 _ do [
-    a = 1,
+    _a set 1,
     [_ data_ .a, a]
 ]
 -----
@@ -46,7 +46,7 @@ _ do [
 data_ . special
 -----
 _ do [
-    __a = 1,
+    __a set 1,
     [_ data_ ._a, ._a]
 ]
 -----
@@ -55,7 +55,7 @@ _ do [
 data_ $
 -----
 _ do [
-    a = _ data _ not true,
+    _a set _ data _ not true,
     _ data_ $a
 ]
 -----
@@ -64,7 +64,7 @@ false
 data. trivial
 -----
 _ do [
-    a = 1,
+    _a set 1,
     [_ data. a, a]
 ]
 -----
@@ -79,7 +79,7 @@ a
 data. .
 -----
 _ do [
-    a = 1,
+    _a set 1,
     [_ data. .a, a]
 ]
 -----
@@ -88,7 +88,7 @@ _ do [
 data. $
 -----
 _ do [
-    a = _ data _ not true,
+    _a set _ data _ not true,
     _ data. $a
 ]
 -----
@@ -97,7 +97,7 @@ false
 data$ trivial
 -----
 _ do [
-    a = _ data _ not true,
+    _a set _ data _ not true,
     _ data$ a
 ]
 -----
@@ -112,7 +112,7 @@ a
 data$ .
 -----
 _ do [
-    a = 1,
+    _a set 1,
     [_ data$ .a, a]
 ]
 -----
@@ -121,7 +121,7 @@ _ do [
 data$ $
 -----
 _ do [
-    a = _ data _ not true,
+    _a set _ data _ not true,
     _ data$ $a
 ]
 -----
@@ -130,7 +130,7 @@ false
 code call
 -----
 _ do [
-    a = _ data. _ code _ not true,
+    _a set _ data. _ code _ not true,
     $a
 ]
 -----
@@ -157,7 +157,7 @@ a
 code_ .
 -----
 _ do [
-    a = 1,
+    _a set 1,
     [_ code_ .a, a]
 ]
 -----
@@ -166,7 +166,7 @@ _ do [
 code_ $
 -----
 _ do [
-    a = _ data _ not true,
+    _a set _ data _ not true,
     _ code_ $a
 ]
 -----
@@ -175,7 +175,7 @@ false
 code. trivial
 -----
 _ do [
-    a = 1,
+    _a set 1,
     [_ code. a, a]
 ]
 -----
@@ -190,7 +190,7 @@ a
 code. .
 -----
 _ do [
-    a = 1,
+    _a set 1,
     [_ code. .a, a]
 ]
 -----
@@ -199,7 +199,7 @@ _ do [
 code. $
 -----
 _ do [
-    a = _ data _ not true,
+    _a set _ data _ not true,
     _ code. $a
 ]
 -----
@@ -208,7 +208,7 @@ false
 code$ trivial
 -----
 _ do [
-    a = _ data _ not true,
+    _a set _ data _ not true,
     _ code$ a
 ]
 -----
@@ -223,7 +223,7 @@ a
 code$ .
 -----
 _ do [
-    a = 1,
+    _a set 1,
     [_ code$ .a, a]
 ]
 -----
@@ -232,7 +232,7 @@ _ do [
 code$ $
 -----
 _ do [
-    a = _ data _ not true,
+    _a set _ data _ not true,
     _ code$ $a
 ]
 -----
@@ -241,8 +241,8 @@ false
 new default
 -----
 _ do [
-    new = _ import _adapter.new,
-    f = _ new .,
+    _new set _ import _adapter.new,
+    _f set _ new .,
     _ f _a
 ]
 -----
@@ -251,8 +251,8 @@ _a
 new primitive from symbol 1
 -----
 _ do [
-    new = _ import _adapter.new,
-    f = _ new data_,
+    _new set _ import _adapter.new,
+    _f set _ new data_,
     _ f _ a _b
 ]
 -----
@@ -261,8 +261,8 @@ _ a b
 new primitive from symbol 2
 -----
 _ do [
-    new = _ import _adapter.new,
-    f = _ new code.,
+    _new set _ import _adapter.new,
+    _f set _ new code.,
     _ f _ not true
 ]
 -----
@@ -271,8 +271,8 @@ false
 new primitive data
 -----
 _ do [
-    new = _ import _adapter.new,
-    f = _ new {default : data},
+    _new set _ import _adapter.new,
+    _f set _ new {default : data},
     _ f [.a, _ f a]
 ]
 -----
@@ -281,8 +281,8 @@ _ do [
 new primitive data_
 -----
 _ do [
-    new = _ import _adapter.new,
-    f = _ new {default : data_},
+    _new set _ import _adapter.new,
+    _f set _ new {default : data_},
     _ f [_a, _ f a]
 ]
 -----
@@ -291,9 +291,9 @@ _ do [
 new primitive data.
 -----
 _ do [
-    new = _ import _adapter.new,
-    a = 1,
-    f = _ new {default : data.},
+    _new set _ import _adapter.new,
+    _a set 1,
+    _f set _ new {default : data.},
     _ f [a, _ _a a]
 ]
 -----
@@ -302,9 +302,9 @@ _ do [
 new primitive data$
 -----
 _ do [
-    new = _ import _adapter.new,
-    a = _ data _ not true,
-    f = _ new {default : data$},
+    _new set _ import _adapter.new,
+    _a set _ data _ not true,
+    _f set _ new {default : data$},
     _ f [a, _ _a a]
 ]
 -----
@@ -313,9 +313,9 @@ _ do [
 new primitive code
 -----
 _ do [
-    new = _ import _adapter.new,
-    f = _ new {default : code},
-    b = _ data. _ f [_a, _ not true],
+    _new set _ import _adapter.new,
+    _f set _ new {default : code},
+    _b set _ data. _ f [_a, _ not true],
     $b
 ]
 -----
@@ -324,8 +324,8 @@ _ do [
 new primitive code_
 -----
 _ do [
-    new = _ import _adapter.new,
-    f = _ new {default : code_},
+    _new set _ import _adapter.new,
+    _f set _ new {default : code_},
     _ f [a, _ .not true]
 ]
 -----
@@ -334,9 +334,9 @@ _ do [
 new primitive code.
 -----
 _ do [
-    new = _ import _adapter.new,
-    a = 1,
-    f = _ new {default : code.},
+    _new set _ import _adapter.new,
+    _a set 1,
+    _f set _ new {default : code.},
     _ f [a, _ not true]
 ]
 -----
@@ -345,9 +345,9 @@ _ do [
 new primitive code$
 -----
 _ do [
-    new = _ import _adapter.new,
-    a = _ data _ not true,
-    f = _ new {default : code$},
+    _new set _ import _adapter.new,
+    _a set _ data _ not true,
+    _f set _ new {default : code$},
     _ f [a, _ .not true]
 ]
 -----
@@ -356,8 +356,8 @@ _ do [
 new pair some
 -----
 _ do [
-    new = _ import _adapter.new,
-    f = _ new {
+    _new set _ import _adapter.new,
+    _f set _ new {
         pair : {
             this : {},
             that : data_,
@@ -375,10 +375,10 @@ _ do [
 new multiple
 -----
 _ do [
-    new = _ import _adapter.new,
-    c = 1,
-    d = 2,
-    f = _ new {
+    _new set _ import _adapter.new,
+    _c set 1,
+    _d set 2,
+    _f set _ new {
         pair : {} : data_ : {pair : data_}
     },
     _ f a : _b : _ .c $d
@@ -389,8 +389,8 @@ a : b : _ 1 2
 new call
 -----
 _ do [
-    new = _ import _adapter.new,
-    f = _ new {
+    _new set _ import _adapter.new,
+    _f set _ new {
         call : _ code. code.
     },
     _ f _ _g _ not true
@@ -401,8 +401,8 @@ _ g false
 new list list
 -----
 _ do [
-    new = _ import _adapter.new,
-    f = _ new {
+    _new set _ import _adapter.new,
+    _f set _ new {
         list : [data, code_]
     },
     _ f [_ not true, _ .not true, _ _not true]
@@ -413,8 +413,8 @@ _ do [
 new list head tail
 -----
 _ do [
-    new = _ import _adapter.new,
-    f = _ new {
+    _new set _ import _adapter.new,
+    _f set _ new {
         list : [data, code_] : data_
     },
     _ f [_ not true, _ .not true, _ _not true]
@@ -425,8 +425,8 @@ _ do [
 new map map
 -----
 _ do [
-    new = _ import _adapter.new,
-    f = _ new {
+    _new set _ import _adapter.new,
+    _f set _ new {
         map : {
             a : data,
             b : code_,
@@ -444,8 +444,8 @@ _ do [
 new map some else
 -----
 _ do [
-    new = _ import _adapter.new,
-    f = _ new {
+    _new set _ import _adapter.new,
+    _f set _ new {
         map : {
             a : data,
             b : code_,
@@ -463,8 +463,8 @@ _ do [
 new func
 -----
 _ do [
-    new = _ import _adapter.new,
-    f = _ new .not,
+    _new set _ import _adapter.new,
+    _f set _ new .not,
     _ f true
 ]
 -----
@@ -473,7 +473,7 @@ false
 access free
 -----
 _ do [
-    context_access = _ import _function.context_access,
+    _context_access set _ import _function.context_access,
     data which _ context_access .
 ]
 -----
@@ -482,9 +482,9 @@ free
 access const
 -----
 _ do [
-    new = _ import _adapter.new,
-    context_access = _ import _function.context_access,
-    f = _ new .get,
+    _new set _ import _adapter.new,
+    _context_access set _ import _function.context_access,
+    _f set _ new .get,
     f which _ context_access .
 ]
 -----
@@ -493,7 +493,7 @@ constant
 access mutable
 -----
 _ do [
-    context_access = _ import _function.context_access,
+    _context_access set _ import _function.context_access,
     code. which _ context_access .
 ]
 -----

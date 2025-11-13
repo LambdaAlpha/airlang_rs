@@ -1,13 +1,13 @@
 length push
 -----
 _ do [
-    any = _ import _value.any,
-    length = _ import _byte.length,
-    push = _ import _byte.push,
-    b = _ any _byte,
-    l = b which _ length .,
+    _any set _ import _value.any,
+    _length set _ import _byte.length,
+    _push set _ import _byte.push,
+    _b set _ any _byte,
+    _l set b which _ length .,
     b which _ push byte(00),
-    l1 = b which _ length .,
+    _l1 set b which _ length .,
     l1 == l + 1
 ]
 -----
@@ -16,15 +16,15 @@ true
 length join
 -----
 _ do [
-    any = _ import _value.any,
-    length = _ import _byte.length,
-    join = _ import _byte.join,
-    a = _ any _byte,
-    la = a which _ length .,
-    b = _ any _byte,
-    lb = b which _ length .,
-    ab = . join [a, b],
-    lab = ab which _ length .,
+    _any set _ import _value.any,
+    _length set _ import _byte.length,
+    _join set _ import _byte.join,
+    _a set _ any _byte,
+    _la set a which _ length .,
+    _b set _ any _byte,
+    _lb set b which _ length .,
+    _ab set . join [a, b],
+    _lab set ab which _ length .,
     lab == la + lb
 ]
 -----
@@ -33,8 +33,8 @@ true
 length empty
 -----
 _ do [
-    length = _ import _byte.length,
-    b = byte(),
+    _length set _ import _byte.length,
+    _b set byte(),
     b which _ length .
 ]
 -----
@@ -43,8 +43,8 @@ _ do [
 length else
 -----
 _ do [
-    length = _ import _byte.length,
-    b = byte(ff),
+    _length set _ import _byte.length,
+    _b set byte(ff),
     b which _ length .
 ]
 -----
@@ -53,14 +53,14 @@ _ do [
 push join
 -----
 _ do [
-    any = _ import _value.any,
-    push = _ import _byte.push,
-    join = _ import _byte.join,
-    a = _ any _byte,
-    b = _ any _byte,
-    ab = a,
+    _any set _ import _value.any,
+    _push set _ import _byte.push,
+    _join set _ import _byte.join,
+    _a set _ any _byte,
+    _b set _ any _byte,
+    _ab set a,
     ab which _ push b,
-    ab1 = . join [a, b],
+    _ab1 set . join [a, b],
     ab == ab1
 ]
 -----
@@ -69,9 +69,9 @@ true
 push
 -----
 _ do [
-    push = _ import _byte.push,
-    a = byte(00),
-    b = byte(1122),
+    _push set _ import _byte.push,
+    _a set byte(00),
+    _b set byte(1122),
     a which _ push b,
     a
 ]
@@ -81,7 +81,7 @@ byte(001122)
 join empty
 -----
 _ do [
-    join = _ import _byte.join,
+    _join set _ import _byte.join,
     byte() join [byte(1234), byte(56)]
 ]
 -----
@@ -90,10 +90,10 @@ byte(123456)
 join unit
 -----
 _ do [
-    join = _ import _byte.join,
-    a = byte(1234),
-    b = byte(5678),
-    c = byte(9abc),
+    _join set _ import _byte.join,
+    _a set byte(1234),
+    _b set byte(5678),
+    _c set byte(9abc),
     . join [a, b, c]
 ]
 -----
@@ -102,7 +102,7 @@ byte(123456789abc)
 join no byte
 -----
 _ do [
-    join = _ import _byte.join,
+    _join set _ import _byte.join,
     . join []
 ]
 -----
@@ -111,7 +111,7 @@ byte()
 join else
 -----
 _ do [
-    join = _ import _byte.join,
+    _join set _ import _byte.join,
     byte(00) join [byte(1111), byte(22)]
 ]
 -----

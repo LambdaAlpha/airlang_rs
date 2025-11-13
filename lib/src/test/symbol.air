@@ -1,15 +1,15 @@
 length join
 -----
 _ do [
-    any = _ import _value.any,
-    length = _ import _symbol.length,
-    join = _ import _symbol.join,
-    a = _ any _symbol,
-    la = a which _ length .,
-    b = _ any _symbol,
-    lb = b which _ length .,
-    ab = . join [a, b],
-    lab = ab which _ length .,
+    _any set _ import _value.any,
+    _length set _ import _symbol.length,
+    _join set _ import _symbol.join,
+    _a set _ any _symbol,
+    _la set a which _ length .,
+    _b set _ any _symbol,
+    _lb set b which _ length .,
+    _ab set . join [a, b],
+    _lab set ab which _ length .,
     lab == la + lb
 ]
 -----
@@ -18,7 +18,7 @@ true
 length empty
 -----
 _ do [
-    length = _ import _symbol.length,
+    _length set _ import _symbol.length,
     empty which _ length .
 ]
 -----
@@ -27,8 +27,8 @@ _ do [
 length else
 -----
 _ do [
-    length = _ import _symbol.length,
-    s = _a,
+    _length set _ import _symbol.length,
+    _s set _a,
     s which _ length .
 ]
 -----
@@ -37,7 +37,7 @@ _ do [
 join empty
 -----
 _ do [
-    join = _ import _symbol.join,
+    _join set _ import _symbol.join,
     empty join [_a, _b]
 ]
 -----
@@ -46,10 +46,10 @@ ab
 join unit
 -----
 _ do [
-    join = _ import _symbol.join,
-    a = _a1,
-    b = _b1,
-    c = _c1,
+    _join set _ import _symbol.join,
+    _a set _a1,
+    _b set _b1,
+    _c set _c1,
     . join [a, b, c]
 ]
 -----
@@ -58,7 +58,7 @@ a1b1c1
 join no symbol
 -----
 _ do [
-    join = _ import _symbol.join,
+    _join set _ import _symbol.join,
     . join []
 ]
 -----
@@ -67,7 +67,7 @@ _ do [
 join else
 -----
 _ do [
-    join = _ import _symbol.join,
+    _join set _ import _symbol.join,
     _. join [_a, _b]
 ]
 -----
@@ -76,11 +76,11 @@ a.b
 into_text from_text
 -----
 _ do [
-    any = _ import _value.any,
-    from_text = _ import _symbol.from_text,
-    into_text = _ import _symbol.into_text,
-    s = _ any _symbol,
-    s1 = _ from_text _ into_text s,
+    _any set _ import _value.any,
+    _from_text set _ import _symbol.from_text,
+    _into_text set _ import _symbol.into_text,
+    _s set _ any _symbol,
+    _s1 set _ from_text _ into_text s,
     s == s1
 ]
 -----
@@ -89,7 +89,7 @@ true
 from_text empty
 -----
 _ do [
-    from_text = _ import _symbol.from_text,
+    _from_text set _ import _symbol.from_text,
     _ from_text ""
 ]
 -----
@@ -98,7 +98,7 @@ _ do [
 from_text trivial
 -----
 _ do [
-    from_text = _ import _symbol.from_text,
+    _from_text set _ import _symbol.from_text,
     _ from_text "hello_world!"
 ]
 -----
@@ -107,7 +107,7 @@ hello_world!
 from_text special
 -----
 _ do [
-    from_text = _ import _symbol.from_text,
+    _from_text set _ import _symbol.from_text,
     _ from_text "{}"
 ]
 -----
@@ -116,7 +116,7 @@ _ do [
 into_text empty
 -----
 _ do [
-    into_text = _ import _symbol.into_text,
+    _into_text set _ import _symbol.into_text,
     _ into_text empty
 ]
 -----
@@ -125,7 +125,7 @@ _ do [
 into_text trivial
 -----
 _ do [
-    into_text = _ import _symbol.into_text,
+    _into_text set _ import _symbol.into_text,
     _ into_text _hello_world!
 ]
 -----

@@ -20,7 +20,7 @@ It is an experimental proof-of-concept project and is still in the very early st
 _("A demo of implementing a C-style for function")
 
 _ do [
-    c_for = _ function {
+    _c_for set _ function {
         id : _c_for,
         code : (_ctx : _args) : _ do [
             [_init, _condition, _next, _body] = _args,
@@ -34,7 +34,7 @@ _ do [
         ],
     },
     _adapter@c_for export data, 
-    _ c_for [[i = 1, sum = 0], i <= 10, i = i + 1, sum = sum + i],
+    _ c_for [[_i set 1, _sum set 0], i <= 10, _i set i + 1, _sum set sum + i],
     sum
 ]
 ```

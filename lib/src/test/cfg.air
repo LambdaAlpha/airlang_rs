@@ -1,17 +1,17 @@
 new repr
 -----
 _ do [
-    any = _ import _value.any,
-    new = _ import _configuration.new,
-    represent = _ import _configuration.represent,
-    c = [
+    _any set _ import _value.any,
+    _new set _ import _configuration.new,
+    _represent set _ import _configuration.represent,
+    _c set [
         {a : _ any ., b : _ any .},
         {a : _ any .},
         {b : _ any ., c : _ any .},
         {},
         {b : _ any .},
     ],
-    c1 = _ represent _ new c,
+    _c1 set _ represent _ new c,
     c == c1
 ]
 -----
@@ -20,11 +20,11 @@ true
 length
 -----
 _ do [
-    new = _ import _configuration.new,
-    where = _ import _configuration.where,
-    length = _ import _configuration.length,
-    any = _ import _value.any,
-    c = _ new [
+    _new set _ import _configuration.new,
+    _where set _ import _configuration.where,
+    _length set _ import _configuration.length,
+    _any set _ import _value.any,
+    _c set _ new [
         {a : _ any ., b : _ any .},
         {a : _ any .},
         {b : _ any ., c : _ any .},
@@ -39,16 +39,16 @@ _ do [
 length == snapshot repr length
 -----
 _ do [
-    configuration.length = _ import _configuration.length,
-    map.length = _ import _map.length,
-    snapshot = _ import _configuration.snapshot,
-    represent = _ import _configuration.represent,
-    any = _ import _value.any,
-    where = _ import _configuration.where,
-    c = _ any _configuration,
+    _configuration.length set _ import _configuration.length,
+    _map.length set _ import _map.length,
+    _snapshot set _ import _configuration.snapshot,
+    _represent set _ import _configuration.represent,
+    _any set _ import _value.any,
+    _where set _ import _configuration.where,
+    _c set _ any _configuration,
     [m] = _ represent c where _ snapshot _,
-    lc = c where _ configuration.length _,
-    lm = m which _ map.length _,
+    _lc set c where _ configuration.length _,
+    _lm set m which _ map.length _,
     lc == lm
 ]
 -----
@@ -57,21 +57,21 @@ true
 snapshot
 -----
 _ do [
-    any = _ import _value.any,
-    new = _ import _configuration.new,
-    snapshot = _ import _configuration.snapshot,
-    where = _ import _configuration.where,
-    represent = _ import _configuration.represent,
-    a1 = _ any .,
-    a2 = _ any .,
-    b1 = _ any .,
-    b2 = _ any .,
-    c = _ new [
+    _any set _ import _value.any,
+    _new set _ import _configuration.new,
+    _snapshot set _ import _configuration.snapshot,
+    _where set _ import _configuration.where,
+    _represent set _ import _configuration.represent,
+    _a1 set _ any .,
+    _a2 set _ any .,
+    _b1 set _ any .,
+    _b2 set _ any .,
+    _c set _ new [
         {a : a1, b1 : b1},
         {a : a2, b2 : b2},
     ],
-    c1 = c where _ snapshot _,
-    repr = _ represent c1,
+    _c1 set c where _ snapshot _,
+    _repr set _ represent c1,
     repr == [{a : a2, b1 : b1, b2 : b2}]
 ]
 -----
@@ -80,8 +80,8 @@ true
 export exist
 -----
 _ do [
-    any = _ import _value.any,
-    ab = _ any .,
+    _any set _ import _value.any,
+    _ab set _ any .,
     _a.b export ab,
     _ exist _a.b
 ]
@@ -91,10 +91,10 @@ true
 export import
 -----
 _ do [
-    any = _ import _value.any,
-    ab = _ any .,
+    _any set _ import _value.any,
+    _ab set _ any .,
     _a.b export ab,
-    ab1 = _ import _a.b,
+    _ab1 set _ import _a.b,
     ab == ab1
 ]
 -----
@@ -103,12 +103,12 @@ true
 with override
 -----
 _ do [
-    any = _ import _value.any,
-    a1 = _ any .,
-    a2 = _ any .,
+    _any set _ import _value.any,
+    _a1 set _ any .,
+    _a2 set _ any .,
     {a : a1} with _ do [
-        a4 = {a : a2} with _ import _a,
-        a3 = _ import _a,
+        _a4 set {a : a2} with _ import _a,
+        _a3 set _ import _a,
     ],
     (a1 == a3) and (a2 == a4)
 ]
@@ -118,15 +118,15 @@ true
 with exist
 -----
 _ do [
-    any = _ import _value.any,
-    a = _ any .,
-    b = _ any .,
+    _any set _ import _value.any,
+    _a set _ any .,
+    _b set _ any .,
     {a : a} with _ do [
-        c1 = _ exist _a,
-        c2 = {b : b} with _ exist _b,
-        c3 = _ exist _b,
+        _c1 set _ exist _a,
+        _c2 set {b : b} with _ exist _b,
+        _c3 set _ exist _b,
     ],
-    c4 = _ exist _a,
+    _c4 set _ exist _a,
     c1 and c2 and (_ not c3) and (_ not c4)
 ]
 -----
@@ -135,7 +135,7 @@ true
 with panic safe
 -----
 _ do [
-    limit_steps = _ import _resource.limit_steps,
+    _limit_steps set _ import _resource.limit_steps,
     10 limit_steps {a : 1} with _ do [
         [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         11
@@ -148,12 +148,12 @@ true
 where
 -----
 _ do [
-    any = _ import _value.any,
-    new = _ import _configuration.new,
-    where = _ import _configuration.where,
-    a = _ any .,
-    c = _ new [{a : a}],
-    a1 = c where _ import _a,
+    _any set _ import _value.any,
+    _new set _ import _configuration.new,
+    _where set _ import _configuration.where,
+    _a set _ any .,
+    _c set _ new [{a : a}],
+    _a1 set c where _ import _a,
     a == a1
 ]
 -----
@@ -162,13 +162,13 @@ true
 cfg func call
 -----
 _ do [
-    any = _ import _value.any,
-    a0 = _ any .,
-    f = _ function {
+    _any set _ import _value.any,
+    _a0 set _ any .,
+    _f set _ function {
         context_access : _free,
         code : __ : _ import __a
     },
-    a1 = {a : a0} with _ f .,
+    _a1 set {a : a0} with _ f .,
     a0 == a1
 ]
 -----

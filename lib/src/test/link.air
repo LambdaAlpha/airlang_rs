@@ -1,12 +1,12 @@
 new get
 -----
 _ do [
-    any = _ import _value.any,
-    new = _ import _link.new,
-    get = _ import _link.get,
-    a = _ any .,
-    l = _ new a,
-    a1 = l get _,
+    _any set _ import _value.any,
+    _new set _ import _link.new,
+    _get set _ import _link.get,
+    _a set _ any .,
+    _l set _ new a,
+    _a1 set l get _,
     a == a1
 ]
 -----
@@ -15,14 +15,14 @@ true
 set get
 -----
 _ do [
-    any = _ import _value.any,
-    new = _ import _link.new,
-    set = _ import _link.set,
-    get = _ import _link.get,
-    l = _ new _ any .,
-    a = _ any .,
-    l set a,
-    a1 = l get _,
+    _any set _ import _value.any,
+    _new set _ import _link.new,
+    _set set _ import _link.set,
+    _get set _ import _link.get,
+    _l set _ new _ any .,
+    _a set _ any .,
+    _l set a,
+    _a1 set l get _,
     a == a1
 ]
 -----
@@ -31,14 +31,14 @@ true
 sync
 -----
 _ do [
-    any = _ import _value.any,
-    new = _ import _link.new,
-    set = _ import _link.set,
-    get = _ import _link.get,
-    l = _ new _ any .,
-    l1 = l, a = _ any .,
-    l set a,
-    a1 = l1 get _,
+    _any set _ import _value.any,
+    _new set _ import _link.new,
+    _set set _ import _link.set,
+    _get set _ import _link.get,
+    _l set _ new _ any .,
+    _l1 set l, a set _ any .,
+    _l set a,
+    _a1 set l1 get _,
     a == a1
 ]
 -----
@@ -47,11 +47,11 @@ true
 leak no panic
 -----
 _ do [
-    any = _ import _value.any,
-    new = _ import _link.new,
-    set = _ import _link.set,
-    l = _ new _ any .,
-    l set l,
+    _any set _ import _value.any,
+    _new set _ import _link.new,
+    _set set _ import _link.set,
+    _l set _ new _ any .,
+    _l set l,
     _l move _,
     .
 ]
@@ -61,12 +61,12 @@ _ do [
 cycle recover
 -----
 _ do [
-    any = _ import _value.any,
-    new = _ import _link.new,
-    set = _ import _link.set,
-    l = _ new _ any .,
-    l set l,
-    l1 = l set _ any .,
+    _any set _ import _value.any,
+    _new set _ import _link.new,
+    _set set _ import _link.set,
+    _l set _ new _ any .,
+    _l set l,
+    _l1 set l set _ any .,
     l == l1
 ]
 -----
