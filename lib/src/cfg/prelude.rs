@@ -48,6 +48,7 @@ pub struct CorePrelude {
     pub move_: MutPrimFuncVal,
 
     pub function: FreePrimFuncVal,
+    pub apply: MutPrimFuncVal,
 
     pub get: ConstPrimFuncVal,
     pub set: MutPrimFuncVal,
@@ -108,6 +109,7 @@ impl CorePrelude {
             move_: lib.memo.remove.clone(),
 
             function: lib.func.new.clone(),
+            apply: lib.func.apply.clone(),
 
             get: lib.ctx.get.clone(),
             set: lib.ctx.set.clone(),
@@ -165,6 +167,7 @@ impl Prelude for CorePrelude {
         memo_put_func(memo, "move", &self.move_);
 
         memo_put_func(memo, "function", &self.function);
+        memo_put_func(memo, "apply", &self.apply);
 
         memo_put_func(memo, "get", &self.get);
         memo_put_func(memo, "set", &self.set);

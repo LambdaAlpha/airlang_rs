@@ -378,7 +378,6 @@ true
 apply free
 -----
 _ do [
-    _apply set _ import _function.apply,
     not apply _ not true
 ]
 -----
@@ -387,7 +386,6 @@ true
 apply const
 -----
 _ do [
-    _apply set _ import _function.apply,
     _a set 1,
     get apply _a
 ]
@@ -397,7 +395,6 @@ _ do [
 apply mut
 -----
 _ do [
-    _apply set _ import _function.apply,
     = apply _a : 1,
     a
 ]
@@ -407,7 +404,6 @@ _ do [
 apply no adapter
 -----
 _ do [
-    _apply set _ import _function.apply,
     test apply true : [_a set true] : [_b set true],
     a and b
 ]
