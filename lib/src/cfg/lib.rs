@@ -1,6 +1,5 @@
 use std::rc::Rc;
 
-use self::adapter::AdapterLib;
 use self::bit::BitLib;
 use self::byte::ByteLib;
 use self::call::CallLib;
@@ -55,7 +54,6 @@ pub struct CoreLib {
     pub memo: MemoLib,
     pub func: FuncLib,
     pub ctx: CtxLib,
-    pub adapter: AdapterLib,
     pub ctrl: CtrlLib,
     pub value: ValueLib,
     pub resource: ResourceLib,
@@ -80,7 +78,6 @@ impl CfgMod for CoreLib {
         self.memo.extend(cfg);
         self.func.extend(cfg);
         self.ctx.extend(cfg);
-        self.adapter.extend(cfg);
         self.ctrl.extend(cfg);
         self.value.extend(cfg);
         self.resource.extend(cfg);
@@ -90,31 +87,45 @@ impl CfgMod for CoreLib {
 
 pub struct FreePrimFn<F> {
     pub id: &'static str,
+    pub raw_input: bool,
     pub f: F,
 }
 
 pub struct DynPrimFn<F> {
     pub id: &'static str,
+    pub raw_input: bool,
     pub f: F,
 }
 
 impl<F: FreeFn<Cfg, Val, Val> + 'static> FreePrimFn<F> {
     pub fn free(self) -> FreePrimFuncVal {
-        let func = FreePrimFunc { id: Symbol::from_str_unchecked(self.id), fn_: Rc::new(self.f) };
+        let func = FreePrimFunc {
+            id: Symbol::from_str_unchecked(self.id),
+            raw_input: self.raw_input,
+            fn_: Rc::new(self.f),
+        };
         FreePrimFuncVal::from(func)
     }
 }
 
 impl<F: ConstFn<Cfg, Val, Val, Val> + 'static> DynPrimFn<F> {
     pub fn const_(self) -> ConstPrimFuncVal {
-        let func = ConstPrimFunc { id: Symbol::from_str_unchecked(self.id), fn_: Rc::new(self.f) };
+        let func = ConstPrimFunc {
+            id: Symbol::from_str_unchecked(self.id),
+            raw_input: self.raw_input,
+            fn_: Rc::new(self.f),
+        };
         ConstPrimFuncVal::from(func)
     }
 }
 
 impl<F: MutFn<Cfg, Val, Val, Val> + 'static> DynPrimFn<F> {
     pub fn mut_(self) -> MutPrimFuncVal {
-        let func = MutPrimFunc { id: Symbol::from_str_unchecked(self.id), fn_: Rc::new(self.f) };
+        let func = MutPrimFunc {
+            id: Symbol::from_str_unchecked(self.id),
+            raw_input: self.raw_input,
+            fn_: Rc::new(self.f),
+        };
         MutPrimFuncVal::from(func)
     }
 }
@@ -251,8 +262,6 @@ pub mod func;
 // -----
 
 pub mod ctx;
-
-pub mod adapter;
 
 pub mod ctrl;
 

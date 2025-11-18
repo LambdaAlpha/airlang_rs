@@ -1,15 +1,15 @@
 _("bench interpret")
 
 _ do [
-    _% set _ import _integer.remainder,
-    _f set _ function {
-        code : _n : _ do [
-            __sum set 0,
-            _n iterate _i : [
-                (0 == _i % 3) __continue .,
-                __sum set _sum + _i,
+    .% set _ import _integer.remainder,
+    .f set _ function {
+        code : .n : _ form _ do [
+            ..sum set 0,
+            .n iterate .i : [
+                (0 == .i % 3) _continue .,
+                ..sum set .sum + .i,
             ],
-            _sum
+            .sum
         ],
         context_access : _free,
     },

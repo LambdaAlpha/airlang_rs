@@ -20,21 +20,20 @@ It is an experimental proof-of-concept project and is still in the very early st
 _("A demo of implementing a C-style for function")
 
 _ do [
-    _c_for set _ function {
-        id : _c_for,
-        code : (_ctx : _args) : _ do [
-            [_init, _condition, _next, _body] = _args,
-            _ctx which _ eval _ do [
-                _init,
-                _condition loop [
-                    _body,
-                    _next,
+    .c_for set _ function {
+        code : (.ctx : .args) : _ form _ do [
+            [..init, ..condition, ..next, ..body] = .args,
+            .ctx which _ eval _ form _ do [
+                .init,
+                .condition loop [
+                    .body,
+                    .next,
                 ],
             ],
         ],
+        raw_input : true,
     },
-    _adapter@c_for export data, 
-    _ c_for [[_i set 1, _sum set 0], i <= 10, _i set i + 1, _sum set sum + i],
+    _ c_for [[.i set 1, .sum set 0], i <= 10, .i set i + 1, .sum set sum + i],
     sum
 ]
 ```

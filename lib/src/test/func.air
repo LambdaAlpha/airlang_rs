@@ -1,8 +1,8 @@
 recursive call
 -----
 _ do [
-    _f set _ function {
-        code : (__ : _i) : _i,
+    .f set _ function {
+        code : (__ : .i) : .i,
     },
     _ f _ not true
 ]
@@ -12,8 +12,8 @@ false
 call external func
 -----
 _ do [
-    _f set _ function {
-        code : (__ : _i) : _ not _i
+    .f set _ function {
+        code : (__ : .i) : _ form _ not .i
     },
     _ f _ not true
 ]
@@ -23,9 +23,9 @@ true
 call internal func
 -----
 _ do [
-    _memory set _ import _memory.new,
-    _f set _ function {
-        code : (__ : _i) : _ _not _i,
+    .memory set _ import _memory.new,
+    .f set _ function {
+        code : (__ : .i) : _ form _ .not .i,
         memory : _ memory {
             not : . : not
         },
@@ -38,9 +38,9 @@ true
 call rename
 -----
 _ do [
-    _memory set _ import _memory.new,
-    _f set _ function {
-        code : (__ : _a) : _ _n _a,
+    .memory set _ import _memory.new,
+    .f set _ function {
+        code : (__ : .a) : _ form _ .n .a,
         memory : _ memory {
             n : . : not
         },
@@ -53,16 +53,16 @@ true
 stateful
 -----
 _ do [
-    _memory set _ import _memory.new,
-    _new_link set _ import _link.new,
-    _link_get set _ import _link.get,
-    _link_set set _ import _link.set,
-    _f set _ function {
+    .memory set _ import _memory.new,
+    .new_link set _ import _link.new,
+    .link_get set _ import _link.get,
+    .link_set set _ import _link.set,
+    .f set _ function {
         context_access : _free,
-        code : __ : _ do [
-            __i set _a link_get _,
-            _a link_set _i + 1,
-            _i
+        code : __ : _ form _ do [
+            ..i set .a link_get _,
+            .a link_set .i + 1,
+            .i
         ],
         memory : _ memory {
             a : . : _ new_link 0
@@ -76,23 +76,23 @@ _ do [
 multiple stateful
 -----
 _ do [
-    _memory set _ import _memory.new,
-    _new_link set _ import _link.new,
-    _link_get set _ import _link.get,
-    _link_set set _ import _link.set,
-    _f set _ data _ function {
+    .memory set _ import _memory.new,
+    .new_link set _ import _link.new,
+    .link_get set _ import _link.get,
+    .link_set set _ import _link.set,
+    .f set _ data _ function {
         context_access : _free,
-        code : __ : _ do [
-            __i set _a link_get _,
-            _a link_set _i + 1,
-            _i
+        code : __ : _ form _ do [
+            ..i set .a link_get _,
+            .a link_set .i + 1,
+            .i
         ],
         memory : _ memory {
             a : . : _ new_link 0
         },
     },
-    _f1 set $f,
-    _f2 set $f,
+    .f1 set _ eval f,
+    .f2 set _ eval f,
     [_ f1 ., _ f1 ., _ f1 ., _ f2 ., _ f2 ., _ f2 .]
 ]
 -----
@@ -102,8 +102,8 @@ const const
 -----
 _ do [
     _a set 1,
-    _f set _ function {
-        code : (_c : __) : _c which _ get __a,
+    .f set _ function {
+        code : (_c : __) : _ form _c which _ get _a,
         context_access : _constant,
     },
     _ f .
@@ -115,8 +115,8 @@ mutable const
 -----
 _ do [
     _a set 1,
-    _f set _ function {
-        code : (_c : __) : _c which _ get __a,
+    .f set _ function {
+        code : (_c : __) : _ form _c which _ get _a,
         context_access : _mutable,
     },
     _ f .
@@ -127,12 +127,12 @@ _ do [
 mutable mutate
 -----
 _ do [
-    _f set _ function {
-        code : (_c : _i) : _c which _.i set 2,
+    .f set _ function {
+        code : (_c : .i) : _ form _c which .i set 2,
         context_access : _mutable,
     },
-    _a set 1,
-    _ f _a,
+    .a set 1,
+    _ f .a,
     a
 ]
 -----
@@ -141,12 +141,12 @@ _ do [
 const mutate fail
 -----
 _ do [
-    _f set _ function {
-        code : (_c : _i) : _c which _.i set 2,
+    .f set _ function {
+        code : (_c : .i) : _ form _c which .i set 2,
         context_access : _constant,
     },
-    _a set 1,
-    _ f _a,
+    .a set 1,
+    _ f .a,
     a
 ]
 -----
@@ -155,8 +155,8 @@ _ do [
 const free
 -----
 _ do [
-    _a set .,
-    _f set _ function {
+    .a set .,
+    .f set _ function {
         code : (__c : __) : 1,
         context_access : _constant,
     },
@@ -168,13 +168,13 @@ _ do [
 ctx name occupied
 -----
 _ do [
-    _memory set _ import _memory.new,
-    _a set 1,
-    _f set _ function {
+    .memory set _ import _memory.new,
+    .a set 1,
+    .f set _ function {
         code : (_ctx : __) : 2,
         context_access : _constant,
         memory : _ memory {
-            ctx : constant : 3
+            ctx : _constant : 3
         },
     },
     _ f .,
@@ -186,16 +186,16 @@ true
 ctx panic safe
 -----
 _ do [
-    _limit_steps set _ import _resource.limit_steps,
-    _f set _ function {
+    .limit_steps set _ import _resource.limit_steps,
+    .f set _ function {
         context_access : _constant,
-        code : (_ctx : __) : _ do [
+        code : (_ctx : __) : _ form _ do [
             [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             11
         ],
     },
-    _p set 1 : 2,
-    10 limit_steps p which _ f .,
+    .p set 1 : 2,
+    10 limit_steps _ data p which _ f .,
     p
 ]
 -----
@@ -204,10 +204,10 @@ _ do [
 ctx explicit
 -----
 _ do [
-    _set_first set _ import _pair.set_first,
-    _a set 1 : 2,
-    _f set _ function {
-        code : (_p : _i) : _p which _ set_first _i,
+    .set_first set _ import _pair.set_first,
+    .a set 1 : 2,
+    .f set _ function {
+        code : (_p : .i) : _ form _p which _ set_first .i,
     },
     a which _ f 3,
     a
@@ -218,55 +218,55 @@ _ do [
 repr
 -----
 _ do [
-    _represent set _ import _function.represent,
+    .represent set _ import _function.represent,
     _ represent _ function {
-        code : (__ : _i) : _i
+        code : (.c : .i) : .i
     }
 ]
 
 -----
-{code : (_ : i) : i}
+{code : (c : i) : i}
 =====
 repr primitive free
 -----
 _ do [
-    _represent set _ import _function.represent,
+    .represent set _ import _function.represent,
     _ represent not
 ]
 -----
-{id : bit.not}
+{id : _bit.not}
 =====
 repr const
 -----
 _ do [
-    _represent set _ import _function.represent,
+    .represent set _ import _function.represent,
     _ represent _ function {
-        code : (__ : _i) : _i,
+        code : (_c : .i) : .i,
         context_access : _constant
     }
 ]
 -----
-{code : (_ : i) : i, context_access : constant}
+{code : (_c : i) : i, context_access : _constant}
 =====
 repr primitive const
 -----
 _ do [
-    _represent set _ import _function.represent,
+    .represent set _ import _function.represent,
     _ represent ==
 ]
 -----
-{id : value.equal}
+{id : _value.equal}
 =====
 repr composite
 -----
 _ do [
-    _represent set _ import _function.represent,
-    _repr set _ data_ {
-        id : f,
-        code : (ctx : in) : in,
-        context_access : constant,
+    .represent set _ import _function.represent,
+    .repr set {
+        id : _f,
+        code : (_ctx : .in) : .in,
+        context_access : _constant,
     },
-    _new_repr set _ represent _ function repr,
+    .new_repr set _ represent _ function repr,
     repr == new_repr
 ]
 -----
@@ -275,44 +275,44 @@ true
 access free
 -----
 _ do [
-    _context_access set _ import _function.context_access,
+    .context_access set _ import _function.context_access,
     function which _ context_access .
 ]
 -----
-free
+_free
 =====
 access const
 -----
 _ do [
-    _context_access set _ import _function.context_access,
+    .context_access set _ import _function.context_access,
     get which _ context_access .
 ]
 -----
-constant
+_constant
 =====
 access mutable
 -----
 _ do [
-    _context_access set _ import _function.context_access,
-    code. which _ context_access .
+    .context_access set _ import _function.context_access,
+    code which _ context_access .
 ]
 -----
-mutable
+_mutable
 =====
 access default
 -----
 _ do [
-    _context_access set _ import _function.context_access,
-    _f set _ function {},
+    .context_access set _ import _function.context_access,
+    .f set _ function {},
     f which _ context_access .
 ]
 -----
-mutable
+_mutable
 =====
 is_primitive primitive
 -----
 _ do [
-    _is_primitive set _ import _function.is_primitive,
+    .is_primitive set _ import _function.is_primitive,
     not which _ is_primitive .
 ]
 -----
@@ -321,8 +321,8 @@ true
 is_primitive composite
 -----
 _ do [
-    _is_primitive set _ import _function.is_primitive,
-    _f set _ function {},
+    .is_primitive set _ import _function.is_primitive,
+    .f set _ function {},
     f which _ is_primitive .
 ]
 -----
@@ -331,43 +331,43 @@ false
 id primitive
 -----
 _ do [
-    _id set _ import _function.id,
+    .id set _ import _function.id,
     not which _ id .
 ]
 -----
-bit.not
+_bit.not
 =====
 id rename
 -----
 _ do [
-    _id set _ import _function.id,
-    _neg set not,
+    .id set _ import _function.id,
+    .neg set not,
     neg which _ id .
 ]
 -----
-bit.not
+_bit.not
 =====
 code
 -----
 _ do [
-    _code set _ import _function.code,
-    _f set _ function {
-        code : (_ctx : _i) : _i
+    .code set _ import _function.code,
+    .f set _ function {
+        code : (_ctx : .i) : .i
     },
     f which _ code .
 ]
 -----
-(ctx : i) : i
+(_ctx : i) : i
 =====
 ctx
 -----
 _ do [
-    _memory.new set _ import _memory.new,
-    _function.memory set _ import _function.memory,
-    _memo set _ memory.new {
+    .memory.new set _ import _memory.new,
+    .function.memory set _ import _function.memory,
+    .memo set _ memory.new {
         a : . : 1
     },
-    _f set _ function {
+    .f set _ function {
         memory : memo
     },
     (f which _ function.memory .) == memo
@@ -395,16 +395,16 @@ _ do [
 apply mut
 -----
 _ do [
-    = apply _a : 1,
+    set apply .a : 1,
     a
 ]
 -----
 1
 =====
-apply no adapter
+apply eval
 -----
 _ do [
-    test apply true : [_a set true] : [_b set true],
+    test apply true : [.a set true] : [.b set true],
     a and b
 ]
 -----
@@ -413,19 +413,19 @@ true
 recurse
 -----
 _ do [
-    _recurse set _ import _function.recurse,
-    _g set _ function {
-        code : _fi : _ do [
-            (_f : _i) = _fi,
-            (_i < 1) test [
+    .recurse set _ import _function.recurse,
+    .g set _ function {
+        code : .fi : _ form _ do [
+            (..f : ..i) = .fi,
+            (.i < 1) test [
                 0
             ] : [
-                _i + _f _f _i - 1
+                .i + .f .f .i - 1
             ]
         ],
         context_access : _free,
     },
-    _g set _ recurse g,
+    .g set _ recurse g,
     _ g 10
 ]
 -----

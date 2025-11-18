@@ -1,9 +1,9 @@
 == true
 -----
 _ do [
-    _any set _ import _value.any,
-    _a set _ any .,
-    _b set a,
+    .any set _ import _value.any,
+    .a set _ any .,
+    .b set a,
     a == b
 ]
 -----
@@ -12,270 +12,270 @@ true
 any unit
 -----
 _ do [
-    _any set _ import _value.any,
-    _u set _ any _unit,
+    .any set _ import _value.any,
+    .u set _ any _unit,
     u which _ type .
 ]
 -----
-unit
+_unit
 =====
 any bit
 -----
 _ do [
-    _any set _ import _value.any,
-    _b set _ any _bit,
+    .any set _ import _value.any,
+    .b set _ any _bit,
     b which _ type .
 ]
 -----
-bit
+_bit
 =====
 any symbol
 -----
 _ do [
-    _any set _ import _value.any,
-    _s set _ any _symbol,
+    .any set _ import _value.any,
+    .s set _ any _symbol,
     s which _ type .
 ]
 -----
-symbol
+_symbol
 =====
 any text
 -----
 _ do [
-    _any set _ import _value.any,
-    _t set _ any _text,
+    .any set _ import _value.any,
+    .t set _ any _text,
     t which _ type .
 ]
 -----
-text
+_text
 =====
 any integer
 -----
 _ do [
-    _any set _ import _value.any,
-    _i set _ any _integer,
+    .any set _ import _value.any,
+    .i set _ any _integer,
     i which _ type .
 ]
 -----
-integer
+_integer
 =====
 any number
 -----
 _ do [
-    _any set _ import _value.any,
-    _n set _ any _number,
+    .any set _ import _value.any,
+    .n set _ any _number,
     n which _ type .
 ]
 -----
-number
+_number
 =====
 any byte
 -----
 _ do [
-    _any set _ import _value.any,
-    _b set _ any _byte,
+    .any set _ import _value.any,
+    .b set _ any _byte,
     b which _ type .
 ]
 -----
-byte
+_byte
 =====
 any pair
 -----
 _ do [
-    _any set _ import _value.any,
-    _p set _ any _pair,
+    .any set _ import _value.any,
+    .p set _ any _pair,
     p which _ type .
 ]
 -----
-pair
+_pair
 =====
 any call
 -----
 _ do [
-    _any set _ import _value.any,
-    _c set _ any _call,
+    .any set _ import _value.any,
+    .c set _ any _call,
     c which _ type .
 ]
 -----
-call
+_call
 =====
 any list
 -----
 _ do [
-    _any set _ import _value.any,
-    _a set _ any _list,
-    a which _ type .
+    .any set _ import _value.any,
+    .l set _ any _list,
+    l which _ type .
 ]
 -----
-list
+_list
 =====
 any map
 -----
 _ do [
-    _any set _ import _value.any,
-    _a set _ any _map,
-    a which _ type .
+    .any set _ import _value.any,
+    .m set _ any _map,
+    m which _ type .
 ]
 -----
-map
+_map
 =====
 any link
 -----
 _ do [
-    _any set _ import _value.any,
-    _a set _ any _link,
-    a which _ type .
+    .any set _ import _value.any,
+    .l set _ any _link,
+    l which _ type .
 ]
 -----
-link
+_link
 =====
 any memory
 -----
 _ do [
-    _any set _ import _value.any,
-    _m set _ any _memory,
+    .any set _ import _value.any,
+    .m set _ any _memory,
     m which _ type .
 ]
 -----
-memory
+_memory
 =====
 any function
 -----
 _ do [
-    _any set _ import _value.any,
-    _f set _ any _function,
+    .any set _ import _value.any,
+    .f set _ any _function,
     f which _ type .
 ]
 -----
-function
+_function
 =====
 type unit
 -----
 _ do [
-    _a set .,
+    .a set .,
     a which _ type .
 ]
 -----
-unit
+_unit
 =====
 type bit
 -----
 _ do [
-    _a set true,
+    .a set true,
     a which _ type .
 ]
 -----
-bit
+_bit
 =====
 type symbol
 -----
 _ do [
-    _a set _a,
+    .a set _a,
     a which _ type .
 ]
 -----
-symbol
+_symbol
 =====
 type text
 -----
 _ do [
-    _a set "",
+    .a set "",
     a which _ type .
 ]
 -----
-text
+_text
 =====
 type integer
 -----
 _ do [
-    _a set 1,
+    .a set 1,
     a which _ type .
 ]
 -----
-integer
+_integer
 =====
 type number
 -----
 _ do [
-    _a set 1.0,
+    .a set 1.0,
     a which _ type .
 ]
 -----
-number
+_number
 =====
 type byte
 -----
 _ do [
-    _a set byte(ff),
+    .a set byte(ff),
     a which _ type .
 ]
 -----
-byte
+_byte
 =====
 type pair
 -----
 _ do [
-    _a set 1 : 2,
+    .a set 1 : 2,
     a which _ type .
 ]
 -----
-pair
+_pair
 =====
 type call
 -----
 _ do [
-    _a set _ data _ f a,
+    .a set _ data _ f a,
     a which _ type .
 ]
 -----
-call
+_call
 =====
 type list
 -----
 _ do [
-    _a set [],
+    .a set [],
     a which _ type .
 ]
 -----
-list
+_list
 =====
 type map
 -----
 _ do [
-    _a set {},
+    .a set {},
     a which _ type .
 ]
 -----
-map
+_map
 =====
 type link
 -----
 _ do [
-    _new_link set _ import _link.new,
-    _a set _ new_link .,
+    .new_link set _ import _link.new,
+    .a set _ new_link .,
     a which _ type .
 ]
 -----
-link
+_link
 =====
 type memory
 -----
 _ do [
-    _new_memory set _ import _memory.new,
-    _a set _ new_memory {},
+    .new_memory set _ import _memory.new,
+    .a set _ new_memory {},
     a which _ type .
 ]
 -----
-memory
+_memory
 =====
 type function
 -----
 _ do [
-    _a set _ function {},
+    .a set _ function {},
     a which _ type .
 ]
 -----
-function
+_function
 =====
 == unit
 -----
@@ -346,10 +346,10 @@ true
 == link
 -----
 _ do [
-    _new_link set _ import _link.new,
-    _a set _ new_link .,
-    _b set a,
-    a == b
+    .new_link set _ import _link.new,
+    .a set _ new_link .,
+    .b set a,
+    (a == b) and _ not a == .
 ]
 -----
 true
@@ -357,9 +357,9 @@ true
 == memory
 -----
 _ do [
-    _new_memory set _ import _memory.new,
-    _a set _ new_memory {},
-    _b set _ new_memory {},
+    .new_memory set _ import _memory.new,
+    .a set _ new_memory {},
+    .b set _ new_memory {},
     (a == b) and _ not a == .
 ]
 -----
@@ -368,8 +368,8 @@ true
 == function
 -----
 _ do [
-    _a set _ function {},
-    _b set _ function {},
+    .a set _ function {},
+    .b set _ function {},
     (a == b) and _ not a == .
 ]
 -----
@@ -390,7 +390,7 @@ false
 == ref val
 -----
 _ do [
-    _a set 1,
+    .a set 1,
     a == 1
 ]
 -----
@@ -399,7 +399,7 @@ true
 == val ref
 -----
 _ do [
-    _a set 1,
+    .a set 1,
     1 == a
 ]
 -----
@@ -408,8 +408,8 @@ true
 == ref ref
 -----
 _ do [
-    _a set 1,
-    _b set 1,
+    .a set 1,
+    .b set 1,
     a == b
 ]
 -----
@@ -418,7 +418,7 @@ true
 == same ref
 -----
 _ do [
-    _a set 1,
+    .a set 1,
     a == a
 ]
 -----
@@ -433,8 +433,8 @@ true
 == special ref
 -----
 _ do [
-    __a set 1,
-    ._a == 1
+    ._a set 1,
+    :_a == 1
 ]
 -----
 true

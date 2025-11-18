@@ -28,6 +28,7 @@ where T: FreeFn<Cfg, I, O>
 #[derive(Clone)]
 pub struct FreePrimFunc {
     pub(crate) id: Symbol,
+    pub(crate) raw_input: bool,
     pub(crate) fn_: Rc<dyn FreeFn<Cfg, Val, Val>>,
 }
 
@@ -45,7 +46,7 @@ impl Default for FreePrimFunc {
                 Val::default()
             }
         }
-        Self { id: Symbol::default(), fn_: Rc::new(F) }
+        Self { id: Symbol::default(), fn_: Rc::new(F), raw_input: false }
     }
 }
 

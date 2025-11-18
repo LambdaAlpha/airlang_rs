@@ -11,9 +11,7 @@ use super::const_impl;
 use super::free_impl;
 use super::func::repr::generate_code;
 use super::func::repr::generate_ctx_access;
-use super::func::repr::parse_adapter;
 use crate::cfg::CfgMod;
-use crate::cfg::CoreCfg;
 use crate::cfg::exception::illegal_ctx;
 use crate::cfg::exception::illegal_input;
 use crate::semantics::cfg::Cfg;
@@ -66,7 +64,6 @@ impl Default for FuncLib {
 
 impl CfgMod for FuncLib {
     fn extend(self, cfg: &Cfg) {
-        CoreCfg::extend_adapter(cfg, &self.new.id, parse_adapter());
         self.new.extend(cfg);
         self.repr.extend(cfg);
         self.apply.extend(cfg);
@@ -80,7 +77,7 @@ impl CfgMod for FuncLib {
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { id: "function.new", f: free_impl(fn_new) }.free()
+    FreePrimFn { id: "_function.new", raw_input: false, f: free_impl(fn_new) }.free()
 }
 
 fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
@@ -92,7 +89,7 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn repr() -> FreePrimFuncVal {
-    FreePrimFn { id: "function.represent", f: free_impl(fn_repr) }.free()
+    FreePrimFn { id: "_function.represent", raw_input: false, f: free_impl(fn_repr) }.free()
 }
 
 fn fn_repr(cfg: &mut Cfg, input: Val) -> Val {
@@ -104,8 +101,12 @@ fn fn_repr(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn apply() -> MutPrimFuncVal {
-    DynPrimFn { id: "function.apply", f: MutImpl::new(fn_apply_free, fn_apply_const, fn_apply_mut) }
-        .mut_()
+    DynPrimFn {
+        id: "_function.apply",
+        raw_input: false,
+        f: MutImpl::new(fn_apply_free, fn_apply_const, fn_apply_mut),
+    }
+    .mut_()
 }
 
 fn fn_apply_free(cfg: &mut Cfg, input: Val) -> Val {
@@ -148,7 +149,7 @@ fn fn_apply_mut(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn recurse() -> FreePrimFuncVal {
-    FreePrimFn { id: "function.recurse", f: free_impl(fn_recurse) }.free()
+    FreePrimFn { id: "_function.recurse", raw_input: false, f: free_impl(fn_recurse) }.free()
 }
 
 fn fn_recurse(cfg: &mut Cfg, input: Val) -> Val {
@@ -159,10 +160,17 @@ fn fn_recurse(cfg: &mut Cfg, input: Val) -> Val {
     let recurse = Recurse(func.clone());
     let id = format!("function.recurse.{}", &*func.id());
     let id = Symbol::from_string_unchecked(id);
+    let raw_input = false;
     let recurse = match func.ctx_access() {
-        CtxAccess::Free => FuncVal::FreePrim(FreePrimFunc { id, fn_: Rc::new(recurse) }.into()),
-        CtxAccess::Const => FuncVal::ConstPrim(ConstPrimFunc { id, fn_: Rc::new(recurse) }.into()),
-        CtxAccess::Mut => FuncVal::MutPrim(MutPrimFunc { id, fn_: Rc::new(recurse) }.into()),
+        CtxAccess::Free => {
+            FuncVal::FreePrim(FreePrimFunc { id, raw_input, fn_: Rc::new(recurse) }.into())
+        }
+        CtxAccess::Const => {
+            FuncVal::ConstPrim(ConstPrimFunc { id, raw_input, fn_: Rc::new(recurse) }.into())
+        }
+        CtxAccess::Mut => {
+            FuncVal::MutPrim(MutPrimFunc { id, raw_input, fn_: Rc::new(recurse) }.into())
+        }
     };
     Val::Func(recurse)
 }
@@ -191,7 +199,8 @@ impl MutFn<Cfg, Val, Val, Val> for Recurse {
 }
 
 pub fn ctx_access() -> ConstPrimFuncVal {
-    DynPrimFn { id: "function.context_access", f: const_impl(fn_ctx_access) }.const_()
+    DynPrimFn { id: "_function.context_access", raw_input: false, f: const_impl(fn_ctx_access) }
+        .const_()
 }
 
 fn fn_ctx_access(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -204,7 +213,8 @@ fn fn_ctx_access(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn is_primitive() -> ConstPrimFuncVal {
-    DynPrimFn { id: "function.is_primitive", f: const_impl(fn_is_primitive) }.const_()
+    DynPrimFn { id: "_function.is_primitive", raw_input: false, f: const_impl(fn_is_primitive) }
+        .const_()
 }
 
 fn fn_is_primitive(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -217,7 +227,7 @@ fn fn_is_primitive(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn id() -> ConstPrimFuncVal {
-    DynPrimFn { id: "function.id", f: const_impl(fn_id) }.const_()
+    DynPrimFn { id: "_function.id", raw_input: false, f: const_impl(fn_id) }.const_()
 }
 
 fn fn_id(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -229,7 +239,7 @@ fn fn_id(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn code() -> ConstPrimFuncVal {
-    DynPrimFn { id: "function.code", f: const_impl(fn_code) }.const_()
+    DynPrimFn { id: "_function.code", raw_input: false, f: const_impl(fn_code) }.const_()
 }
 
 fn fn_code(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -245,7 +255,7 @@ fn fn_code(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn memo() -> ConstPrimFuncVal {
-    DynPrimFn { id: "function.memory", f: const_impl(fn_memo) }.const_()
+    DynPrimFn { id: "_function.memory", raw_input: false, f: const_impl(fn_memo) }.const_()
 }
 
 fn fn_memo(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {

@@ -33,7 +33,7 @@ impl CfgMod for LinkLib {
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { id: "link.new", f: free_impl(fn_new) }.free()
+    FreePrimFn { id: "_link.new", raw_input: false, f: free_impl(fn_new) }.free()
 }
 
 fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
@@ -41,7 +41,7 @@ fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn get() -> FreePrimFuncVal {
-    FreePrimFn { id: "link.get", f: free_impl(fn_get) }.free()
+    FreePrimFn { id: "_link.get", raw_input: false, f: free_impl(fn_get) }.free()
 }
 
 fn fn_get(cfg: &mut Cfg, input: Val) -> Val {
@@ -53,7 +53,7 @@ fn fn_get(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn set() -> FreePrimFuncVal {
-    FreePrimFn { id: "link.set", f: free_impl(fn_set) }.free()
+    FreePrimFn { id: "_link.set", raw_input: false, f: free_impl(fn_set) }.free()
 }
 
 fn fn_set(cfg: &mut Cfg, input: Val) -> Val {

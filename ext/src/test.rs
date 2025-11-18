@@ -34,12 +34,13 @@ fn test_build_load(path: &str, expect: Val) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+// AIR CODE
 fn generate_load(path: &str) -> String {
     let mut path_prefix = String::new();
     escape_text(&mut path_prefix, env!("CARGO_MANIFEST_DIR"));
     format!(
         "_ do [\
-            load = _ import _build.load,\
+            .load set _ import _build.load,\
             _ load \"{path_prefix}{path}\"\
         ]"
     )

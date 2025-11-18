@@ -39,7 +39,7 @@ const ARGUMENTS: &str = "arguments";
 // todo design
 // todo impl
 pub fn call() -> FreePrimFuncVal {
-    FreePrimFn { id: "process.call", f: free_impl(fn_call) }.free()
+    FreePrimFn { id: "_process.call", raw_input: false, f: free_impl(fn_call) }.free()
 }
 
 fn fn_call(cfg: &mut Cfg, input: Val) -> Val {

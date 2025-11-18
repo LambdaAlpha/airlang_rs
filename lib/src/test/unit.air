@@ -1,8 +1,8 @@
 unit return .
 -----
 _ do [
-    _any set _ import _value.any,
-    _unit set _ import _unit.unit,
+    .any set _ import _value.any,
+    .unit set _ import _unit.unit,
     _ unit _ any .
 ]
 -----

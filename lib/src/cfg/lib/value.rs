@@ -1,3 +1,5 @@
+use const_format::concatcp;
+
 pub use self::arbitrary::Arbitrary;
 
 _____!();
@@ -14,6 +16,7 @@ use crate::cfg::CfgMod;
 use crate::cfg::exception::fail;
 use crate::cfg::exception::illegal_input;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::PREFIX_ID;
 use crate::semantics::memo::Memo;
 use crate::semantics::val::BIT;
 use crate::semantics::val::BYTE;
@@ -70,9 +73,25 @@ impl CfgMod for ValueLib {
     }
 }
 
+const TYPE_UNIT: &str = concatcp!(PREFIX_ID, UNIT);
+const TYPE_BIT: &str = concatcp!(PREFIX_ID, BIT);
+const TYPE_SYMBOL: &str = concatcp!(PREFIX_ID, SYMBOL);
+const TYPE_TEXT: &str = concatcp!(PREFIX_ID, TEXT);
+const TYPE_INT: &str = concatcp!(PREFIX_ID, INT);
+const TYPE_NUMBER: &str = concatcp!(PREFIX_ID, NUMBER);
+const TYPE_BYTE: &str = concatcp!(PREFIX_ID, BYTE);
+const TYPE_PAIR: &str = concatcp!(PREFIX_ID, PAIR);
+const TYPE_CALL: &str = concatcp!(PREFIX_ID, CALL);
+const TYPE_LIST: &str = concatcp!(PREFIX_ID, LIST);
+const TYPE_MAP: &str = concatcp!(PREFIX_ID, MAP);
+const TYPE_LINK: &str = concatcp!(PREFIX_ID, LINK);
+const TYPE_CFG: &str = concatcp!(PREFIX_ID, CFG);
+const TYPE_MEMO: &str = concatcp!(PREFIX_ID, MEMO);
+const TYPE_FUNC: &str = concatcp!(PREFIX_ID, FUNC);
+
 // todo design pick value from cfg or ctx
 pub fn any() -> FreePrimFuncVal {
-    FreePrimFn { id: "value.any", f: free_impl(fn_any) }.free()
+    FreePrimFn { id: "_value.any", raw_input: false, f: free_impl(fn_any) }.free()
 }
 
 fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
@@ -82,21 +101,21 @@ fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
     match input {
         Val::Unit(_) => Val::any(rng, DEPTH),
         Val::Symbol(s) => match &*s {
-            UNIT => Val::Unit(Unit::any(rng, DEPTH)),
-            BIT => Val::Bit(Bit::any(rng, DEPTH)),
-            SYMBOL => Val::Symbol(Symbol::any(rng, DEPTH)),
-            TEXT => Val::Text(Text::any(rng, DEPTH).into()),
-            INT => Val::Int(Int::any(rng, DEPTH).into()),
-            NUMBER => Val::Number(Number::any(rng, DEPTH).into()),
-            BYTE => Val::Byte(Byte::any(rng, DEPTH).into()),
-            PAIR => Val::Pair(Pair::<Val, Val>::any(rng, DEPTH).into()),
-            CALL => Val::Call(Call::<Val, Val>::any(rng, DEPTH).into()),
-            LIST => Val::List(List::<Val>::any(rng, DEPTH).into()),
-            MAP => Val::Map(Map::<Val, Val>::any(rng, DEPTH).into()),
-            LINK => Val::Link(Link::any(rng, DEPTH)),
-            CFG => Val::Cfg(Cfg::any(rng, DEPTH).into()),
-            MEMO => Val::Memo(Memo::any(rng, DEPTH).into()),
-            FUNC => Val::Func(FuncVal::any(rng, DEPTH)),
+            TYPE_UNIT => Val::Unit(Unit::any(rng, DEPTH)),
+            TYPE_BIT => Val::Bit(Bit::any(rng, DEPTH)),
+            TYPE_SYMBOL => Val::Symbol(Symbol::any(rng, DEPTH)),
+            TYPE_TEXT => Val::Text(Text::any(rng, DEPTH).into()),
+            TYPE_INT => Val::Int(Int::any(rng, DEPTH).into()),
+            TYPE_NUMBER => Val::Number(Number::any(rng, DEPTH).into()),
+            TYPE_BYTE => Val::Byte(Byte::any(rng, DEPTH).into()),
+            TYPE_PAIR => Val::Pair(Pair::<Val, Val>::any(rng, DEPTH).into()),
+            TYPE_CALL => Val::Call(Call::<Val, Val>::any(rng, DEPTH).into()),
+            TYPE_LIST => Val::List(List::<Val>::any(rng, DEPTH).into()),
+            TYPE_MAP => Val::Map(Map::<Val, Val>::any(rng, DEPTH).into()),
+            TYPE_LINK => Val::Link(Link::any(rng, DEPTH)),
+            TYPE_CFG => Val::Cfg(Cfg::any(rng, DEPTH).into()),
+            TYPE_MEMO => Val::Memo(Memo::any(rng, DEPTH).into()),
+            TYPE_FUNC => Val::Func(FuncVal::any(rng, DEPTH)),
             _ => fail(cfg),
         },
         v => {
@@ -107,26 +126,26 @@ fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn type_() -> ConstPrimFuncVal {
-    DynPrimFn { id: "value.type", f: const_impl(fn_type) }.const_()
+    DynPrimFn { id: "_value.type", raw_input: false, f: const_impl(fn_type) }.const_()
 }
 
 fn fn_type(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let s = match &*ctx {
-        Val::Unit(_) => UNIT,
-        Val::Bit(_) => BIT,
-        Val::Symbol(_) => SYMBOL,
-        Val::Text(_) => TEXT,
-        Val::Int(_) => INT,
-        Val::Number(_) => NUMBER,
-        Val::Byte(_) => BYTE,
-        Val::Pair(_) => PAIR,
-        Val::Call(_) => CALL,
-        Val::List(_) => LIST,
-        Val::Map(_) => MAP,
-        Val::Link(_) => LINK,
-        Val::Cfg(_) => CFG,
-        Val::Memo(_) => MEMO,
-        Val::Func(_) => FUNC,
+        Val::Unit(_) => TYPE_UNIT,
+        Val::Bit(_) => TYPE_BIT,
+        Val::Symbol(_) => TYPE_SYMBOL,
+        Val::Text(_) => TYPE_TEXT,
+        Val::Int(_) => TYPE_INT,
+        Val::Number(_) => TYPE_NUMBER,
+        Val::Byte(_) => TYPE_BYTE,
+        Val::Pair(_) => TYPE_PAIR,
+        Val::Call(_) => TYPE_CALL,
+        Val::List(_) => TYPE_LIST,
+        Val::Map(_) => TYPE_MAP,
+        Val::Link(_) => TYPE_LINK,
+        Val::Cfg(_) => TYPE_CFG,
+        Val::Memo(_) => TYPE_MEMO,
+        Val::Func(_) => TYPE_FUNC,
         Val::Dyn(val) => return Val::Symbol(val.type_name()),
     };
     Val::Symbol(Symbol::from_str_unchecked(s))
@@ -134,7 +153,7 @@ fn fn_type(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 
 // todo design
 pub fn equal() -> FreePrimFuncVal {
-    FreePrimFn { id: "value.equal", f: free_impl(fn_equal) }.free()
+    FreePrimFn { id: "_value.equal", raw_input: false, f: free_impl(fn_equal) }.free()
 }
 
 fn fn_equal(cfg: &mut Cfg, input: Val) -> Val {

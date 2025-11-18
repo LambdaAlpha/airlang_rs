@@ -1,9 +1,9 @@
 get ref
 -----
 _ do [
-    _any set _ import _value.any,
+    .any set _ import _value.any,
     _a set _ any .,
-    a == _a get _
+    :_a == _a get _
 ]
 -----
 true
@@ -11,9 +11,9 @@ true
 get indirect
 -----
 _ do [
-    _any set _ import _value.any,
-    _a set _ any .,
-    _b set _a,
+    .any set _ import _value.any,
+    .a set _ any .,
+    .b set .a,
     a == b get _
 ]
 -----
@@ -31,7 +31,7 @@ _ do [
 set return
 -----
 _ do [
-    _any set _ import _value.any,
+    .any set _ import _value.any,
     _a set 1,
     _a set _ any .
 ]
@@ -41,9 +41,9 @@ _ do [
 set another
 -----
 _ do [
-    _any set _ import _value.any,
-    _a set _ any .,
-    _a set 2,
+    .any set _ import _value.any,
+    .a set _ any .,
+    .a set 2,
     a
 ]
 -----
@@ -52,8 +52,8 @@ _ do [
 set self
 -----
 _ do [
-    _a set 1,
-    _a set a,
+    .a set 1,
+    .a set a,
     a
 ]
 -----
@@ -62,8 +62,8 @@ _ do [
 set indirect
 -----
 _ do [
-    _a set _b,
-    .a set 1,
+    .a set .b,
+    :a set 1,
     b
 ]
 -----
@@ -72,8 +72,8 @@ _ do [
 set special key 1
 -----
 _ do [
-    __a set 1,
-    ._a
+    _a set 1,
+    :_a
 ]
 -----
 1
@@ -81,9 +81,9 @@ _ do [
 set special key 2
 -----
 _ do [
-    _first set _ import _pair.first,
-    __p set 1 : 2,
-    _p which _ first .
+    .first set _ import _pair.first,
+    .:p set 1 : 2,
+    :p which _ first .
 ]
 -----
 1
@@ -91,7 +91,7 @@ _ do [
 = destruct pair
 -----
 _ do [
-    (a : b) = 1 : 2,
+    (.a : .b) = 1 : 2,
     a : b
 ]
 -----
@@ -100,9 +100,9 @@ _ do [
 = destruct pair return
 -----
 _ do [
-    _a set 1,
-    _b set 2,
-    (a : b) = 3 : 4
+    .a set 1,
+    .b set 2,
+    (.a : .b) = 3 : 4
 ]
 -----
 1 : 2
@@ -110,7 +110,7 @@ _ do [
 = destruct recursive
 -----
 _ do [
-    (a : b : c) = 1 : 2 : 3,
+    (.a : .b : .c) = 1 : 2 : 3,
     [a, b, c]
 ]
 -----
@@ -119,7 +119,7 @@ _ do [
 = destruct call
 -----
 _ do [
-    (_ f a) = _ data _ 1 2,
+    (_ form _ .f .a) = _ data _ 1 2,
     [f, a]
 ]
 -----
@@ -128,7 +128,7 @@ _ do [
 = destruct infix
 -----
 _ do [
-    (a b c) = _ data 1 2 3,
+    (_ form .a .b .c) = _ data 1 2 3,
     [a, b, c]
 ]
 -----
@@ -137,7 +137,7 @@ _ do [
 = destruct list equal length
 -----
 _ do [
-    [a, b, c] = [1, 2, 3],
+    [.a, .b, .c] = [1, 2, 3],
     [a, b, c]
 ]
 -----
@@ -146,7 +146,7 @@ _ do [
 = destruct list more value
 -----
 _ do [
-    [a, b] = [1, 2, 3],
+    [.a, .b] = [1, 2, 3],
     [a, b]
 ]
 -----
@@ -155,9 +155,9 @@ _ do [
 = destruct list more pattern
 -----
 _ do [
-    _a set 1,
-    _b set 2,
-    [a, b] = [3],
+    .a set 1,
+    .b set 2,
+    [.a, .b] = [3],
     [a, b]
 ]
 -----
@@ -166,9 +166,9 @@ _ do [
 = destruct list more pattern return
 -----
 _ do [
-    _a set 1,
-    _b set 2,
-    [a, b] = [3]
+    .a set 1,
+    .b set 2,
+    [.a, .b] = [3]
 ]
 -----
 [1, 2]
@@ -176,7 +176,7 @@ _ do [
 = destruct map symbol key
 -----
 _ do [
-    {a : a, b : b} = {a : 1, b : 2, c : 3},
+    {a : .a, b : .b} = {a : 1, b : 2, c : 3},
     [a, b]
 ]
 -----
@@ -185,7 +185,7 @@ _ do [
 = destruct map other key
 -----
 _ do [
-    {1 : a, 3 : b} = {1 : 2, 3 : 4},
+    {1 : .a, 3 : .b} = {1 : 2, 3 : 4},
     [a, b]
 ]
 -----
@@ -194,9 +194,9 @@ _ do [
 = destruct map not full match
 -----
 _ do [
-    _a set 1,
-    _b set 2,
-    {3 : a, 4 : b} = {3 : 5, 6 : 7}
+    .a set 1,
+    .b set 2,
+    {3 : .a, 4 : .b} = {3 : 5, 6 : 7}
 ]
 -----
 {3 : 1, 4 : 2}
@@ -204,7 +204,7 @@ _ do [
 = destruct match
 -----
 _ do [
-    [a, 2, c] = [1, 2, 3],
+    [.a, 2, .c] = [1, 2, 3],
     [a, c]
 ]
 -----
@@ -213,9 +213,9 @@ _ do [
 = destruct not match
 -----
 _ do [
-    _a set 1,
-    _c set 3,
-    [a, 2, c] = [2, 3, 4],
+    .a set 1,
+    .c set 3,
+    [.a, 2, .c] = [2, 3, 4],
     [a, c]
 ]
 -----
@@ -224,10 +224,9 @@ _ do [
 = pair ctx
 -----
 _ do [
-    _first set _ import _pair.first,
-    _p set 1 : 2,
-    p which _first set 3,
-    p which _ first .
+    .p set 1 : 2,
+    p which .first set 3,
+    p which _ get .first
 ]
 -----
 3
@@ -235,21 +234,20 @@ _ do [
 = call ctx
 -----
 _ do [
-    _function set _ import _call.function,
-    _t set _ data _ func input,
-    t which _function set _c,
-    t which _ function .
+    .c set _ data _ func input,
+    c which .function set _f,
+    c which _ get .function
 ]
 -----
-c
+_f
 =====
 = list ctx
 -----
 _ do [
-    _get set _ import _list.get,
-    _l set [1, 2, 3],
-    l which _1 set 4,
-    l which _ get 1
+    .list.get set _ import _list.get,
+    .l set [1, 2, 3],
+    l which .1 set 4,
+    l which _ list.get 1
 ]
 -----
 4
@@ -257,10 +255,10 @@ _ do [
 = map ctx
 -----
 _ do [
-    _get set _ import _map.get,
-    _m set {a : 1, b : 2},
+    .map.get set _ import _map.get,
+    .m set {a : 1, b : 2},
     m which _a set 3,
-    m which _ get _a
+    m which _ map.get _a
 ]
 -----
 3
@@ -268,10 +266,10 @@ _ do [
 = map ctx not exist
 -----
 _ do [
-    _get set _ import _map.get,
-    _m set {},
+    .map.get set _ import _map.get,
+    .m set {},
     m which _a set 3,
-    m which _ get _a
+    m which _ map.get _a
 ]
 -----
 3
@@ -279,7 +277,7 @@ _ do [
 is_constant default
 -----
 _ do [
-    _is_constant set _ import _context.is_constant,
+    .is_constant set _ import _context.is_constant,
     _ is_constant .
 ]
 -----
@@ -288,12 +286,12 @@ false
 is_constant true
 -----
 _ do [
-    _new set _ import _memory.new,
-    _set_contract set _ import _memory.set_contract,
-    _is_constant set _ import _context.is_constant,
+    .new set _ import _memory.new,
+    .set_contract set _ import _memory.set_contract,
+    .is_constant set _ import _context.is_constant,
     _a set _ new {},
     _a set_contract _final,
-    a which _ is_constant .
+    _a which _ is_constant .
 ]
 -----
 true
@@ -301,9 +299,9 @@ true
 is_constant false
 -----
 _ do [
-    _new set _ import _memory.new,
-    _is_constant set _ import _context.is_constant,
-    _a set _ new {},
+    .new set _ import _memory.new,
+    .is_constant set _ import _context.is_constant,
+    .a set _ new {},
     a which _ is_constant .
 ]
 -----
@@ -312,12 +310,11 @@ false
 which 1
 -----
 _ do [
-    _new set _ import _memory.new,
-    _set_first set _ import _pair.set_first,
-    _a set _ new {p : . : 1 : 2},
-    _b set 3,
-    a which _ eval _p which _ set_first b,
-    a which _ move _p,
+    .new set _ import _memory.new,
+    .set_first set _ import _pair.set_first,
+    _a set _ new {_p : . : 1 : 2},
+    _a which _ eval _ form _p which _ set_first 3,
+    _a which _ move _p,
 ]
 -----
 3 : 2
@@ -325,14 +322,14 @@ _ do [
 which 2
 -----
 _ do [
-    _new set _ import _memory.new,
-    _set_first set _ import _pair.set_first,
+    .new set _ import _memory.new,
+    .set_first set _ import _pair.set_first,
     _a set _ new {
-        p : . : 1 : 2,
-        b : . : 3,
+        _p : . : 1 : 2,
+        _b : . : 3,
     },
-    a which _ eval _p which _ set_first _b,
-    a which _ move _p,
+    _a which _ eval _ form _p which _ set_first _ get _b,
+    _a which _ move _p,
 ]
 -----
 3 : 2
@@ -340,15 +337,15 @@ _ do [
 which 3
 -----
 _ do [
-    _new set _ import _memory.new,
-    _set_first set _ import _pair.set_first,
+    .new set _ import _memory.new,
+    .set_first set _ import _pair.set_first,
     _a set _ new {
         set_first : . : set_first,
-        p : . : 1 : 2,
+        _p : . : 1 : 2,
         b : . : 3,
     },
-    a which _ eval _p which _ _set_first _b,
-    a which _ move _p,
+    _a which _ eval _ form _p which _ .set_first .b,
+    _a which _ move _p,
 ]
 -----
 3 : 2
@@ -356,9 +353,9 @@ _ do [
 which recursive
 -----
 _ do [
-    _new set _ import _memory.new,
-    _a set _ new {b : . : _ new {c : . : 1}},
-    a which _ eval _b which _ eval __c
+    .new set _ import _memory.new,
+    _a set _ new {_b : . : _ new {_c : . : 1}},
+    _a which _ eval _ form _b which _ get _c
 ]
 -----
 1
@@ -366,8 +363,8 @@ _ do [
 which self
 -----
 _ do [
-    _self set _ import _context.self,
-    _u set 1,
+    .self set _ import _context.self,
+    .u set 1,
     u which _ self .
 ]
 -----
@@ -376,10 +373,10 @@ _ do [
 self
 -----
 _ do [
-    _self set _ import _context.self,
+    .self set _ import _context.self,
     _a set 1,
-    _b set _ self .,
-    b which _ eval _a
+    .b set _ self .,
+    b which _ get _a
 ]
 -----
 1
@@ -387,10 +384,10 @@ _ do [
 self non-sync
 -----
 _ do [
-    _any set _ import _value.any,
-    _self set _ import _context.self,
-    _exist set _ import _memory.exist,
-    _a set _ self .,
+    .any set _ import _value.any,
+    .self set _ import _context.self,
+    .exist set _ import _memory.exist,
+    .a set _ self .,
     _b set _ any .,
     a which _ exist _b
 ]

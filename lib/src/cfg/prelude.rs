@@ -1,17 +1,4 @@
 use crate::cfg::lib::CoreLib;
-use crate::cfg::lib::adapter::CODE_EVAL;
-use crate::cfg::lib::adapter::CODE_ID;
-use crate::cfg::lib::adapter::CODE_LITERAL;
-use crate::cfg::lib::adapter::CODE_REF;
-use crate::cfg::lib::adapter::CallPrimAdapter;
-use crate::cfg::lib::adapter::DATA_EVAL;
-use crate::cfg::lib::adapter::DATA_ID;
-use crate::cfg::lib::adapter::DATA_LITERAL;
-use crate::cfg::lib::adapter::DATA_REF;
-use crate::cfg::lib::adapter::SymbolAdapter;
-use crate::cfg::lib::adapter::adapter_free_func;
-use crate::cfg::lib::adapter::adapter_mut_func;
-use crate::cfg::lib::adapter::prim_adapter;
 use crate::semantics::memo::Contract;
 use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
@@ -52,7 +39,8 @@ pub struct CorePrelude {
 
     pub get: ConstPrimFuncVal,
     pub set: MutPrimFuncVal,
-    pub assign: MutPrimFuncVal,
+    pub form: ConstPrimFuncVal,
+    pub repr: MutPrimFuncVal,
     pub which: MutPrimFuncVal,
 
     pub do_: MutPrimFuncVal,
@@ -65,16 +53,10 @@ pub struct CorePrelude {
     pub type_: ConstPrimFuncVal,
     pub equal: FreePrimFuncVal,
 
+    pub data: FreePrimFuncVal,
+    pub id: FreePrimFuncVal,
+    pub code: MutPrimFuncVal,
     pub eval: MutPrimFuncVal,
-
-    pub form_id: FreePrimFuncVal,
-    pub form_literal: MutPrimFuncVal,
-    pub form_ref: MutPrimFuncVal,
-    pub form_eval: MutPrimFuncVal,
-    pub eval_id: MutPrimFuncVal,
-    pub eval_literal: MutPrimFuncVal,
-    pub eval_ref: MutPrimFuncVal,
-    pub eval_eval: MutPrimFuncVal,
 }
 
 pub trait Prelude {
@@ -113,7 +95,8 @@ impl CorePrelude {
 
             get: lib.ctx.get.clone(),
             set: lib.ctx.set.clone(),
-            assign: lib.ctx.assign.clone(),
+            form: lib.ctx.form.clone(),
+            repr: lib.ctx.repr.clone(),
             which: lib.ctx.which.clone(),
 
             do_: lib.ctrl.do_.clone(),
@@ -126,16 +109,10 @@ impl CorePrelude {
             type_: lib.value.type_.clone(),
             equal: lib.value.equal.clone(),
 
+            data: lib.lang.data.clone(),
+            id: lib.lang.id.clone(),
+            code: lib.lang.code.clone(),
             eval: lib.lang.eval.clone(),
-
-            form_id: form_id(),
-            form_literal: form_literal(),
-            form_ref: form_ref(),
-            form_eval: form_eval(),
-            eval_literal: eval_literal(),
-            eval_id: eval_id(),
-            eval_ref: eval_ref(),
-            eval_eval: eval_eval(),
         }
     }
 }
@@ -171,7 +148,8 @@ impl Prelude for CorePrelude {
 
         memo_put_func(memo, "get", &self.get);
         memo_put_func(memo, "set", &self.set);
-        memo_put_func(memo, "=", &self.assign);
+        memo_put_func(memo, "form", &self.form);
+        memo_put_func(memo, "=", &self.repr);
         memo_put_func(memo, "which", &self.which);
 
         memo_put_func(memo, "do", &self.do_);
@@ -184,16 +162,10 @@ impl Prelude for CorePrelude {
         memo_put_func(memo, "type", &self.type_);
         memo_put_func(memo, "==", &self.equal);
 
+        memo_put_func(memo, "data", &self.data);
+        memo_put_func(memo, "id", &self.id);
+        memo_put_func(memo, "code", &self.code);
         memo_put_func(memo, "eval", &self.eval);
-
-        memo_put_func(memo, DATA_ID, &self.form_id);
-        memo_put_func(memo, DATA_LITERAL, &self.form_literal);
-        memo_put_func(memo, DATA_REF, &self.form_ref);
-        memo_put_func(memo, DATA_EVAL, &self.form_eval);
-        memo_put_func(memo, CODE_ID, &self.eval_id);
-        memo_put_func(memo, CODE_LITERAL, &self.eval_literal);
-        memo_put_func(memo, CODE_REF, &self.eval_ref);
-        memo_put_func(memo, CODE_EVAL, &self.eval_eval);
     }
 }
 
@@ -207,44 +179,4 @@ pub fn prelude_repr<T: Prelude>(t: T) -> Memo {
     let mut memo = Memo::default();
     t.extend(&mut memo);
     memo
-}
-
-pub fn form_id() -> FreePrimFuncVal {
-    let adapter = prim_adapter(SymbolAdapter::Id, CallPrimAdapter::Data);
-    adapter_free_func(adapter)
-}
-
-pub fn form_literal() -> MutPrimFuncVal {
-    let adapter = prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Data);
-    adapter_mut_func(adapter)
-}
-
-pub fn form_ref() -> MutPrimFuncVal {
-    let adapter = prim_adapter(SymbolAdapter::Ref, CallPrimAdapter::Data);
-    adapter_mut_func(adapter)
-}
-
-pub fn form_eval() -> MutPrimFuncVal {
-    let adapter = prim_adapter(SymbolAdapter::Eval, CallPrimAdapter::Data);
-    adapter_mut_func(adapter)
-}
-
-pub fn eval_id() -> MutPrimFuncVal {
-    let adapter = prim_adapter(SymbolAdapter::Id, CallPrimAdapter::Code);
-    adapter_mut_func(adapter)
-}
-
-pub fn eval_literal() -> MutPrimFuncVal {
-    let adapter = prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Code);
-    adapter_mut_func(adapter)
-}
-
-pub fn eval_ref() -> MutPrimFuncVal {
-    let adapter = prim_adapter(SymbolAdapter::Ref, CallPrimAdapter::Code);
-    adapter_mut_func(adapter)
-}
-
-pub fn eval_eval() -> MutPrimFuncVal {
-    let adapter = prim_adapter(SymbolAdapter::Eval, CallPrimAdapter::Code);
-    adapter_mut_func(adapter)
 }

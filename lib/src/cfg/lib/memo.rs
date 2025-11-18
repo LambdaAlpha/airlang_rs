@@ -10,11 +10,9 @@ use super::const_impl;
 use super::free_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
-use crate::cfg::CoreCfg;
 use crate::cfg::exception::fail;
 use crate::cfg::exception::illegal_ctx;
 use crate::cfg::exception::illegal_input;
-use crate::cfg::lib::memo::repr::parse_adapter;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
@@ -55,7 +53,6 @@ impl Default for MemoLib {
 
 impl CfgMod for MemoLib {
     fn extend(self, cfg: &Cfg) {
-        CoreCfg::extend_adapter(cfg, &self.new.id, parse_adapter());
         self.new.extend(cfg);
         self.repr.extend(cfg);
         self.length.extend(cfg);
@@ -68,7 +65,7 @@ impl CfgMod for MemoLib {
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { id: "memory.new", f: free_impl(fn_new) }.free()
+    FreePrimFn { id: "_memory.new", raw_input: false, f: free_impl(fn_new) }.free()
 }
 
 fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
@@ -80,7 +77,7 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn repr() -> FreePrimFuncVal {
-    FreePrimFn { id: "memory.represent", f: free_impl(fn_repr) }.free()
+    FreePrimFn { id: "_memory.represent", raw_input: false, f: free_impl(fn_repr) }.free()
 }
 
 fn fn_repr(cfg: &mut Cfg, input: Val) -> Val {
@@ -92,7 +89,7 @@ fn fn_repr(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn length() -> ConstPrimFuncVal {
-    DynPrimFn { id: "memory.length", f: const_impl(fn_length) }.const_()
+    DynPrimFn { id: "_memory.length", raw_input: false, f: const_impl(fn_length) }.const_()
 }
 
 fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -104,7 +101,7 @@ fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn reverse() -> FreePrimFuncVal {
-    FreePrimFn { id: "memory.reverse", f: free_impl(fn_reverse) }.free()
+    FreePrimFn { id: "_memory.reverse", raw_input: false, f: free_impl(fn_reverse) }.free()
 }
 
 fn fn_reverse(cfg: &mut Cfg, input: Val) -> Val {
@@ -118,7 +115,7 @@ fn fn_reverse(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn remove() -> MutPrimFuncVal {
-    DynPrimFn { id: "memory.remove", f: mut_impl(fn_remove) }.mut_()
+    DynPrimFn { id: "_memory.remove", raw_input: false, f: mut_impl(fn_remove) }.mut_()
 }
 
 fn fn_remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -134,7 +131,7 @@ fn fn_remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn contract() -> ConstPrimFuncVal {
-    DynPrimFn { id: "memory.contract", f: const_impl(fn_contract) }.const_()
+    DynPrimFn { id: "_memory.contract", raw_input: false, f: const_impl(fn_contract) }.const_()
 }
 
 fn fn_contract(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -154,7 +151,7 @@ fn fn_contract(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn set_contract() -> MutPrimFuncVal {
-    DynPrimFn { id: "memory.set_contract", f: mut_impl(fn_set_contract) }.mut_()
+    DynPrimFn { id: "_memory.set_contract", raw_input: false, f: mut_impl(fn_set_contract) }.mut_()
 }
 
 fn fn_set_contract(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -182,7 +179,7 @@ fn fn_set_contract(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn exist() -> ConstPrimFuncVal {
-    DynPrimFn { id: "memory.exist", f: const_impl(fn_exist) }.const_()
+    DynPrimFn { id: "_memory.exist", raw_input: false, f: const_impl(fn_exist) }.const_()
 }
 
 fn fn_exist(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {

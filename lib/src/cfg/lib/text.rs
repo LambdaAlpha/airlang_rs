@@ -51,7 +51,7 @@ impl CfgMod for TextLib {
 }
 
 pub fn from_utf8() -> FreePrimFuncVal {
-    FreePrimFn { id: "text.from_utf8", f: free_impl(fn_from_utf8) }.free()
+    FreePrimFn { id: "_text.from_utf8", raw_input: false, f: free_impl(fn_from_utf8) }.free()
 }
 
 fn fn_from_utf8(cfg: &mut Cfg, input: Val) -> Val {
@@ -68,7 +68,7 @@ fn fn_from_utf8(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn into_utf8() -> FreePrimFuncVal {
-    FreePrimFn { id: "text.into_utf8", f: free_impl(fn_into_utf8) }.free()
+    FreePrimFn { id: "_text.into_utf8", raw_input: false, f: free_impl(fn_into_utf8) }.free()
 }
 
 fn fn_into_utf8(cfg: &mut Cfg, input: Val) -> Val {
@@ -82,7 +82,7 @@ fn fn_into_utf8(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn length() -> ConstPrimFuncVal {
-    DynPrimFn { id: "text.length", f: const_impl(fn_length) }.const_()
+    DynPrimFn { id: "_text.length", raw_input: false, f: const_impl(fn_length) }.const_()
 }
 
 fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -95,7 +95,7 @@ fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn push() -> MutPrimFuncVal {
-    DynPrimFn { id: "text.push", f: mut_impl(fn_push) }.mut_()
+    DynPrimFn { id: "_text.push", raw_input: false, f: mut_impl(fn_push) }.mut_()
 }
 
 fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -113,7 +113,7 @@ fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 
 // todo design
 pub fn join() -> FreePrimFuncVal {
-    FreePrimFn { id: "text.join", f: free_impl(fn_join) }.free()
+    FreePrimFn { id: "_text.join", raw_input: false, f: free_impl(fn_join) }.free()
 }
 
 fn fn_join(cfg: &mut Cfg, input: Val) -> Val {

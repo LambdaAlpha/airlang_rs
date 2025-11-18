@@ -100,7 +100,7 @@ impl CfgMod for MapLib {
 }
 
 pub fn length() -> ConstPrimFuncVal {
-    DynPrimFn { id: "map.length", f: const_impl(fn_length) }.const_()
+    DynPrimFn { id: "_map.length", raw_input: false, f: const_impl(fn_length) }.const_()
 }
 
 fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -113,7 +113,7 @@ fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn items() -> ConstPrimFuncVal {
-    DynPrimFn { id: "map.items", f: const_impl(fn_items) }.const_()
+    DynPrimFn { id: "_map.items", raw_input: false, f: const_impl(fn_items) }.const_()
 }
 
 fn fn_items(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -127,7 +127,7 @@ fn fn_items(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn into_items() -> MutPrimFuncVal {
-    DynPrimFn { id: "map.into_items", f: mut_impl(fn_into_items) }.mut_()
+    DynPrimFn { id: "_map.into_items", raw_input: false, f: mut_impl(fn_into_items) }.mut_()
 }
 
 fn fn_into_items(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
@@ -143,7 +143,7 @@ fn fn_into_items(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
 }
 
 pub fn keys() -> ConstPrimFuncVal {
-    DynPrimFn { id: "map.keys", f: const_impl(fn_keys) }.const_()
+    DynPrimFn { id: "_map.keys", raw_input: false, f: const_impl(fn_keys) }.const_()
 }
 
 fn fn_keys(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -156,7 +156,7 @@ fn fn_keys(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn into_keys() -> MutPrimFuncVal {
-    DynPrimFn { id: "map.into_keys", f: mut_impl(fn_into_keys) }.mut_()
+    DynPrimFn { id: "_map.into_keys", raw_input: false, f: mut_impl(fn_into_keys) }.mut_()
 }
 
 fn fn_into_keys(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
@@ -171,7 +171,7 @@ fn fn_into_keys(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
 }
 
 pub fn values() -> ConstPrimFuncVal {
-    DynPrimFn { id: "map.values", f: const_impl(fn_values) }.const_()
+    DynPrimFn { id: "_map.values", raw_input: false, f: const_impl(fn_values) }.const_()
 }
 
 fn fn_values(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -184,7 +184,7 @@ fn fn_values(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn into_values() -> MutPrimFuncVal {
-    DynPrimFn { id: "map.into_values", f: mut_impl(fn_into_values) }.mut_()
+    DynPrimFn { id: "_map.into_values", raw_input: false, f: mut_impl(fn_into_values) }.mut_()
 }
 
 fn fn_into_values(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
@@ -199,7 +199,7 @@ fn fn_into_values(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
 }
 
 pub fn contain() -> ConstPrimFuncVal {
-    DynPrimFn { id: "map.contain", f: const_impl(fn_contain) }.const_()
+    DynPrimFn { id: "_map.contain", raw_input: false, f: const_impl(fn_contain) }.const_()
 }
 
 fn fn_contain(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -211,7 +211,7 @@ fn fn_contain(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn contain_all() -> ConstPrimFuncVal {
-    DynPrimFn { id: "map.contain_all", f: const_impl(fn_contain_all) }.const_()
+    DynPrimFn { id: "_map.contain_all", raw_input: false, f: const_impl(fn_contain_all) }.const_()
 }
 
 fn fn_contain_all(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -229,7 +229,7 @@ fn fn_contain_all(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn contain_any() -> ConstPrimFuncVal {
-    DynPrimFn { id: "map.contain_any", f: const_impl(fn_contain_many) }.const_()
+    DynPrimFn { id: "_map.contain_any", raw_input: false, f: const_impl(fn_contain_many) }.const_()
 }
 
 fn fn_contain_many(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -247,7 +247,7 @@ fn fn_contain_many(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn set() -> MutPrimFuncVal {
-    DynPrimFn { id: "map.set", f: mut_impl(fn_set) }.mut_()
+    DynPrimFn { id: "_map.set", raw_input: false, f: mut_impl(fn_set) }.mut_()
 }
 
 fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -266,7 +266,7 @@ fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn set_many() -> MutPrimFuncVal {
-    DynPrimFn { id: "map.set_many", f: mut_impl(fn_set_many) }.mut_()
+    DynPrimFn { id: "_map.set_many", raw_input: false, f: mut_impl(fn_set_many) }.mut_()
 }
 
 fn fn_set_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -285,7 +285,7 @@ fn fn_set_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn get() -> ConstPrimFuncVal {
-    DynPrimFn { id: "map.get", f: const_impl(fn_get) }.const_()
+    DynPrimFn { id: "_map.get", raw_input: false, f: const_impl(fn_get) }.const_()
 }
 
 fn fn_get(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -297,7 +297,7 @@ fn fn_get(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn get_many() -> ConstPrimFuncVal {
-    DynPrimFn { id: "map.get_many", f: const_impl(fn_get_many) }.const_()
+    DynPrimFn { id: "_map.get_many", raw_input: false, f: const_impl(fn_get_many) }.const_()
 }
 
 fn fn_get_many(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -316,7 +316,7 @@ fn fn_get_many(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn remove() -> MutPrimFuncVal {
-    DynPrimFn { id: "map.remove", f: mut_impl(fn_remove) }.mut_()
+    DynPrimFn { id: "_map.remove", raw_input: false, f: mut_impl(fn_remove) }.mut_()
 }
 
 fn fn_remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -328,7 +328,7 @@ fn fn_remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn remove_many() -> MutPrimFuncVal {
-    DynPrimFn { id: "map.remove_many", f: mut_impl(fn_remove_many) }.mut_()
+    DynPrimFn { id: "_map.remove_many", raw_input: false, f: mut_impl(fn_remove_many) }.mut_()
 }
 
 fn fn_remove_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -347,7 +347,7 @@ fn fn_remove_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn clear() -> MutPrimFuncVal {
-    DynPrimFn { id: "map.clear", f: mut_impl(fn_clear) }.mut_()
+    DynPrimFn { id: "_map.clear", raw_input: false, f: mut_impl(fn_clear) }.mut_()
 }
 
 fn fn_clear(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
@@ -360,7 +360,7 @@ fn fn_clear(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
 }
 
 pub fn new_map() -> FreePrimFuncVal {
-    FreePrimFn { id: "map.new", f: free_impl(fn_new_map) }.free()
+    FreePrimFn { id: "_map.new", raw_input: false, f: free_impl(fn_new_map) }.free()
 }
 
 fn fn_new_map(cfg: &mut Cfg, input: Val) -> Val {
@@ -386,7 +386,7 @@ fn fn_new_map(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn new_set() -> FreePrimFuncVal {
-    FreePrimFn { id: "map.new_set", f: free_impl(fn_new_set) }.free()
+    FreePrimFn { id: "_map.new_set", raw_input: false, f: free_impl(fn_new_set) }.free()
 }
 
 fn fn_new_set(cfg: &mut Cfg, input: Val) -> Val {
@@ -400,7 +400,7 @@ fn fn_new_set(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn new_multiset() -> FreePrimFuncVal {
-    FreePrimFn { id: "map.new_multiset", f: free_impl(fn_new_multiset) }.free()
+    FreePrimFn { id: "_map.new_multiset", raw_input: false, f: free_impl(fn_new_multiset) }.free()
 }
 
 fn fn_new_multiset(cfg: &mut Cfg, input: Val) -> Val {

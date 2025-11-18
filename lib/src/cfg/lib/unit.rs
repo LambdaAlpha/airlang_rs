@@ -24,7 +24,7 @@ impl CfgMod for UnitLib {
 }
 
 pub fn unit() -> FreePrimFuncVal {
-    FreePrimFn { id: "unit.unit", f: free_impl(fn_unit) }.free()
+    FreePrimFn { id: "_unit.unit", raw_input: false, f: free_impl(fn_unit) }.free()
 }
 
 fn fn_unit(_cfg: &mut Cfg, _input: Val) -> Val {

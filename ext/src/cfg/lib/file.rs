@@ -27,7 +27,7 @@ impl CfgMod for FileLib {
 }
 
 pub fn read_to_text() -> FreePrimFuncVal {
-    FreePrimFn { id: "file.read_to_text", f: free_impl(fn_read_to_text) }.free()
+    FreePrimFn { id: "_file.read_to_text", raw_input: false, f: free_impl(fn_read_to_text) }.free()
 }
 
 fn fn_read_to_text(cfg: &mut Cfg, input: Val) -> Val {

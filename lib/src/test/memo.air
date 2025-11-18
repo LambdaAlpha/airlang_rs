@@ -1,10 +1,10 @@
 length
 -----
 _ do [
-    _length set _ import _memory.length,
-    _new set _ import _memory.new,
-    _any set _ import _value.any,
-    _m set _ new {
+    .length set _ import _memory.length,
+    .new set _ import _memory.new,
+    .any set _ import _value.any,
+    .m set _ new {
         a : . : _ any .,
         b : . : _ any .,
         c : . : _ any .,
@@ -18,14 +18,14 @@ _ do [
 length == repr length
 -----
 _ do [
-    _memory.length set _ import _memory.length,
-    _map.length set _ import _map.length,
-    _represent set _ import _memory.represent,
-    _any set _ import _value.any,
-    _m set _ any _memory,
-    _m1 set _ represent m,
-    _l set m which _ memory.length _,
-    _l1 set m1 which _ map.length _,
+    .memory.length set _ import _memory.length,
+    .map.length set _ import _map.length,
+    .represent set _ import _memory.represent,
+    .any set _ import _value.any,
+    .m set _ any _memory,
+    .m1 set _ represent m,
+    .l set m which _ memory.length _,
+    .l1 set m1 which _ map.length _,
     l == l1
 ]
 -----
@@ -34,9 +34,9 @@ true
 get none
 -----
 _ do [
-    _any set _ import _value.any,
-    _a set _ any .,
-    a == _a get _
+    .any set _ import _value.any,
+    .a set _ any .,
+    a == .a get _
 ]
 -----
 true
@@ -44,11 +44,11 @@ true
 get final
 -----
 _ do [
-    _any set _ import _value.any,
-    _new set _ import _memory.new,
-    _v set _ any .,
-    _a set _ new {b : final : v},
-    v == a which _ get _b
+    .any set _ import _value.any,
+    .new set _ import _memory.new,
+    .v set _ any .,
+    _a set _ new {_b : _final : v},
+    v == _a which _ get _b
 ]
 -----
 true
@@ -56,11 +56,11 @@ true
 get still
 -----
 _ do [
-    _any set _ import _value.any,
-    _new set _ import _memory.new,
-    _v set _ any .,
-    _a set _ new {b : still : v},
-    v == a which _ get _b
+    .any set _ import _value.any,
+    .new set _ import _memory.new,
+    .v set _ any .,
+    _a set _ new {_b : _still : v},
+    v == _a which _ get _b
 ]
 -----
 true
@@ -68,11 +68,11 @@ true
 get static
 -----
 _ do [
-    _any set _ import _value.any,
-    _new set _ import _memory.new,
-    _v set _ any .,
-    _a set _ new {b : static : v},
-    v == a which _ get _b
+    .any set _ import _value.any,
+    .new set _ import _memory.new,
+    .v set _ any .,
+    _a set _ new {_b : _static : v},
+    v == _a which _ get _b
 ]
 -----
 true
@@ -80,11 +80,11 @@ true
 get const
 -----
 _ do [
-    _any set _ import _value.any,
-    _new set _ import _memory.new,
-    _v set _ any .,
-    _a set _ new {b : constant : v},
-    v == a which _ get _b
+    .any set _ import _value.any,
+    .new set _ import _memory.new,
+    .v set _ any .,
+    _a set _ new {_b : _constant : v},
+    v == _a which _ get _b
 ]
 -----
 true
@@ -92,10 +92,10 @@ true
 move ref
 -----
 _ do [
-    _any set _ import _value.any,
-    _exist set _ import _memory.exist,
+    .any set _ import _value.any,
+    .exist set _ import _memory.exist,
     _a set _ any .,
-    _b set a,
+    .b set _ get _a,
     (b == _a move _) and (_ not _a exist _)
 ]
 -----
@@ -104,11 +104,11 @@ true
 move indirect
 -----
 _ do [
-    _any set _ import _value.any,
-    _exist set _ import _memory.exist,
+    .any set _ import _value.any,
+    .exist set _ import _memory.exist,
     _a set _ any .,
-    _b set _a,
-    _c set a,
+    .b set _a,
+    .c set _ get _a,
     (c == b move _) and (_ not _a exist _)
 ]
 -----
@@ -117,12 +117,12 @@ true
 move final
 -----
 _ do [
-    _any set _ import _value.any,
-    _new set _ import _memory.new,
-    _exist set _ import _memory.exist,
-    _v set _ any .,
-    _a set _ new {b : final : v},
-    (. == a which _ move _b) and (a which _ exist _b)
+    .any set _ import _value.any,
+    .new set _ import _memory.new,
+    .exist set _ import _memory.exist,
+    .v set _ any .,
+    _a set _ new {_b : _final : v},
+    (. == _a which _ move _b) and (_a which _ exist _b)
 ]
 -----
 true
@@ -130,12 +130,12 @@ true
 move still
 -----
 _ do [
-    _any set _ import _value.any,
-    _new set _ import _memory.new,
-    _exist set _ import _memory.exist,
-    _v set _ any .,
-    _a set _ new {b : still : v},
-    (v == a which _ move _b) and (_ not a which _ exist _b)
+    .any set _ import _value.any,
+    .new set _ import _memory.new,
+    .exist set _ import _memory.exist,
+    .v set _ any .,
+    _a set _ new {_b : _still : v},
+    (v == _a which _ move _b) and (_ not _a which _ exist _b)
 ]
 -----
 true
@@ -143,12 +143,12 @@ true
 move static
 -----
 _ do [
-    _any set _ import _value.any,
-    _new set _ import _memory.new,
-    _exist set _ import _memory.exist,
-    _v set _ any .,
-    _a set _ new {b : static : v},
-    (. == a which _ move _b) and (a which _ exist _b)
+    .any set _ import _value.any,
+    .new set _ import _memory.new,
+    .exist set _ import _memory.exist,
+    .v set _ any .,
+    _a set _ new {_b : _static : v},
+    (. == _a which _ move _b) and (_a which _ exist _b)
 ]
 -----
 true
@@ -156,12 +156,12 @@ true
 move const
 -----
 _ do [
-    _any set _ import _value.any,
-    _new set _ import _memory.new,
-    _exist set _ import _memory.exist,
-    _v set _ any .,
-    _a set _ new {b : constant : v},
-    (. == a which _ move _b) and (a which _ exist _b)
+    .any set _ import _value.any,
+    .new set _ import _memory.new,
+    .exist set _ import _memory.exist,
+    .v set _ any .,
+    _a set _ new {_b : _constant : v},
+    (. == _a which _ move _b) and (_a which _ exist _b)
 ]
 -----
 true
@@ -169,30 +169,29 @@ true
 = none
 -----
 _ do [
-    _contract set _ import _memory.contract,
-    _a set 1,
-    [a, _a contract _]
+    .contract set _ import _memory.contract,
+    .a set 1,
+    [a, .a contract _]
 ]
 -----
-[1, none]
+[1, _none]
 =====
 = const
 -----
 _ do [
-    _set_contract set _ import _memory.set_contract,
-    _first set _ import _pair.first,
-    _p set 1 : 2,
-    _p set_contract _final,
-    p which _first set 3,
-    p which _ first .
+    .set_contract set _ import _memory.set_contract,
+    .p set 1 : 2,
+    .p set_contract _final,
+    p which ..first set 3,
+    p which _ get .first
 ]
 -----
 1
 =====
-_none set return
+none set return
 -----
 _ do [
-    _any set _ import _value.any,
+    .any set _ import _value.any,
     _a set 1,
     1 == _a set _ any .
 ]
@@ -202,8 +201,8 @@ true
 none mutate
 -----
 _ do [
-    _set_first set _ import _pair.set_first,
-    _a set 1 : 2,
+    .set_first set _ import _pair.set_first,
+    .a set 1 : 2,
     a which _ set_first 3,
     a
 ]
@@ -213,25 +212,25 @@ _ do [
 final mutate
 -----
 _ do [
-    _any set _ import _value.any,
-    _set_contract set _ import _memory.set_contract,
-    _set_first set _ import _pair.set_first,
-    _a set 1 : 2,
-    _a set_contract _final,
+    .any set _ import _value.any,
+    .set_contract set _ import _memory.set_contract,
+    .set_first set _ import _pair.set_first,
+    .a set 1 : 2,
+    .a set_contract _final,
     a which _ set_first _ any .,
     a
 ]
 -----
 1 : 2
 =====
-final =
+final set
 -----
 _ do [
-    _any set _ import _value.any,
-    _set_contract set _ import _memory.set_contract,
-    _final_a set 1,
-    _final_a set_contract _final,
-    _final_a set _ any .,
+    .any set _ import _value.any,
+    .set_contract set _ import _memory.set_contract,
+    .final_a set 1,
+    .final_a set_contract _final,
+    .final_a set _ any .,
     final_a
 ]
 -----
@@ -240,145 +239,145 @@ _ do [
 set_contract still none
 -----
 _ do [
-    _any set _ import _value.any,
-    _new set _ import _memory.new,
-    _set_contract set _ import _memory.set_contract,
-    _contract set _ import _memory.contract,
-    _c set _ new {a : still : _ any .},
+    .any set _ import _value.any,
+    .new set _ import _memory.new,
+    .set_contract set _ import _memory.set_contract,
+    .contract set _ import _memory.contract,
+    .c set _ new {_a : _still : _ any .},
     c which _a set_contract _none,
     c which _ contract _a
 ]
 -----
-none
+_none
 =====
 set_contract still none
 -----
 _ do [
-    _any set _ import _value.any,
-    _new set _ import _memory.new,
-    _set_contract set _ import _memory.set_contract,
-    _contract set _ import _memory.contract,
-    _c set _ new {a : still : _ any .},
+    .any set _ import _value.any,
+    .new set _ import _memory.new,
+    .set_contract set _ import _memory.set_contract,
+    .contract set _ import _memory.contract,
+    .c set _ new {_a : _still : _ any .},
     c which _a set_contract _final,
     c which _ contract _a
 ]
 -----
-final
+_final
 =====
 set_contract none final
 -----
 _ do [
-    _any set _ import _value.any,
-    _set_contract set _ import _memory.set_contract,
-    _contract set _ import _memory.contract,
-    _a set _ any .,
-    _a set_contract _final,
-    _a contract _
+    .any set _ import _value.any,
+    .set_contract set _ import _memory.set_contract,
+    .contract set _ import _memory.contract,
+    .a set _ any .,
+    .a set_contract _final,
+    .a contract _
 ]
 -----
-final
+_final
 =====
 set_contract none still
 -----
 _ do [
-    _any set _ import _value.any,
-    _set_contract set _ import _memory.set_contract,
-    _contract set _ import _memory.contract,
-    _a set _ any .,
-    _a set_contract _still,
-    _a contract _
+    .any set _ import _value.any,
+    .set_contract set _ import _memory.set_contract,
+    .contract set _ import _memory.contract,
+    .a set _ any .,
+    .a set_contract _still,
+    .a contract _
 ]
 -----
-none
+_none
 =====
 set_contract final still
 -----
 _ do [
-    _any set _ import _value.any,
-    _new set _ import _memory.new,
-    _set_contract set _ import _memory.set_contract,
-    _contract set _ import _memory.contract,
-    _c set _ new {a : final : _ any .},
+    .any set _ import _value.any,
+    .new set _ import _memory.new,
+    .set_contract set _ import _memory.set_contract,
+    .contract set _ import _memory.contract,
+    .c set _ new {_a : _final : _ any .},
     c which _a set_contract _still,
     c which _ contract _a
 ]
 -----
-final
+_final
 =====
 set_contract final none
 -----
 _ do [
-    _any set _ import _value.any,
-    _new set _ import _memory.new,
-    _set_contract set _ import _memory.set_contract,
-    _contract set _ import _memory.contract,
-    _c set _ new {a : final : _ any .},
+    .any set _ import _value.any,
+    .new set _ import _memory.new,
+    .set_contract set _ import _memory.set_contract,
+    .contract set _ import _memory.contract,
+    .c set _ new {_a : _final : _ any .},
     c which _a set_contract _none,
     c which _ contract _a
 ]
 -----
-final
+_final
 =====
 set_contract static const
 -----
 _ do [
-    _any set _ import _value.any,
-    _new set _ import _memory.new,
-    _set_contract set _ import _memory.set_contract,
-    _contract set _ import _memory.contract,
-    _c set _ new {a : static : _ any .},
+    .any set _ import _value.any,
+    .new set _ import _memory.new,
+    .set_contract set _ import _memory.set_contract,
+    .contract set _ import _memory.contract,
+    .c set _ new {_a : _static : _ any .},
     c which _a set_contract _constant,
     c which _ contract _a
 ]
 -----
-static
+_static
 =====
 set_contract static still
 -----
 _ do [
-    _any set _ import _value.any,
-    _new set _ import _memory.new,
-    _set_contract set _ import _memory.set_contract,
-    _contract set _ import _memory.contract,
-    _c set _ new {a : static : _ any .},
+    .any set _ import _value.any,
+    .new set _ import _memory.new,
+    .set_contract set _ import _memory.set_contract,
+    .contract set _ import _memory.contract,
+    .c set _ new {_a : _static : _ any .},
     c which _a set_contract _still,
     c which _ contract _a
 ]
 -----
-static
+_static
 =====
 set_contract static final
 -----
 _ do [
-    _any set _ import _value.any,
-    _new set _ import _memory.new,
-    _set_contract set _ import _memory.set_contract,
-    _contract set _ import _memory.contract,
-    _c set _ new {a : static : _ any .},
+    .any set _ import _value.any,
+    .new set _ import _memory.new,
+    .set_contract set _ import _memory.set_contract,
+    .contract set _ import _memory.contract,
+    .c set _ new {_a : _static : _ any .},
     c which _a set_contract _final,
     c which _ contract _a
 ]
 -----
-static
+_static
 =====
 set_contract static none
 -----
 _ do [
-    _any set _ import _value.any,
-    _new set _ import _memory.new,
-    _set_contract set _ import _memory.set_contract,
-    _contract set _ import _memory.contract,
-    _c set _ new {a : static : _ any .},
+    .any set _ import _value.any,
+    .new set _ import _memory.new,
+    .set_contract set _ import _memory.set_contract,
+    .contract set _ import _memory.contract,
+    .c set _ new {_a : _static : _ any .},
     c which _a set_contract _none,
     c which _ contract _a
 ]
 -----
-static
+_static
 =====
 exist false
 -----
 _ do [
-    _exist set _ import _memory.exist,
+    .exist set _ import _memory.exist,
     _a exist _
 ]
 -----
@@ -387,8 +386,8 @@ false
 exist true
 -----
 _ do [
-    _any set _ import _value.any,
-    _exist set _ import _memory.exist,
+    .any set _ import _value.any,
+    .exist set _ import _memory.exist,
     _a set _ any .,
     _a exist _
 ]
@@ -398,8 +397,8 @@ true
 static move
 -----
 _ do [
-    _new set _ import _memory.new,
-    _c set _ new {a : static : 1},
+    .new set _ import _memory.new,
+    .c set _ new {_a : _static : 1},
     c which _ move _a,
     c which _ get _a
 ]
@@ -409,8 +408,8 @@ _ do [
 static set to static
 -----
 _ do [
-    _new set _ import _memory.new,
-    _c set _ new {static_a : static : 1},
+    .new set _ import _memory.new,
+    .c set _ new {_static_a : _static : 1},
     c which _static_a set 2,
     c which _ get _static_a
 ]
@@ -420,7 +419,7 @@ _ do [
 which free free
 -----
 _ do [
-    _u set .,
+    .u set .,
     u which 1 + 1
 ]
 -----
@@ -429,9 +428,9 @@ _ do [
 which free mutate
 -----
 _ do [
-    _u set .,
-    _a set 1,
-    u which _ move _a,
+    .u set .,
+    .a set 1,
+    u which _ move .a,
     a
 ]
 -----
@@ -440,8 +439,8 @@ _ do [
 represent default
 -----
 _ do [
-    _new set _ import _memory.new,
-    _represent set _ import _memory.represent,
+    .new set _ import _memory.new,
+    .represent set _ import _memory.represent,
     _ represent _ new {}
 ]
 -----
@@ -450,46 +449,46 @@ _ do [
 represent else
 -----
 _ do [
-    _new set _ import _memory.new,
-    _represent set _ import _memory.represent,
-    _ represent _ new {a : constant : 1}
+    .new set _ import _memory.new,
+    .represent set _ import _memory.represent,
+    _ represent _ new {a : _constant : 1}
 ]
 -----
-{a : constant : 1}
+{a : _constant : 1}
 =====
 represent non-recursive
 -----
 _ do [
-    _new set _ import _memory.new,
-    _represent set _ import _memory.represent,
-    _remove set _ import _map.remove,
-    _second set _ import _pair.second,
-    _m set _ represent _ new {b : . : _ new {}},
-    _b set m which _ remove _b,
-    _b set b which _ second .,
+    .new set _ import _memory.new,
+    .represent set _ import _memory.represent,
+    .remove set _ import _map.remove,
+    .second set _ import _pair.second,
+    .m set _ represent _ new {_b : . : _ new {}},
+    .b set m which _ remove _b,
+    .b set b which _ second .,
     b which _ type .
 ]
 -----
-memory
+_memory
 =====
 reverse
 -----
 _ do [
-    _new set _ import _memory.new,
-    _reverse set _ import _memory.reverse,
-    _c1 set _ new {
-        a : none : 1,
-        b : still : 2,
-        c : final : 3,
-        d : static : 4,
-        e : constant : 5,
+    .new set _ import _memory.new,
+    .reverse set _ import _memory.reverse,
+    .c1 set _ new {
+        a : _none : 1,
+        b : _still : 2,
+        c : _final : 3,
+        d : _static : 4,
+        e : _constant : 5,
     },
-    _c2 set _ new {
-        a : none : 1,
-        b : final : 2,
-        c : still : 3,
-        d : static : 4,
-        e : constant : 5,
+    .c2 set _ new {
+        a : _none : 1,
+        b : _final : 2,
+        c : _still : 3,
+        d : _static : 4,
+        e : _constant : 5,
     },
     (c1 == _ reverse c2) and (c2 == _ reverse c1)
 ]

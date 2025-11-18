@@ -1,13 +1,9 @@
 use std::process::Command;
 
 use airlang::cfg::CfgMod;
-use airlang::cfg::CoreCfg;
 use airlang::cfg::exception::fail;
 use airlang::cfg::exception::illegal_input;
 use airlang::cfg::lib::FreePrimFn;
-use airlang::cfg::lib::adapter::CallPrimAdapter;
-use airlang::cfg::lib::adapter::SymbolAdapter;
-use airlang::cfg::lib::adapter::prim_adapter;
 use airlang::cfg::lib::free_impl;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::val::FreePrimFuncVal;
@@ -27,8 +23,6 @@ impl Default for CmdLib {
 
 impl CfgMod for CmdLib {
     fn extend(self, cfg: &Cfg) {
-        let call_adapter = prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Code);
-        CoreCfg::extend_adapter(cfg, &self.call.id(), call_adapter);
         self.call.extend(cfg);
     }
 }
@@ -37,7 +31,7 @@ impl CfgMod for CmdLib {
 // todo design
 // todo impl
 pub fn call() -> FreePrimFuncVal {
-    FreePrimFn { id: "command.call", f: free_impl(fn_call) }.free()
+    FreePrimFn { id: "_command.call", raw_input: false, f: free_impl(fn_call) }.free()
 }
 
 fn fn_call(cfg: &mut Cfg, input: Val) -> Val {

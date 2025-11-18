@@ -49,6 +49,7 @@ where T: MutFn<Cfg, Ctx, I, O>
 #[derive(Clone)]
 pub struct MutPrimFunc {
     pub(crate) id: Symbol,
+    pub(crate) raw_input: bool,
     pub(crate) fn_: Rc<dyn MutFn<Cfg, Val, Val, Val>>,
 }
 

@@ -1,13 +1,9 @@
+use const_format::concatcp;
 use log::error;
 
-use crate::cfg::lib::adapter::CallPrimAdapter;
-use crate::cfg::lib::adapter::CoreAdapter;
-use crate::cfg::lib::adapter::SymbolAdapter;
-use crate::cfg::lib::adapter::default_adapter;
-use crate::cfg::lib::adapter::map_adapter;
-use crate::cfg::lib::adapter::prim_adapter;
 use crate::cfg::utils::map_remove;
 use crate::cfg::utils::symbol;
+use crate::semantics::core::PREFIX_ID;
 use crate::semantics::ctx::CtxAccess;
 use crate::semantics::func::ConstCompFunc;
 use crate::semantics::func::DynComposite;
@@ -32,18 +28,13 @@ use crate::type_::Symbol;
 const CODE: &str = "code";
 const MEMO: &str = "memory";
 const ID: &str = "id";
+const RAW_INPUT: &str = "raw_input";
 // todo rename
 const CTX_ACCESS: &str = "context_access";
 
-const FREE: &str = "free";
-const CONST: &str = "constant";
-const MUTABLE: &str = "mutable";
-
-pub(in crate::cfg) fn parse_adapter() -> CoreAdapter {
-    let mut map = Map::default();
-    map.insert(symbol(CODE), prim_adapter(SymbolAdapter::Ref, CallPrimAdapter::Data));
-    map_adapter(map, default_adapter())
-}
+const FREE: &str = concatcp!(PREFIX_ID, "free");
+const CONST: &str = concatcp!(PREFIX_ID, "constant");
+const MUTABLE: &str = concatcp!(PREFIX_ID, "mutable");
 
 // todo design defaults
 pub(in crate::cfg) fn parse_func(input: Val) -> Option<FuncVal> {
@@ -53,6 +44,7 @@ pub(in crate::cfg) fn parse_func(input: Val) -> Option<FuncVal> {
     };
 
     let id = parse_id(map_remove(&mut map, ID))?;
+    let raw_input = parse_raw_input(map_remove(&mut map, RAW_INPUT))?;
     // todo design
     let FuncCode { ctx_name, input_name, body } = parse_code(map_remove(&mut map, CODE))?;
     let memo = parse_memo(map_remove(&mut map, MEMO))?;
@@ -61,19 +53,19 @@ pub(in crate::cfg) fn parse_func(input: Val) -> Option<FuncVal> {
     let free_comp = FreeComposite { body, input_name };
     let func = match ctx_access {
         FREE => {
-            let func = FreeCompFunc { id, comp: free_comp, memo };
+            let func = FreeCompFunc { id, raw_input, comp: free_comp, memo };
             FuncVal::FreeComp(FreeCompFuncVal::from(func))
         }
         CONST => {
             let ctx_name = ctx_name?;
             let comp = DynComposite { free: free_comp, ctx_name };
-            let func = ConstCompFunc { id, comp, memo };
+            let func = ConstCompFunc { id, raw_input, comp, memo };
             FuncVal::ConstComp(ConstCompFuncVal::from(func))
         }
         MUTABLE => {
             let ctx_name = ctx_name?;
             let comp = DynComposite { free: free_comp, ctx_name };
-            let func = MutCompFunc { id, comp, memo };
+            let func = MutCompFunc { id, raw_input, comp, memo };
             FuncVal::MutComp(MutCompFuncVal::from(func))
         }
         s => {
@@ -88,6 +80,14 @@ fn parse_id(id: Val) -> Option<Symbol> {
     match id {
         Val::Unit(_) => Some(Symbol::default()),
         Val::Symbol(id) => Some(id),
+        _ => None,
+    }
+}
+
+fn parse_raw_input(id: Val) -> Option<bool> {
+    match id {
+        Val::Unit(_) => Some(false),
+        Val::Bit(bit) => Some(bit.into()),
         _ => None,
     }
 }

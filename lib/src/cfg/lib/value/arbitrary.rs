@@ -9,15 +9,6 @@ use rand::distr::weighted::WeightedIndex;
 use rand::prelude::Distribution;
 use rand::prelude::IndexedRandom;
 
-use crate::cfg::lib::adapter::CallAdapter;
-use crate::cfg::lib::adapter::CallPrimAdapter;
-use crate::cfg::lib::adapter::CompAdapter;
-use crate::cfg::lib::adapter::CoreAdapter;
-use crate::cfg::lib::adapter::ListAdapter;
-use crate::cfg::lib::adapter::MapAdapter;
-use crate::cfg::lib::adapter::PairAdapter;
-use crate::cfg::lib::adapter::PrimAdapter;
-use crate::cfg::lib::adapter::SymbolAdapter;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::func::ConstCompFunc;
 use crate::semantics::func::DynComposite;
@@ -289,90 +280,6 @@ impl<T: Arbitrary> Arbitrary for Box<T> {
     }
 }
 
-impl Arbitrary for CallPrimAdapter {
-    fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
-        const ADAPTERS: [CallPrimAdapter; 2] = [CallPrimAdapter::Data, CallPrimAdapter::Code];
-        *(ADAPTERS.choose(rng).unwrap())
-    }
-}
-
-impl Arbitrary for SymbolAdapter {
-    fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
-        const ADAPTERS: [SymbolAdapter; 3] =
-            [SymbolAdapter::Literal, SymbolAdapter::Ref, SymbolAdapter::Eval];
-        *(ADAPTERS.choose(rng).unwrap())
-    }
-}
-
-impl Arbitrary for CompAdapter {
-    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let depth = depth + 1;
-        let default = Arbitrary::any(rng, depth);
-        let pair = Arbitrary::any(rng, depth);
-        let call = Arbitrary::any(rng, depth);
-        let list = Arbitrary::any(rng, depth);
-        let map = Arbitrary::any(rng, depth);
-        CompAdapter { default, pair, call, list, map }
-    }
-}
-
-impl Arbitrary for PairAdapter {
-    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let depth = depth + 1;
-        let some = Arbitrary::any(rng, depth);
-        let first = Arbitrary::any(rng, depth);
-        let second = Arbitrary::any(rng, depth);
-        PairAdapter { some, first, second }
-    }
-}
-
-impl Arbitrary for CallAdapter {
-    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let depth = depth + 1;
-        let func = Arbitrary::any(rng, depth);
-        let input = Arbitrary::any(rng, depth);
-        CallAdapter { func, input }
-    }
-}
-
-impl Arbitrary for ListAdapter {
-    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let depth = depth + 1;
-        let head = Arbitrary::any(rng, depth);
-        let tail = Arbitrary::any(rng, depth);
-        ListAdapter { head, tail }
-    }
-}
-
-impl Arbitrary for MapAdapter {
-    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let depth = depth + 1;
-        let some = Arbitrary::any(rng, depth);
-        let else_ = Arbitrary::any(rng, depth);
-        MapAdapter { some, else_ }
-    }
-}
-
-impl Arbitrary for PrimAdapter {
-    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let depth = depth + 1;
-        let symbol = Arbitrary::any(rng, depth);
-        let call = Arbitrary::any(rng, depth);
-        PrimAdapter { symbol, call }
-    }
-}
-
-impl Arbitrary for CoreAdapter {
-    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let depth = depth + 1;
-        if rng.random() {
-            CoreAdapter::Comp(Arbitrary::any(rng, depth))
-        } else {
-            CoreAdapter::Func(FuncVal::any(rng, depth))
-        }
-    }
-}
-
 impl Arbitrary for FuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
@@ -416,6 +323,7 @@ impl Arbitrary for FreeCompFuncVal {
         let depth = depth + 1;
         let func = FreeCompFunc {
             id: Arbitrary::any(rng, depth),
+            raw_input: rng.random(),
             comp: Arbitrary::any(rng, depth),
             memo: Arbitrary::any(rng, depth),
         };
@@ -428,6 +336,7 @@ impl Arbitrary for ConstCompFuncVal {
         let depth = depth + 1;
         let func = ConstCompFunc {
             id: Arbitrary::any(rng, depth),
+            raw_input: rng.random(),
             comp: Arbitrary::any(rng, depth),
             memo: Arbitrary::any(rng, depth),
         };
@@ -440,6 +349,7 @@ impl Arbitrary for MutCompFuncVal {
         let depth = depth + 1;
         let func = MutCompFunc {
             id: Arbitrary::any(rng, depth),
+            raw_input: rng.random(),
             comp: Arbitrary::any(rng, depth),
             memo: Arbitrary::any(rng, depth),
         };

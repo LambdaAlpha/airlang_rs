@@ -2,12 +2,9 @@ use log::error;
 use log::info;
 
 use self::lib::CoreLib;
-use crate::cfg::lib::adapter::CoreAdapter;
-use crate::cfg::lib::adapter::adapter_func;
 use crate::cfg::prelude::CorePrelude;
 use crate::cfg::prelude::prelude_repr;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::CFG_ADAPTER;
 use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
@@ -46,15 +43,7 @@ impl CfgMod for CoreCfg {
 }
 
 impl CoreCfg {
-    pub const PRELUDE: &'static str = "prelude";
-    pub const ADAPTER: &'static str = CFG_ADAPTER;
-    pub const REVERSE: &'static str = "reverse";
-
-    pub fn extend_adapter(cfg: &Cfg, id: &str, adapter: CoreAdapter) -> Option<()> {
-        let id = format!("{}@{id}", Self::ADAPTER);
-        let adapter = Val::Func(adapter_func(adapter));
-        cfg.extend_scope(Symbol::from_string_unchecked(id), adapter)
-    }
+    pub const PRELUDE: &'static str = "_prelude";
 
     pub fn prelude(cfg: &Cfg) -> Option<Memo> {
         let prelude = cfg.import(Symbol::from_str_unchecked(Self::PRELUDE));

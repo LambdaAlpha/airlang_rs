@@ -1,16 +1,13 @@
 use log::error;
 
 use crate::cfg::CfgMod;
-use crate::cfg::CoreCfg;
 use crate::cfg::exception::illegal_input;
 use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::FreePrimFn;
-use crate::cfg::lib::adapter::CallPrimAdapter;
-use crate::cfg::lib::adapter::SymbolAdapter;
-use crate::cfg::lib::adapter::prim_adapter;
 use crate::cfg::lib::free_impl;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
+use crate::semantics::core::Id;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
@@ -25,6 +22,9 @@ use crate::type_::Text;
 
 #[derive(Clone)]
 pub struct LangLib {
+    pub data: FreePrimFuncVal,
+    pub id: FreePrimFuncVal,
+    pub code: MutPrimFuncVal,
     pub eval: MutPrimFuncVal,
     pub parse: FreePrimFuncVal,
     pub generate: FreePrimFuncVal,
@@ -32,26 +32,46 @@ pub struct LangLib {
 
 impl Default for LangLib {
     fn default() -> Self {
-        LangLib { eval: eval(), parse: parse(), generate: generate() }
+        LangLib {
+            data: data(),
+            id: id(),
+            code: code(),
+            eval: eval(),
+            parse: parse(),
+            generate: generate(),
+        }
     }
 }
 
 impl CfgMod for LangLib {
     fn extend(self, cfg: &Cfg) {
-        let eval_adapter = prim_adapter(SymbolAdapter::Ref, CallPrimAdapter::Data);
-        CoreCfg::extend_adapter(cfg, &self.eval.id, eval_adapter);
+        self.data.extend(cfg);
+        self.id.extend(cfg);
+        self.code.extend(cfg);
         self.eval.extend(cfg);
         self.parse.extend(cfg);
         self.generate.extend(cfg);
     }
 }
 
+pub fn data() -> FreePrimFuncVal {
+    FreePrimFn { id: "_language.semantics.data", raw_input: true, f: Id }.free()
+}
+
+pub fn id() -> FreePrimFuncVal {
+    FreePrimFn { id: "_language.semantics.id", raw_input: false, f: Id }.free()
+}
+
+pub fn code() -> MutPrimFuncVal {
+    DynPrimFn { id: "_language.semantics.code", raw_input: true, f: Eval }.mut_()
+}
+
 pub fn eval() -> MutPrimFuncVal {
-    DynPrimFn { id: "language.semantics.eval", f: Eval }.mut_()
+    DynPrimFn { id: "_language.semantics.eval", raw_input: false, f: Eval }.mut_()
 }
 
 pub fn parse() -> FreePrimFuncVal {
-    FreePrimFn { id: "language.syntax.parse", f: free_impl(fn_parse) }.free()
+    FreePrimFn { id: "_language.syntax.parse", raw_input: false, f: free_impl(fn_parse) }.free()
 }
 
 fn fn_parse(cfg: &mut Cfg, input: Val) -> Val {
@@ -67,7 +87,8 @@ fn fn_parse(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn generate() -> FreePrimFuncVal {
-    FreePrimFn { id: "language.syntax.generate", f: free_impl(fn_generate) }.free()
+    FreePrimFn { id: "_language.syntax.generate", raw_input: false, f: free_impl(fn_generate) }
+        .free()
 }
 
 fn fn_generate(cfg: &mut Cfg, input: Val) -> Val {

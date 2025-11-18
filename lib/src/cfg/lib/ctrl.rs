@@ -8,19 +8,14 @@ use num_traits::ToPrimitive;
 use super::DynPrimFn;
 use super::mut_impl;
 use crate::cfg::CfgMod;
-use crate::cfg::CoreCfg;
 use crate::cfg::exception::fail;
 use crate::cfg::exception::illegal_input;
-use crate::cfg::lib::adapter::CallPrimAdapter;
-use crate::cfg::lib::adapter::PrimAdapter;
-use crate::cfg::lib::adapter::SymbolAdapter;
-use crate::cfg::lib::adapter::id_adapter;
 use crate::cfg::lib::ctx::pattern::PatternAssign;
 use crate::cfg::lib::ctx::pattern::PatternMatch;
 use crate::cfg::lib::ctx::pattern::PatternParse;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
-use crate::semantics::core::SYMBOL_LITERAL_CHAR;
+use crate::semantics::core::PREFIX_ID;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::ListVal;
@@ -61,25 +56,17 @@ impl Default for CtrlLib {
 
 impl CfgMod for CtrlLib {
     fn extend(self, cfg: &Cfg) {
-        CoreCfg::extend_adapter(cfg, &self.do_.id, id_adapter());
         self.do_.extend(cfg);
-        CoreCfg::extend_adapter(cfg, &self.test.id, id_adapter());
         self.test.extend(cfg);
-        CoreCfg::extend_adapter(cfg, &self.switch.id, id_adapter());
         self.switch.extend(cfg);
-        CoreCfg::extend_adapter(cfg, &self.match_.id, id_adapter());
         self.match_.extend(cfg);
-        CoreCfg::extend_adapter(cfg, &self.loop_.id, id_adapter());
         self.loop_.extend(cfg);
-        CoreCfg::extend_adapter(cfg, &self.iterate.id, id_adapter());
         self.iterate.extend(cfg);
     }
 }
 
-const CONTINUE: &str = "continue";
-const RETURN: &str = "return";
-const CTRL_FLOW_CONTINUE: &str = concatcp!(SYMBOL_LITERAL_CHAR, CONTINUE);
-const CTRL_FLOW_RETURN: &str = concatcp!(SYMBOL_LITERAL_CHAR, RETURN);
+const CONTINUE: &str = concatcp!(PREFIX_ID, "continue");
+const RETURN: &str = concatcp!(PREFIX_ID, "return");
 
 #[derive(Clone)]
 struct Block {
@@ -165,8 +152,8 @@ impl Statement {
 impl CtrlFlow {
     fn parse(str: &str) -> Option<Self> {
         let ctrl_flow = match str {
-            CTRL_FLOW_RETURN => Self::Return,
-            CTRL_FLOW_CONTINUE => Self::Continue,
+            RETURN => Self::Return,
+            CONTINUE => Self::Continue,
             _ => return None,
         };
         Some(ctrl_flow)
@@ -174,7 +161,7 @@ impl CtrlFlow {
 }
 
 pub fn do_() -> MutPrimFuncVal {
-    DynPrimFn { id: "control.do", f: mut_impl(fn_do) }.mut_()
+    DynPrimFn { id: "_control.do", raw_input: true, f: mut_impl(fn_do) }.mut_()
 }
 
 fn fn_do(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -185,7 +172,7 @@ fn fn_do(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn test() -> MutPrimFuncVal {
-    DynPrimFn { id: "control.test", f: mut_impl(fn_test) }.mut_()
+    DynPrimFn { id: "_control.test", raw_input: true, f: mut_impl(fn_test) }.mut_()
 }
 
 fn fn_test(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -231,7 +218,7 @@ impl Test {
 }
 
 pub fn switch() -> MutPrimFuncVal {
-    DynPrimFn { id: "control.switch", f: mut_impl(fn_switch) }.mut_()
+    DynPrimFn { id: "_control.switch", raw_input: true, f: mut_impl(fn_switch) }.mut_()
 }
 
 fn fn_switch(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -291,7 +278,7 @@ impl Switch {
 }
 
 pub fn match_() -> MutPrimFuncVal {
-    DynPrimFn { id: "control.match", f: mut_impl(fn_match) }.mut_()
+    DynPrimFn { id: "_control.match", raw_input: true, f: mut_impl(fn_match) }.mut_()
 }
 
 fn fn_match(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -339,9 +326,8 @@ impl Match {
 
     fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
         let val = Eval.mut_call(cfg, ctx, self.val);
-        let adapter = PrimAdapter::new(SymbolAdapter::Literal, CallPrimAdapter::Data);
         for (pattern, block) in self.arms {
-            let pattern = adapter.mut_call(cfg, ctx, pattern);
+            let pattern = Eval.mut_call(cfg, ctx, pattern);
             let Some(pattern) = pattern.parse() else {
                 error!("parse pattern failed");
                 return fail(cfg);
@@ -356,7 +342,7 @@ impl Match {
 }
 
 pub fn loop_() -> MutPrimFuncVal {
-    DynPrimFn { id: "control.loop", f: mut_impl(fn_loop) }.mut_()
+    DynPrimFn { id: "_control.loop", raw_input: true, f: mut_impl(fn_loop) }.mut_()
 }
 
 fn fn_loop(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -405,7 +391,7 @@ impl Loop {
 }
 
 pub fn iterate() -> MutPrimFuncVal {
-    DynPrimFn { id: "control.iterate", f: mut_impl(fn_iterate) }.mut_()
+    DynPrimFn { id: "_control.iterate", raw_input: true, f: mut_impl(fn_iterate) }.mut_()
 }
 
 fn fn_iterate(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {

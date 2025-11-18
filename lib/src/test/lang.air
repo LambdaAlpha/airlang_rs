@@ -1,33 +1,33 @@
 parse generate
 -----
 _ do [
-    _any set _ import _value.any,
-    _parse set _ import _language.syntax.parse,
-    _generate set _ import _language.syntax.generate,
-    _get set _ import _list.get,
-    _% set _ import _integer.remainder,
-    _atom set [_unit, _bit, _symbol, _text, _integer, _number, _byte],
-    _i set 3 + (_ any _integer) % 4,
-    _a set atom which _ get i,
+    .any set _ import _value.any,
+    .parse set _ import _language.syntax.parse,
+    .generate set _ import _language.syntax.generate,
+    .get set _ import _list.get,
+    .% set _ import _integer.remainder,
+    .atom set [_unit, _bit, _symbol, _text, _integer, _number, _byte],
+    .i set 3 + (_ any _integer) % 4,
+    .a set _ any atom which _ get i,
     (_ any _bit) loop [
         (_ any _bit) test [
-            _i set 3 + (_ any _integer) % 4,
-            _b set atom which _ get i,
-            _i set (4 + (_ any _integer) % 4) % 4,
-            _a set (_ any _bit) test [a : b] : [_ data. _ a b],
+            .i set 3 + (_ any _integer) % 4,
+            .b set _ any atom which _ get i,
+            .i set (4 + (_ any _integer) % 4) % 4,
+            .a set (_ any _bit) test [a : b] : [_ form _ a b],
         ] : [
             (_ any _bit) test [
-                _i set 3 + (_ any _integer) % 4,
-                _b set atom which _ get i,
-                _a set [a, b],
+                .i set 3 + (_ any _integer) % 4,
+                .b set _ any atom which _ get i,
+                .a set [a, b],
             ] : [
-                _i set 3 + (_ any _integer) % 4,
-                _b set atom which _ get i,
-                _a set {a : b},
+                .i set 3 + (_ any _integer) % 4,
+                .b set _ any atom which _ get i,
+                .a set {a : b},
             ]
         ]
     ],
-    _a1 set _ parse _ generate a,
+    .a1 set _ parse _ generate a,
     a == a1
 ]
 -----
@@ -36,7 +36,7 @@ true
 parse
 -----
 _ do [
-    _parse set _ import _language.syntax.parse,
+    .parse set _ import _language.syntax.parse,
     _ parse "[1, 2]"
 ]
 -----
@@ -45,8 +45,8 @@ _ do [
 parse no eval
 -----
 _ do [
-    _parse set _ import _language.syntax.parse,
-    _a set 1,
+    .parse set _ import _language.syntax.parse,
+    .a set 1,
     _ parse "a"
 ]
 -----
@@ -55,7 +55,7 @@ a
 parse text
 -----
 _ do [
-    _parse set _ import _language.syntax.parse,
+    .parse set _ import _language.syntax.parse,
     _ parse "\`1\`"
 ]
 -----
@@ -64,7 +64,7 @@ _ do [
 generate text
 -----
 _ do [
-    _generate set _ import _language.syntax.generate,
+    .generate set _ import _language.syntax.generate,
     _ generate "1"
 ]
 -----

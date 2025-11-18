@@ -46,12 +46,13 @@ pub fn interpret_file(path: &str) -> std::io::Result<()> {
     }
 }
 
+// AIR CODE
 fn generate_load(path: &str) -> String {
     let mut escaped = String::new();
     escape_text(&mut escaped, path);
     format!(
         "_ do [\
-            load = _ import _build.load,\
+            .load set _ import _build.load,\
             _ load \"{escaped}\"\
         ]"
     )

@@ -40,6 +40,7 @@ where T: ConstFn<Cfg, Ctx, I, O>
 #[derive(Clone)]
 pub struct ConstPrimFunc {
     pub(crate) id: Symbol,
+    pub(crate) raw_input: bool,
     pub(crate) fn_: Rc<dyn ConstFn<Cfg, Val, Val, Val>>,
 }
 

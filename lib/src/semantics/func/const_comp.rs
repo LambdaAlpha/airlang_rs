@@ -10,6 +10,7 @@ use crate::type_::Symbol;
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct ConstCompFunc {
     pub(crate) id: Symbol,
+    pub(crate) raw_input: bool,
     pub(crate) comp: DynComposite,
     pub(crate) memo: Memo,
 }

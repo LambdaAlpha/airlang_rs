@@ -1,13 +1,13 @@
 _("bench parse")
 
 _ do [
-    _x set 42,
-    _y set 24,
+    .x set 42,
+    .y set 24,
     (x <> y) loop [
         (x > y) test [
-            _x set x - y
+            .x set x - y
         ] : [
-            _y set y - x
+            .y set y - x
         ]
     ],
     x

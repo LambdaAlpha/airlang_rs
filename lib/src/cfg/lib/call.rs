@@ -51,7 +51,7 @@ impl CfgMod for CallLib {
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { id: "call.new", f: free_impl(fn_new) }.free()
+    FreePrimFn { id: "_call.new", raw_input: false, f: free_impl(fn_new) }.free()
 }
 
 fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
@@ -64,7 +64,7 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn func() -> ConstPrimFuncVal {
-    DynPrimFn { id: "call.function", f: const_impl(fn_func) }.const_()
+    DynPrimFn { id: "_call.function", raw_input: false, f: const_impl(fn_func) }.const_()
 }
 
 fn fn_func(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -75,7 +75,7 @@ fn fn_func(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn set_func() -> MutPrimFuncVal {
-    DynPrimFn { id: "call.set_function", f: mut_impl(fn_set_func) }.mut_()
+    DynPrimFn { id: "_call.set_function", raw_input: false, f: mut_impl(fn_set_func) }.mut_()
 }
 
 fn fn_set_func(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
@@ -87,7 +87,7 @@ fn fn_set_func(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
 }
 
 pub fn input() -> ConstPrimFuncVal {
-    DynPrimFn { id: "call.input", f: const_impl(fn_input) }.const_()
+    DynPrimFn { id: "_call.input", raw_input: false, f: const_impl(fn_input) }.const_()
 }
 
 fn fn_input(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -98,7 +98,7 @@ fn fn_input(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn set_input() -> MutPrimFuncVal {
-    DynPrimFn { id: "call.set_input", f: mut_impl(fn_set_input) }.mut_()
+    DynPrimFn { id: "_call.set_input", raw_input: false, f: mut_impl(fn_set_input) }.mut_()
 }
 
 fn fn_set_input(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {

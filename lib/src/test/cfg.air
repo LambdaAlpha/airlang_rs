@@ -1,17 +1,17 @@
 new repr
 -----
 _ do [
-    _any set _ import _value.any,
-    _new set _ import _configuration.new,
-    _represent set _ import _configuration.represent,
-    _c set [
+    .any set _ import _value.any,
+    .new set _ import _configuration.new,
+    .represent set _ import _configuration.represent,
+    .c set [
         {a : _ any ., b : _ any .},
         {a : _ any .},
         {b : _ any ., c : _ any .},
         {},
         {b : _ any .},
     ],
-    _c1 set _ represent _ new c,
+    .c1 set _ represent _ new c,
     c == c1
 ]
 -----
@@ -20,35 +20,35 @@ true
 length
 -----
 _ do [
-    _new set _ import _configuration.new,
-    _where set _ import _configuration.where,
-    _length set _ import _configuration.length,
-    _any set _ import _value.any,
-    _c set _ new [
+    .new set _ import _configuration.new,
+    .where set _ import _configuration.where,
+    .length set _ import _configuration.length,
+    .any set _ import _value.any,
+    .c set _ new [
         {a : _ any ., b : _ any .},
         {a : _ any .},
         {b : _ any ., c : _ any .},
         {},
         {b : _ any .},
     ],
-    c where _ length _
+    c where _ data _ length .
 ]
 -----
-3 
+3
 =====
 length == snapshot repr length
 -----
 _ do [
-    _configuration.length set _ import _configuration.length,
-    _map.length set _ import _map.length,
-    _snapshot set _ import _configuration.snapshot,
-    _represent set _ import _configuration.represent,
-    _any set _ import _value.any,
-    _where set _ import _configuration.where,
-    _c set _ any _configuration,
-    [m] = _ represent c where _ snapshot _,
-    _lc set c where _ configuration.length _,
-    _lm set m which _ map.length _,
+    .configuration.length set _ import _configuration.length,
+    .map.length set _ import _map.length,
+    .snapshot set _ import _configuration.snapshot,
+    .represent set _ import _configuration.represent,
+    .any set _ import _value.any,
+    .where set _ import _configuration.where,
+    .c set _ any _configuration,
+    [.m] = _ represent c where _ data _ snapshot .,
+    .lc set c where _ data _ configuration.length .,
+    .lm set m which _ map.length _,
     lc == lm
 ]
 -----
@@ -57,21 +57,21 @@ true
 snapshot
 -----
 _ do [
-    _any set _ import _value.any,
-    _new set _ import _configuration.new,
-    _snapshot set _ import _configuration.snapshot,
-    _where set _ import _configuration.where,
-    _represent set _ import _configuration.represent,
-    _a1 set _ any .,
-    _a2 set _ any .,
-    _b1 set _ any .,
-    _b2 set _ any .,
-    _c set _ new [
+    .any set _ import _value.any,
+    .new set _ import _configuration.new,
+    .snapshot set _ import _configuration.snapshot,
+    .where set _ import _configuration.where,
+    .represent set _ import _configuration.represent,
+    .a1 set _ any .,
+    .a2 set _ any .,
+    .b1 set _ any .,
+    .b2 set _ any .,
+    .c set _ new [
         {a : a1, b1 : b1},
         {a : a2, b2 : b2},
     ],
-    _c1 set c where _ snapshot _,
-    _repr set _ represent c1,
+    .c1 set c where _ data _ snapshot .,
+    .repr set _ represent c1,
     repr == [{a : a2, b1 : b1, b2 : b2}]
 ]
 -----
@@ -80,8 +80,8 @@ true
 export exist
 -----
 _ do [
-    _any set _ import _value.any,
-    _ab set _ any .,
+    .any set _ import _value.any,
+    .ab set _ any .,
     _a.b export ab,
     _ exist _a.b
 ]
@@ -91,10 +91,10 @@ true
 export import
 -----
 _ do [
-    _any set _ import _value.any,
-    _ab set _ any .,
+    .any set _ import _value.any,
+    .ab set _ any .,
     _a.b export ab,
-    _ab1 set _ import _a.b,
+    .ab1 set _ import _a.b,
     ab == ab1
 ]
 -----
@@ -103,12 +103,12 @@ true
 with override
 -----
 _ do [
-    _any set _ import _value.any,
-    _a1 set _ any .,
-    _a2 set _ any .,
-    {a : a1} with _ do [
-        _a4 set {a : a2} with _ import _a,
-        _a3 set _ import _a,
+    .any set _ import _value.any,
+    .a1 set _ any .,
+    .a2 set _ any .,
+    {_a : a1} with _ data _ do [
+        .a4 set {_a : a2} with _ data _ import _a,
+        .a3 set _ import _a,
     ],
     (a1 == a3) and (a2 == a4)
 ]
@@ -118,15 +118,15 @@ true
 with exist
 -----
 _ do [
-    _any set _ import _value.any,
-    _a set _ any .,
-    _b set _ any .,
-    {a : a} with _ do [
-        _c1 set _ exist _a,
-        _c2 set {b : b} with _ exist _b,
-        _c3 set _ exist _b,
+    .any set _ import _value.any,
+    .a set _ any .,
+    .b set _ any .,
+    {_a : a} with _ data _ do [
+        .c1 set _ exist _a,
+        .c2 set {_b : b} with _ data _ exist _b,
+        .c3 set _ exist _b,
     ],
-    _c4 set _ exist _a,
+    .c4 set _ exist _a,
     c1 and c2 and (_ not c3) and (_ not c4)
 ]
 -----
@@ -135,8 +135,8 @@ true
 with panic safe
 -----
 _ do [
-    _limit_steps set _ import _resource.limit_steps,
-    10 limit_steps {a : 1} with _ do [
+    .limit_steps set _ import _resource.limit_steps,
+    10 limit_steps _ data {_a : 1} with _ data _ do [
         [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         11
     ],
@@ -148,12 +148,12 @@ true
 where
 -----
 _ do [
-    _any set _ import _value.any,
-    _new set _ import _configuration.new,
-    _where set _ import _configuration.where,
-    _a set _ any .,
-    _c set _ new [{a : a}],
-    _a1 set c where _ import _a,
+    .any set _ import _value.any,
+    .new set _ import _configuration.new,
+    .where set _ import _configuration.where,
+    .a set _ any .,
+    .c set _ new [{_a : a}],
+    .a1 set c where _ data _ import _a,
     a == a1
 ]
 -----
@@ -162,13 +162,13 @@ true
 cfg func call
 -----
 _ do [
-    _any set _ import _value.any,
-    _a0 set _ any .,
-    _f set _ function {
+    .any set _ import _value.any,
+    .a0 set _ any .,
+    .f set _ function {
         context_access : _free,
-        code : __ : _ import __a
+        code : __ : _ form _ import _a
     },
-    _a1 set {a : a0} with _ f .,
+    .a1 set {_a : a0} with _ data _ f .,
     a0 == a1
 ]
 -----

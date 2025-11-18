@@ -3,13 +3,9 @@ use std::collections::HashMap;
 use log::error;
 
 use crate::cfg::CfgMod;
-use crate::cfg::CoreCfg;
 use crate::cfg::exception::illegal_input;
 use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::FreePrimFn;
-use crate::cfg::lib::adapter::default_adapter;
-use crate::cfg::lib::adapter::id_adapter;
-use crate::cfg::lib::adapter::pair_adapter;
 use crate::cfg::lib::free_impl;
 use crate::cfg::lib::mut_impl;
 use crate::semantics::cfg::Cfg;
@@ -65,17 +61,13 @@ impl CfgMod for CfgLib {
         self.exist.extend(cfg);
         self.import.extend(cfg);
         self.export.extend(cfg);
-        let with_adapter = pair_adapter(Map::default(), default_adapter(), id_adapter());
-        CoreCfg::extend_adapter(cfg, &self.with.id, with_adapter);
         self.with.extend(cfg);
-        let where_adapter = pair_adapter(Map::default(), default_adapter(), id_adapter());
-        CoreCfg::extend_adapter(cfg, &self.where_.id, where_adapter);
         self.where_.extend(cfg);
     }
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { id: "configuration.new", f: free_impl(fn_new) }.free()
+    FreePrimFn { id: "_configuration.new", raw_input: false, f: free_impl(fn_new) }.free()
 }
 
 fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
@@ -105,7 +97,7 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn repr() -> FreePrimFuncVal {
-    FreePrimFn { id: "configuration.represent", f: free_impl(fn_repr) }.free()
+    FreePrimFn { id: "_configuration.represent", raw_input: false, f: free_impl(fn_repr) }.free()
 }
 
 fn fn_repr(cfg: &mut Cfg, input: Val) -> Val {
@@ -131,7 +123,7 @@ fn fn_repr(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn length() -> FreePrimFuncVal {
-    FreePrimFn { id: "configuration.length", f: free_impl(fn_length) }.free()
+    FreePrimFn { id: "_configuration.length", raw_input: false, f: free_impl(fn_length) }.free()
 }
 
 fn fn_length(cfg: &mut Cfg, _input: Val) -> Val {
@@ -139,7 +131,7 @@ fn fn_length(cfg: &mut Cfg, _input: Val) -> Val {
 }
 
 pub fn snapshot() -> FreePrimFuncVal {
-    FreePrimFn { id: "configuration.snapshot", f: free_impl(fn_snapshot) }.free()
+    FreePrimFn { id: "_configuration.snapshot", raw_input: false, f: free_impl(fn_snapshot) }.free()
 }
 
 fn fn_snapshot(cfg: &mut Cfg, _input: Val) -> Val {
@@ -147,7 +139,7 @@ fn fn_snapshot(cfg: &mut Cfg, _input: Val) -> Val {
 }
 
 pub fn exist() -> FreePrimFuncVal {
-    FreePrimFn { id: "configuration.exist", f: free_impl(fn_exist) }.free()
+    FreePrimFn { id: "_configuration.exist", raw_input: false, f: free_impl(fn_exist) }.free()
 }
 
 fn fn_exist(cfg: &mut Cfg, input: Val) -> Val {
@@ -160,7 +152,7 @@ fn fn_exist(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn import() -> FreePrimFuncVal {
-    FreePrimFn { id: "configuration.import", f: free_impl(fn_import) }.free()
+    FreePrimFn { id: "_configuration.import", raw_input: false, f: free_impl(fn_import) }.free()
 }
 
 fn fn_import(cfg: &mut Cfg, input: Val) -> Val {
@@ -172,7 +164,7 @@ fn fn_import(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn export() -> FreePrimFuncVal {
-    FreePrimFn { id: "configuration.export", f: free_impl(fn_export) }.free()
+    FreePrimFn { id: "_configuration.export", raw_input: false, f: free_impl(fn_export) }.free()
 }
 
 fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
@@ -190,7 +182,7 @@ fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn with() -> MutPrimFuncVal {
-    DynPrimFn { id: "configuration.with", f: mut_impl(fn_with) }.mut_()
+    DynPrimFn { id: "_configuration.with", raw_input: false, f: mut_impl(fn_with) }.mut_()
 }
 
 fn fn_with(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -222,7 +214,7 @@ fn fn_with(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn where_() -> MutPrimFuncVal {
-    DynPrimFn { id: "configuration.where", f: mut_impl(fn_where) }.mut_()
+    DynPrimFn { id: "_configuration.where", raw_input: false, f: mut_impl(fn_where) }.mut_()
 }
 
 fn fn_where(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {

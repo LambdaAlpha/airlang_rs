@@ -1,6 +1,6 @@
 _ do [
-    _load set _ import _build.load,
-    _a set _ load "a/a.air",
-    _b set _ load "a/b/b.air",
+    .load set _ import _build.load,
+    .a set _ load "a/a.air",
+    .b set _ load "a/b/b.air",
     a + b
 ]

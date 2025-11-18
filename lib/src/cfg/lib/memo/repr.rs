@@ -1,13 +1,8 @@
+use const_format::concatcp;
 use log::error;
 
-use crate::cfg::lib::adapter::CallPrimAdapter;
-use crate::cfg::lib::adapter::CoreAdapter;
-use crate::cfg::lib::adapter::SymbolAdapter;
-use crate::cfg::lib::adapter::default_adapter;
-use crate::cfg::lib::adapter::map_adapter;
-use crate::cfg::lib::adapter::pair_adapter;
-use crate::cfg::lib::adapter::prim_adapter;
 use crate::cfg::utils::symbol;
+use crate::semantics::core::PREFIX_ID;
 use crate::semantics::memo::Contract;
 use crate::semantics::memo::Memo;
 use crate::semantics::memo::MemoMap;
@@ -18,22 +13,11 @@ use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Symbol;
 
-const NONE: &str = "none";
-const STILL: &str = "still";
-const FINAL: &str = "final";
-const STATIC: &str = "static";
-const CONST: &str = "constant";
-
-pub(in crate::cfg) fn parse_adapter() -> CoreAdapter {
-    map_adapter(
-        Map::default(),
-        pair_adapter(
-            Map::default(),
-            prim_adapter(SymbolAdapter::Literal, CallPrimAdapter::Code),
-            default_adapter(),
-        ),
-    )
-}
+const NONE: &str = concatcp!(PREFIX_ID, "none");
+const STILL: &str = concatcp!(PREFIX_ID, "still");
+const FINAL: &str = concatcp!(PREFIX_ID, "final");
+const STATIC: &str = concatcp!(PREFIX_ID, "static");
+const CONST: &str = concatcp!(PREFIX_ID, "constant");
 
 pub(in crate::cfg) fn parse_memo(input: Val) -> Option<MemoVal> {
     let Val::Map(map) = input else {

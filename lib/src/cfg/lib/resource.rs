@@ -3,14 +3,10 @@ use num_traits::Signed;
 use num_traits::ToPrimitive;
 
 use crate::cfg::CfgMod;
-use crate::cfg::CoreCfg;
 use crate::cfg::exception::illegal_input;
 use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::FreePrimFn;
 use crate::cfg::lib::MutImpl;
-use crate::cfg::lib::adapter::default_adapter;
-use crate::cfg::lib::adapter::id_adapter;
-use crate::cfg::lib::adapter::pair_adapter;
 use crate::cfg::lib::free_impl;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::cfg::StepsExceed;
@@ -23,7 +19,6 @@ use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::Int;
-use crate::type_::Map;
 use crate::type_::Pair;
 
 #[derive(Clone)]
@@ -46,17 +41,18 @@ impl Default for ResourceLib {
 impl CfgMod for ResourceLib {
     fn extend(self, cfg: &Cfg) {
         self.available_steps.extend(cfg);
-        let measure_steps_adapter = id_adapter();
-        CoreCfg::extend_adapter(cfg, &self.measure_steps.id, measure_steps_adapter);
         self.measure_steps.extend(cfg);
-        let limit_steps_adapter = pair_adapter(Map::default(), default_adapter(), id_adapter());
-        CoreCfg::extend_adapter(cfg, &self.limit_steps.id, limit_steps_adapter);
         self.limit_steps.extend(cfg);
     }
 }
 
 pub fn available_steps() -> FreePrimFuncVal {
-    FreePrimFn { id: "resource.available_steps", f: free_impl(fn_available_steps) }.free()
+    FreePrimFn {
+        id: "_resource.available_steps",
+        raw_input: false,
+        f: free_impl(fn_available_steps),
+    }
+    .free()
 }
 
 fn fn_available_steps(cfg: &mut Cfg, _input: Val) -> Val {
@@ -66,7 +62,8 @@ fn fn_available_steps(cfg: &mut Cfg, _input: Val) -> Val {
 
 pub fn measure_steps() -> MutPrimFuncVal {
     DynPrimFn {
-        id: "resource.measure_steps",
+        id: "_resource.measure_steps",
+        raw_input: true,
         f: MutImpl::new(fn_measure_steps_free, fn_measure_steps_const, fn_measure_steps_mut),
     }
     .mut_()
@@ -98,7 +95,8 @@ fn fn_measure_steps_mut(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 
 pub fn limit_steps() -> MutPrimFuncVal {
     DynPrimFn {
-        id: "resource.limit_steps",
+        id: "_resource.limit_steps",
+        raw_input: false,
         f: MutImpl::new(fn_limit_steps_free, fn_limit_steps_const, fn_limit_steps_mut),
     }
     .mut_()

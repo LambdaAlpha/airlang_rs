@@ -1,9 +1,9 @@
 available_steps
 -----
 _ do [
-    _steps set _ import _resource.available_steps,
-    _s1 set _ steps _,
-    _s2 set _ steps _,
+    .steps set _ import _resource.available_steps,
+    .s1 set _ steps _,
+    .s2 set _ steps _,
     s1 - s2
 ]
 -----
@@ -12,8 +12,8 @@ _ do [
 measure_steps 1
 -----
 _ do [
-    _measure_steps set _ import _resource.measure_steps,
-    (v : s) = _ measure_steps true,
+    .measure_steps set _ import _resource.measure_steps,
+    (.v : .s) = _ measure_steps true,
     s
 ]
 -----
@@ -22,10 +22,10 @@ _ do [
 measure_steps ref + form + call
 -----
 _ do [
-    _measure_steps set _ import _resource.measure_steps,
-    _a set true,
-    _b set false,
-    (v : s) = _ measure_steps a and b,
+    .measure_steps set _ import _resource.measure_steps,
+    .a set true,
+    .b set false,
+    (.v : .s) = _ measure_steps a and b,
     s
 ]
 -----
@@ -34,10 +34,10 @@ _ do [
 limit_steps
 -----
 _ do [
-    _limit_steps set _ import _resource.limit_steps,
-    _a4 set 4 limit_steps 1 + 1,
-    _a5 set 5 limit_steps 1 + 1,
-    _a6 set 6 limit_steps 1 + 1,
+    .limit_steps set _ import _resource.limit_steps,
+    .a4 set 4 limit_steps _ data 1 + 1,
+    .a5 set 5 limit_steps _ data 1 + 1,
+    .a6 set 6 limit_steps _ data 1 + 1,
     (a4 == .) and (a5 == 2) and (a6 == 2)
 ]
 -----

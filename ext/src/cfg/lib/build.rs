@@ -37,7 +37,7 @@ impl CfgMod for BuildLib {
 // todo rename
 // todo design
 pub fn load() -> FreePrimFuncVal {
-    FreePrimFn { id: "build.load", f: FreeImpl::new(fn_load) }.free()
+    FreePrimFn { id: "_build.load", raw_input: false, f: FreeImpl::new(fn_load) }.free()
 }
 
 // todo rename

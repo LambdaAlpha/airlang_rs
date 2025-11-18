@@ -93,6 +93,10 @@ impl FuncVal {
         match_func_val!(self, f => f.id.clone())
     }
 
+    pub fn raw_input(&self) -> bool {
+        match_func_val!(self, f => f.raw_input)
+    }
+
     pub fn memo(&self) -> Option<&Memo> {
         match self {
             FuncVal::FreePrim(_) => None,

@@ -8,6 +8,7 @@ use crate::type_::Symbol;
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FreeCompFunc {
     pub(crate) id: Symbol,
+    pub(crate) raw_input: bool,
     pub(crate) comp: FreeComposite,
     pub(crate) memo: Memo,
 }

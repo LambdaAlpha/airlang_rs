@@ -213,10 +213,8 @@ impl DynCtx<Val, Val> for MapVal {
 
 impl DynCtx<Val, Val> for Val {
     fn ref_(&mut self, input: Val) -> Option<DynRef<'_, Val>> {
-        match &input {
-            Val::Unit(_) => return Some(DynRef::new_mut(self)),
-            Val::Symbol(name) => return self.ref_(name.clone()),
-            _ => {}
+        if let Val::Symbol(name) = &input {
+            return self.ref_(name.clone());
         }
         match self {
             Val::List(list) => {

@@ -32,7 +32,7 @@ impl CfgMod for BitLib {
 }
 
 pub fn not() -> FreePrimFuncVal {
-    FreePrimFn { id: "bit.not", f: free_impl(fn_not) }.free()
+    FreePrimFn { id: "_bit.not", raw_input: false, f: free_impl(fn_not) }.free()
 }
 
 fn fn_not(cfg: &mut Cfg, input: Val) -> Val {
@@ -43,7 +43,7 @@ fn fn_not(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn and() -> FreePrimFuncVal {
-    FreePrimFn { id: "bit.and", f: free_impl(fn_and) }.free()
+    FreePrimFn { id: "_bit.and", raw_input: false, f: free_impl(fn_and) }.free()
 }
 
 fn fn_and(cfg: &mut Cfg, input: Val) -> Val {
@@ -60,7 +60,7 @@ fn fn_and(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn or() -> FreePrimFuncVal {
-    FreePrimFn { id: "bit.or", f: free_impl(fn_or) }.free()
+    FreePrimFn { id: "_bit.or", raw_input: false, f: free_impl(fn_or) }.free()
 }
 
 fn fn_or(cfg: &mut Cfg, input: Val) -> Val {
@@ -77,7 +77,7 @@ fn fn_or(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn xor() -> FreePrimFuncVal {
-    FreePrimFn { id: "bit.xor", f: free_impl(fn_xor) }.free()
+    FreePrimFn { id: "_bit.xor", raw_input: false, f: free_impl(fn_xor) }.free()
 }
 
 fn fn_xor(cfg: &mut Cfg, input: Val) -> Val {
@@ -94,7 +94,7 @@ fn fn_xor(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn imply() -> FreePrimFuncVal {
-    FreePrimFn { id: "bit.imply", f: free_impl(fn_imply) }.free()
+    FreePrimFn { id: "_bit.imply", raw_input: false, f: free_impl(fn_imply) }.free()
 }
 
 fn fn_imply(cfg: &mut Cfg, input: Val) -> Val {

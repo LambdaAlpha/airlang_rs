@@ -159,11 +159,6 @@ fn test_ctx() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_adapter() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/adapter.air"), "test/adapter.air")
-}
-
-#[test]
 fn test_ctrl() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/ctrl.air"), "test/ctrl.air")
 }
@@ -179,6 +174,6 @@ fn test_resource() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_syntax() -> Result<(), Box<dyn Error>> {
+fn test_lang() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/lang.air"), "test/lang.air")
 }

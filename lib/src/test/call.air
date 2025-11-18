@@ -1,11 +1,11 @@
 new
 -----
 _ do [
-    _any set _ import _value.any,
-    _f set _ any .,
-    _i set _ any .,
-    _c1 set f call i,
-    _c2 set _ data. _ f i,
+    .any set _ import _value.any,
+    .f set _ any .,
+    .i set _ any .,
+    .c1 set f call i,
+    .c2 set _ form _ f i,
     c1 == c2
 ]
 -----
@@ -14,12 +14,12 @@ true
 get
 -----
 _ do [
-    _any set _ import _value.any,
-    _function set _ import _call.function,
-    _input set _ import _call.input,
-    _f set _ any .,
-    _i set _ any .,
-    _c set _ data. _ f i,
+    .any set _ import _value.any,
+    .function set _ import _call.function,
+    .input set _ import _call.input,
+    .f set _ any .,
+    .i set _ any .,
+    .c set _ form _ f i,
     (f == c which _ function .) and (i == c which _ input .)
 ]
 -----
@@ -28,14 +28,14 @@ true
 set get
 -----
 _ do [
-    _any set _ import _value.any,
-    _function set _ import _call.function,
-    _input set _ import _call.input,
-    _set_function set _ import _call.set_function,
-    _set_input set _ import _call.set_input,
-    _c set _ any _call,
-    _f set _ any .,
-    _i set _ any .,
+    .any set _ import _value.any,
+    .function set _ import _call.function,
+    .input set _ import _call.input,
+    .set_function set _ import _call.set_function,
+    .set_input set _ import _call.set_input,
+    .c set _ any _call,
+    .f set _ any .,
+    .i set _ any .,
     c which _ set_function f,
     c which _ set_input i,
     (f == c which _ function .) and (i == c which _ input .)
@@ -46,14 +46,14 @@ true
 set return
 -----
 _ do [
-    _any set _ import _value.any,
-    _set_function set _ import _call.set_function,
-    _set_input set _ import _call.set_input,
-    _f1 set _ any .,
-    _i1 set _ any .,
-    _c set _ data. _ f1 i1,
-    _f2 set c which _ set_function _ any .,
-    _i2 set c which _ set_input _ any .,
+    .any set _ import _value.any,
+    .set_function set _ import _call.set_function,
+    .set_input set _ import _call.set_input,
+    .f1 set _ any .,
+    .i1 set _ any .,
+    .c set _ form _ f1 i1,
+    .f2 set c which _ set_function _ any .,
+    .i2 set c which _ set_input _ any .,
     (f1 == f2) and (i1 == i2)
 ]
 -----
