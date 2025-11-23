@@ -2,7 +2,7 @@ use std::mem::take;
 
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::id::Id;
-use crate::semantics::core::symbol::SymbolEval;
+use crate::semantics::core::key::KeyEval;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
 use crate::semantics::func::MutFn;
@@ -12,7 +12,7 @@ use crate::semantics::val::MapVal;
 use crate::semantics::val::PairVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
-use crate::type_::Symbol;
+use crate::type_::Key;
 
 pub(crate) struct PairForm<'a, First, Second> {
     pub(crate) first: &'a First,
@@ -188,7 +188,7 @@ pub(crate) struct Form;
 impl FreeFn<Cfg, Val, Val> for Form {
     fn free_call(&self, cfg: &mut Cfg, input: Val) -> Val {
         match input {
-            Val::Symbol(symbol) => self.free_call(cfg, symbol),
+            Val::Key(key) => self.free_call(cfg, key),
             Val::Pair(pair) => self.free_call(cfg, pair),
             Val::Call(call) => self.free_call(cfg, call),
             Val::List(list) => self.free_call(cfg, list),
@@ -201,7 +201,7 @@ impl FreeFn<Cfg, Val, Val> for Form {
 impl ConstFn<Cfg, Val, Val, Val> for Form {
     fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
         match input {
-            Val::Symbol(symbol) => self.const_call(cfg, ctx, symbol),
+            Val::Key(key) => self.const_call(cfg, ctx, key),
             Val::Pair(pair) => self.const_call(cfg, ctx, pair),
             Val::Call(call) => self.const_call(cfg, ctx, call),
             Val::List(list) => self.const_call(cfg, ctx, list),
@@ -214,7 +214,7 @@ impl ConstFn<Cfg, Val, Val, Val> for Form {
 impl MutFn<Cfg, Val, Val, Val> for Form {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         match input {
-            Val::Symbol(symbol) => self.mut_call(cfg, ctx, symbol),
+            Val::Key(key) => self.mut_call(cfg, ctx, key),
             Val::Pair(pair) => self.mut_call(cfg, ctx, pair),
             Val::Call(call) => self.mut_call(cfg, ctx, call),
             Val::List(list) => self.mut_call(cfg, ctx, list),
@@ -224,21 +224,21 @@ impl MutFn<Cfg, Val, Val, Val> for Form {
     }
 }
 
-impl FreeFn<Cfg, Symbol, Val> for Form {
-    fn free_call(&self, cfg: &mut Cfg, input: Symbol) -> Val {
-        SymbolEval.free_call(cfg, input)
+impl FreeFn<Cfg, Key, Val> for Form {
+    fn free_call(&self, cfg: &mut Cfg, input: Key) -> Val {
+        KeyEval.free_call(cfg, input)
     }
 }
 
-impl ConstFn<Cfg, Val, Symbol, Val> for Form {
-    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Symbol) -> Val {
-        SymbolEval.const_call(cfg, ctx, input)
+impl ConstFn<Cfg, Val, Key, Val> for Form {
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Key) -> Val {
+        KeyEval.const_call(cfg, ctx, input)
     }
 }
 
-impl MutFn<Cfg, Val, Symbol, Val> for Form {
-    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Symbol) -> Val {
-        SymbolEval.mut_call(cfg, ctx, input)
+impl MutFn<Cfg, Val, Key, Val> for Form {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Key) -> Val {
+        KeyEval.mut_call(cfg, ctx, input)
     }
 }
 

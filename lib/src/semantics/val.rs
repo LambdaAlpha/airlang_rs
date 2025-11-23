@@ -31,17 +31,17 @@ use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
 use crate::type_::Int;
+use crate::type_::Key;
 use crate::type_::Link;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Number;
 use crate::type_::Pair;
-use crate::type_::Symbol;
 use crate::type_::Text;
 use crate::type_::Unit;
 
 pub trait Value: DynCtx<Val, Val> {
-    fn type_name(&self) -> Symbol;
+    fn type_name(&self) -> Key;
 }
 
 dyn_any_debug_clone_eq_hash!(pub DynVal : Value);
@@ -51,7 +51,7 @@ pub enum Val {
     Unit(Unit),
     Bit(Bit),
 
-    Symbol(Symbol),
+    Key(Key),
 
     Text(TextVal),
     Int(IntVal),
@@ -76,7 +76,7 @@ pub type LinkVal = Link<Val>;
 
 pub(crate) const UNIT: &str = "unit";
 pub(crate) const BIT: &str = "bit";
-pub(crate) const SYMBOL: &str = "symbol";
+pub(crate) const KEY: &str = "key";
 pub(crate) const TEXT: &str = "text";
 pub(crate) const INT: &str = "integer";
 pub(crate) const NUMBER: &str = "number";
@@ -149,7 +149,7 @@ macro_rules! match_val {
         match $self {
             $crate::semantics::val::Val::Unit($name) => $body,
             $crate::semantics::val::Val::Bit($name) => $body,
-            $crate::semantics::val::Val::Symbol($name) => $body,
+            $crate::semantics::val::Val::Key($name) => $body,
             $crate::semantics::val::Val::Text($name) => $body,
             $crate::semantics::val::Val::Int($name) => $body,
             $crate::semantics::val::Val::Number($name) => $body,

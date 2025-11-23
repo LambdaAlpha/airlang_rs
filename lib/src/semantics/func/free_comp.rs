@@ -3,11 +3,11 @@ use super::comp::FreeComposite;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::memo::Memo;
 use crate::semantics::val::Val;
-use crate::type_::Symbol;
+use crate::type_::Key;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FreeCompFunc {
-    pub(crate) id: Symbol,
+    pub(crate) id: Key,
     pub(crate) raw_input: bool,
     pub(crate) comp: FreeComposite,
     pub(crate) memo: Memo,

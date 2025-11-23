@@ -27,13 +27,13 @@ use crate::semantics::val::FUNC;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::INT;
+use crate::semantics::val::KEY;
 use crate::semantics::val::LINK;
 use crate::semantics::val::LIST;
 use crate::semantics::val::MAP;
 use crate::semantics::val::MEMO;
 use crate::semantics::val::NUMBER;
 use crate::semantics::val::PAIR;
-use crate::semantics::val::SYMBOL;
 use crate::semantics::val::TEXT;
 use crate::semantics::val::UNIT;
 use crate::semantics::val::Val;
@@ -42,12 +42,12 @@ use crate::type_::Byte;
 use crate::type_::Call;
 use crate::type_::ConstRef;
 use crate::type_::Int;
+use crate::type_::Key;
 use crate::type_::Link;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Number;
 use crate::type_::Pair;
-use crate::type_::Symbol;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -75,7 +75,7 @@ impl CfgMod for ValueLib {
 
 const TYPE_UNIT: &str = concatcp!(PREFIX_ID, UNIT);
 const TYPE_BIT: &str = concatcp!(PREFIX_ID, BIT);
-const TYPE_SYMBOL: &str = concatcp!(PREFIX_ID, SYMBOL);
+const TYPE_KEY: &str = concatcp!(PREFIX_ID, KEY);
 const TYPE_TEXT: &str = concatcp!(PREFIX_ID, TEXT);
 const TYPE_INT: &str = concatcp!(PREFIX_ID, INT);
 const TYPE_NUMBER: &str = concatcp!(PREFIX_ID, NUMBER);
@@ -100,10 +100,10 @@ fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
     let rng = &mut rng;
     match input {
         Val::Unit(_) => Val::any(rng, DEPTH),
-        Val::Symbol(s) => match &*s {
+        Val::Key(s) => match &*s {
             TYPE_UNIT => Val::Unit(Unit::any(rng, DEPTH)),
             TYPE_BIT => Val::Bit(Bit::any(rng, DEPTH)),
-            TYPE_SYMBOL => Val::Symbol(Symbol::any(rng, DEPTH)),
+            TYPE_KEY => Val::Key(Key::any(rng, DEPTH)),
             TYPE_TEXT => Val::Text(Text::any(rng, DEPTH).into()),
             TYPE_INT => Val::Int(Int::any(rng, DEPTH).into()),
             TYPE_NUMBER => Val::Number(Number::any(rng, DEPTH).into()),
@@ -119,7 +119,7 @@ fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
             _ => fail(cfg),
         },
         v => {
-            error!("input {v:?} should be a symbol or a unit");
+            error!("input {v:?} should be a key or a unit");
             illegal_input(cfg)
         }
     }
@@ -133,7 +133,7 @@ fn fn_type(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let s = match &*ctx {
         Val::Unit(_) => TYPE_UNIT,
         Val::Bit(_) => TYPE_BIT,
-        Val::Symbol(_) => TYPE_SYMBOL,
+        Val::Key(_) => TYPE_KEY,
         Val::Text(_) => TYPE_TEXT,
         Val::Int(_) => TYPE_INT,
         Val::Number(_) => TYPE_NUMBER,
@@ -146,9 +146,9 @@ fn fn_type(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
         Val::Cfg(_) => TYPE_CFG,
         Val::Memo(_) => TYPE_MEMO,
         Val::Func(_) => TYPE_FUNC,
-        Val::Dyn(val) => return Val::Symbol(val.type_name()),
+        Val::Dyn(val) => return Val::Key(val.type_name()),
     };
-    Val::Symbol(Symbol::from_str_unchecked(s))
+    Val::Key(Key::from_str_unchecked(s))
 }
 
 // todo design

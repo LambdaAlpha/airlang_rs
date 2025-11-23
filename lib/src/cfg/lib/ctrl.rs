@@ -25,10 +25,10 @@ use crate::semantics::val::Val;
 use crate::type_::Byte;
 use crate::type_::Call;
 use crate::type_::Int;
+use crate::type_::Key;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
-use crate::type_::Symbol;
 use crate::type_::Text;
 
 #[derive(Clone)]
@@ -130,7 +130,7 @@ impl Statement {
         let Val::Call(call) = val else {
             return Some(Statement::Normal(val));
         };
-        let Val::Symbol(s) = &call.func else {
+        let Val::Key(s) = &call.func else {
             return Some(Statement::Normal(Val::Call(call)));
         };
         let Some(ctrl_flow) = CtrlFlow::parse(s) else {
@@ -403,7 +403,7 @@ fn fn_iterate(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 
 struct Iterate {
     val: Val,
-    name: Symbol,
+    name: Key,
     body: Block,
 }
 
@@ -420,8 +420,8 @@ impl Iterate {
             return None;
         };
         let name_body = Pair::from(name_body);
-        let Val::Symbol(name) = name_body.first else {
-            error!("input.first {:?} should be a symbol", name_body.first);
+        let Val::Key(name) = name_body.first else {
+            error!("input.first {:?} should be a key", name_body.first);
             return None;
         };
         let body = Block::parse(name_body.second)?;
@@ -451,10 +451,10 @@ impl Iterate {
                 });
                 iterate_val(cfg, ctx, self.body, self.name, iter)
             }
-            Val::Symbol(s) => {
-                let iter = s.char_indices().map(|(start, c)| {
-                    let symbol = Symbol::from_str_unchecked(&s[start .. start + c.len_utf8()]);
-                    Val::Symbol(symbol)
+            Val::Key(key) => {
+                let iter = key.char_indices().map(|(start, c)| {
+                    let key = Key::from_str_unchecked(&key[start .. start + c.len_utf8()]);
+                    Val::Key(key)
                 });
                 iterate_val(cfg, ctx, self.body, self.name, iter)
             }
@@ -484,7 +484,7 @@ impl Iterate {
 }
 
 fn iterate_val<ValIter>(
-    cfg: &mut Cfg, ctx: &mut Val, body: Block, name: Symbol, values: ValIter,
+    cfg: &mut Cfg, ctx: &mut Val, body: Block, name: Key, values: ValIter,
 ) -> Val
 where ValIter: Iterator<Item = Val> {
     for val in values {

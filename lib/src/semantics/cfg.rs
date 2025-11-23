@@ -14,7 +14,7 @@ use rustc_hash::FxBuildHasher;
 use stable_deref_trait::StableDeref;
 
 use crate::semantics::val::Val;
-use crate::type_::Symbol;
+use crate::type_::Key;
 
 // todo design invariant
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -22,7 +22,7 @@ pub struct Cfg {
     steps: u128,
     max_scope: usize,
     // box is required for StableDeref, which is required for insert
-    map: OnceMap<Symbol, Box<OnceMap<usize /*scope*/, Box<Val>>>>,
+    map: OnceMap<Key, Box<OnceMap<usize /*scope*/, Box<Val>>>>,
 }
 
 #[derive(Copy, Clone)]
@@ -50,7 +50,7 @@ impl Cfg {
         self.max_scope -= 1;
     }
 
-    pub fn extend_scope(&self, name: Symbol, val: Val) -> Option<()> {
+    pub fn extend_scope(&self, name: Key, val: Val) -> Option<()> {
         let scopes = self.map.insert(name, |_| Box::default());
         if scopes.contains_key(&self.max_scope) {
             return None;
@@ -59,18 +59,18 @@ impl Cfg {
         Some(())
     }
 
-    pub fn exist(&self, name: Symbol) -> bool {
+    pub fn exist(&self, name: Key) -> bool {
         self.map.get(&name).is_some()
     }
 
-    pub fn import(&self, name: Symbol) -> Option<Val> {
+    pub fn import(&self, name: Key) -> Option<Val> {
         let scopes = self.map.get(&name)?;
         let max_scope = *scopes.read_only_view().keys().max().expect("scopes should not be empty");
         let val = scopes.get(&max_scope).unwrap().clone();
         Some(val)
     }
 
-    pub fn export(&self, name: Symbol, val: Val) -> Option<()> {
+    pub fn export(&self, name: Key, val: Val) -> Option<()> {
         let scopes = self.map.insert(name, |_| Box::default());
         let min_scope = (0 ..= self.max_scope).into_iter().find(|i| !scopes.contains_key(i))?;
         scopes.insert(min_scope, |_| Box::new(val));
@@ -157,7 +157,7 @@ impl Default for Cfg {
 }
 
 impl IntoIterator for Cfg {
-    type Item = (Symbol, Box<dyn Iterator<Item = (usize, Val)>>);
+    type Item = (Key, Box<dyn Iterator<Item = (usize, Val)>>);
     type IntoIter = Box<dyn Iterator<Item = Self::Item>>;
     fn into_iter(self) -> Self::IntoIter {
         let iter = self.map.0.into_iter().map(|(k, v)| {

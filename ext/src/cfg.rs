@@ -3,8 +3,8 @@ use airlang::cfg::CoreCfg;
 use airlang::cfg::prelude::prelude_repr;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::val::Val;
+use airlang::type_::Key;
 use airlang::type_::Link;
-use airlang::type_::Symbol;
 use log::info;
 
 use self::lib::StdLib;
@@ -30,7 +30,7 @@ impl CfgMod for StdCfg {
         let prelude = prelude_repr(self.prelude);
         info!("std prelude len {}", prelude.len());
         let prelude = Val::Link(Link::new(Val::Memo(prelude.into())));
-        cfg.extend_scope(Symbol::from_str_unchecked(CoreCfg::PRELUDE), prelude);
+        cfg.extend_scope(Key::from_str_unchecked(CoreCfg::PRELUDE), prelude);
     }
 }
 

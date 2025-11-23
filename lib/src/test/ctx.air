@@ -173,7 +173,7 @@ _ do [
 -----
 [1, 2]
 =====
-= destruct map symbol key
+= destruct map key
 -----
 _ do [
     {a : .a, b : .b} = {a : 1, b : 2, c : 3},

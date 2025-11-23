@@ -9,6 +9,7 @@ use super::BYTE;
 use super::Direction;
 use super::EMPTY;
 use super::FALSE;
+use super::KEY_QUOTE;
 use super::LEFT;
 use super::LIST_LEFT;
 use super::LIST_RIGHT;
@@ -20,7 +21,6 @@ use super::RIGHT;
 use super::SCOPE_LEFT;
 use super::SCOPE_RIGHT;
 use super::SEPARATOR;
-use super::SYMBOL_QUOTE;
 use super::TEXT_QUOTE;
 use super::TRUE;
 use super::UNIT;
@@ -30,11 +30,11 @@ use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
 use crate::type_::Int;
+use crate::type_::Key;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Number;
 use crate::type_::Pair;
-use crate::type_::Symbol;
 use crate::type_::Text;
 use crate::type_::Unit;
 use crate::utils;
@@ -43,7 +43,7 @@ use crate::utils;
 pub enum GenRepr<'a> {
     Unit(&'a Unit),
     Bit(&'a Bit),
-    Symbol(&'a Symbol),
+    Key(&'a Key),
     Int(&'a Int),
     Number(&'a Number),
     Text(&'a Text),
@@ -62,7 +62,7 @@ pub(crate) struct GenFmt {
     pub(crate) right_padding: &'static str,
     pub(crate) before_item: &'static str,
     pub(crate) after_item: &'static str,
-    pub(crate) symbol_encoding: bool,
+    pub(crate) key_encoding: bool,
     pub(crate) compact: bool,
 }
 
@@ -73,18 +73,18 @@ pub(crate) const COMPACT_FMT: GenFmt = GenFmt {
     right_padding: "",
     before_item: "",
     after_item: concatcp!(SEPARATOR),
-    symbol_encoding: false,
+    key_encoding: false,
     compact: true,
 };
 
-pub(crate) const SYMBOL_FMT: GenFmt = GenFmt {
+pub(crate) const KEY_FMT: GenFmt = GenFmt {
     before_first: "",
     after_last: "",
     left_padding: "",
     right_padding: "",
     before_item: "",
     after_item: concatcp!(SEPARATOR),
-    symbol_encoding: true,
+    key_encoding: true,
     compact: true,
 };
 
@@ -95,7 +95,7 @@ pub(crate) const PRETTY_FMT: GenFmt = GenFmt {
     right_padding: "",
     after_item: concatcp!(SEPARATOR, '\n'),
     before_item: INDENT,
-    symbol_encoding: false,
+    key_encoding: false,
     compact: false,
 };
 
@@ -125,7 +125,7 @@ impl Gen for GenRepr<'_> {
         match self {
             GenRepr::Unit(unit) => unit.gen_(ctx, s),
             GenRepr::Bit(bit) => bit.gen_(ctx, s),
-            GenRepr::Symbol(symbol) => symbol.gen_(ctx, s),
+            GenRepr::Key(key) => key.gen_(ctx, s),
             GenRepr::Text(text) => text.gen_(ctx, s),
             GenRepr::Int(int) => int.gen_(ctx, s),
             GenRepr::Number(number) => number.gen_(ctx, s),
@@ -150,22 +150,22 @@ impl Gen for &Bit {
     }
 }
 
-impl Gen for &Symbol {
+impl Gen for &Key {
     fn gen_(self, _ctx: GenCtx, s: &mut String) {
         if !should_quote(self) {
             return s.push_str(self);
         }
-        s.push(SYMBOL_QUOTE);
-        escape_symbol(s, self);
-        s.push(SYMBOL_QUOTE);
+        s.push(KEY_QUOTE);
+        escape_key(s, self);
+        s.push(KEY_QUOTE);
     }
 }
 
-pub fn escape_symbol(s: &mut String, symbol: &str) {
-    for c in symbol.chars() {
+pub fn escape_key(s: &mut String, key: &str) {
+    for c in key.chars() {
         let escaped = match c {
             '\\' => "\\\\",
-            SYMBOL_QUOTE => concatcp!('\\', QUOTE),
+            KEY_QUOTE => concatcp!('\\', QUOTE),
             _ => {
                 s.push(c);
                 continue;
@@ -192,8 +192,8 @@ fn should_quote(str: &str) -> bool {
 impl Gen for &Text {
     fn gen_(self, ctx: GenCtx, s: &mut String) {
         s.push(TEXT_QUOTE);
-        if ctx.fmt.symbol_encoding {
-            escape_text_symbol(s, self);
+        if ctx.fmt.key_encoding {
+            escape_text_key(s, self);
         } else if ctx.fmt.compact {
             escape_text(s, self);
         } else if self.contains('\n') {
@@ -222,7 +222,7 @@ pub fn escape_text(s: &mut String, str: &str) {
     }
 }
 
-pub fn escape_text_symbol(s: &mut String, str: &str) {
+pub fn escape_text_key(s: &mut String, str: &str) {
     for c in str.chars() {
         let escaped = match c {
             '\\' => "\\\\",
@@ -230,7 +230,7 @@ pub fn escape_text_symbol(s: &mut String, str: &str) {
             '\r' => "\\r",
             '\t' => "\\t",
             TEXT_QUOTE => concatcp!('\\', QUOTE),
-            c if Symbol::is_symbol(c) => &format!("{c}"),
+            c if Key::is_key(c) => &format!("{c}"),
             c => &format!("\\u({:x})", c as u32),
         };
         s.push_str(escaped);

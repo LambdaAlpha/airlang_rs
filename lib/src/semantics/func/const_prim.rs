@@ -4,7 +4,7 @@ use super::FreeFn;
 use super::prim::impl_prim_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::Val;
-use crate::type_::Symbol;
+use crate::type_::Key;
 use crate::type_::ref_::ConstRef;
 
 pub trait ConstFn<Cfg, Ctx, I, O>: FreeFn<Cfg, I, O> {
@@ -39,7 +39,7 @@ where T: ConstFn<Cfg, Ctx, I, O>
 
 #[derive(Clone)]
 pub struct ConstPrimFunc {
-    pub(crate) id: Symbol,
+    pub(crate) id: Key,
     pub(crate) raw_input: bool,
     pub(crate) fn_: Rc<dyn ConstFn<Cfg, Val, Val, Val>>,
 }

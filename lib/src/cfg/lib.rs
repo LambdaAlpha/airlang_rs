@@ -8,6 +8,7 @@ use self::ctrl::CtrlLib;
 use self::ctx::CtxLib;
 use self::func::FuncLib;
 use self::int::IntLib;
+use self::key::KeyLib;
 use self::lang::LangLib;
 use self::link::LinkLib;
 use self::list::ListLib;
@@ -16,7 +17,6 @@ use self::memo::MemoLib;
 use self::number::NumberLib;
 use self::pair::PairLib;
 use self::resource::ResourceLib;
-use self::symbol::SymbolLib;
 use self::text::TextLib;
 use self::unit::UnitLib;
 use self::value::ValueLib;
@@ -34,13 +34,13 @@ use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::DynRef;
-use crate::type_::Symbol;
+use crate::type_::Key;
 
 #[derive(Default, Clone)]
 pub struct CoreLib {
     pub unit: UnitLib,
     pub bit: BitLib,
-    pub symbol: SymbolLib,
+    pub key: KeyLib,
     pub text: TextLib,
     pub int: IntLib,
     pub number: NumberLib,
@@ -64,7 +64,7 @@ impl CfgMod for CoreLib {
     fn extend(self, cfg: &Cfg) {
         self.unit.extend(cfg);
         self.bit.extend(cfg);
-        self.symbol.extend(cfg);
+        self.key.extend(cfg);
         self.text.extend(cfg);
         self.int.extend(cfg);
         self.number.extend(cfg);
@@ -100,7 +100,7 @@ pub struct DynPrimFn<F> {
 impl<F: FreeFn<Cfg, Val, Val> + 'static> FreePrimFn<F> {
     pub fn free(self) -> FreePrimFuncVal {
         let func = FreePrimFunc {
-            id: Symbol::from_str_unchecked(self.id),
+            id: Key::from_str_unchecked(self.id),
             raw_input: self.raw_input,
             fn_: Rc::new(self.f),
         };
@@ -111,7 +111,7 @@ impl<F: FreeFn<Cfg, Val, Val> + 'static> FreePrimFn<F> {
 impl<F: ConstFn<Cfg, Val, Val, Val> + 'static> DynPrimFn<F> {
     pub fn const_(self) -> ConstPrimFuncVal {
         let func = ConstPrimFunc {
-            id: Symbol::from_str_unchecked(self.id),
+            id: Key::from_str_unchecked(self.id),
             raw_input: self.raw_input,
             fn_: Rc::new(self.f),
         };
@@ -122,7 +122,7 @@ impl<F: ConstFn<Cfg, Val, Val, Val> + 'static> DynPrimFn<F> {
 impl<F: MutFn<Cfg, Val, Val, Val> + 'static> DynPrimFn<F> {
     pub fn mut_(self) -> MutPrimFuncVal {
         let func = MutPrimFunc {
-            id: Symbol::from_str_unchecked(self.id),
+            id: Key::from_str_unchecked(self.id),
             raw_input: self.raw_input,
             fn_: Rc::new(self.f),
         };
@@ -233,7 +233,7 @@ pub mod unit;
 
 pub mod bit;
 
-pub mod symbol;
+pub mod key;
 
 pub mod text;
 

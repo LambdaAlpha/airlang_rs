@@ -123,8 +123,8 @@ fn fn_remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         error!("ctx {ctx:?} should be a memo");
         return illegal_ctx(cfg);
     };
-    let Val::Symbol(s) = input else {
-        error!("input {input:?} should be a symbol");
+    let Val::Key(s) = input else {
+        error!("input {input:?} should be a key");
         return illegal_input(cfg);
     };
     memo.remove(s).unwrap_or_default()
@@ -139,8 +139,8 @@ fn fn_contract(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
         error!("ctx {ctx:?} should be a memo");
         return illegal_ctx(cfg);
     };
-    let Val::Symbol(s) = input else {
-        error!("input {input:?} should be a symbol");
+    let Val::Key(s) = input else {
+        error!("input {input:?} should be a key");
         return illegal_input(cfg);
     };
     let Some(contract) = memo.get_contract(s.clone()) else {
@@ -164,8 +164,8 @@ fn fn_set_contract(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Symbol(s) = pair.first else {
-        error!("input.first {:?} should be a symbol", pair.first);
+    let Val::Key(s) = pair.first else {
+        error!("input.first {:?} should be a key", pair.first);
         return illegal_input(cfg);
     };
     let Some(contract) = parse_contract(&pair.second) else {
@@ -187,8 +187,8 @@ fn fn_exist(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
         error!("ctx {ctx:?} should be a memo");
         return illegal_ctx(cfg);
     };
-    let Val::Symbol(s) = input else {
-        error!("input {input:?} should be a symbol");
+    let Val::Key(s) = input else {
+        error!("input {input:?} should be a key");
         return illegal_input(cfg);
     };
     Val::Bit(Bit::from(memo.exist(s)))

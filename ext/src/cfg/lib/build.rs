@@ -13,7 +13,7 @@ use airlang::semantics::cfg::Cfg;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::syntax::parse;
-use airlang::type_::Symbol;
+use airlang::type_::Key;
 use airlang::type_::Text;
 use log::error;
 
@@ -49,7 +49,7 @@ fn fn_load(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let url = Text::from(url);
-    let cur_url_key = Symbol::from_str_unchecked(CUR_URL_KEY);
+    let cur_url_key = Key::from_str_unchecked(CUR_URL_KEY);
     let cur_url = get_cur_url(cfg, cur_url_key);
     let new_url =
         cur_url.as_ref().and_then(|cur_url| join_url(cur_url, &url)).unwrap_or(String::from(url));
@@ -74,7 +74,7 @@ fn load_from_url(cfg: &mut Cfg, url: String) -> Val {
         error!("prelude should exist in cfg");
         return fail(cfg);
     };
-    let cur_url_key = Symbol::from_str_unchecked(CUR_URL_KEY);
+    let cur_url_key = Key::from_str_unchecked(CUR_URL_KEY);
     mod_air.cfg_mut().begin_scope();
     mod_air.cfg_mut().extend_scope(cur_url_key, Val::Text(Text::from(url).into()));
     mod_air.interpret(val)
@@ -88,7 +88,7 @@ fn read_to_string<'a>(url: &str, buffer: &'a mut String) -> std::io::Result<&'a 
     Ok(content)
 }
 
-fn get_cur_url(cfg: &Cfg, key: Symbol) -> Option<String> {
+fn get_cur_url(cfg: &Cfg, key: Key) -> Option<String> {
     if let Some(val) = cfg.import(key) {
         return if let Val::Text(url) = val { Some((**url).clone()) } else { None };
     }

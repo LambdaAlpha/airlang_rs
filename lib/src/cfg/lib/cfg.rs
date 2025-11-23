@@ -84,8 +84,8 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
         };
         let map = Map::from(map);
         for (k, v) in map {
-            let Val::Symbol(name) = k else {
-                error!("list.item.key {k:?} should be a symbol");
+            let Val::Key(name) = k else {
+                error!("list.item.key {k:?} should be a key");
                 return illegal_input(cfg);
             };
             new_cfg.extend_scope(name, v);
@@ -111,7 +111,7 @@ fn fn_repr(cfg: &mut Cfg, input: Val) -> Val {
     for (name, scopes) in new_cfg {
         for (scope, val) in scopes {
             let map = map_scopes.entry(scope).or_insert_with(Map::default);
-            map.insert(Val::Symbol(name.clone()), val);
+            map.insert(Val::Key(name.clone()), val);
         }
     }
     let mut list = List::default();
@@ -143,8 +143,8 @@ pub fn exist() -> FreePrimFuncVal {
 }
 
 fn fn_exist(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Symbol(name) = input else {
-        error!("input {input:?} should be a symbol");
+    let Val::Key(name) = input else {
+        error!("input {input:?} should be a key");
         return illegal_input(cfg);
     };
     let exist = cfg.exist(name);
@@ -156,8 +156,8 @@ pub fn import() -> FreePrimFuncVal {
 }
 
 fn fn_import(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Symbol(name) = input else {
-        error!("input {input:?} should be a symbol");
+    let Val::Key(name) = input else {
+        error!("input {input:?} should be a key");
         return illegal_input(cfg);
     };
     cfg.import(name).unwrap_or_default()
@@ -173,8 +173,8 @@ fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Symbol(name) = pair.first else {
-        error!("input.first {:?} should be a symbol", pair.first);
+    let Val::Key(name) = pair.first else {
+        error!("input.first {:?} should be a key", pair.first);
         return illegal_input(cfg);
     };
     cfg.export(name, pair.second);
@@ -201,8 +201,8 @@ fn fn_with(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
             };
             let map = Map::from(map);
             for (k, v) in map {
-                let Val::Symbol(name) = k else {
-                    error!("input.first.key {k:?} should be a symbol");
+                let Val::Key(name) = k else {
+                    error!("input.first.key {k:?} should be a key");
                     return illegal_input(cfg);
                 };
                 cfg.extend_scope(name, v);

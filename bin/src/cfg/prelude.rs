@@ -5,7 +5,7 @@ use airlang::semantics::memo::Memo;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::TextVal;
 use airlang::semantics::val::Val;
-use airlang::type_::Symbol;
+use airlang::type_::Key;
 use airlang_ext::cfg::prelude::StdPrelude;
 
 use crate::cfg::lib::BinLib;
@@ -31,7 +31,7 @@ impl Prelude for BinPrelude {
     fn extend(&self, memo: &mut Memo) {
         self.std.extend(memo);
         let _ = memo.put(
-            Symbol::from_str_unchecked("help"),
+            Key::from_str_unchecked("help"),
             Val::Text(self.help.clone()),
             Contract::default(),
         );

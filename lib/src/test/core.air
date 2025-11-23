@@ -10,31 +10,31 @@ _ do [.a set 1, a]
 -----
 1
 =====
-symbol id
+key id
 -----
 _a
 -----
 _a
 =====
-symbol shift
+key shift
 -----
 .a
 -----
 a
 =====
-symbol shift special 1
+key shift special 1
 -----
 ..a
 -----
 .a
 =====
-symbol shift special 2
+key shift special 2
 -----
 ...a
 -----
 ..a
 =====
-symbol shift special 3
+key shift special 3
 -----
 .:a
 -----
@@ -173,7 +173,7 @@ _ do [
 -----
 2
 =====
-list ctx index symbol
+list ctx index key
 -----
 _ do [
     .l set [0, 2, 4],

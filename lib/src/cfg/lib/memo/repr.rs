@@ -1,7 +1,7 @@
 use const_format::concatcp;
 use log::error;
 
-use crate::cfg::utils::symbol;
+use crate::cfg::utils::key;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::memo::Contract;
 use crate::semantics::memo::Memo;
@@ -9,9 +9,9 @@ use crate::semantics::memo::MemoMap;
 use crate::semantics::memo::MemoValue;
 use crate::semantics::val::MemoVal;
 use crate::semantics::val::Val;
+use crate::type_::Key;
 use crate::type_::Map;
 use crate::type_::Pair;
-use crate::type_::Symbol;
 
 const NONE: &str = concatcp!(PREFIX_ID, "none");
 const STILL: &str = concatcp!(PREFIX_ID, "still");
@@ -30,10 +30,10 @@ pub(in crate::cfg) fn parse_memo(input: Val) -> Option<MemoVal> {
     Some(memo.into())
 }
 
-fn parse_variables(map: Map<Val, Val>) -> Option<Map<Symbol, MemoValue>> {
+fn parse_variables(map: Map<Val, Val>) -> Option<Map<Key, MemoValue>> {
     map.into_iter()
         .map(|(name, val)| {
-            let Val::Symbol(name) = name else {
+            let Val::Key(name) = name else {
                 return None;
             };
             let Val::Pair(pair) = val else {
@@ -49,7 +49,7 @@ fn parse_variables(map: Map<Val, Val>) -> Option<Map<Symbol, MemoValue>> {
 pub(in crate::cfg) fn parse_contract(contract: &Val) -> Option<Contract> {
     match contract {
         Val::Unit(_) => Some(Contract::None),
-        Val::Symbol(s) => {
+        Val::Key(s) => {
             let contract = match &**s {
                 NONE => Contract::None,
                 STILL => Contract::Still,
@@ -66,7 +66,7 @@ pub(in crate::cfg) fn parse_contract(contract: &Val) -> Option<Contract> {
             Some(contract)
         }
         contract => {
-            error!("contract {contract:?} should be a symbol");
+            error!("contract {contract:?} should be a key");
             None
         }
     }
@@ -84,7 +84,7 @@ fn generate_variables(memo_map: MemoMap) -> Val {
         .map(|(name, v)| {
             let contract = generate_contract(v.contract);
             let pair = Val::Pair(Pair::new(contract, v.val).into());
-            (Val::Symbol(name), pair)
+            (Val::Key(name), pair)
         })
         .collect();
     Val::Map(map.into())
@@ -98,5 +98,5 @@ pub(in crate::cfg) fn generate_contract(contract: Contract) -> Val {
         Contract::Static => STATIC,
         Contract::Const => CONST,
     };
-    symbol(s)
+    key(s)
 }

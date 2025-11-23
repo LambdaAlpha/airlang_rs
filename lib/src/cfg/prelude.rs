@@ -6,7 +6,7 @@ use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
-use crate::type_::Symbol;
+use crate::type_::Key;
 
 #[derive(Clone)]
 pub struct CorePrelude {
@@ -170,7 +170,7 @@ impl Prelude for CorePrelude {
 }
 
 pub fn memo_put_func<V: Clone + Into<FuncVal>>(memo: &mut Memo, name: &'static str, val: &V) {
-    let name = Symbol::from_str_unchecked(name);
+    let name = Key::from_str_unchecked(name);
     let v = memo.put(name, Val::Func(val.clone().into()), Contract::None);
     assert!(matches!(v, Ok(None)), "names of preludes should be unique");
 }

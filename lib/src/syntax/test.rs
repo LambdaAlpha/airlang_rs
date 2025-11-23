@@ -5,8 +5,8 @@ use num_bigint::BigInt;
 use num_traits::Num;
 
 use super::generate_compact;
+use super::generate_key;
 use super::generate_pretty;
-use super::generate_symbol;
 use super::parse;
 use super::repr::PairRepr;
 use super::repr::Repr;
@@ -14,10 +14,10 @@ use crate::test::parse_test_file;
 use crate::type_::Bit;
 use crate::type_::Call;
 use crate::type_::Int;
+use crate::type_::Key;
 use crate::type_::Map;
 use crate::type_::Number;
 use crate::type_::Pair;
-use crate::type_::Symbol;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -29,8 +29,8 @@ fn bit(b: bool) -> Repr {
     Repr::Bit(Bit::from(b))
 }
 
-fn symbol(s: &str) -> Repr {
-    Repr::Symbol(Symbol::from_str_unchecked(s))
+fn key(s: &str) -> Repr {
+    Repr::Key(Key::from_str_unchecked(s))
 }
 
 fn text(s: &str) -> Repr {
@@ -98,7 +98,7 @@ fn test_parse(
 }
 
 fn test_generate(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
-    let gen_fmt_list = [generate_compact, generate_pretty, generate_symbol];
+    let gen_fmt_list = [generate_compact, generate_pretty, generate_key];
     for [title, s] in parse_test_file::<2>(src, file_name) {
         let repr: Repr = parse(s).map_err(|e| {
             eprintln!("file {file_name} case ({title}) src({s}): parse failed\n{e}");
@@ -182,13 +182,13 @@ fn test_generate_bit() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_symbol() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/symbol.air"), "test/symbol.air", symbol::expected)
+fn test_parse_key() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/key.air"), "test/key.air", key::expected)
 }
 
 #[test]
-fn test_generate_symbol() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/symbol.air"), "test/symbol.air")
+fn test_generate_key() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/key.air"), "test/key.air")
 }
 
 #[test]
@@ -285,7 +285,7 @@ mod unit;
 
 mod bit;
 
-mod symbol;
+mod key;
 
 mod text;
 

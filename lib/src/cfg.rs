@@ -11,8 +11,8 @@ use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
+use crate::type_::Key;
 use crate::type_::Link;
-use crate::type_::Symbol;
 
 pub trait CfgMod {
     fn extend(self, cfg: &Cfg);
@@ -38,7 +38,7 @@ impl CfgMod for CoreCfg {
         let prelude = prelude_repr(self.prelude);
         info!("core prelude len {}", prelude.len());
         let prelude = Val::Link(Link::new(Val::Memo(prelude.into())));
-        cfg.extend_scope(Symbol::from_str_unchecked(Self::PRELUDE), prelude);
+        cfg.extend_scope(Key::from_str_unchecked(Self::PRELUDE), prelude);
     }
 }
 
@@ -46,7 +46,7 @@ impl CoreCfg {
     pub const PRELUDE: &'static str = "_prelude";
 
     pub fn prelude(cfg: &Cfg) -> Option<Memo> {
-        let prelude = cfg.import(Symbol::from_str_unchecked(Self::PRELUDE));
+        let prelude = cfg.import(Key::from_str_unchecked(Self::PRELUDE));
         let Some(prelude) = prelude else {
             error!("prelude should exist in cfg");
             return None;
@@ -65,23 +65,23 @@ impl CoreCfg {
 }
 
 pub(crate) trait Named {
-    fn name(&self) -> Symbol;
+    fn name(&self) -> Key;
 }
 
 impl Named for FreePrimFuncVal {
-    fn name(&self) -> Symbol {
+    fn name(&self) -> Key {
         self.id.clone()
     }
 }
 
 impl Named for ConstPrimFuncVal {
-    fn name(&self) -> Symbol {
+    fn name(&self) -> Key {
         self.id.clone()
     }
 }
 
 impl Named for MutPrimFuncVal {
-    fn name(&self) -> Symbol {
+    fn name(&self) -> Key {
         self.id.clone()
     }
 }

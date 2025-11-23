@@ -15,11 +15,11 @@ use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
 use crate::type_::Int;
+use crate::type_::Key;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Number;
 use crate::type_::Pair;
-use crate::type_::Symbol;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -28,7 +28,7 @@ pub enum Repr {
     Unit(Unit),
     Bit(Bit),
 
-    Symbol(Symbol),
+    Key(Key),
 
     Text(Text),
     Int(Int),
@@ -109,7 +109,7 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
         let r = match self {
             Repr::Unit(unit) => GenRepr::Unit(unit),
             Repr::Bit(bit) => GenRepr::Bit(bit),
-            Repr::Symbol(symbol) => GenRepr::Symbol(symbol),
+            Repr::Key(key) => GenRepr::Key(key),
             Repr::Text(text) => GenRepr::Text(text),
             Repr::Int(int) => GenRepr::Int(int),
             Repr::Number(number) => GenRepr::Number(number),

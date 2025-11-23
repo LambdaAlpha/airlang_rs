@@ -1,8 +1,8 @@
 use const_format::concatcp;
 use log::error;
 
+use crate::cfg::utils::key;
 use crate::cfg::utils::map_remove;
-use crate::cfg::utils::symbol;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::ctx::CtxAccess;
 use crate::semantics::func::ConstCompFunc;
@@ -20,9 +20,9 @@ use crate::semantics::val::MemoVal;
 use crate::semantics::val::MutCompFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
+use crate::type_::Key;
 use crate::type_::Map;
 use crate::type_::Pair;
-use crate::type_::Symbol;
 
 // todo rename
 const CODE: &str = "code";
@@ -76,10 +76,10 @@ pub(in crate::cfg) fn parse_func(input: Val) -> Option<FuncVal> {
     Some(func)
 }
 
-fn parse_id(id: Val) -> Option<Symbol> {
+fn parse_id(id: Val) -> Option<Key> {
     match id {
-        Val::Unit(_) => Some(Symbol::default()),
-        Val::Symbol(id) => Some(id),
+        Val::Unit(_) => Some(Key::default()),
+        Val::Key(id) => Some(id),
         _ => None,
     }
 }
@@ -93,28 +93,28 @@ fn parse_raw_input(id: Val) -> Option<bool> {
 }
 
 struct FuncCode {
-    ctx_name: Option<Symbol>,
-    input_name: Symbol,
+    ctx_name: Option<Key>,
+    input_name: Key,
     body: Val,
 }
 
 fn parse_code(code: Val) -> Option<FuncCode> {
     let code = match code {
         Val::Unit(_) => FuncCode {
-            ctx_name: Some(Symbol::default()),
-            input_name: Symbol::default(),
+            ctx_name: Some(Key::default()),
+            input_name: Key::default(),
             body: Val::default(),
         },
         Val::Pair(names_body) => {
             let names_body = Pair::from(names_body);
             match names_body.first {
                 Val::Pair(ctx_input) => {
-                    let Val::Symbol(ctx) = &ctx_input.first else {
-                        error!("ctx {:?} should be a symbol", ctx_input.first);
+                    let Val::Key(ctx) = &ctx_input.first else {
+                        error!("ctx {:?} should be a key", ctx_input.first);
                         return None;
                     };
-                    let Val::Symbol(input) = &ctx_input.second else {
-                        error!("input {:?} should be a symbol", ctx_input.second);
+                    let Val::Key(input) = &ctx_input.second else {
+                        error!("input {:?} should be a key", ctx_input.second);
                         return None;
                     };
                     FuncCode {
@@ -123,11 +123,11 @@ fn parse_code(code: Val) -> Option<FuncCode> {
                         body: names_body.second,
                     }
                 }
-                Val::Symbol(input) => {
+                Val::Key(input) => {
                     FuncCode { ctx_name: None, input_name: input, body: names_body.second }
                 }
                 v => {
-                    error!("name {v:?} should be a symbol or a pair of symbol");
+                    error!("name {v:?} should be a key or a pair of key");
                     return None;
                 }
             }
@@ -153,10 +153,10 @@ fn parse_memo(memo: Val) -> Option<Memo> {
 
 fn parse_ctx_access(access: &Val) -> Option<&str> {
     match &access {
-        Val::Symbol(s) => Some(&**s),
+        Val::Key(s) => Some(&**s),
         Val::Unit(_) => Some(MUTABLE),
         v => {
-            error!("ctx access {v:?} should be a symbol or a unit");
+            error!("ctx access {v:?} should be a key or a unit");
             None
         }
     }
@@ -179,7 +179,7 @@ fn generate_free_prim(f: FreePrimFuncVal) -> Val {
 
 fn generate_free_comp(f: FreeCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
-    repr.insert(symbol(CODE), free_code(&f.comp));
+    repr.insert(key(CODE), free_code(&f.comp));
     let comp = CompRepr { id: f.id.clone(), access: FREE, memo: f.memo.clone() };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
@@ -191,7 +191,7 @@ fn generate_const_prim(f: ConstPrimFuncVal) -> Val {
 
 fn generate_const_comp(f: ConstCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
-    repr.insert(symbol(CODE), dyn_code(&f.comp));
+    repr.insert(key(CODE), dyn_code(&f.comp));
     let comp = CompRepr { id: f.id.clone(), access: CONST, memo: f.memo.clone() };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
@@ -203,15 +203,15 @@ fn generate_mut_prim(f: MutPrimFuncVal) -> Val {
 
 fn generate_mut_comp(f: MutCompFuncVal) -> Val {
     let mut repr = Map::<Val, Val>::default();
-    repr.insert(symbol(CODE), dyn_code(&f.comp));
+    repr.insert(key(CODE), dyn_code(&f.comp));
     let comp = CompRepr { id: f.id.clone(), access: MUTABLE, memo: f.memo.clone() };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
 
-fn generate_prim(id: Symbol) -> Val {
+fn generate_prim(id: Key) -> Val {
     let mut repr = Map::<Val, Val>::default();
-    repr.insert(symbol(ID), Val::Symbol(id));
+    repr.insert(key(ID), Val::Key(id));
     Val::Map(repr.into())
 }
 
@@ -227,33 +227,33 @@ pub(in crate::cfg) fn generate_code(func: &FuncVal) -> Option<Val> {
 }
 
 fn free_code(comp: &FreeComposite) -> Val {
-    let input = Val::Symbol(comp.input_name.clone());
+    let input = Val::Key(comp.input_name.clone());
     let output = comp.body.clone();
     Val::Pair(Pair::new(input, output).into())
 }
 
 fn dyn_code(comp: &DynComposite) -> Val {
-    let ctx = Val::Symbol(comp.ctx_name.clone());
-    let input = Val::Symbol(comp.free.input_name.clone());
+    let ctx = Val::Key(comp.ctx_name.clone());
+    let input = Val::Key(comp.free.input_name.clone());
     let names = Val::Pair(Pair::new(ctx, input).into());
     Val::Pair(Pair::new(names, comp.free.body.clone()).into())
 }
 
 struct CompRepr {
-    id: Symbol,
+    id: Key,
     access: &'static str,
     memo: Memo,
 }
 
 fn generate_comp(repr: &mut Map<Val, Val>, comp: CompRepr) {
     if !comp.id.is_empty() {
-        repr.insert(symbol(ID), Val::Symbol(comp.id));
+        repr.insert(key(ID), Val::Key(comp.id));
     }
     if comp.access != MUTABLE {
-        repr.insert(symbol(CTX_ACCESS), symbol(comp.access));
+        repr.insert(key(CTX_ACCESS), key(comp.access));
     }
     if comp.memo != Memo::default() {
-        repr.insert(symbol(MEMO), Val::Memo(MemoVal::from(comp.memo)));
+        repr.insert(key(MEMO), Val::Memo(MemoVal::from(comp.memo)));
     }
 }
 

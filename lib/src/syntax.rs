@@ -1,9 +1,9 @@
 pub use self::error::ParseError;
 pub use self::error::ReprError;
 pub use self::generator::GenRepr;
-pub use self::generator::escape_symbol;
+pub use self::generator::escape_key;
 pub use self::generator::escape_text;
-pub use self::generator::escape_text_symbol;
+pub use self::generator::escape_text_key;
 pub use self::parser::ParseRepr;
 pub use self::parser::parse;
 
@@ -12,8 +12,8 @@ _____!();
 use derive_more::IsVariant;
 
 use self::generator::COMPACT_FMT;
+use self::generator::KEY_FMT;
 use self::generator::PRETTY_FMT;
-use self::generator::SYMBOL_FMT;
 
 pub fn generate_pretty(src: GenRepr) -> String {
     generator::generate(src, PRETTY_FMT)
@@ -23,8 +23,8 @@ pub fn generate_compact(src: GenRepr) -> String {
     generator::generate(src, COMPACT_FMT)
 }
 
-pub fn generate_symbol(src: GenRepr) -> String {
-    generator::generate(src, SYMBOL_FMT)
+pub fn generate_key(src: GenRepr) -> String {
+    generator::generate(src, KEY_FMT)
 }
 
 // delimiters {
@@ -39,7 +39,7 @@ pub(crate) const SPACE: char = ' ';
 pub(crate) const SEPARATOR: char = ',';
 
 pub(crate) const TEXT_QUOTE: char = '"';
-pub(crate) const SYMBOL_QUOTE: char = '\'';
+pub(crate) const KEY_QUOTE: char = '\'';
 // } delimiters
 
 pub(crate) const QUOTE: char = '`';
@@ -74,7 +74,7 @@ pub(crate) fn is_delimiter(c: char) -> bool {
             | SCOPE_LEFT
             | SCOPE_RIGHT
             | TEXT_QUOTE
-            | SYMBOL_QUOTE
+            | KEY_QUOTE
     )
 }
 

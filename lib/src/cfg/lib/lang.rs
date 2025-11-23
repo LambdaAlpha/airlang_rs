@@ -109,7 +109,7 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
         let r = match self {
             Val::Unit(unit) => GenRepr::Unit(unit),
             Val::Bit(bit) => GenRepr::Bit(bit),
-            Val::Symbol(symbol) => GenRepr::Symbol(symbol),
+            Val::Key(key) => GenRepr::Key(key),
             Val::Text(text) => GenRepr::Text(text),
             Val::Int(int) => GenRepr::Int(int),
             Val::Number(number) => GenRepr::Number(number),

@@ -3,6 +3,7 @@ pub use self::byte::Byte;
 pub use self::call::Call;
 pub use self::either::Either;
 pub use self::int::Int;
+pub use self::key::Key;
 pub use self::link::Link;
 pub use self::list::List;
 pub use self::map::Map;
@@ -10,7 +11,6 @@ pub use self::number::Number;
 pub use self::pair::Pair;
 pub use self::ref_::ConstRef;
 pub use self::ref_::DynRef;
-pub use self::symbol::Symbol;
 pub use self::text::Text;
 pub use self::unit::Unit;
 
@@ -22,7 +22,7 @@ mod unit;
 
 mod bit;
 
-mod symbol;
+mod key;
 
 mod text;
 

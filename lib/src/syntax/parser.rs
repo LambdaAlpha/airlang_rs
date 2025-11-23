@@ -36,6 +36,7 @@ use super::Direction;
 use super::EMPTY;
 use super::FALSE;
 use super::INT;
+use super::KEY_QUOTE;
 use super::LEFT;
 use super::LIST_LEFT;
 use super::LIST_RIGHT;
@@ -49,7 +50,6 @@ use super::SCOPE_LEFT;
 use super::SCOPE_RIGHT;
 use super::SEPARATOR;
 use super::SPACE;
-use super::SYMBOL_QUOTE;
 use super::TEXT_QUOTE;
 use super::TRUE;
 use super::UNIT;
@@ -58,11 +58,11 @@ use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
 use crate::type_::Int;
+use crate::type_::Key;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Number;
 use crate::type_::Pair;
-use crate::type_::Symbol;
 use crate::type_::Text;
 use crate::type_::Unit;
 use crate::utils::conversion::bin_str_to_vec_u8;
@@ -71,7 +71,7 @@ use crate::utils::conversion::hex_str_to_vec_u8;
 pub trait ParseRepr:
     From<Unit>
     + From<Bit>
-    + From<Symbol>
+    + From<Key>
     + From<Text>
     + From<Int>
     + From<Number>
@@ -169,7 +169,7 @@ macro_rules! impl_parse_repr_for_comment {
     };
 }
 
-impl_parse_repr_for_comment!(Unit Bit Symbol Text Int Number Byte);
+impl_parse_repr_for_comment!(Unit Bit Key Text Int Number Byte);
 impl_parse_repr_for_comment!(Pair<C, C> Call<C, C> List<C> Map<C, C>);
 impl ParseRepr for C {}
 
@@ -206,16 +206,16 @@ fn scope<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     scoped_trim_comment(ctx, compose(ctx)).context(label("scope"))
 }
 
-fn trivial_symbol1<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
-    take_while(1 .., is_trivial_symbol).parse_next(i)
+fn trivial_key1<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
+    take_while(1 .., is_trivial_key).parse_next(i)
 }
 
-fn is_trivial_symbol(c: char) -> bool {
-    Symbol::is_symbol(c) && !is_delimiter(c)
+fn is_trivial_key(c: char) -> bool {
+    Key::is_key(c) && !is_delimiter(c)
 }
 
-fn is_symbol(c: char) -> bool {
-    Symbol::is_symbol(c)
+fn is_key(c: char) -> bool {
+    Key::is_key(c)
 }
 
 fn token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
@@ -229,28 +229,28 @@ fn token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
         SEPARATOR => fail.parse_next(i),
         SPACE => fail.parse_next(i),
         TEXT_QUOTE => text.map(T::from).map(Token::Default).parse_next(i),
-        SYMBOL_QUOTE => symbol.map(T::from).map(Token::Default).parse_next(i),
+        KEY_QUOTE => key.map(T::from).map(Token::Default).parse_next(i),
         '0' ..= '9' => int_or_number.map(Token::Default).parse_next(i),
-        _ => cut_err(symbol_token(ctx)).parse_next(i),
+        _ => cut_err(key_token(ctx)).parse_next(i),
     })
     .context(label("token"))
 }
 
-fn symbol_token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
+fn key_token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<T>, E> {
     move |i: &mut _| {
         let i: &mut &str = i;
-        let symbol = trivial_symbol1.context(label("symbol")).parse_next(i)?;
+        let key = trivial_key1.context(label("key")).parse_next(i)?;
         if i.starts_with(LEFT_DELIMITERS) {
-            return prefix(symbol, ctx).map(Token::Default).parse_next(i);
+            return prefix(key, ctx).map(Token::Default).parse_next(i);
         }
-        if let Some(keyword) = keyword(symbol) {
+        if let Some(keyword) = keyword(key) {
             return Ok(Token::Default(keyword));
         }
-        Ok(Token::Unquote(Symbol::from_str_unchecked(symbol)))
+        Ok(Token::Unquote(Key::from_str_unchecked(key)))
     }
 }
 
-const LEFT_DELIMITERS: [char; 5] = [SCOPE_LEFT, LIST_LEFT, MAP_LEFT, SYMBOL_QUOTE, TEXT_QUOTE];
+const LEFT_DELIMITERS: [char; 5] = [SCOPE_LEFT, LIST_LEFT, MAP_LEFT, KEY_QUOTE, TEXT_QUOTE];
 
 fn keyword<T: ParseRepr>(s: &str) -> Option<T> {
     match s {
@@ -282,7 +282,7 @@ fn prefix<'a, T: ParseRepr>(prefix: &str, ctx: ParseCtx) -> impl Parser<&'a str,
 
 #[derive(Clone)]
 enum Token<T> {
-    Unquote(Symbol),
+    Unquote(Key),
     Default(T),
 }
 
@@ -474,17 +474,17 @@ fn raw_map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     delimited_trim_comment(ctx, MAP_LEFT, items, MAP_RIGHT).context(label("raw map"))
 }
 
-fn symbol(i: &mut &str) -> ModalResult<Symbol> {
-    let symbol = move |i: &mut _| {
+fn key(i: &mut &str) -> ModalResult<Key> {
+    let key = move |i: &mut _| {
         let mut s = String::new();
-        let mut literal = take_while(1 .., |c| is_symbol(c) && c != '\\' && c != SYMBOL_QUOTE);
-        let mut raw_literal = take_while(0 .., is_symbol);
+        let mut literal = take_while(1 .., |c| is_key(c) && c != '\\' && c != KEY_QUOTE);
+        let mut raw_literal = take_while(0 .., is_key);
         let mut raw = false;
         loop {
             if raw {
                 match peek(any).parse_next(i)? {
                     '\r' | '\n' => {
-                        symbol_newline.parse_next(i)?;
+                        key_newline.parse_next(i)?;
                         match any.parse_next(i)? {
                             SCOPE_RIGHT => raw = false,
                             ' ' => {}
@@ -495,10 +495,10 @@ fn symbol(i: &mut &str) -> ModalResult<Symbol> {
                 }
             } else {
                 match peek(any).parse_next(i)? {
-                    SYMBOL_QUOTE => break,
-                    '\\' => s.push_str(symbol_escaped.parse_next(i)?),
+                    KEY_QUOTE => break,
+                    '\\' => s.push_str(key_escaped.parse_next(i)?),
                     '\r' | '\n' => {
-                        symbol_newline.parse_next(i)?;
+                        key_newline.parse_next(i)?;
                         match any.parse_next(i)? {
                             SCOPE_LEFT => raw = true,
                             ' ' => {}
@@ -509,16 +509,16 @@ fn symbol(i: &mut &str) -> ModalResult<Symbol> {
                 }
             }
         }
-        Ok(Symbol::from_string_unchecked(s))
+        Ok(Key::from_string_unchecked(s))
     };
-    delimited_cut(SYMBOL_QUOTE, symbol, SYMBOL_QUOTE).context(label("symbol")).parse_next(i)
+    delimited_cut(KEY_QUOTE, key, KEY_QUOTE).context(label("key")).parse_next(i)
 }
 
-fn symbol_escaped<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
+fn key_escaped<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
     preceded('\\', move |i: &mut _| match any.parse_next(i)? {
         '\\' => empty.value("\\").parse_next(i),
         '_' => empty.value(" ").parse_next(i),
-        QUOTE => empty.value(concatcp!(SYMBOL_QUOTE)).parse_next(i),
+        QUOTE => empty.value(concatcp!(KEY_QUOTE)).parse_next(i),
         ' ' | '\t' => opt(space_tab).value("").parse_next(i),
         _ => fail.parse_next(i),
     })
@@ -526,7 +526,7 @@ fn symbol_escaped<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
     .parse_next(i)
 }
 
-fn symbol_newline(i: &mut &str) -> ModalResult<()> {
+fn key_newline(i: &mut &str) -> ModalResult<()> {
     (line_ending, opt(space_tab), '|'.context(expect_char('|')))
         .void()
         .context(expect_desc("newline"))
@@ -627,7 +627,7 @@ impl StrFragment<'_> {
 fn int_or_number<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
     let norm = preceded('0', (sign, significand, opt(exponent)));
     let short = (empty.value(true), significand_radix(10, digit1, "decimal"), opt(exponent));
-    let end = not(one_of(|c| is_trivial_symbol(c) || LEFT_DELIMITERS.contains(&c)));
+    let end = not(one_of(|c| is_trivial_key(c) || LEFT_DELIMITERS.contains(&c)));
     let f = alt((norm, short))
         .map(|(sign, significand, exponent)| build_int_or_number(sign, significand, exponent));
     cut_err(terminated(f, end).context(label("int or number"))).parse_next(i)

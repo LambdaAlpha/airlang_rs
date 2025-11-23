@@ -68,8 +68,8 @@ fn test_bit() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_symbol() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/symbol.air"), "test/symbol.air")
+fn test_key() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/key.air"), "test/key.air")
 }
 
 #[test]

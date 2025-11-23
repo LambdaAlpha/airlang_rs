@@ -1,6 +1,6 @@
 use log::error;
 
-use crate::cfg::utils::symbol;
+use crate::cfg::utils::key;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::val::CallVal;
 use crate::semantics::val::ListVal;
@@ -8,14 +8,14 @@ use crate::semantics::val::MapVal;
 use crate::semantics::val::PairVal;
 use crate::semantics::val::Val;
 use crate::type_::Call;
+use crate::type_::Key;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
-use crate::type_::Symbol;
 use crate::type_::Unit;
 
 pub(in crate::cfg) enum Pattern {
-    Any(Symbol),
+    Any(Key),
     Val(Val),
     Pair(Box<Pair<Pattern, Pattern>>),
     Call(Box<Call<Pattern, Pattern>>),
@@ -30,7 +30,7 @@ pub(in crate::cfg) trait PatternParse {
 impl PatternParse for Val {
     fn parse(self) -> Option<Pattern> {
         match self {
-            Val::Symbol(symbol) => symbol.parse(),
+            Val::Key(key) => key.parse(),
             Val::Pair(pair) => pair.parse(),
             Val::List(list) => list.parse(),
             Val::Map(map) => map.parse(),
@@ -40,14 +40,14 @@ impl PatternParse for Val {
     }
 }
 
-const SYMBOL_LITERAL_CHAR: char = '-';
-const SYMBOL_REF_CHAR: char = '*';
+const KEY_LITERAL_CHAR: char = '-';
+const KEY_REF_CHAR: char = '*';
 
-impl PatternParse for Symbol {
+impl PatternParse for Key {
     fn parse(self) -> Option<Pattern> {
         let pattern = match self.chars().next() {
-            Some(SYMBOL_LITERAL_CHAR) => Pattern::Val(symbol(&self[1 ..])),
-            Some(SYMBOL_REF_CHAR) => Pattern::Any(Symbol::from_str_unchecked(&self[1 ..])),
+            Some(KEY_LITERAL_CHAR) => Pattern::Val(key(&self[1 ..])),
+            Some(KEY_REF_CHAR) => Pattern::Any(Key::from_str_unchecked(&self[1 ..])),
             _ => Pattern::Any(self),
         };
         Some(pattern)
@@ -106,7 +106,7 @@ impl PatternMatch<Val> for Pattern {
     }
 }
 
-impl PatternMatch<Val> for Symbol {
+impl PatternMatch<Val> for Key {
     fn match_(&self, _val: &Val) -> bool {
         true
     }
@@ -186,7 +186,7 @@ impl PatternAssign<Val, Val> for Pattern {
     }
 }
 
-impl PatternAssign<Val, Val> for Symbol {
+impl PatternAssign<Val, Val> for Key {
     fn assign(self, ctx: &mut Val, val: Val) -> Val {
         ctx.set(self, val).unwrap_or_default()
     }

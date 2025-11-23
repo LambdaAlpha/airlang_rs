@@ -2,11 +2,11 @@ length join
 -----
 _ do [
     .any set _ import _value.any,
-    .length set _ import _symbol.length,
-    .join set _ import _symbol.join,
-    .a set _ any _symbol,
+    .length set _ import _key.length,
+    .join set _ import _key.join,
+    .a set _ any _key,
     .la set a which _ length .,
-    .b set _ any _symbol,
+    .b set _ any _key,
     .lb set b which _ length .,
     .ab set . join [a, b],
     .lab set ab which _ length .,
@@ -18,7 +18,7 @@ true
 length empty
 -----
 _ do [
-    .length set _ import _symbol.length,
+    .length set _ import _key.length,
     empty which _ length .
 ]
 -----
@@ -27,7 +27,7 @@ _ do [
 length else
 -----
 _ do [
-    .length set _ import _symbol.length,
+    .length set _ import _key.length,
     .s set _a,
     s which _ length .
 ]
@@ -37,7 +37,7 @@ _ do [
 join empty
 -----
 _ do [
-    .join set _ import _symbol.join,
+    .join set _ import _key.join,
     empty join [.a, .b]
 ]
 -----
@@ -46,7 +46,7 @@ ab
 join unit
 -----
 _ do [
-    .join set _ import _symbol.join,
+    .join set _ import _key.join,
     .a set .a1,
     .b set .b1,
     .c set .c1,
@@ -55,10 +55,10 @@ _ do [
 -----
 a1b1c1
 =====
-join no symbol
+join no key
 -----
 _ do [
-    .join set _ import _symbol.join,
+    .join set _ import _key.join,
     . join []
 ]
 -----
@@ -67,7 +67,7 @@ _ do [
 join else
 -----
 _ do [
-    .join set _ import _symbol.join,
+    .join set _ import _key.join,
     .. join [.a, .b]
 ]
 -----
@@ -77,9 +77,9 @@ into_text from_text
 -----
 _ do [
     .any set _ import _value.any,
-    .from_text set _ import _symbol.from_text,
-    .into_text set _ import _symbol.into_text,
-    .s set _ any _symbol,
+    .from_text set _ import _key.from_text,
+    .into_text set _ import _key.into_text,
+    .s set _ any _key,
     .s1 set _ from_text _ into_text s,
     s == s1
 ]
@@ -89,7 +89,7 @@ true
 from_text empty
 -----
 _ do [
-    .from_text set _ import _symbol.from_text,
+    .from_text set _ import _key.from_text,
     _ from_text ""
 ]
 -----
@@ -98,7 +98,7 @@ _ do [
 from_text trivial
 -----
 _ do [
-    .from_text set _ import _symbol.from_text,
+    .from_text set _ import _key.from_text,
     _ from_text "hello_world!"
 ]
 -----
@@ -107,7 +107,7 @@ hello_world!
 from_text special
 -----
 _ do [
-    .from_text set _ import _symbol.from_text,
+    .from_text set _ import _key.from_text,
     _ from_text "{}"
 ]
 -----
@@ -116,7 +116,7 @@ _ do [
 into_text empty
 -----
 _ do [
-    .into_text set _ import _symbol.into_text,
+    .into_text set _ import _key.into_text,
     _ into_text empty
 ]
 -----
@@ -125,7 +125,7 @@ _ do [
 into_text trivial
 -----
 _ do [
-    .into_text set _ import _symbol.into_text,
+    .into_text set _ import _key.into_text,
     _ into_text .hello_world!
 ]
 -----

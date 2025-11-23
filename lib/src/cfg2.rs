@@ -27,7 +27,7 @@ impl CoreCfg2 {
         // don't depend on the execution order {
         Self::run(cfg, ctx, include_str!("air/lib/unit.air"), "/lib/unit").unwrap();
         Self::run(cfg, ctx, include_str!("air/lib/bit.air"), "/lib/bit").unwrap();
-        Self::run(cfg, ctx, include_str!("air/lib/symbol.air"), "/lib/symbol").unwrap();
+        Self::run(cfg, ctx, include_str!("air/lib/key.air"), "/lib/key").unwrap();
         Self::run(cfg, ctx, include_str!("air/lib/text.air"), "/lib/text").unwrap();
         Self::run(cfg, ctx, include_str!("air/lib/integer.air"), "/lib/integer").unwrap();
         Self::run(cfg, ctx, include_str!("air/lib/number.air"), "/lib/number").unwrap();

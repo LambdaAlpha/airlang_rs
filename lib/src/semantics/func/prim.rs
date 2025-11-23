@@ -1,7 +1,7 @@
 macro_rules! impl_prim_func {
     ($func:ty) => {
         impl $func {
-            pub fn id(&self) -> Symbol {
+            pub fn id(&self) -> Key {
                 self.id.clone()
             }
         }

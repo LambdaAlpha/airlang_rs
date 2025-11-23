@@ -1,48 +1,36 @@
 use crate::syntax::repr::Repr;
 use crate::syntax::test::infix_call;
+use crate::syntax::test::key;
 use crate::syntax::test::list;
 use crate::syntax::test::map;
 use crate::syntax::test::pair;
-use crate::syntax::test::symbol;
 
 pub fn expected() -> Vec<Repr> {
     vec![
-        symbol("a"),
-        symbol("a"),
+        key("a"),
+        key("a"),
         infix_call(
-            infix_call(symbol("a"), symbol("b"), infix_call(symbol("c"), symbol("d"), symbol("e"))),
-            symbol("f"),
-            symbol("g"),
+            infix_call(key("a"), key("b"), infix_call(key("c"), key("d"), key("e"))),
+            key("f"),
+            key("g"),
         ),
-        list(vec![symbol("a")]),
-        map(vec![(pair(symbol("a"), symbol("b")), symbol("c"))]),
-        map(vec![(symbol("a"), pair(symbol("b"), symbol("c")))]),
-        infix_call(infix_call(symbol("a"), symbol("b"), symbol("c")), symbol("d"), symbol("e")),
-        infix_call(infix_call(symbol("a"), symbol("b"), symbol("c")), symbol("d"), symbol("e")),
-        list(vec![infix_call(
-            infix_call(symbol("a"), symbol("b"), symbol("c")),
-            symbol("d"),
-            symbol("e"),
-        )]),
+        list(vec![key("a")]),
+        map(vec![(pair(key("a"), key("b")), key("c"))]),
+        map(vec![(key("a"), pair(key("b"), key("c")))]),
+        infix_call(infix_call(key("a"), key("b"), key("c")), key("d"), key("e")),
+        infix_call(infix_call(key("a"), key("b"), key("c")), key("d"), key("e")),
+        list(vec![infix_call(infix_call(key("a"), key("b"), key("c")), key("d"), key("e"))]),
         map(vec![(
-            infix_call(infix_call(symbol("a"), symbol("b"), symbol("c")), symbol("d"), symbol("e")),
-            infix_call(infix_call(symbol("f"), symbol("g"), symbol("h")), symbol("i"), symbol("j")),
+            infix_call(infix_call(key("a"), key("b"), key("c")), key("d"), key("e")),
+            infix_call(infix_call(key("f"), key("g"), key("h")), key("i"), key("j")),
         )]),
-        infix_call(
-            pair(symbol("a"), infix_call(symbol("b"), symbol("c"), symbol("d"))),
-            symbol("e"),
-            symbol("f"),
-        ),
-        infix_call(symbol("a"), symbol("b"), infix_call(symbol("c"), symbol("d"), symbol("e"))),
-        infix_call(symbol("a"), symbol("b"), infix_call(symbol("c"), symbol("d"), symbol("e"))),
-        list(vec![infix_call(
-            symbol("a"),
-            symbol("b"),
-            infix_call(symbol("c"), symbol("d"), symbol("e")),
-        )]),
+        infix_call(pair(key("a"), infix_call(key("b"), key("c"), key("d"))), key("e"), key("f")),
+        infix_call(key("a"), key("b"), infix_call(key("c"), key("d"), key("e"))),
+        infix_call(key("a"), key("b"), infix_call(key("c"), key("d"), key("e"))),
+        list(vec![infix_call(key("a"), key("b"), infix_call(key("c"), key("d"), key("e")))]),
         map(vec![(
-            infix_call(symbol("a"), symbol("b"), infix_call(symbol("c"), symbol("d"), symbol("e"))),
-            infix_call(symbol("f"), symbol("g"), infix_call(symbol("h"), symbol("i"), symbol("j"))),
+            infix_call(key("a"), key("b"), infix_call(key("c"), key("d"), key("e"))),
+            infix_call(key("f"), key("g"), infix_call(key("h"), key("i"), key("j"))),
         )]),
     ]
 }

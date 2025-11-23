@@ -2,7 +2,7 @@ use airlang::cfg::CfgMod;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::val::TextVal;
 use airlang::semantics::val::Val;
-use airlang::type_::Symbol;
+use airlang::type_::Key;
 use airlang::type_::Text;
 
 #[derive(Clone)]
@@ -18,7 +18,7 @@ impl Default for ReplLib {
 
 impl CfgMod for ReplLib {
     fn extend(self, cfg: &Cfg) {
-        cfg.extend_scope(Symbol::from_str_unchecked("repl.help"), Val::Text(self.help));
+        cfg.extend_scope(Key::from_str_unchecked("repl.help"), Val::Text(self.help));
     }
 }
 

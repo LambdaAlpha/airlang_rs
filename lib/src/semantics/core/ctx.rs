@@ -13,21 +13,21 @@ use crate::semantics::val::MemoVal;
 use crate::semantics::val::PairVal;
 use crate::semantics::val::Val;
 use crate::type_::DynRef;
-use crate::type_::Symbol;
+use crate::type_::Key;
 
-impl DynCtx<Symbol, Val> for PairVal {
-    fn ref_(&mut self, input: Symbol) -> Option<DynRef<'_, Val>> {
+impl DynCtx<Key, Val> for PairVal {
+    fn ref_(&mut self, input: Key) -> Option<DynRef<'_, Val>> {
         match &*input {
             "first" => Some(DynRef::new_mut(&mut self.first)),
             "second" => Some(DynRef::new_mut(&mut self.second)),
             _ => {
-                error!("symbol {input:?} should be first or second");
+                error!("key {input:?} should be first or second");
                 None
             }
         }
     }
 
-    fn set(&mut self, input: Symbol, mut value: Val) -> Option<Val> {
+    fn set(&mut self, input: Key, mut value: Val) -> Option<Val> {
         match &*input {
             "first" => {
                 swap(&mut self.first, &mut value);
@@ -38,26 +38,26 @@ impl DynCtx<Symbol, Val> for PairVal {
                 Some(value)
             }
             _ => {
-                error!("symbol {input:?} should be first or second");
+                error!("key {input:?} should be first or second");
                 None
             }
         }
     }
 }
 
-impl DynCtx<Symbol, Val> for CallVal {
-    fn ref_(&mut self, input: Symbol) -> Option<DynRef<'_, Val>> {
+impl DynCtx<Key, Val> for CallVal {
+    fn ref_(&mut self, input: Key) -> Option<DynRef<'_, Val>> {
         match &*input {
             "function" => Some(DynRef::new_mut(&mut self.func)),
             "input" => Some(DynRef::new_mut(&mut self.input)),
             _ => {
-                error!("symbol {input:?} should be function, context or input");
+                error!("key {input:?} should be function, context or input");
                 None
             }
         }
     }
 
-    fn set(&mut self, input: Symbol, mut value: Val) -> Option<Val> {
+    fn set(&mut self, input: Key, mut value: Val) -> Option<Val> {
         match &*input {
             "function" => {
                 swap(&mut self.func, &mut value);
@@ -68,18 +68,18 @@ impl DynCtx<Symbol, Val> for CallVal {
                 Some(value)
             }
             _ => {
-                error!("symbol {input:?} should be function, context or input");
+                error!("key {input:?} should be function, context or input");
                 None
             }
         }
     }
 }
 
-impl DynCtx<Symbol, Val> for ListVal {
-    fn ref_(&mut self, input: Symbol) -> Option<DynRef<'_, Val>> {
+impl DynCtx<Key, Val> for ListVal {
+    fn ref_(&mut self, input: Key) -> Option<DynRef<'_, Val>> {
         let len = self.len();
         let Ok(index) = input.parse::<usize>() else {
-            error!("symbol {input:?} should be a int and >= 0 and < list.len {len}");
+            error!("key {input:?} should be a int and >= 0 and < list.len {len}");
             return None;
         };
         let Some(val) = self.get_mut(index) else {
@@ -89,10 +89,10 @@ impl DynCtx<Symbol, Val> for ListVal {
         Some(DynRef::new_mut(val))
     }
 
-    fn set(&mut self, input: Symbol, mut value: Val) -> Option<Val> {
+    fn set(&mut self, input: Key, mut value: Val) -> Option<Val> {
         let len = self.len();
         let Ok(index) = input.parse::<usize>() else {
-            error!("symbol {input:?} should be a int and >= 0 and < list.len {len}");
+            error!("key {input:?} should be a int and >= 0 and < list.len {len}");
             return None;
         };
         let Some(val) = self.get_mut(index) else {
@@ -104,22 +104,22 @@ impl DynCtx<Symbol, Val> for ListVal {
     }
 }
 
-impl DynCtx<Symbol, Val> for MapVal {
-    fn ref_(&mut self, input: Symbol) -> Option<DynRef<'_, Val>> {
-        let Some(val) = self.get_mut(&Val::Symbol(input.clone())) else {
+impl DynCtx<Key, Val> for MapVal {
+    fn ref_(&mut self, input: Key) -> Option<DynRef<'_, Val>> {
+        let Some(val) = self.get_mut(&Val::Key(input.clone())) else {
             error!("name {input:?} should exist in the map");
             return None;
         };
         Some(DynRef::new_mut(val))
     }
 
-    fn set(&mut self, input: Symbol, value: Val) -> Option<Val> {
-        self.insert(Val::Symbol(input), value)
+    fn set(&mut self, input: Key, value: Val) -> Option<Val> {
+        self.insert(Val::Key(input), value)
     }
 }
 
-impl DynCtx<Symbol, Val> for MemoVal {
-    fn ref_(&mut self, input: Symbol) -> Option<DynRef<'_, Val>> {
+impl DynCtx<Key, Val> for MemoVal {
+    fn ref_(&mut self, input: Key) -> Option<DynRef<'_, Val>> {
         let Ok(val) = self.get_ref_dyn(input.clone()) else {
             error!("name {input:?} should exist");
             return None;
@@ -127,7 +127,7 @@ impl DynCtx<Symbol, Val> for MemoVal {
         Some(val)
     }
 
-    fn set(&mut self, input: Symbol, value: Val) -> Option<Val> {
+    fn set(&mut self, input: Key, value: Val) -> Option<Val> {
         let Ok(last) = self.put(input.clone(), value, Contract::None) else {
             error!("variable {input:?} is not assignable");
             return None;
@@ -136,32 +136,32 @@ impl DynCtx<Symbol, Val> for MemoVal {
     }
 }
 
-impl DynCtx<Symbol, Val> for Val {
-    fn ref_(&mut self, input: Symbol) -> Option<DynRef<'_, Val>> {
+impl DynCtx<Key, Val> for Val {
+    fn ref_(&mut self, input: Key) -> Option<DynRef<'_, Val>> {
         match self {
             Val::Pair(pair) => pair.ref_(input),
             Val::Call(call) => call.ref_(input),
             Val::List(list) => list.ref_(input),
             Val::Map(map) => map.ref_(input),
             Val::Memo(ctx) => ctx.ref_(input),
-            Val::Dyn(val) => val.ref_(Val::Symbol(input)),
+            Val::Dyn(val) => val.ref_(Val::Key(input)),
             v => {
-                error!("symbol {input:?} should exist in {v:?}");
+                error!("key {input:?} should exist in {v:?}");
                 None
             }
         }
     }
 
-    fn set(&mut self, input: Symbol, value: Val) -> Option<Val> {
+    fn set(&mut self, input: Key, value: Val) -> Option<Val> {
         match self {
             Val::Pair(pair) => pair.set(input, value),
             Val::Call(call) => call.set(input, value),
             Val::List(list) => list.set(input, value),
             Val::Map(map) => map.set(input, value),
             Val::Memo(ctx) => ctx.set(input, value),
-            Val::Dyn(val) => val.set(Val::Symbol(input), value),
+            Val::Dyn(val) => val.set(Val::Key(input), value),
             v => {
-                error!("symbol {input:?} should exist in {v:?}");
+                error!("key {input:?} should exist in {v:?}");
                 None
             }
         }
@@ -213,7 +213,7 @@ impl DynCtx<Val, Val> for MapVal {
 
 impl DynCtx<Val, Val> for Val {
     fn ref_(&mut self, input: Val) -> Option<DynRef<'_, Val>> {
-        if let Val::Symbol(name) = &input {
+        if let Val::Key(name) = &input {
             return self.ref_(name.clone());
         }
         match self {
@@ -234,7 +234,7 @@ impl DynCtx<Val, Val> for Val {
     }
 
     fn set(&mut self, input: Val, value: Val) -> Option<Val> {
-        if let Val::Symbol(name) = &input {
+        if let Val::Key(name) = &input {
             return self.set(name.clone(), value);
         }
         match self {

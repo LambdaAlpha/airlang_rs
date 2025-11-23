@@ -3,7 +3,7 @@ use std::rc::Rc;
 use super::prim::impl_prim_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::Val;
-use crate::type_::Symbol;
+use crate::type_::Key;
 
 pub trait FreeFn<Cfg, I, O> {
     fn free_call(&self, cfg: &mut Cfg, input: I) -> O;
@@ -27,7 +27,7 @@ where T: FreeFn<Cfg, I, O>
 
 #[derive(Clone)]
 pub struct FreePrimFunc {
-    pub(crate) id: Symbol,
+    pub(crate) id: Key,
     pub(crate) raw_input: bool,
     pub(crate) fn_: Rc<dyn FreeFn<Cfg, Val, Val>>,
 }
@@ -46,7 +46,7 @@ impl Default for FreePrimFunc {
                 Val::default()
             }
         }
-        Self { id: Symbol::default(), fn_: Rc::new(F), raw_input: false }
+        Self { id: Key::default(), fn_: Rc::new(F), raw_input: false }
     }
 }
 

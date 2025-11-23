@@ -6,7 +6,7 @@ text unknown digit prefix
 -----
 1""
 =====
-text unknown symbol prefix
+text unknown key prefix
 -----
 @""
 =====
@@ -18,7 +18,7 @@ text digit postfix
 -----
 "a"1
 =====
-text symbol postfix
+text key postfix
 -----
 "a".
 =====
@@ -80,63 +80,63 @@ raw text no line indicator
 abc
 +"
 =====
-symbol empty unpaired
+key empty unpaired
 -----
 '
 =====
-symbol unpaired
+key unpaired
 -----
 'a
 =====
-symbol extra unpaired
+key extra unpaired
 -----
 '''
 =====
-symbol escape unpaired
+key escape unpaired
 -----
 '\`
 =====
-symbol wrong quote
+key wrong quote
 -----
 '\''
 =====
-symbol unknown escape
+key unknown escape
 -----
 '\a'
 =====
-symbol illegal
+key illegal
 -----
 '中'
 =====
-symbol unknown alphabet prefix
+key unknown alphabet prefix
 -----
 a''
 =====
-symbol unknown digit prefix
+key unknown digit prefix
 -----
 1''
 =====
-symbol unknown symbol prefix
+key unknown key prefix
 -----
 @''
 =====
-symbol tab
+key tab
 -----
 '	a
 |'
 =====
-raw symbol unpaired
+raw key unpaired
 -----
 '
 |(
 | '
 =====
-raw symbol wrong line indicator
+raw key wrong line indicator
 -----
 '
 + a'
 =====
-raw symbol illegal
+raw key illegal
 -----
 '
 | 中
@@ -318,11 +318,11 @@ byte point
 -----
 byte(Xff.)
 =====
-unquoted symbol with [
+unquoted key with [
 -----
 %[
 =====
-unquoted symbol begin with [
+unquoted key begin with [
 -----
 [%
 =====

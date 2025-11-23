@@ -29,12 +29,12 @@ use crate::type_::Byte;
 use crate::type_::Call;
 use crate::type_::Either;
 use crate::type_::Int;
+use crate::type_::Key;
 use crate::type_::Link;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Number;
 use crate::type_::Pair;
-use crate::type_::Symbol;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -48,7 +48,7 @@ impl Arbitrary for Val {
         let weights = [
             weight, // unit
             weight, // bit
-            weight, // symbol
+            weight, // key
             weight, // text
             weight, // int
             weight, // number
@@ -68,7 +68,7 @@ impl Arbitrary for Val {
         match i {
             0 => Val::Unit(Unit::any(rng, depth)),
             1 => Val::Bit(Bit::any(rng, depth)),
-            2 => Val::Symbol(Symbol::any(rng, depth)),
+            2 => Val::Key(Key::any(rng, depth)),
             3 => Val::Text(Text::any(rng, depth).into()),
             4 => Val::Int(Int::any(rng, depth).into()),
             5 => Val::Number(Number::any(rng, depth).into()),
@@ -98,17 +98,17 @@ impl Arbitrary for Bit {
     }
 }
 
-struct DistSymbol;
+struct DistKey;
 
-impl Distribution<u8> for DistSymbol {
+impl Distribution<u8> for DistKey {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> u8 {
-        rng.random_range(Symbol::MIN ..= Symbol::MAX) as u8
+        rng.random_range(Key::MIN ..= Key::MAX) as u8
     }
 }
 
-impl SampleString for DistSymbol {
+impl SampleString for DistKey {
     fn append_string<R: Rng + ?Sized>(&self, rng: &mut R, string: &mut String, len: usize) {
-        // safety: symbols are valid utf-8
+        // safety: keys are valid utf-8
         unsafe {
             let v = string.as_mut_vec();
             v.extend(self.sample_iter(rng).take(len));
@@ -116,11 +116,11 @@ impl SampleString for DistSymbol {
     }
 }
 
-impl Arbitrary for Symbol {
+impl Arbitrary for Key {
     fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
         let len = any_len(rng);
-        let s = DistSymbol.sample_string(rng, len);
-        Symbol::from_string_unchecked(s)
+        let s = DistKey.sample_string(rng, len);
+        Key::from_string_unchecked(s)
     }
 }
 
@@ -237,7 +237,7 @@ impl Arbitrary for Cfg {
         let depth = depth + 1;
         let cfg = Cfg::default();
         for _ in 0 .. len {
-            cfg.extend_scope(Symbol::any(rng, depth), Val::any(rng, depth));
+            cfg.extend_scope(Key::any(rng, depth), Val::any(rng, depth));
         }
         cfg
     }

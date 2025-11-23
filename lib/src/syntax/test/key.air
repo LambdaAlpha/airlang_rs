@@ -166,31 +166,31 @@ digit multiple
 -----
 '0123456789'
 =====
-symbol with "
+key with "
 -----
 '"a'
 =====
-symbol with '
+key with '
 -----
 '\`a'
 =====
-symbol with _
+key with _
 -----
 to_be_or_not_to_be
 =====
-symbol with digit
+key with digit
 -----
 R34G148B83
 =====
-alphabet symbol
+alphabet key
 -----
 a%
 =====
-symbol alphabet
+key alphabet
 -----
 %a
 =====
-symbol digit
+key digit
 -----
 &1
 =====
@@ -210,7 +210,7 @@ soft keyword digit
 -----
 +1
 =====
-+symbol
++key
 -----
 +=
 =====
@@ -222,7 +222,7 @@ soft keyword digit
 -----
 -1.1
 =====
--symbol
+-key
 -----
 ->
 =====

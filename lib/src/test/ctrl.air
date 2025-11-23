@@ -189,7 +189,7 @@ true test [
 -----
 []
 =====
-switch symbol
+switch key
 -----
 .a switch {
     a : [_ not true],
@@ -346,7 +346,7 @@ _ do [
 -----
 [false, false, 3]
 =====
-match symbol
+match key
 -----
 _ do [
     .a set .a,
@@ -595,7 +595,7 @@ _ do [
 -----
 [byte(11), byte(22), byte(33), byte(44), byte(55)]
 =====
-iterate symbol
+iterate key
 -----
 _ do [
     .push set _ import _list.push,

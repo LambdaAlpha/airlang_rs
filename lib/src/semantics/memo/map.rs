@@ -6,14 +6,14 @@ use derive_more::IsVariant;
 
 use super::MemoError;
 use crate::semantics::val::Val;
+use crate::type_::Key;
 use crate::type_::Map;
-use crate::type_::Symbol;
 use crate::type_::ref_::DynRef;
 
 // todo impl arena
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
 pub struct MemoMap {
-    map: Map<Symbol, MemoValue>,
+    map: Map<Key, MemoValue>,
 }
 
 // still -> (none <-> null) -> final
@@ -41,11 +41,11 @@ pub struct MemoValue {
 }
 
 impl MemoMap {
-    pub(crate) fn new(map: Map<Symbol, MemoValue>) -> Self {
+    pub(crate) fn new(map: Map<Key, MemoValue>) -> Self {
         Self { map }
     }
 
-    pub(crate) fn unwrap(self) -> Map<Symbol, MemoValue> {
+    pub(crate) fn unwrap(self) -> Map<Key, MemoValue> {
         self.map
     }
 
@@ -57,18 +57,18 @@ impl MemoMap {
         self.map.len()
     }
 
-    pub fn exist(&self, name: Symbol) -> bool {
+    pub fn exist(&self, name: Key) -> bool {
         self.map.get(&name).is_some()
     }
 
-    pub fn get_ref(&self, name: Symbol) -> Result<&Val, MemoError> {
+    pub fn get_ref(&self, name: Key) -> Result<&Val, MemoError> {
         let Some(value) = self.map.get(&name) else {
             return Err(MemoError::NotFound);
         };
         Ok(&value.val)
     }
 
-    pub fn get_ref_mut(&mut self, name: Symbol) -> Result<&mut Val, MemoError> {
+    pub fn get_ref_mut(&mut self, name: Key) -> Result<&mut Val, MemoError> {
         let Some(value) = self.map.get_mut(&name) else {
             return Err(MemoError::NotFound);
         };
@@ -78,14 +78,14 @@ impl MemoMap {
         Ok(&mut value.val)
     }
 
-    pub fn get_ref_dyn(&mut self, name: Symbol) -> Result<DynRef<'_, Val>, MemoError> {
+    pub fn get_ref_dyn(&mut self, name: Key) -> Result<DynRef<'_, Val>, MemoError> {
         let Some(value) = self.map.get_mut(&name) else {
             return Err(MemoError::NotFound);
         };
         Ok(DynRef::new(&mut value.val, !value.contract.is_mutable()))
     }
 
-    pub fn remove(&mut self, name: Symbol) -> Result<Val, MemoError> {
+    pub fn remove(&mut self, name: Key) -> Result<Val, MemoError> {
         let Entry::Occupied(entry) = self.map.entry(name) else {
             return Err(MemoError::NotFound);
         };
@@ -96,7 +96,7 @@ impl MemoMap {
     }
 
     pub fn put(
-        &mut self, name: Symbol, val: Val, contract: Contract,
+        &mut self, name: Key, val: Val, contract: Contract,
     ) -> Result<Option<Val>, MemoError> {
         match self.map.entry(name) {
             Entry::Occupied(mut entry) => {
@@ -116,19 +116,19 @@ impl MemoMap {
         }
     }
 
-    pub fn is_assignable(&self, name: Symbol, contract: Contract) -> bool {
+    pub fn is_assignable(&self, name: Key, contract: Contract) -> bool {
         let Some(old) = self.map.get(&name) else {
             return contract.is_insertable();
         };
         old.contract.is_replaceable(contract)
     }
 
-    pub fn get_contract(&self, name: Symbol) -> Option<Contract> {
+    pub fn get_contract(&self, name: Key) -> Option<Contract> {
         let value = self.map.get(&name)?;
         Some(value.contract)
     }
 
-    pub fn set_contract(&mut self, name: Symbol, contract: Contract) -> Result<(), MemoError> {
+    pub fn set_contract(&mut self, name: Key, contract: Contract) -> Result<(), MemoError> {
         let Some(old) = self.map.get_mut(&name) else {
             return Err(MemoError::NotFound);
         };
@@ -146,13 +146,11 @@ impl MemoMap {
         self
     }
 
-    pub(in crate::semantics) fn put_unchecked(
-        &mut self, name: Symbol, val: MemoValue,
-    ) -> Option<Val> {
+    pub(in crate::semantics) fn put_unchecked(&mut self, name: Key, val: MemoValue) -> Option<Val> {
         self.map.insert(name, val).map(|memo_value| memo_value.val)
     }
 
-    pub(in crate::semantics) fn remove_unchecked(&mut self, name: &Symbol) -> Option<MemoValue> {
+    pub(in crate::semantics) fn remove_unchecked(&mut self, name: &Key) -> Option<MemoValue> {
         self.map.remove(name)
     }
 }

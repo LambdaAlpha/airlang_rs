@@ -13,25 +13,25 @@ use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::Int;
-use crate::type_::Symbol;
+use crate::type_::Key;
 use crate::type_::Text;
 
 // todo design add more
 #[derive(Clone)]
-pub struct SymbolLib {
+pub struct KeyLib {
     pub from_text: FreePrimFuncVal,
     pub into_text: FreePrimFuncVal,
     pub length: ConstPrimFuncVal,
     pub join: FreePrimFuncVal,
 }
 
-impl Default for SymbolLib {
+impl Default for KeyLib {
     fn default() -> Self {
-        SymbolLib { from_text: from_text(), into_text: into_text(), length: length(), join: join() }
+        KeyLib { from_text: from_text(), into_text: into_text(), length: length(), join: join() }
     }
 }
 
-impl CfgMod for SymbolLib {
+impl CfgMod for KeyLib {
     fn extend(self, cfg: &Cfg) {
         self.from_text.extend(cfg);
         self.into_text.extend(cfg);
@@ -41,7 +41,7 @@ impl CfgMod for SymbolLib {
 }
 
 pub fn from_text() -> FreePrimFuncVal {
-    FreePrimFn { id: "_symbol.from_text", raw_input: false, f: free_impl(fn_from_text) }.free()
+    FreePrimFn { id: "_key.from_text", raw_input: false, f: free_impl(fn_from_text) }.free()
 }
 
 fn fn_from_text(cfg: &mut Cfg, input: Val) -> Val {
@@ -49,43 +49,43 @@ fn fn_from_text(cfg: &mut Cfg, input: Val) -> Val {
         error!("input {input:?} should be a text");
         return illegal_input(cfg);
     };
-    let is_symbol = t.chars().all(Symbol::is_symbol);
-    if !is_symbol {
-        error!("every character of input {t:?} text should be a symbol");
+    let is_key = t.chars().all(Key::is_key);
+    if !is_key {
+        error!("every character of input {t:?} text should be a key");
         return illegal_input(cfg);
     }
-    let symbol = Symbol::from_string_unchecked(t.to_string());
-    Val::Symbol(symbol)
+    let key = Key::from_string_unchecked(t.to_string());
+    Val::Key(key)
 }
 
 pub fn into_text() -> FreePrimFuncVal {
-    FreePrimFn { id: "_symbol.into_text", raw_input: false, f: free_impl(fn_into_text) }.free()
+    FreePrimFn { id: "_key.into_text", raw_input: false, f: free_impl(fn_into_text) }.free()
 }
 
 fn fn_into_text(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Symbol(s) = input else {
-        error!("input {input:?} should be a symbol");
+    let Val::Key(key) = input else {
+        error!("input {input:?} should be a key");
         return illegal_input(cfg);
     };
-    Val::Text(Text::from(String::from(s)).into())
+    Val::Text(Text::from(String::from(key)).into())
 }
 
 pub fn length() -> ConstPrimFuncVal {
-    DynPrimFn { id: "_symbol.length", raw_input: false, f: const_impl(fn_length) }.const_()
+    DynPrimFn { id: "_key.length", raw_input: false, f: const_impl(fn_length) }.const_()
 }
 
 fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
-    let Val::Symbol(symbol) = &*ctx else {
-        error!("ctx {ctx:?} should be a symbol");
+    let Val::Key(key) = &*ctx else {
+        error!("ctx {ctx:?} should be a key");
         return illegal_ctx(cfg);
     };
-    let len: Int = symbol.len().into();
+    let len: Int = key.len().into();
     Val::Int(len.into())
 }
 
 // todo design
 pub fn join() -> FreePrimFuncVal {
-    FreePrimFn { id: "_symbol.join", raw_input: false, f: free_impl(fn_join) }.free()
+    FreePrimFn { id: "_key.join", raw_input: false, f: free_impl(fn_join) }.free()
 }
 
 fn fn_join(cfg: &mut Cfg, input: Val) -> Val {
@@ -95,30 +95,30 @@ fn fn_join(cfg: &mut Cfg, input: Val) -> Val {
     };
     let separator = match &pair.first {
         Val::Unit(_) => "",
-        Val::Symbol(s) => s,
+        Val::Key(key) => key,
         s => {
-            error!("separator {s:?} should be a unit or a symbol");
+            error!("separator {s:?} should be a unit or a key");
             return illegal_input(cfg);
         }
     };
-    let Val::List(symbols) = &pair.second else {
+    let Val::List(keys) = &pair.second else {
         error!("input.second {:?} should be a list", pair.second);
         return illegal_input(cfg);
     };
-    let symbols: Option<Vec<&str>> = symbols
+    let keys: Option<Vec<&str>> = keys
         .iter()
         .map(|v| {
-            let Val::Symbol(s) = v else {
-                error!("item {v:?} should be a symbol");
+            let Val::Key(s) = v else {
+                error!("item {v:?} should be a key");
                 return None;
             };
-            let symbol: &str = s;
-            Some(symbol)
+            let key: &str = s;
+            Some(key)
         })
         .collect();
-    let Some(symbols) = symbols else {
+    let Some(keys) = keys else {
         return illegal_input(cfg);
     };
-    let symbol = symbols.join(separator);
-    Val::Symbol(Symbol::from_string_unchecked(symbol))
+    let key = keys.join(separator);
+    Val::Key(Key::from_string_unchecked(key))
 }

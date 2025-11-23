@@ -7,7 +7,7 @@ use crate::semantics::cfg::Cfg;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::Either;
-use crate::type_::Symbol;
+use crate::type_::Key;
 use crate::type_::ref_::DynRef;
 
 pub trait MutFn<Cfg, Ctx, I, O>: ConstFn<Cfg, Ctx, I, O> {
@@ -48,7 +48,7 @@ where T: MutFn<Cfg, Ctx, I, O>
 
 #[derive(Clone)]
 pub struct MutPrimFunc {
-    pub(crate) id: Symbol,
+    pub(crate) id: Key,
     pub(crate) raw_input: bool,
     pub(crate) fn_: Rc<dyn MutFn<Cfg, Val, Val, Val>>,
 }

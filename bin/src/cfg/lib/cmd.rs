@@ -41,9 +41,9 @@ fn fn_call(cfg: &mut Cfg, input: Val) -> Val {
     };
     let program: &str = match &pair.first {
         Val::Text(program) => program,
-        Val::Symbol(symbol) => symbol,
+        Val::Key(key) => key,
         v => {
-            error!("program {v:?} should be a text or a symbol");
+            error!("program {v:?} should be a text or a key");
             return illegal_input(cfg);
         }
     };
@@ -56,9 +56,9 @@ fn fn_call(cfg: &mut Cfg, input: Val) -> Val {
         .map(|val| {
             let arg: &str = match val {
                 Val::Text(text) => text,
-                Val::Symbol(symbol) => symbol,
+                Val::Key(key) => key,
                 v => {
-                    error!("argument {v:?} should be a text or a symbol");
+                    error!("argument {v:?} should be a text or a key");
                     return None;
                 }
             };

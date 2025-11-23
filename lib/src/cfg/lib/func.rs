@@ -30,8 +30,8 @@ use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::ConstRef;
+use crate::type_::Key;
 use crate::type_::Pair;
-use crate::type_::Symbol;
 
 #[derive(Clone)]
 pub struct FuncLib {
@@ -159,7 +159,7 @@ fn fn_recurse(cfg: &mut Cfg, input: Val) -> Val {
     };
     let recurse = Recurse(func.clone());
     let id = format!("function.recurse.{}", &*func.id());
-    let id = Symbol::from_string_unchecked(id);
+    let id = Key::from_string_unchecked(id);
     let raw_input = false;
     let recurse = match func.ctx_access() {
         CtxAccess::Free => {
@@ -209,7 +209,7 @@ fn fn_ctx_access(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
         return illegal_ctx(cfg);
     };
     let access = generate_ctx_access(func.ctx_access());
-    Val::Symbol(Symbol::from_str_unchecked(access))
+    Val::Key(Key::from_str_unchecked(access))
 }
 
 pub fn is_primitive() -> ConstPrimFuncVal {
@@ -235,7 +235,7 @@ fn fn_id(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
         error!("ctx {ctx:?} should be a function");
         return illegal_ctx(cfg);
     };
-    Val::Symbol(func.id())
+    Val::Key(func.id())
 }
 
 pub fn code() -> ConstPrimFuncVal {

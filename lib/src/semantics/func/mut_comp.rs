@@ -7,11 +7,11 @@ use crate::semantics::memo::Memo;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::DynRef;
-use crate::type_::Symbol;
+use crate::type_::Key;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct MutCompFunc {
-    pub(crate) id: Symbol,
+    pub(crate) id: Key,
     pub(crate) raw_input: bool,
     pub(crate) comp: DynComposite,
     pub(crate) memo: Memo,

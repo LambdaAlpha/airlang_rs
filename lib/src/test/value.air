@@ -29,15 +29,15 @@ _ do [
 -----
 _bit
 =====
-any symbol
+any key
 -----
 _ do [
     .any set _ import _value.any,
-    .s set _ any _symbol,
+    .s set _ any _key,
     s which _ type .
 ]
 -----
-_symbol
+_key
 =====
 any text
 -----
@@ -167,14 +167,14 @@ _ do [
 -----
 _bit
 =====
-type symbol
+type key
 -----
 _ do [
     .a set _a,
     a which _ type .
 ]
 -----
-_symbol
+_key
 =====
 type text
 -----
@@ -295,7 +295,7 @@ false == false
 -----
 true
 =====
-== symbol
+== key
 -----
 _a == _a
 -----

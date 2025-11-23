@@ -9,19 +9,19 @@ use crate::semantics::memo::MemoError;
 use crate::semantics::memo::MemoValue;
 use crate::semantics::val::Val;
 use crate::type_::DynRef;
-use crate::type_::Symbol;
+use crate::type_::Key;
 use crate::utils::gurad::guard;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) struct FreeComposite {
     pub(crate) body: Val,
-    pub(crate) input_name: Symbol,
+    pub(crate) input_name: Key,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) struct DynComposite {
     pub(crate) free: FreeComposite,
-    pub(crate) ctx_name: Symbol,
+    pub(crate) ctx_name: Key,
 }
 
 impl FreeComposite {
@@ -57,13 +57,13 @@ pub(crate) fn composite_call(cfg: &mut Cfg, memo: &mut Memo, body: Val) -> Val {
     )
 }
 
-fn put_input(memo: &mut Memo, input_name: Symbol, input: Val) -> Result<(), MemoError> {
+fn put_input(memo: &mut Memo, input_name: Key, input: Val) -> Result<(), MemoError> {
     let _ = memo.put(input_name, input, Contract::None)?;
     Ok(())
 }
 
 fn with_ctx(
-    memo: &mut Memo, mut ctx: DynRef<Val>, name: Symbol, f: impl FnOnce(&mut Memo) -> Val,
+    memo: &mut Memo, mut ctx: DynRef<Val>, name: Key, f: impl FnOnce(&mut Memo) -> Val,
 ) -> Val {
     if memo.exist(name.clone()) {
         return Val::default();
@@ -78,7 +78,7 @@ fn with_ctx(
     )
 }
 
-fn keep_ctx(memo: &mut Memo, ctx: DynRef<Val>, name: Symbol) {
+fn keep_ctx(memo: &mut Memo, ctx: DynRef<Val>, name: Key) {
     let const_ = ctx.is_const();
     // here is why we need a `&mut Val` for a const func
     let ctx = take(ctx.unwrap());
@@ -86,7 +86,7 @@ fn keep_ctx(memo: &mut Memo, ctx: DynRef<Val>, name: Symbol) {
     let _ = memo.put_unchecked(name, MemoValue::new(ctx, contract));
 }
 
-fn restore_ctx(memo: &mut Memo, ctx: &mut Val, name: Symbol) {
+fn restore_ctx(memo: &mut Memo, ctx: &mut Val, name: Key) {
     let Some(ctx_val) = memo.remove_unchecked(&name) else {
         unreachable!("restore_ctx ctx invariant is broken!!!");
     };
