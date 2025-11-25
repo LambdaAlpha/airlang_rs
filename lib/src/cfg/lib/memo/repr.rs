@@ -30,12 +30,9 @@ pub(in crate::cfg) fn parse_memo(input: Val) -> Option<MemoVal> {
     Some(memo.into())
 }
 
-fn parse_variables(map: Map<Val, Val>) -> Option<Map<Key, MemoValue>> {
+fn parse_variables(map: Map<Key, Val>) -> Option<Map<Key, MemoValue>> {
     map.into_iter()
         .map(|(name, val)| {
-            let Val::Key(name) = name else {
-                return None;
-            };
             let Val::Pair(pair) = val else {
                 return None;
             };
@@ -78,13 +75,13 @@ pub(in crate::cfg) fn generate_memo(memo: MemoVal) -> Val {
 }
 
 fn generate_variables(memo_map: MemoMap) -> Val {
-    let map: Map<Val, Val> = memo_map
+    let map: Map<Key, Val> = memo_map
         .unwrap()
         .into_iter()
         .map(|(name, v)| {
             let contract = generate_contract(v.contract);
             let pair = Val::Pair(Pair::new(contract, v.val).into());
-            (Val::Key(name), pair)
+            (name, pair)
         })
         .collect();
     Val::Map(map.into())

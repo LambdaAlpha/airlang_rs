@@ -106,7 +106,7 @@ impl DynCtx<Key, Val> for ListVal {
 
 impl DynCtx<Key, Val> for MapVal {
     fn ref_(&mut self, input: Key) -> Option<DynRef<'_, Val>> {
-        let Some(val) = self.get_mut(&Val::Key(input.clone())) else {
+        let Some(val) = self.get_mut(&input) else {
             error!("name {input:?} should exist in the map");
             return None;
         };
@@ -114,7 +114,7 @@ impl DynCtx<Key, Val> for MapVal {
     }
 
     fn set(&mut self, input: Key, value: Val) -> Option<Val> {
-        self.insert(Val::Key(input), value)
+        self.insert(input, value)
     }
 }
 
@@ -197,20 +197,6 @@ impl DynCtx<IntVal, Val> for ListVal {
     }
 }
 
-impl DynCtx<Val, Val> for MapVal {
-    fn ref_(&mut self, input: Val) -> Option<DynRef<'_, Val>> {
-        let Some(val) = self.get_mut(&input) else {
-            error!("ref {input:?} should exist in the map");
-            return None;
-        };
-        Some(DynRef::new_mut(val))
-    }
-
-    fn set(&mut self, input: Val, value: Val) -> Option<Val> {
-        self.insert(input, value)
-    }
-}
-
 impl DynCtx<Val, Val> for Val {
     fn ref_(&mut self, input: Val) -> Option<DynRef<'_, Val>> {
         if let Val::Key(name) = &input {
@@ -224,7 +210,6 @@ impl DynCtx<Val, Val> for Val {
                 };
                 list.ref_(index)
             }
-            Val::Map(map) => map.ref_(input),
             Val::Dyn(val) => val.ref_(input),
             _ => {
                 error!("ctx {self:?} should be a dyn ctx");
@@ -245,7 +230,6 @@ impl DynCtx<Val, Val> for Val {
                 };
                 list.set(index, value)
             }
-            Val::Map(map) => map.set(input, value),
             Val::Dyn(val) => val.set(input, value),
             _ => {
                 error!("ctx {self:?} should be a dyn ctx");

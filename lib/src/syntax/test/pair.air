@@ -34,10 +34,6 @@ list item
 -----
 [a : b]
 =====
-map key
------
-{(a : b) : c}
-=====
 map value
 -----
 {a : b : c}

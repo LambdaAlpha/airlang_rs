@@ -230,7 +230,7 @@ fn fn_switch(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 
 struct Switch {
     val: Val,
-    map: HashMap<Val, Block>,
+    map: HashMap<Key, Block>,
     default: Option<Block>,
 }
 
@@ -264,13 +264,17 @@ impl Switch {
         }
     }
 
-    fn parse_block_map(map: MapVal) -> Option<HashMap<Val, Block>> {
+    fn parse_block_map(map: MapVal) -> Option<HashMap<Key, Block>> {
         Map::from(map).into_iter().map(|(k, v)| Some((k, Block::parse(v)?))).collect()
     }
 
     fn eval(mut self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
         let val = Eval.mut_call(cfg, ctx, self.val);
-        let Some(body) = self.map.remove(&val).or(self.default) else {
+        let Val::Key(key) = val else {
+            error!("input.first {val:?} should be a key");
+            return illegal_input(cfg);
+        };
+        let Some(body) = self.map.remove(&key).or(self.default) else {
             return illegal_input(cfg);
         };
         body.eval(cfg, ctx)
@@ -473,7 +477,7 @@ impl Iterate {
             Val::Map(map) => {
                 let map = Map::from(map);
                 let iter = map.into_iter().map(|pair| {
-                    let pair = Pair::new(pair.0, pair.1);
+                    let pair = Pair::new(Val::Key(pair.0), pair.1);
                     Val::Pair(pair.into())
                 });
                 iterate_val(cfg, ctx, self.body, self.name, iter)

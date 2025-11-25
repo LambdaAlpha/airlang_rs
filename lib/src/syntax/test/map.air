@@ -31,7 +31,7 @@ c d
 =====
 raw two non-atomic
 -----
-_{(a : b) c d (e : f)}
+_{a b c (d : e)}
 =====
 two trailing comma
 -----
@@ -39,7 +39,7 @@ two trailing comma
 =====
 recursive
 -----
-{{} : {}}
+{a : {}}
 =====
 sequence
 -----
@@ -52,10 +52,6 @@ omit value
 mix omit and normal
 -----
 {a, b : c}
-=====
-non-atomic key
------
-{(a : b) : c}
 =====
 non-atomic value
 -----

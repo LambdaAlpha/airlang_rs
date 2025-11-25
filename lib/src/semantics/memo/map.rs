@@ -11,7 +11,7 @@ use crate::type_::Map;
 use crate::type_::ref_::DynRef;
 
 // todo impl arena
-#[derive(Debug, Clone, Default, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Default, Eq, PartialEq)]
 pub struct MemoMap {
     map: Map<Key, MemoValue>,
 }
@@ -34,7 +34,7 @@ pub enum Contract {
     Const,
 }
 
-#[derive(Clone, Eq, PartialEq, Hash)]
+#[derive(Clone, Eq, PartialEq)]
 pub struct MemoValue {
     pub(crate) val: Val,
     pub(crate) contract: Contract,

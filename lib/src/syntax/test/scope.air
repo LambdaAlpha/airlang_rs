@@ -14,10 +14,6 @@ list item
 -----
 [(a)]
 =====
-map key
------
-{(a : b) : c}
-=====
 map value
 -----
 {a : (b : c)}
@@ -36,7 +32,7 @@ left ctx + list
 =====
 left ctx + map
 -----
-<({(a b c d e) : f g h i j})
+<({a : b c d e f})
 =====
 left ctx pair
 -----
@@ -56,4 +52,4 @@ right ctx + list
 =====
 right ctx + map
 -----
->({(a b c d e) : f g h i j})
+>({a : b c d e f})

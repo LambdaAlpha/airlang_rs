@@ -7,7 +7,7 @@ use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::Key;
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ConstCompFunc {
     pub(crate) id: Key,
     pub(crate) raw_input: bool,

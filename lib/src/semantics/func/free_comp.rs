@@ -5,7 +5,7 @@ use crate::semantics::memo::Memo;
 use crate::semantics::val::Val;
 use crate::type_::Key;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FreeCompFunc {
     pub(crate) id: Key,
     pub(crate) raw_input: bool,

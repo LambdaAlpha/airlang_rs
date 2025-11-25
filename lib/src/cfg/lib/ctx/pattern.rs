@@ -20,7 +20,7 @@ pub(in crate::cfg) enum Pattern {
     Pair(Box<Pair<Pattern, Pattern>>),
     Call(Box<Call<Pattern, Pattern>>),
     List(List<Pattern>),
-    Map(Map<Val, Pattern>),
+    Map(Map<Key, Pattern>),
 }
 
 pub(in crate::cfg) trait PatternParse {
@@ -156,7 +156,7 @@ impl PatternMatch<Val> for List<Pattern> {
     }
 }
 
-impl PatternMatch<Val> for Map<Val, Pattern> {
+impl PatternMatch<Val> for Map<Key, Pattern> {
     fn match_(&self, val: &Val) -> bool {
         let Val::Map(val) = val else {
             error!("{val:?} should be a map");
@@ -241,13 +241,13 @@ impl PatternAssign<Val, Val> for List<Pattern> {
     }
 }
 
-impl PatternAssign<Val, Val> for Map<Val, Pattern> {
+impl PatternAssign<Val, Val> for Map<Key, Pattern> {
     fn assign(self, ctx: &mut Val, val: Val) -> Val {
         let Val::Map(mut val) = val else {
             error!("{val:?} should be a map");
             return Val::default();
         };
-        let map: Map<Val, Val> = self
+        let map: Map<Key, Val> = self
             .into_iter()
             .map(|(k, pattern)| {
                 let val = val.remove(&k).unwrap_or_default();

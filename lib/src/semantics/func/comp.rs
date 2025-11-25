@@ -12,13 +12,13 @@ use crate::type_::DynRef;
 use crate::type_::Key;
 use crate::utils::gurad::guard;
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub(crate) struct FreeComposite {
     pub(crate) body: Val,
     pub(crate) input_name: Key,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub(crate) struct DynComposite {
     pub(crate) free: FreeComposite,
     pub(crate) ctx_name: Key,

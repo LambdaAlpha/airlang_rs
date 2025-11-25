@@ -20,13 +20,12 @@ _____!();
 
 use std::fmt::Debug;
 use std::fmt::Formatter;
-use std::hash::Hash;
 
 use derive_more::From;
 use derive_more::IsVariant;
 
 use crate::semantics::ctx::DynCtx;
-use crate::trait_::dyn_safe::dyn_any_debug_clone_eq_hash;
+use crate::trait_::dyn_safe::dyn_any_debug_clone_eq;
 use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
@@ -44,9 +43,9 @@ pub trait Value: DynCtx<Val, Val> {
     fn type_name(&self) -> Key;
 }
 
-dyn_any_debug_clone_eq_hash!(pub DynVal : Value);
+dyn_any_debug_clone_eq!(pub DynVal : Value);
 
-#[derive(Clone, PartialEq, Eq, Hash, From, IsVariant)]
+#[derive(Clone, PartialEq, Eq, From, IsVariant)]
 pub enum Val {
     Unit(Unit),
     Bit(Bit),
@@ -138,8 +137,8 @@ impl From<List<Val>> for Val {
     }
 }
 
-impl From<Map<Val, Val>> for Val {
-    fn from(value: Map<Val, Val>) -> Self {
+impl From<Map<Key, Val>> for Val {
+    fn from(value: Map<Key, Val>) -> Self {
         Val::Map(MapVal::from(value))
     }
 }

@@ -79,10 +79,7 @@ pub trait ParseRepr:
     + From<Pair<Self, Self>>
     + From<Call<Self, Self>>
     + From<List<Self>>
-    + Eq
-    + Hash
-    + From<Map<Self, Self>>
-    + Clone {
+    + From<Map<Key, Self>> {
 }
 
 #[derive(Default, Copy, Clone, PartialEq, Eq)]
@@ -170,7 +167,7 @@ macro_rules! impl_parse_repr_for_comment {
 }
 
 impl_parse_repr_for_comment!(Unit Bit Key Text Int Number Byte);
-impl_parse_repr_for_comment!(Pair<C, C> Call<C, C> List<C> Map<C, C>);
+impl_parse_repr_for_comment!(Pair<C, C> Call<C, C> List<C> Map<Key, C>);
 impl ParseRepr for C {}
 
 fn delimited_cut<'a, T, F>(left: char, f: F, right: char) -> impl Parser<&'a str, T, E>
@@ -427,7 +424,7 @@ fn raw_list<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
 fn map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     let items = move |i: &mut _| {
         let mut map = Map::default();
-        let mut key = opt(repr(ctx));
+        let mut key = opt(any_key);
         let mut pair = opt(preceded(spaces_comment(ctx), PAIR.void()));
         let mut value = cut_err(preceded(
             spaces_comment(ctx).context(expect_desc("space")),
@@ -459,19 +456,19 @@ fn map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
 
 fn raw_map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     let items = move |i: &mut _| {
-        let tokens: Vec<_> = separated(0 .., repr::<T>(ctx), spaces_comment(ctx)).parse_next(i)?;
-        if !tokens.len().is_multiple_of(2) {
-            return cut_err(fail.context(expect_desc("even number of tokens"))).parse_next(i);
-        }
-        let mut map = Map::with_capacity(tokens.len() / 2);
-        let mut tokens = tokens.into_iter();
-        while let Some(key) = tokens.next() {
-            let value = tokens.next().unwrap();
+        let kv = (any_key, spaces_comment(ctx), repr::<T>(ctx));
+        let tokens: Vec<_> = separated(0 .., kv, spaces_comment(ctx)).parse_next(i)?;
+        let mut map = Map::with_capacity(tokens.len());
+        for (key, (), value) in tokens {
             map.insert(key, value);
         }
         Ok(T::from(map))
     };
     delimited_trim_comment(ctx, MAP_LEFT, items, MAP_RIGHT).context(label("raw map"))
+}
+
+fn any_key(i: &mut &str) -> ModalResult<Key> {
+    alt((trivial_key1.map(Key::from_str_unchecked), key)).parse_next(i)
 }
 
 fn key(i: &mut &str) -> ModalResult<Key> {

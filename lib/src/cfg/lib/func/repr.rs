@@ -178,8 +178,8 @@ fn generate_free_prim(f: FreePrimFuncVal) -> Val {
 }
 
 fn generate_free_comp(f: FreeCompFuncVal) -> Val {
-    let mut repr = Map::<Val, Val>::default();
-    repr.insert(key(CODE), free_code(&f.comp));
+    let mut repr = Map::<Key, Val>::default();
+    repr.insert(Key::from_str_unchecked(CODE), free_code(&f.comp));
     let comp = CompRepr { id: f.id.clone(), access: FREE, memo: f.memo.clone() };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
@@ -190,8 +190,8 @@ fn generate_const_prim(f: ConstPrimFuncVal) -> Val {
 }
 
 fn generate_const_comp(f: ConstCompFuncVal) -> Val {
-    let mut repr = Map::<Val, Val>::default();
-    repr.insert(key(CODE), dyn_code(&f.comp));
+    let mut repr = Map::<Key, Val>::default();
+    repr.insert(Key::from_str_unchecked(CODE), dyn_code(&f.comp));
     let comp = CompRepr { id: f.id.clone(), access: CONST, memo: f.memo.clone() };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
@@ -202,16 +202,16 @@ fn generate_mut_prim(f: MutPrimFuncVal) -> Val {
 }
 
 fn generate_mut_comp(f: MutCompFuncVal) -> Val {
-    let mut repr = Map::<Val, Val>::default();
-    repr.insert(key(CODE), dyn_code(&f.comp));
+    let mut repr = Map::<Key, Val>::default();
+    repr.insert(Key::from_str_unchecked(CODE), dyn_code(&f.comp));
     let comp = CompRepr { id: f.id.clone(), access: MUTABLE, memo: f.memo.clone() };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
 
 fn generate_prim(id: Key) -> Val {
-    let mut repr = Map::<Val, Val>::default();
-    repr.insert(key(ID), Val::Key(id));
+    let mut repr = Map::<Key, Val>::default();
+    repr.insert(Key::from_str_unchecked(ID), Val::Key(id));
     Val::Map(repr.into())
 }
 
@@ -245,15 +245,15 @@ struct CompRepr {
     memo: Memo,
 }
 
-fn generate_comp(repr: &mut Map<Val, Val>, comp: CompRepr) {
+fn generate_comp(repr: &mut Map<Key, Val>, comp: CompRepr) {
     if !comp.id.is_empty() {
-        repr.insert(key(ID), Val::Key(comp.id));
+        repr.insert(Key::from_str_unchecked(ID), Val::Key(comp.id));
     }
     if comp.access != MUTABLE {
-        repr.insert(key(CTX_ACCESS), key(comp.access));
+        repr.insert(Key::from_str_unchecked(CTX_ACCESS), key(comp.access));
     }
     if comp.memo != Memo::default() {
-        repr.insert(key(MEMO), Val::Memo(MemoVal::from(comp.memo)));
+        repr.insert(Key::from_str_unchecked(MEMO), Val::Memo(MemoVal::from(comp.memo)));
     }
 }
 

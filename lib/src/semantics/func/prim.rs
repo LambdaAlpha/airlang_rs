@@ -19,12 +19,6 @@ macro_rules! impl_prim_func {
         }
 
         impl ::std::cmp::Eq for $func {}
-
-        impl ::std::hash::Hash for $func {
-            fn hash<H: ::std::hash::Hasher>(&self, state: &mut H) {
-                self.id.hash(state);
-            }
-        }
     };
 }
 

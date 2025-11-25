@@ -47,8 +47,7 @@ fn fn_call(cfg: &mut Cfg, input: Val) -> Val {
         error!("input {input:?} should be a map");
         return illegal_input(cfg);
     };
-    let program_key = Val::Key(Key::from_str_unchecked(PROGRAM));
-    let Some(program) = map.remove(&program_key) else {
+    let Some(program) = map.remove(&Key::from_str_unchecked(PROGRAM)) else {
         error!("program name should be provided");
         return illegal_input(cfg);
     };
@@ -56,8 +55,7 @@ fn fn_call(cfg: &mut Cfg, input: Val) -> Val {
         error!("program {program:?} should be a text");
         return illegal_input(cfg);
     };
-    let arguments_key = Val::Key(Key::from_str_unchecked(ARGUMENTS));
-    let Some(arguments) = map.remove(&arguments_key) else {
+    let Some(arguments) = map.remove(&Key::from_str_unchecked(ARGUMENTS)) else {
         error!("arguments should be provided");
         return illegal_input(cfg);
     };
@@ -99,11 +97,8 @@ fn fn_call(cfg: &mut Cfg, input: Val) -> Val {
     };
 
     let mut map = Map::default();
-    let output_key = Val::Key(Key::from_str_unchecked("output"));
-    map.insert(output_key, stdout);
-    let error_key = Val::Key(Key::from_str_unchecked("error"));
-    map.insert(error_key, stderr);
-    let status_key = Val::Key(Key::from_str_unchecked("status"));
-    map.insert(status_key, status);
+    map.insert(Key::from_str_unchecked("output"), stdout);
+    map.insert(Key::from_str_unchecked("error"), stderr);
+    map.insert(Key::from_str_unchecked("status"), status);
     Val::Map(map.into())
 }

@@ -138,10 +138,6 @@ list item
 -----
 [_ a b]
 =====
-map key
------
-{(_ a b) : c}
-=====
 map value
 -----
 {a : _ b c}

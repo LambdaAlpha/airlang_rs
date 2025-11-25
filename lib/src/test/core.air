@@ -118,9 +118,9 @@ list eval
 =====
 map eval
 -----
-{(_ not true) : (_ not true)}
+{a : (_ not true)}
 -----
-{(_ not true) : false}
+{a : false}
 =====
 call recursive
 -----
@@ -190,12 +190,3 @@ _ do [
 ]
 -----
 1
-=====
-map ctx key other
------
-_ do [
-    .m set {1 : 2, 2 : 4},
-    m which _ get 1
-]
------
-2

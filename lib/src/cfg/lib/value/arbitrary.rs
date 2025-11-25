@@ -76,7 +76,7 @@ impl Arbitrary for Val {
             7 => Val::Pair(Pair::<Val, Val>::any(rng, depth).into()),
             8 => Val::Call(Call::<Val, Val>::any(rng, depth).into()),
             9 => Val::List(List::<Val>::any(rng, depth).into()),
-            10 => Val::Map(Map::<Val, Val>::any(rng, depth).into()),
+            10 => Val::Map(Map::<Key, Val>::any(rng, depth).into()),
             11 => Val::Link(Link::any(rng, depth)),
             12 => Val::Cfg(Cfg::any(rng, depth).into()),
             13 => Val::Memo(Memo::any(rng, depth).into()),

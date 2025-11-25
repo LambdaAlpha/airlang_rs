@@ -1,5 +1,4 @@
 use std::fmt::Write;
-use std::hash::Hash;
 
 use const_format::concatcp;
 use derive_more::IsVariant;
@@ -39,7 +38,7 @@ use crate::type_::Text;
 use crate::type_::Unit;
 use crate::utils;
 
-#[derive(Clone, PartialEq, Eq, Hash, IsVariant)]
+#[derive(Clone, PartialEq, Eq, IsVariant)]
 pub enum GenRepr<'a> {
     Unit(&'a Unit),
     Bit(&'a Bit),
@@ -51,7 +50,7 @@ pub enum GenRepr<'a> {
     Pair(Box<Pair<GenRepr<'a>, GenRepr<'a>>>),
     Call(Box<Call<GenRepr<'a>, GenRepr<'a>>>),
     List(List<GenRepr<'a>>),
-    Map(Map<GenRepr<'a>, GenRepr<'a>>),
+    Map(Map<&'a Key, GenRepr<'a>>),
 }
 
 #[derive(Copy, Clone)]
@@ -454,7 +453,7 @@ impl<'a> Gen for List<GenRepr<'a>> {
     }
 }
 
-impl<'a> Gen for Map<GenRepr<'a>, GenRepr<'a>> {
+impl<'a> Gen for Map<&'a Key, GenRepr<'a>> {
     fn gen_(self, mut ctx: GenCtx, s: &mut String) {
         if self.is_empty() {
             s.push(MAP_LEFT);
@@ -490,8 +489,8 @@ impl<'a> Gen for Map<GenRepr<'a>, GenRepr<'a>> {
     }
 }
 
-fn gen_kv(ctx: GenCtx, s: &mut String, key: GenRepr, value: GenRepr) {
-    gen_scope_if_need(ctx, s, key);
+fn gen_kv(ctx: GenCtx, s: &mut String, key: &Key, value: GenRepr) {
+    key.gen_(ctx, s);
     s.push(' ');
     s.push_str(PAIR);
     s.push(' ');

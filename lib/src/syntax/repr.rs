@@ -23,7 +23,7 @@ use crate::type_::Pair;
 use crate::type_::Text;
 use crate::type_::Unit;
 
-#[derive(PartialEq, Eq, Clone, Hash, From, IsVariant)]
+#[derive(PartialEq, Eq, Clone, From, IsVariant)]
 pub enum Repr {
     Unit(Unit),
     Bit(Bit),
@@ -48,7 +48,7 @@ pub type CallRepr = Call<Repr, Repr>;
 
 pub type ListRepr = List<Repr>;
 
-pub type MapRepr = Map<Repr, Repr>;
+pub type MapRepr = Map<Key, Repr>;
 
 impl From<PairRepr> for Repr {
     fn from(p: PairRepr) -> Self {
@@ -132,7 +132,6 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
                 let map = map
                     .iter()
                     .map(|(k, v)| {
-                        let k = k.try_into()?;
                         let v = v.try_into()?;
                         Ok((k, v))
                     })

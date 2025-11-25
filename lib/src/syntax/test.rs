@@ -71,7 +71,7 @@ fn list(v: Vec<Repr>) -> Repr {
     Repr::List(v.into())
 }
 
-fn map(v: Vec<(Repr, Repr)>) -> Repr {
+fn map(v: Vec<(Key, Repr)>) -> Repr {
     Repr::Map(Map::from_iter(v))
 }
 

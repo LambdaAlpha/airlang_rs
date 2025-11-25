@@ -84,11 +84,7 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
         };
         let map = Map::from(map);
         for (k, v) in map {
-            let Val::Key(name) = k else {
-                error!("list.item.key {k:?} should be a key");
-                return illegal_input(cfg);
-            };
-            new_cfg.extend_scope(name, v);
+            new_cfg.extend_scope(k, v);
         }
         new_cfg.begin_scope();
     }
@@ -111,7 +107,7 @@ fn fn_repr(cfg: &mut Cfg, input: Val) -> Val {
     for (name, scopes) in new_cfg {
         for (scope, val) in scopes {
             let map = map_scopes.entry(scope).or_insert_with(Map::default);
-            map.insert(Val::Key(name.clone()), val);
+            map.insert(name.clone(), val);
         }
     }
     let mut list = List::default();
@@ -201,11 +197,7 @@ fn fn_with(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
             };
             let map = Map::from(map);
             for (k, v) in map {
-                let Val::Key(name) = k else {
-                    error!("input.first.key {k:?} should be a key");
-                    return illegal_input(cfg);
-                };
-                cfg.extend_scope(name, v);
+                cfg.extend_scope(k, v);
             }
             Eval.mut_call(&mut **cfg, ctx, pair.second)
         },

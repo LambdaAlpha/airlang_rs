@@ -1,6 +1,5 @@
 use std::fmt::Debug;
 use std::fmt::Formatter;
-use std::hash::Hash;
 
 use derive_more::From;
 
@@ -21,7 +20,7 @@ use crate::type_::ConstRef;
 use crate::type_::Key;
 use crate::type_::wrap::rc_wrap;
 
-#[derive(Clone, PartialEq, Eq, Hash, From)]
+#[derive(Clone, PartialEq, Eq, From)]
 pub enum FuncVal {
     FreePrim(FreePrimFuncVal),
     FreeComp(FreeCompFuncVal),

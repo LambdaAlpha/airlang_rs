@@ -1,7 +1,5 @@
 use std::fmt::Debug;
-use std::hash::BuildHasher;
 use std::hash::Hash;
-use std::hash::Hasher;
 use std::ops::Deref;
 use std::panic::AssertUnwindSafe;
 use std::panic::catch_unwind;
@@ -17,7 +15,7 @@ use crate::semantics::val::Val;
 use crate::type_::Key;
 
 // todo design invariant
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Cfg {
     steps: u128,
     max_scope: usize,
@@ -201,14 +199,6 @@ where
     V: StableDeref,
     <V as Deref>::Target: PartialEq,
 {
-}
-
-impl<K: Hash, V: Hash> Hash for OnceMap<K, V> {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        let view = self.read_only_view();
-        let hash = view.iter().map(|kv| view.hasher().hash_one(kv)).fold(0, u64::wrapping_add);
-        state.write_u64(hash);
-    }
 }
 
 impl<K, V> FromIterator<(K, V)> for OnceMap<K, V>

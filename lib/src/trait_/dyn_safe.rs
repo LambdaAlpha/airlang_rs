@@ -1,9 +1,8 @@
-macro_rules! dyn_any_debug_clone_eq_hash {
+macro_rules! dyn_any_debug_clone_eq {
     ($visibility:vis $trait_name:ident : $super_trait:path) => {
         $visibility trait $trait_name: ::std::any::Any + ::std::fmt::Debug + $super_trait {
             fn dyn_eq(&self, other: &dyn $trait_name) -> bool;
             fn dyn_clone(&self) -> ::std::boxed::Box<dyn $trait_name>;
-            fn dyn_hash(&self, hasher: &mut dyn ::std::hash::Hasher);
         }
 
         impl<T> $trait_name for T
@@ -12,7 +11,6 @@ macro_rules! dyn_any_debug_clone_eq_hash {
                 + ::std::any::Any
                 + ::std::cmp::Eq
                 + ::std::clone::Clone
-                + ::std::hash::Hash
                 + ::std::fmt::Debug,
         {
             fn dyn_eq(&self, other: &dyn $trait_name) -> bool {
@@ -25,10 +23,6 @@ macro_rules! dyn_any_debug_clone_eq_hash {
 
             fn dyn_clone(&self) -> ::std::boxed::Box<dyn $trait_name> {
                 ::std::boxed::Box::new(self.clone())
-            }
-
-            fn dyn_hash(&self, mut hasher: &mut dyn ::std::hash::Hasher) {
-                self.hash(&mut hasher);
             }
         }
 
@@ -52,13 +46,7 @@ macro_rules! dyn_any_debug_clone_eq_hash {
         }
 
         impl ::std::cmp::Eq for dyn $trait_name {}
-
-        impl ::std::hash::Hash for dyn $trait_name {
-            fn hash<H: ::std::hash::Hasher>(&self, state: &mut H) {
-                self.dyn_hash(state);
-            }
-        }
     };
 }
 
-pub(crate) use dyn_any_debug_clone_eq_hash;
+pub(crate) use dyn_any_debug_clone_eq;

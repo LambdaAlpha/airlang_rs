@@ -111,7 +111,7 @@ fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
             TYPE_PAIR => Val::Pair(Pair::<Val, Val>::any(rng, DEPTH).into()),
             TYPE_CALL => Val::Call(Call::<Val, Val>::any(rng, DEPTH).into()),
             TYPE_LIST => Val::List(List::<Val>::any(rng, DEPTH).into()),
-            TYPE_MAP => Val::Map(Map::<Val, Val>::any(rng, DEPTH).into()),
+            TYPE_MAP => Val::Map(Map::<Key, Val>::any(rng, DEPTH).into()),
             TYPE_LINK => Val::Link(Link::any(rng, DEPTH)),
             TYPE_CFG => Val::Cfg(Cfg::any(rng, DEPTH).into()),
             TYPE_MEMO => Val::Memo(Memo::any(rng, DEPTH).into()),

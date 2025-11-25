@@ -8,7 +8,6 @@ use std::error::Error;
 use std::fmt::Debug;
 use std::fmt::Display;
 use std::fmt::Formatter;
-use std::hash::Hash;
 
 use derive_more::Deref;
 use derive_more::DerefMut;
@@ -19,7 +18,7 @@ pub enum MemoError {
     AccessDenied,
 }
 
-#[derive(Debug, Default, Clone, Eq, PartialEq, Hash, Deref, DerefMut)]
+#[derive(Debug, Default, Clone, Eq, PartialEq, Deref, DerefMut)]
 pub struct Memo {
     variables: MemoMap,
 }

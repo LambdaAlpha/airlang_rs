@@ -1,9 +1,8 @@
-use std::borrow::Borrow;
-
 use derive_more::Deref;
 use string_cache::Atom;
 use string_cache::EmptyStaticAtomSet;
 
+/// Note: Key and &str have different hash
 #[derive(Clone, Default, PartialEq, Eq, Hash, Deref, derive_more::Debug)]
 #[deref(forward)]
 #[debug("'{_0}'")]
@@ -36,11 +35,5 @@ impl ToString for Key {
 impl From<Key> for String {
     fn from(value: Key) -> Self {
         value.0.to_string()
-    }
-}
-
-impl Borrow<str> for Key {
-    fn borrow(&self) -> &str {
-        self
     }
 }

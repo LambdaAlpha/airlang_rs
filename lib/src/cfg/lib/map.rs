@@ -18,6 +18,7 @@ use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::ConstRef;
 use crate::type_::Int;
+use crate::type_::Key;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
@@ -44,7 +45,6 @@ pub struct MapLib {
     pub clear: MutPrimFuncVal,
     pub new_map: FreePrimFuncVal,
     pub new_set: FreePrimFuncVal,
-    pub new_multiset: FreePrimFuncVal,
 }
 
 impl Default for MapLib {
@@ -69,7 +69,6 @@ impl Default for MapLib {
             clear: clear(),
             new_map: new_map(),
             new_set: new_set(),
-            new_multiset: new_multiset(),
         }
     }
 }
@@ -95,7 +94,6 @@ impl CfgMod for MapLib {
         self.clear.extend(cfg);
         self.new_map.extend(cfg);
         self.new_set.extend(cfg);
-        self.new_multiset.extend(cfg);
     }
 }
 
@@ -121,8 +119,10 @@ fn fn_items(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
         error!("ctx {ctx:?} should be a map");
         return illegal_ctx(cfg);
     };
-    let items: List<Val> =
-        map.iter().map(|(k, v)| Val::Pair(Pair::new(k.clone(), v.clone()).into())).collect();
+    let items: List<Val> = map
+        .iter()
+        .map(|(k, v)| Val::Pair(Pair::new(Val::Key(k.clone()), v.clone()).into()))
+        .collect();
     Val::List(items.into())
 }
 
@@ -138,7 +138,7 @@ fn fn_into_items(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
     let mut origin = Map::default();
     swap(&mut **map, &mut origin);
     let items: List<Val> =
-        origin.into_iter().map(|(k, v)| Val::Pair(Pair::new(k, v).into())).collect();
+        origin.into_iter().map(|(k, v)| Val::Pair(Pair::new(Val::Key(k), v).into())).collect();
     Val::List(items.into())
 }
 
@@ -151,7 +151,7 @@ fn fn_keys(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
         error!("ctx {ctx:?} should be a map");
         return illegal_ctx(cfg);
     };
-    let keys: List<Val> = map.keys().cloned().collect();
+    let keys: List<Val> = map.keys().map(|k| Val::Key(k.clone())).collect();
     Val::List(keys.into())
 }
 
@@ -166,7 +166,7 @@ fn fn_into_keys(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
     };
     let mut origin = Map::default();
     swap(&mut **map, &mut origin);
-    let keys: List<Val> = origin.into_keys().collect();
+    let keys: List<Val> = origin.into_keys().map(Val::Key).collect();
     Val::List(keys.into())
 }
 
@@ -207,7 +207,11 @@ fn fn_contain(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
         error!("ctx {ctx:?} should be a map");
         return illegal_ctx(cfg);
     };
-    Val::Bit(Bit::from(map.contains_key(&input)))
+    let Val::Key(key) = input else {
+        error!("input {input:?} should be a key");
+        return illegal_input(cfg);
+    };
+    Val::Bit(Bit::from(map.contains_key(&key)))
 }
 
 pub fn contain_all() -> ConstPrimFuncVal {
@@ -224,15 +228,23 @@ fn fn_contain_all(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let keys = List::from(keys);
-    let b = keys.into_iter().all(|k| map.contains_key(&k));
-    Val::Bit(Bit::from(b))
+    for key in keys {
+        let Val::Key(key) = key else {
+            error!("input.item {key:?} should be a key");
+            return illegal_input(cfg);
+        };
+        if !map.contains_key(&key) {
+            return Val::Bit(Bit::from(false));
+        }
+    }
+    Val::Bit(Bit::from(true))
 }
 
 pub fn contain_any() -> ConstPrimFuncVal {
-    DynPrimFn { id: "_map.contain_any", raw_input: false, f: const_impl(fn_contain_many) }.const_()
+    DynPrimFn { id: "_map.contain_any", raw_input: false, f: const_impl(fn_contain_any) }.const_()
 }
 
-fn fn_contain_many(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_contain_any(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
         return illegal_ctx(cfg);
@@ -242,8 +254,16 @@ fn fn_contain_many(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let keys = List::from(keys);
-    let b = keys.into_iter().any(|k| map.contains_key(&k));
-    Val::Bit(Bit::from(b))
+    for key in keys {
+        let Val::Key(key) = key else {
+            error!("input.item {key:?} should be a key");
+            return illegal_input(cfg);
+        };
+        if map.contains_key(&key) {
+            return Val::Bit(Bit::from(true));
+        }
+    }
+    Val::Bit(Bit::from(false))
 }
 
 pub fn set() -> MutPrimFuncVal {
@@ -260,7 +280,10 @@ fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let key_value = Pair::from(key_value);
-    let key = key_value.first;
+    let Val::Key(key) = key_value.first else {
+        error!("input.first {:?} should be a key", key_value.first);
+        return illegal_input(cfg);
+    };
     let value = key_value.second;
     map.insert(key, value).unwrap_or_default()
 }
@@ -279,7 +302,7 @@ fn fn_set_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let update = Map::from(update);
-    let map: Map<Val, Val> =
+    let map: Map<Key, Val> =
         update.into_iter().filter_map(|(k, v)| map.insert(k.clone(), v).map(|v| (k, v))).collect();
     Val::Map(map.into())
 }
@@ -293,7 +316,11 @@ fn fn_get(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
         error!("ctx {ctx:?} should be a map");
         return illegal_ctx(cfg);
     };
-    map.get(&input).cloned().unwrap_or_default()
+    let Val::Key(key) = input else {
+        error!("input {input:?} should be key");
+        return illegal_input(cfg);
+    };
+    map.get(&key).cloned().unwrap_or_default()
 }
 
 pub fn get_many() -> ConstPrimFuncVal {
@@ -310,9 +337,17 @@ fn fn_get_many(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let keys = List::from(keys);
-    let map: Map<Val, Val> =
-        keys.into_iter().filter_map(|k| map.get(&k).map(|v| (k, v.clone()))).collect();
-    Val::Map(map.into())
+    let mut new_map: Map<Key, Val> = Map::with_capacity(keys.len());
+    for key in keys {
+        let Val::Key(key) = key else {
+            error!("input.item {key:?} should be a key");
+            return illegal_input(cfg);
+        };
+        if let Some(val) = map.get(&key) {
+            new_map.insert(key, val.clone());
+        }
+    }
+    Val::Map(new_map.into())
 }
 
 pub fn remove() -> MutPrimFuncVal {
@@ -324,7 +359,11 @@ fn fn_remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         error!("ctx {ctx:?} should be a map");
         return illegal_ctx(cfg);
     };
-    map.remove(&input).unwrap_or_default()
+    let Val::Key(key) = input else {
+        error!("input {input:?} should be key");
+        return illegal_input(cfg);
+    };
+    map.remove(&key).unwrap_or_default()
 }
 
 pub fn remove_many() -> MutPrimFuncVal {
@@ -341,9 +380,17 @@ fn fn_remove_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let keys = List::from(keys);
-    let map: Map<Val, Val> =
-        keys.into_iter().filter_map(|k| map.remove(&k).map(|v| (k, v))).collect();
-    Val::Map(map.into())
+    let mut new_map: Map<Key, Val> = Map::with_capacity(keys.len());
+    for key in keys {
+        let Val::Key(key) = key else {
+            error!("input.item {key:?} should be a key");
+            return illegal_input(cfg);
+        };
+        if let Some(val) = map.remove(&key) {
+            new_map.insert(key, val);
+        }
+    }
+    Val::Map(new_map.into())
 }
 
 pub fn clear() -> MutPrimFuncVal {
@@ -369,20 +416,20 @@ fn fn_new_map(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let list = List::from(list);
-    let map: Option<Map<Val, Val>> = list
-        .into_iter()
-        .map(|item| {
-            let Val::Pair(pair) = item else {
-                return None;
-            };
-            let pair = Pair::from(pair);
-            Some((pair.first, pair.second))
-        })
-        .collect();
-    match map {
-        Some(map) => Val::Map(map.into()),
-        None => illegal_input(cfg),
+    let mut map: Map<Key, Val> = Map::with_capacity(list.len());
+    for item in list {
+        let Val::Pair(pair) = item else {
+            error!("input.item {item:?} should be a pair");
+            return illegal_input(cfg);
+        };
+        let pair = Pair::from(pair);
+        let Val::Key(key) = pair.first else {
+            error!("input.item.first {:?} should be a key", pair.first);
+            return illegal_input(cfg);
+        };
+        map.insert(key, pair.second);
     }
+    Val::Map(map.into())
 }
 
 pub fn new_set() -> FreePrimFuncVal {
@@ -395,25 +442,13 @@ fn fn_new_set(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let list = List::from(list);
-    let map: Map<Val, Val> = list.into_iter().map(|k| (k, Val::default())).collect();
-    Val::Map(map.into())
-}
-
-pub fn new_multiset() -> FreePrimFuncVal {
-    FreePrimFn { id: "_map.new_multiset", raw_input: false, f: free_impl(fn_new_multiset) }.free()
-}
-
-fn fn_new_multiset(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::List(list) = input else {
-        error!("input {input:?} should be a list");
-        return illegal_input(cfg);
-    };
-    let list = List::from(list);
-    let mut multiset = Map::with_capacity(list.len());
+    let mut map: Map<Key, Val> = Map::with_capacity(list.len());
     for item in list {
-        let count = multiset.entry(item).or_insert(Val::Int(Int::from(0).into()));
-        let Val::Int(count) = count else { unreachable!() };
-        ***count += 1;
+        let Val::Key(key) = item else {
+            error!("input.item {item:?} should be a key");
+            return illegal_input(cfg);
+        };
+        map.insert(key, Val::default());
     }
-    Val::Map(multiset.into())
+    Val::Map(map.into())
 }

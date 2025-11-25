@@ -133,7 +133,6 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
                 let map = map
                     .iter()
                     .map(|(k, v)| {
-                        let k = k.try_into()?;
                         let v = v.try_into()?;
                         Ok((k, v))
                     })
