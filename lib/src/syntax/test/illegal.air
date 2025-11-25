@@ -388,7 +388,7 @@ map list concat
 =====
 raw map odd
 -----
-.{a b c}
+_{a b c}
 =====
 scope concat
 -----

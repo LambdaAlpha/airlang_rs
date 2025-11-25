@@ -265,7 +265,7 @@ fn prefix<'a, T: ParseRepr>(prefix: &str, ctx: ParseCtx) -> impl Parser<&'a str,
     move |i: &mut _| {
         let i: &mut &str = i;
         match prefix {
-            UNIT => match i.chars().next().unwrap() {
+            EMPTY => match i.chars().next().unwrap() {
                 LIST_LEFT => raw_list(ctx).parse_next(i),
                 MAP_LEFT => raw_map(ctx).parse_next(i),
                 _ => fail.context(label("prefix token")).parse_next(i),

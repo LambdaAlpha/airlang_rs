@@ -4,7 +4,7 @@ empty
 =====
 raw empty
 -----
-.{}
+_{}
 =====
 one
 -----
@@ -12,7 +12,7 @@ one
 =====
 raw one
 -----
-.{a b}
+_{a b}
 =====
 one trailing comma
 -----
@@ -24,14 +24,14 @@ two
 =====
 raw two
 -----
-.{
+_{
 a b
 c d
 }
 =====
 raw two non-atomic
 -----
-.{(a : b) c d (e : f)}
+_{(a : b) c d (e : f)}
 =====
 two trailing comma
 -----
@@ -43,7 +43,7 @@ recursive
 =====
 sequence
 -----
-.[{} {}]
+_[{} {}]
 =====
 omit value
 -----
