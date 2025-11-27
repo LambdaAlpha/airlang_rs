@@ -1,4 +1,3 @@
-use std::rc::Rc;
 
 use log::error;
 
@@ -15,16 +14,11 @@ use crate::cfg::CfgMod;
 use crate::cfg::exception::illegal_ctx;
 use crate::cfg::exception::illegal_input;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::ctx::CtxAccess;
 use crate::semantics::func::ConstFn;
-use crate::semantics::func::ConstPrimFunc;
 use crate::semantics::func::FreeFn;
-use crate::semantics::func::FreePrimFunc;
 use crate::semantics::func::MutFn;
-use crate::semantics::func::MutPrimFunc;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
-use crate::semantics::val::FuncVal;
 use crate::semantics::val::MemoVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
@@ -38,7 +32,6 @@ pub struct FuncLib {
     pub new: FreePrimFuncVal,
     pub repr: FreePrimFuncVal,
     pub apply: MutPrimFuncVal,
-    pub recurse: FreePrimFuncVal,
     pub ctx_access: ConstPrimFuncVal,
     pub is_primitive: ConstPrimFuncVal,
     pub id: ConstPrimFuncVal,
@@ -52,7 +45,6 @@ impl Default for FuncLib {
             new: new(),
             repr: repr(),
             apply: apply(),
-            recurse: recurse(),
             ctx_access: ctx_access(),
             is_primitive: is_primitive(),
             id: id(),
@@ -67,7 +59,6 @@ impl CfgMod for FuncLib {
         self.new.extend(cfg);
         self.repr.extend(cfg);
         self.apply.extend(cfg);
-        self.recurse.extend(cfg);
         self.ctx_access.extend(cfg);
         self.is_primitive.extend(cfg);
         self.id.extend(cfg);
@@ -146,56 +137,6 @@ fn fn_apply_mut(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return illegal_input(cfg);
     };
     func.mut_call(cfg, ctx, pair.second)
-}
-
-pub fn recurse() -> FreePrimFuncVal {
-    FreePrimFn { id: "_function.recurse", raw_input: false, f: free_impl(fn_recurse) }.free()
-}
-
-fn fn_recurse(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Func(func) = input else {
-        error!("input {input:?} should be a func");
-        return illegal_input(cfg);
-    };
-    let recurse = Recurse(func.clone());
-    let id = format!("function.recurse.{}", &*func.id());
-    let id = Key::from_string_unchecked(id);
-    let raw_input = false;
-    let recurse = match func.ctx_access() {
-        CtxAccess::Free => {
-            FuncVal::FreePrim(FreePrimFunc { id, raw_input, fn_: Rc::new(recurse) }.into())
-        }
-        CtxAccess::Const => {
-            FuncVal::ConstPrim(ConstPrimFunc { id, raw_input, fn_: Rc::new(recurse) }.into())
-        }
-        CtxAccess::Mut => {
-            FuncVal::MutPrim(MutPrimFunc { id, raw_input, fn_: Rc::new(recurse) }.into())
-        }
-    };
-    Val::Func(recurse)
-}
-
-struct Recurse(FuncVal);
-
-impl FreeFn<Cfg, Val, Val> for Recurse {
-    fn free_call(&self, cfg: &mut Cfg, input: Val) -> Val {
-        let input = Val::Pair(Pair::new(Val::Func(self.0.clone()), input).into());
-        self.0.free_call(cfg, input)
-    }
-}
-
-impl ConstFn<Cfg, Val, Val, Val> for Recurse {
-    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-        let input = Val::Pair(Pair::new(Val::Func(self.0.clone()), input).into());
-        self.0.const_call(cfg, ctx, input)
-    }
-}
-
-impl MutFn<Cfg, Val, Val, Val> for Recurse {
-    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
-        let input = Val::Pair(Pair::new(Val::Func(self.0.clone()), input).into());
-        self.0.mut_call(cfg, ctx, input)
-    }
 }
 
 pub fn ctx_access() -> ConstPrimFuncVal {

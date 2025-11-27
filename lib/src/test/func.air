@@ -413,7 +413,6 @@ true
 recurse
 -----
 _ do [
-    .recurse set _ import _function.recurse,
     .g set _ function {
         code : .fi : _ form _ do [
             (..f : ..i) = .fi,
@@ -425,8 +424,7 @@ _ do [
         ],
         context_access : _free,
     },
-    .g set _ recurse g,
-    _ g 10
+    g g 10
 ]
 -----
 55
