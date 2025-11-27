@@ -309,6 +309,24 @@ _ do [
 -----
 _mutable
 =====
+raw_input true
+-----
+_ do [
+    .raw_input set _ import _function.raw_input,
+    data which _ raw_input .
+]
+-----
+true
+=====
+raw_input false
+-----
+_ do [
+    .raw_input set _ import _function.raw_input,
+    id which _ raw_input .
+]
+-----
+false
+=====
 is_primitive primitive
 -----
 _ do [

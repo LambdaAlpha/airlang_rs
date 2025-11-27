@@ -20,6 +20,7 @@ use crate::semantics::val::MemoVal;
 use crate::semantics::val::MutCompFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
+use crate::type_::Bit;
 use crate::type_::Key;
 use crate::type_::Map;
 use crate::type_::Pair;
@@ -180,7 +181,8 @@ fn generate_free_prim(f: FreePrimFuncVal) -> Val {
 fn generate_free_comp(f: FreeCompFuncVal) -> Val {
     let mut repr = Map::<Key, Val>::default();
     repr.insert(Key::from_str_unchecked(CODE), free_code(&f.comp));
-    let comp = CompRepr { id: f.id.clone(), access: FREE, memo: f.memo.clone() };
+    let comp =
+        CompRepr { id: f.id.clone(), access: FREE, raw_input: f.raw_input, memo: f.memo.clone() };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -192,7 +194,8 @@ fn generate_const_prim(f: ConstPrimFuncVal) -> Val {
 fn generate_const_comp(f: ConstCompFuncVal) -> Val {
     let mut repr = Map::<Key, Val>::default();
     repr.insert(Key::from_str_unchecked(CODE), dyn_code(&f.comp));
-    let comp = CompRepr { id: f.id.clone(), access: CONST, memo: f.memo.clone() };
+    let comp =
+        CompRepr { id: f.id.clone(), access: CONST, raw_input: f.raw_input, memo: f.memo.clone() };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -204,7 +207,12 @@ fn generate_mut_prim(f: MutPrimFuncVal) -> Val {
 fn generate_mut_comp(f: MutCompFuncVal) -> Val {
     let mut repr = Map::<Key, Val>::default();
     repr.insert(Key::from_str_unchecked(CODE), dyn_code(&f.comp));
-    let comp = CompRepr { id: f.id.clone(), access: MUTABLE, memo: f.memo.clone() };
+    let comp = CompRepr {
+        id: f.id.clone(),
+        access: MUTABLE,
+        raw_input: f.raw_input,
+        memo: f.memo.clone(),
+    };
     generate_comp(&mut repr, comp);
     Val::Map(repr.into())
 }
@@ -242,6 +250,7 @@ fn dyn_code(comp: &DynComposite) -> Val {
 struct CompRepr {
     id: Key,
     access: &'static str,
+    raw_input: bool,
     memo: Memo,
 }
 
@@ -251,6 +260,9 @@ fn generate_comp(repr: &mut Map<Key, Val>, comp: CompRepr) {
     }
     if comp.access != MUTABLE {
         repr.insert(Key::from_str_unchecked(CTX_ACCESS), key(comp.access));
+    }
+    if comp.raw_input {
+        repr.insert(Key::from_str_unchecked(RAW_INPUT), Val::Bit(Bit::true_()));
     }
     if comp.memo != Memo::default() {
         repr.insert(Key::from_str_unchecked(MEMO), Val::Memo(MemoVal::from(comp.memo)));

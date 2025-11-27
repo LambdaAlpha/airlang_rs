@@ -1,4 +1,3 @@
-
 use log::error;
 
 use self::repr::generate_func;
@@ -33,6 +32,7 @@ pub struct FuncLib {
     pub repr: FreePrimFuncVal,
     pub apply: MutPrimFuncVal,
     pub ctx_access: ConstPrimFuncVal,
+    pub raw_input: ConstPrimFuncVal,
     pub is_primitive: ConstPrimFuncVal,
     pub id: ConstPrimFuncVal,
     pub code: ConstPrimFuncVal,
@@ -46,6 +46,7 @@ impl Default for FuncLib {
             repr: repr(),
             apply: apply(),
             ctx_access: ctx_access(),
+            raw_input: raw_input(),
             is_primitive: is_primitive(),
             id: id(),
             code: code(),
@@ -60,6 +61,7 @@ impl CfgMod for FuncLib {
         self.repr.extend(cfg);
         self.apply.extend(cfg);
         self.ctx_access.extend(cfg);
+        self.raw_input.extend(cfg);
         self.is_primitive.extend(cfg);
         self.id.extend(cfg);
         self.code.extend(cfg);
@@ -151,6 +153,18 @@ fn fn_ctx_access(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     };
     let access = generate_ctx_access(func.ctx_access());
     Val::Key(Key::from_str_unchecked(access))
+}
+
+pub fn raw_input() -> ConstPrimFuncVal {
+    DynPrimFn { id: "_function.raw_input", raw_input: false, f: const_impl(fn_raw_input) }.const_()
+}
+
+fn fn_raw_input(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+    let Val::Func(func) = &*ctx else {
+        error!("ctx {ctx:?} should be a function");
+        return illegal_ctx(cfg);
+    };
+    Val::Bit(Bit::from(func.raw_input()))
 }
 
 pub fn is_primitive() -> ConstPrimFuncVal {
