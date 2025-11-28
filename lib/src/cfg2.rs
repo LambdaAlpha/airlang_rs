@@ -37,8 +37,7 @@ impl CoreCfg2 {
         Self::run(cfg, ctx, include_str!("air/lib/list.air"), "/lib/list").unwrap();
         Self::run(cfg, ctx, include_str!("air/lib/map.air"), "lib/map").unwrap();
         Self::run(cfg, ctx, include_str!("air/lib/link.air"), "/lib/link").unwrap();
-        Self::run(cfg, ctx, include_str!("air/lib/configuration.air"), "/lib/configuration")
-            .unwrap();
+        Self::run(cfg, ctx, include_str!("air/lib/config.air"), "/lib/config").unwrap();
         Self::run(cfg, ctx, include_str!("air/lib/memory.air"), "/lib/memory").unwrap();
         Self::run(cfg, ctx, include_str!("air/lib/function.air"), "/lib/function").unwrap();
 

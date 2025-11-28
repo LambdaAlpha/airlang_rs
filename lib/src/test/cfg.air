@@ -2,8 +2,8 @@ new repr
 -----
 _ do [
     .any set _ import _value.any,
-    .new set _ import _configuration.new,
-    .represent set _ import _configuration.represent,
+    .new set _ import _config.new,
+    .represent set _ import _config.represent,
     .c set [
         {a : _ any ., b : _ any .},
         {a : _ any .},
@@ -20,9 +20,9 @@ true
 length
 -----
 _ do [
-    .new set _ import _configuration.new,
-    .where set _ import _configuration.where,
-    .length set _ import _configuration.length,
+    .new set _ import _config.new,
+    .where set _ import _config.where,
+    .length set _ import _config.length,
     .any set _ import _value.any,
     .c set _ new [
         {a : _ any ., b : _ any .},
@@ -39,15 +39,15 @@ _ do [
 length == snapshot repr length
 -----
 _ do [
-    .configuration.length set _ import _configuration.length,
+    .config.length set _ import _config.length,
     .map.length set _ import _map.length,
-    .snapshot set _ import _configuration.snapshot,
-    .represent set _ import _configuration.represent,
+    .snapshot set _ import _config.snapshot,
+    .represent set _ import _config.represent,
     .any set _ import _value.any,
-    .where set _ import _configuration.where,
-    .c set _ any _configuration,
+    .where set _ import _config.where,
+    .c set _ any _config,
     [.m] = _ represent c where _ data _ snapshot .,
-    .lc set c where _ data _ configuration.length .,
+    .lc set c where _ data _ config.length .,
     .lm set m which _ map.length _,
     lc == lm
 ]
@@ -58,10 +58,10 @@ snapshot
 -----
 _ do [
     .any set _ import _value.any,
-    .new set _ import _configuration.new,
-    .snapshot set _ import _configuration.snapshot,
-    .where set _ import _configuration.where,
-    .represent set _ import _configuration.represent,
+    .new set _ import _config.new,
+    .snapshot set _ import _config.snapshot,
+    .where set _ import _config.where,
+    .represent set _ import _config.represent,
     .a1 set _ any .,
     .a2 set _ any .,
     .b1 set _ any .,
@@ -149,8 +149,8 @@ where
 -----
 _ do [
     .any set _ import _value.any,
-    .new set _ import _configuration.new,
-    .where set _ import _configuration.where,
+    .new set _ import _config.new,
+    .where set _ import _config.where,
     .a set _ any .,
     .c set _ new [{_a : a}],
     .a1 set c where _ data _ import _a,

@@ -85,7 +85,7 @@ pub(crate) const CALL: &str = "call";
 pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
 pub(crate) const LINK: &str = "link";
-pub(crate) const CFG: &str = "configuration";
+pub(crate) const CFG: &str = "config";
 pub(crate) const MEMO: &str = "memory";
 pub(crate) const FUNC: &str = "function";
 
