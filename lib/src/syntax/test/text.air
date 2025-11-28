@@ -4,7 +4,7 @@ empty
 =====
 key
 -----
-" ()[]{}<>\\|/'\':;!?,.`~@#$%^&*-+_="
+" ()[]{}<>\|/'^':;!?,.`~@#$%^^&*-+_="
 =====
 alphabet digit
 -----
@@ -16,57 +16,57 @@ unicode
 =====
 escape
 -----
-" \_\n\r\t\u(1f701)"
+" ^_^n^r^t^u(1f701)"
 =====
 double escape
 -----
-" \\_\\n\\r\\t\\u(1f701)"
+" ^^_^^n^^r^^t^^u(1f701)"
 =====
 triple escape
 -----
-" \\\_\\\n\\\r\\\t\\\u(1f701)"
+" ^^^_^^^n^^^r^^^t^^^u(1f701)"
 =====
 unicode space
 -----
-"\u( 1f701 )"
+"^u( 1f701 )"
 =====
 multiline rich
 -----
-"\_\t\r\n
-| \_\t\r\n
+"^_^t^r^n
+| ^_^t^r^n
 | "
 =====
 multiline rich newline
 -----
-"\_\t\r\n
-+ \_\t\r\n
+"^_^t^r^n
++ ^_^t^r^n
 | "
 =====
 multiline raw
 -----
 "
-|(\_\t\r\n
-| \_\t\r\n
+|(^_^t^r^n
+| ^_^t^r^n
 | `!@#$%^&*()-_=+[{]}\|;:'",<.>/?
 +)"
 =====
 multiline mix
 -----
-"\_\t\r\n
-| \_\t\r\n
-|(\_\t\r\n
-| \_\t\r\n
-|)\_\t\r\n
-| \_\t\r\n"
+"^_^t^r^n
+| ^_^t^r^n
+|(^_^t^r^n
+| ^_^t^r^n
+|)^_^t^r^n
+| ^_^t^r^n"
 =====
 multiline indent
 -----
-    "\_\t\r\n
-    | \_\t\r\n
-    |(\_\t\r\n
-    | \_\t\r\n
-    |)\_\t\r\n
-    | \_\t\r\n"
+    "^_^t^r^n
+    | ^_^t^r^n
+    |(^_^t^r^n
+    | ^_^t^r^n
+    |)^_^t^r^n
+    | ^_^t^r^n"
 =====
 multiline rich empty
 -----

@@ -162,8 +162,8 @@ impl Gen for &Key {
 pub fn escape_key(s: &mut String, key: &str) {
     for c in key.chars() {
         let escaped = match c {
-            '\\' => "\\\\",
-            KEY_QUOTE => concatcp!('\\', TEXT_QUOTE),
+            '^' => "^^",
+            KEY_QUOTE => concatcp!('^', TEXT_QUOTE),
             _ => {
                 s.push(c);
                 continue;
@@ -206,11 +206,11 @@ impl Gen for &Text {
 pub fn escape_text(s: &mut String, str: &str) {
     for c in str.chars() {
         let escaped = match c {
-            '\\' => "\\\\",
-            '\n' => "\\n",
-            '\r' => "\\r",
-            '\t' => "\\t",
-            TEXT_QUOTE => concatcp!('\\', KEY_QUOTE),
+            '^' => "^^",
+            '\n' => "^n",
+            '\r' => "^r",
+            '\t' => "^t",
+            TEXT_QUOTE => concatcp!('^', KEY_QUOTE),
             _ => {
                 s.push(c);
                 continue;
@@ -223,13 +223,13 @@ pub fn escape_text(s: &mut String, str: &str) {
 pub fn escape_text_key(s: &mut String, str: &str) {
     for c in str.chars() {
         let escaped = match c {
-            '\\' => "\\\\",
-            '\n' => "\\n",
-            '\r' => "\\r",
-            '\t' => "\\t",
-            TEXT_QUOTE => concatcp!('\\', KEY_QUOTE),
+            '^' => "^^",
+            '\n' => "^n",
+            '\r' => "^r",
+            '\t' => "^t",
+            TEXT_QUOTE => concatcp!('^', KEY_QUOTE),
             c if Key::is_key(c) => &format!("{c}"),
-            c => &format!("\\u({:x})", c as u32),
+            c => &format!("^u({:x})", c as u32),
         };
         s.push_str(escaped);
     }

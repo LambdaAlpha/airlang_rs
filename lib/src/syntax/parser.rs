@@ -477,7 +477,7 @@ fn any_key(i: &mut &str) -> ModalResult<Key> {
 fn key(i: &mut &str) -> ModalResult<Key> {
     let key = move |i: &mut _| {
         let mut s = String::new();
-        let mut literal = take_while(1 .., |c| is_key(c) && c != '\\' && c != KEY_QUOTE);
+        let mut literal = take_while(1 .., |c| is_key(c) && c != '^' && c != KEY_QUOTE);
         let mut raw_literal = take_while(0 .., is_key);
         let mut raw = false;
         loop {
@@ -496,7 +496,7 @@ fn key(i: &mut &str) -> ModalResult<Key> {
             } else {
                 match peek(any).parse_next(i)? {
                     KEY_QUOTE => break,
-                    '\\' => s.push_str(key_escaped.parse_next(i)?),
+                    '^' => s.push_str(key_escaped.parse_next(i)?),
                     '\r' | '\n' => {
                         key_newline.parse_next(i)?;
                         match any.parse_next(i)? {
@@ -515,8 +515,8 @@ fn key(i: &mut &str) -> ModalResult<Key> {
 }
 
 fn key_escaped<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
-    preceded('\\', move |i: &mut _| match any.parse_next(i)? {
-        '\\' => empty.value("\\").parse_next(i),
+    preceded('^', move |i: &mut _| match any.parse_next(i)? {
+        '^' => empty.value("^").parse_next(i),
         '_' => empty.value(" ").parse_next(i),
         TEXT_QUOTE => empty.value(concatcp!(KEY_QUOTE)).parse_next(i),
         ' ' | '\t' => opt(space_tab).value("").parse_next(i),
@@ -537,7 +537,7 @@ fn text(i: &mut &str) -> ModalResult<Text> {
     let text = move |i: &mut _| {
         let i: &mut &str = i;
         let mut s = String::new();
-        let mut literal = take_until(1 .., ('"', '\\', '\n'));
+        let mut literal = take_until(1 .., ('"', '^', '\n'));
         let mut raw_literal = take_until(1 .., '\n');
         let mut raw = false;
         loop {
@@ -556,7 +556,7 @@ fn text(i: &mut &str) -> ModalResult<Text> {
             } else {
                 match peek(any).parse_next(i)? {
                     TEXT_QUOTE => break,
-                    '\\' => text_escaped.parse_next(i)?.push(&mut s),
+                    '^' => text_escaped.parse_next(i)?.push(&mut s),
                     '\n' => {
                         s.push_str(text_newline.parse_next(i)?);
                         match any.parse_next(i)? {
@@ -575,12 +575,12 @@ fn text(i: &mut &str) -> ModalResult<Text> {
 }
 
 fn text_escaped<'a>(i: &mut &'a str) -> ModalResult<StrFragment<'a>> {
-    preceded('\\', move |i: &mut _| match any.parse_next(i)? {
+    preceded('^', move |i: &mut _| match any.parse_next(i)? {
         'u' => unicode.map(StrFragment::Char).parse_next(i),
         'n' => empty.value(StrFragment::Char('\n')).parse_next(i),
         'r' => empty.value(StrFragment::Char('\r')).parse_next(i),
         't' => empty.value(StrFragment::Char('\t')).parse_next(i),
-        '\\' => empty.value(StrFragment::Char('\\')).parse_next(i),
+        '^' => empty.value(StrFragment::Char('^')).parse_next(i),
         '_' => empty.value(StrFragment::Char(' ')).parse_next(i),
         KEY_QUOTE => empty.value(StrFragment::Char(TEXT_QUOTE)).parse_next(i),
         ' ' | '\t' => opt(space_tab).value(StrFragment::Str("")).parse_next(i),

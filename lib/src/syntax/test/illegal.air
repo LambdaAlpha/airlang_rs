@@ -36,11 +36,11 @@ text extra unpaired
 =====
 text escape unpaired
 -----
-"\'
+"^'
 =====
 text wrong quote
 -----
-"\""
+"^""
 =====
 text concat
 -----
@@ -48,19 +48,19 @@ text concat
 =====
 text unknown escape
 -----
-"\a"
+"^a"
 =====
 unicode no body
 -----
-"\u"
+"^u"
 =====
 unicode wrong bracket
 -----
-"\u{32}"
+"^u{32}"
 =====
 unicode not exist
 -----
-"\u(1234567)"
+"^u(1234567)"
 =====
 raw text unpaired
 -----
@@ -94,15 +94,15 @@ key extra unpaired
 =====
 key escape unpaired
 -----
-'\"
+'^"
 =====
 key wrong quote
 -----
-'\''
+'^''
 =====
 key unknown escape
 -----
-'\a'
+'^a'
 =====
 key illegal
 -----
@@ -416,7 +416,7 @@ illegal unicode
 =====
 comment in unicode
 -----
-"\u(_(a) 123)"
+"^u(_(a) 123)"
 =====
 comment in int
 -----
