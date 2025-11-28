@@ -36,7 +36,7 @@ text extra unpaired
 =====
 text escape unpaired
 -----
-"\`
+"\'
 =====
 text wrong quote
 -----
@@ -94,7 +94,7 @@ key extra unpaired
 =====
 key escape unpaired
 -----
-'\`
+'\"
 =====
 key wrong quote
 -----

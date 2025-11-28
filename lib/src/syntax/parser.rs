@@ -44,7 +44,6 @@ use super::MAP_LEFT;
 use super::MAP_RIGHT;
 use super::NUMBER;
 use super::PAIR;
-use super::QUOTE;
 use super::RIGHT;
 use super::SCOPE_LEFT;
 use super::SCOPE_RIGHT;
@@ -519,7 +518,7 @@ fn key_escaped<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
     preceded('\\', move |i: &mut _| match any.parse_next(i)? {
         '\\' => empty.value("\\").parse_next(i),
         '_' => empty.value(" ").parse_next(i),
-        QUOTE => empty.value(concatcp!(KEY_QUOTE)).parse_next(i),
+        TEXT_QUOTE => empty.value(concatcp!(KEY_QUOTE)).parse_next(i),
         ' ' | '\t' => opt(space_tab).value("").parse_next(i),
         _ => fail.parse_next(i),
     })
@@ -583,7 +582,7 @@ fn text_escaped<'a>(i: &mut &'a str) -> ModalResult<StrFragment<'a>> {
         't' => empty.value(StrFragment::Char('\t')).parse_next(i),
         '\\' => empty.value(StrFragment::Char('\\')).parse_next(i),
         '_' => empty.value(StrFragment::Char(' ')).parse_next(i),
-        QUOTE => empty.value(StrFragment::Char(TEXT_QUOTE)).parse_next(i),
+        KEY_QUOTE => empty.value(StrFragment::Char(TEXT_QUOTE)).parse_next(i),
         ' ' | '\t' => opt(space_tab).value(StrFragment::Str("")).parse_next(i),
         _ => fail.parse_next(i),
     })

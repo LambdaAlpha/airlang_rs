@@ -42,8 +42,6 @@ pub(crate) const TEXT_QUOTE: char = '"';
 pub(crate) const KEY_QUOTE: char = '\'';
 // } delimiters
 
-pub(crate) const QUOTE: char = '`';
-
 // keywords {
 pub(crate) const EMPTY: &str = "_";
 pub(crate) const UNIT: &str = ".";

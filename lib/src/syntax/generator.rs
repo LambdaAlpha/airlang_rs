@@ -15,7 +15,6 @@ use super::LIST_RIGHT;
 use super::MAP_LEFT;
 use super::MAP_RIGHT;
 use super::PAIR;
-use super::QUOTE;
 use super::RIGHT;
 use super::SCOPE_LEFT;
 use super::SCOPE_RIGHT;
@@ -164,7 +163,7 @@ pub fn escape_key(s: &mut String, key: &str) {
     for c in key.chars() {
         let escaped = match c {
             '\\' => "\\\\",
-            KEY_QUOTE => concatcp!('\\', QUOTE),
+            KEY_QUOTE => concatcp!('\\', TEXT_QUOTE),
             _ => {
                 s.push(c);
                 continue;
@@ -211,7 +210,7 @@ pub fn escape_text(s: &mut String, str: &str) {
             '\n' => "\\n",
             '\r' => "\\r",
             '\t' => "\\t",
-            TEXT_QUOTE => concatcp!('\\', QUOTE),
+            TEXT_QUOTE => concatcp!('\\', KEY_QUOTE),
             _ => {
                 s.push(c);
                 continue;
@@ -228,7 +227,7 @@ pub fn escape_text_key(s: &mut String, str: &str) {
             '\n' => "\\n",
             '\r' => "\\r",
             '\t' => "\\t",
-            TEXT_QUOTE => concatcp!('\\', QUOTE),
+            TEXT_QUOTE => concatcp!('\\', KEY_QUOTE),
             c if Key::is_key(c) => &format!("{c}"),
             c => &format!("\\u({:x})", c as u32),
         };
