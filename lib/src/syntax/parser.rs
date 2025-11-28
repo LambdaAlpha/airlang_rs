@@ -458,8 +458,12 @@ fn raw_map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     let items = move |i: &mut _| {
         let kv = (any_key, spaces_comment(ctx), repr::<T>(ctx));
         let tokens: Vec<_> = separated(0 .., kv, spaces_comment(ctx)).parse_next(i)?;
+        let mut duplicate = fail.context(expect_desc("no duplicate keys"));
         let mut map = Map::with_capacity(tokens.len());
         for (key, (), value) in tokens {
+            if map.contains_key(&key) {
+                return duplicate.parse_next(i);
+            }
             map.insert(key, value);
         }
         Ok(T::from(map))

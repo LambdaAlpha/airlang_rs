@@ -378,6 +378,10 @@ map duplicate keys
 -----
 {a : 2, a : 3}
 =====
+raw map duplicate keys
+-----
+_{a 2 a 3}
+=====
 map concat
 -----
 {}{}
