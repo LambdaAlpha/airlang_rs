@@ -34,10 +34,6 @@ two trailing comma
 -----
 [a, b,]
 =====
-raw soft keyword
------
-_[: ; ! ?]
-=====
 recursive
 -----
 [[]]

@@ -22,8 +22,8 @@ use super::SEPARATOR;
 use super::TEXT_QUOTE;
 use super::TRUE;
 use super::UNIT;
-use super::ambiguous;
 use super::is_delimiter;
+use super::keyword;
 use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
@@ -177,7 +177,7 @@ fn should_quote(str: &str) -> bool {
     if str.is_empty() {
         return true;
     }
-    if ambiguous(str) {
+    if keyword(str) {
         return true;
     }
     let first = str.chars().next().unwrap();

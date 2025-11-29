@@ -5,7 +5,6 @@ use crate::syntax::test::key;
 use crate::syntax::test::list;
 use crate::syntax::test::map;
 use crate::syntax::test::pair;
-use crate::syntax::test::unit;
 use crate::type_::Key;
 
 pub(super) fn expected() -> Vec<Repr> {
@@ -13,7 +12,6 @@ pub(super) fn expected() -> Vec<Repr> {
         infix_call(key("a"), key("b"), key("c")),
         call(key("a"), key("b")),
         call(key("b"), key("a")),
-        call(key("a"), unit()),
         infix_call(infix_call(key("a"), key("b"), key("c")), key("d"), key("e")),
         infix_call(pair(key("a"), key("c")), key("d"), key("e")),
         pair(infix_call(key("a"), key("b"), key("c")), key("e")),
@@ -21,13 +19,10 @@ pub(super) fn expected() -> Vec<Repr> {
         pair(call(key("a"), key("b")), key("d")),
         infix_call(call(key("b"), key("a")), key("c"), key("d")),
         pair(call(key("b"), key("a")), key("d")),
-        infix_call(call(key("a"), unit()), key("b"), key("c")),
-        pair(call(key("a"), unit()), key("c")),
         call(key("d"), infix_call(key("a"), key("b"), key("c"))),
         call(key("d"), pair(key("a"), key("c"))),
         call(key("c"), call(key("a"), key("b"))),
         call(key("c"), call(key("b"), key("a"))),
-        call(key("b"), call(key("a"), unit())),
         infix_call(key("a"), key("b"), infix_call(key("c"), key("d"), key("e"))),
         pair(key("a"), infix_call(key("c"), key("d"), key("e"))),
         infix_call(key("a"), key("b"), pair(key("c"), key("e"))),
@@ -37,11 +32,8 @@ pub(super) fn expected() -> Vec<Repr> {
         pair(key("a"), call(key("c"), key("d"))),
         infix_call(key("a"), key("b"), call(key("d"), key("c"))),
         pair(key("a"), call(key("d"), key("c"))),
-        infix_call(key("a"), key("b"), call(key("c"), unit())),
-        pair(key("a"), call(key("c"), unit())),
         call(key("a"), call(key("c"), key("b"))),
         call(key("a"), call(key("b"), key("c"))),
-        call(key("a"), call(key("b"), unit())),
         call(list(vec![key("a"), key("b")]), key("c")),
         call(key("a"), list(vec![key("b"), key("c")])),
         list(vec![call(key("a"), key("b"))]),

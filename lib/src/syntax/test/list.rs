@@ -14,7 +14,6 @@ pub(super) fn expected() -> Vec<Repr> {
         list(vec![key("a"), key("b")]),
         list(vec![pair(key("a"), key("b")), key("c")]),
         list(vec![key("a"), key("b")]),
-        list(vec![key(":"), key(";"), key("!"), key("?")]),
         list(vec![list(vec![])]),
         list(vec![list(vec![]), list(vec![])]),
     ]

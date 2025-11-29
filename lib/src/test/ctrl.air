@@ -283,7 +283,7 @@ match default
 3 match [
     1 : [2],
     2 : [3],
-    _ : [4]
+    __ : [4]
 ]
 -----
 4
@@ -295,7 +295,7 @@ _ do [
     1 match [
         1 : [.a set 1],
         2 : [.b set 2],
-        _ : [.c set 3]
+        __ : [.c set 3]
     ],
     [a, .b exist _, .c exist _]
 ]
@@ -309,7 +309,7 @@ _ do [
     3 match [
         1 : [.a set 1],
         2 : [.b set 2],
-        _ : [.c set 3]
+        __ : [.c set 3]
     ],
     [.a exist _, .b exist _, c]
 ]

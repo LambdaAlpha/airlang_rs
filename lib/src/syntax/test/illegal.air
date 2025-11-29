@@ -346,6 +346,22 @@ unmatched cross
 -----
 [{]}
 =====
+func _
+-----
+a _ b
+=====
+input :
+-----
+: f a
+=====
+only _
+-----
+_
+=====
+hard keyword
+-----
+[_, :]
+=====
 list empty comma
 -----
 [,]

@@ -76,7 +76,7 @@ pub(crate) fn is_delimiter(c: char) -> bool {
     )
 }
 
-pub(crate) fn ambiguous(s: &str) -> bool {
+pub(crate) fn keyword(s: &str) -> bool {
     matches!(s, EMPTY | UNIT | PAIR | TRUE | FALSE)
 }
 

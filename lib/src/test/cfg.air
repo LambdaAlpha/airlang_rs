@@ -48,7 +48,7 @@ _ do [
     .c set _ any _config,
     [.m] = _ represent c where _ data _ snapshot .,
     .lc set c where _ data _ config.length .,
-    .lm set m which _ map.length _,
+    .lm set m which _ map.length .,
     lc == lm
 ]
 -----

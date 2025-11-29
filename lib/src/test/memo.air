@@ -10,7 +10,7 @@ _ do [
         c : . : _ any .,
         d : . : _ any .,
     },
-    m which _ length _
+    m which _ length .
 ]
 -----
 4
@@ -24,8 +24,8 @@ _ do [
     .any set _ import _value.any,
     .m set _ any _memory,
     .m1 set _ represent m,
-    .l set m which _ memory.length _,
-    .l1 set m1 which _ map.length _,
+    .l set m which _ memory.length .,
+    .l1 set m1 which _ map.length .,
     l == l1
 ]
 -----
