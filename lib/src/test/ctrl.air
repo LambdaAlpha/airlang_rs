@@ -406,7 +406,6 @@ _ do [
 loop test
 -----
 _ do [
-    .<> set _ import _integer.less_greater,
     .a set 42,
     .b set 24,
     (a <> b) loop [

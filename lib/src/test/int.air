@@ -399,7 +399,6 @@ _ do [
     .a set _ any _integer,
     .b set _ any _integer,
     .c set _ any _integer,
-    .<> set _ import _integer.less_greater,
     [
         (a > b) == (b < a),
         (a < b) == (b > a),
@@ -420,8 +419,8 @@ _ do [
 order trivial
 -----
 _ do [
-    .<> set _ import _integer.less_greater,
-    (0 < 1) and (0 <= 1) and (1 <= 1) and (0 <> 1) and (2 > 1) and (2 >= 1) and (2 >= 2) and (2 == 2)
+    (0 < 1) and (0 <= 1) and (1 <= 1) and (0 <> 1)
+    and (2 > 1) and (2 >= 1) and (2 >= 2) and (2 == 2)
 ]
 -----
 true

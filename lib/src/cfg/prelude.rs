@@ -24,6 +24,7 @@ pub struct CorePrelude {
     pub less_equal: FreePrimFuncVal,
     pub greater_than: FreePrimFuncVal,
     pub greater_equal: FreePrimFuncVal,
+    pub less_greater: FreePrimFuncVal,
 
     pub call: FreePrimFuncVal,
 
@@ -80,6 +81,7 @@ impl CorePrelude {
             less_equal: lib.int.less_equal.clone(),
             greater_than: lib.int.greater_than.clone(),
             greater_equal: lib.int.greater_equal.clone(),
+            less_greater: lib.int.less_greater.clone(),
 
             call: lib.call.new.clone(),
 
@@ -133,6 +135,7 @@ impl Prelude for CorePrelude {
         memo_put_func(memo, "<=", &self.less_equal);
         memo_put_func(memo, ">", &self.greater_than);
         memo_put_func(memo, ">=", &self.greater_equal);
+        memo_put_func(memo, "<>", &self.less_greater);
 
         memo_put_func(memo, "call", &self.call);
 
