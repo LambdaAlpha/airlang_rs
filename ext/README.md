@@ -1,9 +1,9 @@
-# The Extension of the Air Programming Language
+# The Extension of Air Programming Language
 
-The Air programming language is designed to be a universal, scalable and optimal programming language for abstraction-optimization and problem-solving.
+Air is a minimalist and universal programming language.
 
-This crate offers rich extensions for the Air programming language, such as:
+This crate offers rich extensions for Air programming language, such as:
 
-- Build tools for the Air language
+- Build tools
 - Operating system interfaces
 - And more

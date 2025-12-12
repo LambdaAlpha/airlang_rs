@@ -1,23 +1,30 @@
-readme demo // todo design better demo
+context
 -----
-_("A demo of implementing a C-style for function")
-
 _ do [
-    .c_for set _ function {
-        code : (.ctx : .args) : _ form _ do [
-            [..init, ..condition, ..next, ..body] = .args,
-            .ctx which _ eval _ form _ do [
-                .init,
-                .condition loop [
-                    .body,
-                    .next,
-                ],
-            ],
-        ],
-        raw_input : true,
-    },
-    _ c_for [[.i set 1, .sum set 0], i <= 10, .i set i + 1, .sum set sum + i],
+    .sum set 0,
+    100 iterate i : [
+        .sum set sum + i
+    ],
     sum
 ]
 -----
-55
+4950
+=====
+configuration
+-----
+_ do [
+    .push set _ import _list.push,
+    _list.add export push,
+    _list.append export push,
+]
+-----
+.
+=====
+resource
+-----
+_ do [
+    .limit_steps set _ import _resource.limit_steps,
+    100 limit_steps _ data true loop []
+]
+-----
+.
