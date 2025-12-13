@@ -12,7 +12,6 @@ _____!();
 
 pub(crate) use self::comp::DynComposite;
 pub(crate) use self::comp::FreeComposite;
-pub(crate) use self::comp::composite_call;
 
 _____!();
 

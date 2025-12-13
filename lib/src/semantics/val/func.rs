@@ -14,7 +14,6 @@ use crate::semantics::func::FreePrimFunc;
 use crate::semantics::func::MutCompFunc;
 use crate::semantics::func::MutFn;
 use crate::semantics::func::MutPrimFunc;
-use crate::semantics::memo::Memo;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::Key;
@@ -96,14 +95,14 @@ impl FuncVal {
         match_func_val!(self, f => f.raw_input)
     }
 
-    pub fn memo(&self) -> Option<&Memo> {
+    pub fn ctx(&self) -> Option<&Val> {
         match self {
             FuncVal::FreePrim(_) => None,
-            FuncVal::FreeComp(f) => Some(&f.memo),
+            FuncVal::FreeComp(f) => Some(&f.comp.ctx),
             FuncVal::ConstPrim(_) => None,
-            FuncVal::ConstComp(f) => Some(&f.memo),
+            FuncVal::ConstComp(f) => Some(&f.comp.ctx),
             FuncVal::MutPrim(_) => None,
-            FuncVal::MutComp(f) => Some(&f.memo),
+            FuncVal::MutComp(f) => Some(&f.comp.ctx),
         }
     }
 

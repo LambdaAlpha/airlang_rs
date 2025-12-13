@@ -13,7 +13,6 @@ use self::lang::LangLib;
 use self::link::LinkLib;
 use self::list::ListLib;
 use self::map::MapLib;
-use self::memo::MemoLib;
 use self::number::NumberLib;
 use self::pair::PairLib;
 use self::resource::ResourceLib;
@@ -51,7 +50,6 @@ pub struct CoreLib {
     pub map: MapLib,
     pub link: LinkLib,
     pub cfg: CfgLib,
-    pub memo: MemoLib,
     pub func: FuncLib,
     pub ctx: CtxLib,
     pub ctrl: CtrlLib,
@@ -75,7 +73,6 @@ impl CfgMod for CoreLib {
         self.map.extend(cfg);
         self.link.extend(cfg);
         self.cfg.extend(cfg);
-        self.memo.extend(cfg);
         self.func.extend(cfg);
         self.ctx.extend(cfg);
         self.ctrl.extend(cfg);
@@ -254,8 +251,6 @@ pub mod map;
 pub mod link;
 
 pub mod cfg;
-
-pub mod memo;
 
 pub mod func;
 

@@ -237,7 +237,7 @@ match pattern
 match order
 -----
 _ do [
-    .exist set _ import _memory.exist,
+    .exist set _ import _map.contain,
     [1, 2, 3] match [
         [2, .a, .b] : [.x set 1],
         [1, .c, .d] : [.y set 1],
@@ -291,7 +291,7 @@ match default
 match conditional eval exist
 -----
 _ do [
-    .exist set _ import _memory.exist,
+    .exist set _ import _map.contain,
     1 match [
         1 : [.a set 1],
         2 : [.b set 2],
@@ -305,7 +305,7 @@ _ do [
 match conditional eval default
 -----
 _ do [
-    .exist set _ import _memory.exist,
+    .exist set _ import _map.contain,
     3 match [
         1 : [.a set 1],
         2 : [.b set 2],

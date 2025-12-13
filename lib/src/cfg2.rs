@@ -3,8 +3,8 @@ use log::error;
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::func::composite_call;
-use crate::semantics::memo::Memo;
+use crate::semantics::core::Eval;
+use crate::semantics::func::MutFn;
 use crate::semantics::val::Val;
 use crate::syntax::parse;
 
@@ -19,8 +19,8 @@ impl CoreCfg2 {
     }
 
     pub fn extend(cfg: &mut Cfg) {
-        let mut ctx = CoreCfg::prelude(cfg).expect("prelude should be ready");
-        let ctx = &mut ctx;
+        let ctx = CoreCfg::prelude(cfg).expect("prelude should be ready");
+        let ctx = &mut Val::Map(ctx.into());
 
         Self::run(cfg, ctx, include_str!("air/first.air"), "/first").unwrap();
 
@@ -38,7 +38,6 @@ impl CoreCfg2 {
         Self::run(cfg, ctx, include_str!("air/lib/map.air"), "lib/map").unwrap();
         Self::run(cfg, ctx, include_str!("air/lib/link.air"), "/lib/link").unwrap();
         Self::run(cfg, ctx, include_str!("air/lib/config.air"), "/lib/config").unwrap();
-        Self::run(cfg, ctx, include_str!("air/lib/memory.air"), "/lib/memory").unwrap();
         Self::run(cfg, ctx, include_str!("air/lib/function.air"), "/lib/function").unwrap();
 
         Self::run(cfg, ctx, include_str!("air/lib/language.air"), "/lib/language").unwrap();
@@ -47,15 +46,15 @@ impl CoreCfg2 {
         Self::run(cfg, ctx, include_str!("air/last.air"), "/last").unwrap();
     }
 
-    pub fn run(cfg: &mut Cfg, ctx: &mut Memo, source: &str, path: &str) -> Option<Val> {
-        let input = match parse(source) {
+    pub fn run(cfg: &mut Cfg, ctx: &mut Val, source: &str, path: &str) -> Option<Val> {
+        let input: Val = match parse(source) {
             Ok(input) => input,
             Err(err) => {
                 error!("parse {path} failed: {err}");
                 return None;
             }
         };
-        let output = composite_call(cfg, ctx, input);
+        let output = Eval.mut_call(cfg, ctx, input);
         Some(output)
     }
 }

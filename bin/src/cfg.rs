@@ -2,9 +2,9 @@ use airlang::cfg::CfgMod;
 use airlang::cfg::CoreCfg;
 use airlang::cfg::prelude::prelude_repr;
 use airlang::semantics::cfg::Cfg;
+use airlang::semantics::val::LinkVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Key;
-use airlang::type_::Link;
 use log::info;
 
 use crate::cfg::lib::BinLib;
@@ -29,7 +29,7 @@ impl CfgMod for BinCfg {
         self.lib.extend(cfg);
         let prelude = prelude_repr(self.prelude);
         info!("bin prelude len {}", prelude.len());
-        let prelude = Val::Link(Link::new(Val::Memo(prelude.into())));
+        let prelude = Val::Link(LinkVal::new(Val::Map(prelude.into()), false));
         cfg.extend_scope(Key::from_str_unchecked(CoreCfg::PRELUDE), prelude);
     }
 }

@@ -67,7 +67,7 @@ pub fn get() -> ConstPrimFuncVal {
 
 fn fn_get(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     match ctx.unwrap().ref_(input) {
-        Some(val) => val.unwrap().clone(),
+        Some(val) => val.clone(),
         None => Val::default(),
     }
 }
@@ -153,11 +153,11 @@ fn fn_which(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return fail(cfg);
     };
     let input = if func.raw_input() { call.input } else { Eval.mut_call(cfg, ctx, call.input) };
-    let Some(ctx) = ctx.ref_(pair.first) else {
+    let Some(ctx) = ctx.ref_mut(pair.first) else {
         error!("input.first should be a valid reference");
         return fail(cfg);
     };
-    func.dyn_call(cfg, ctx, input)
+    func.mut_call(cfg, ctx, input)
 }
 
 pub(in crate::cfg) mod pattern;

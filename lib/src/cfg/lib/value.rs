@@ -17,7 +17,6 @@ use crate::cfg::exception::fail;
 use crate::cfg::exception::illegal_input;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
-use crate::semantics::memo::Memo;
 use crate::semantics::val::BIT;
 use crate::semantics::val::BYTE;
 use crate::semantics::val::CALL;
@@ -30,8 +29,8 @@ use crate::semantics::val::INT;
 use crate::semantics::val::KEY;
 use crate::semantics::val::LINK;
 use crate::semantics::val::LIST;
+use crate::semantics::val::LinkVal;
 use crate::semantics::val::MAP;
-use crate::semantics::val::MEMO;
 use crate::semantics::val::NUMBER;
 use crate::semantics::val::PAIR;
 use crate::semantics::val::TEXT;
@@ -43,7 +42,6 @@ use crate::type_::Call;
 use crate::type_::ConstRef;
 use crate::type_::Int;
 use crate::type_::Key;
-use crate::type_::Link;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Number;
@@ -86,7 +84,6 @@ const TYPE_LIST: &str = concatcp!(PREFIX_ID, LIST);
 const TYPE_MAP: &str = concatcp!(PREFIX_ID, MAP);
 const TYPE_LINK: &str = concatcp!(PREFIX_ID, LINK);
 const TYPE_CFG: &str = concatcp!(PREFIX_ID, CFG);
-const TYPE_MEMO: &str = concatcp!(PREFIX_ID, MEMO);
 const TYPE_FUNC: &str = concatcp!(PREFIX_ID, FUNC);
 
 // todo design pick value from cfg or ctx
@@ -112,9 +109,8 @@ fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
             TYPE_CALL => Val::Call(Call::<Val, Val>::any(rng, DEPTH).into()),
             TYPE_LIST => Val::List(List::<Val>::any(rng, DEPTH).into()),
             TYPE_MAP => Val::Map(Map::<Key, Val>::any(rng, DEPTH).into()),
-            TYPE_LINK => Val::Link(Link::any(rng, DEPTH)),
+            TYPE_LINK => Val::Link(LinkVal::any(rng, DEPTH)),
             TYPE_CFG => Val::Cfg(Cfg::any(rng, DEPTH).into()),
-            TYPE_MEMO => Val::Memo(Memo::any(rng, DEPTH).into()),
             TYPE_FUNC => Val::Func(FuncVal::any(rng, DEPTH)),
             _ => fail(cfg),
         },
@@ -144,7 +140,6 @@ fn fn_type(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
         Val::Map(_) => TYPE_MAP,
         Val::Link(_) => TYPE_LINK,
         Val::Cfg(_) => TYPE_CFG,
-        Val::Memo(_) => TYPE_MEMO,
         Val::Func(_) => TYPE_FUNC,
         Val::Dyn(val) => return Val::Key(val.type_name()),
     };

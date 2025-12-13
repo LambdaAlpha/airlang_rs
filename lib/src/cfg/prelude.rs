@@ -1,12 +1,11 @@
 use crate::cfg::lib::CoreLib;
-use crate::semantics::memo::Contract;
-use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Key;
+use crate::type_::Map;
 
 #[derive(Clone)]
 pub struct CorePrelude {
@@ -28,12 +27,12 @@ pub struct CorePrelude {
 
     pub call: FreePrimFuncVal,
 
+    pub move_: MutPrimFuncVal,
+
     pub exist: FreePrimFuncVal,
     pub import: FreePrimFuncVal,
     pub export: FreePrimFuncVal,
     pub with: MutPrimFuncVal,
-
-    pub move_: MutPrimFuncVal,
 
     pub function: FreePrimFuncVal,
     pub apply: MutPrimFuncVal,
@@ -61,7 +60,7 @@ pub struct CorePrelude {
 }
 
 pub trait Prelude {
-    fn extend(&self, memo: &mut Memo);
+    fn extend(&self, map: &mut Map<Key, Val>);
 }
 
 impl CorePrelude {
@@ -85,12 +84,12 @@ impl CorePrelude {
 
             call: lib.call.new.clone(),
 
+            move_: lib.map.remove.clone(),
+
             exist: lib.cfg.exist.clone(),
             import: lib.cfg.import.clone(),
             export: lib.cfg.export.clone(),
             with: lib.cfg.with.clone(),
-
-            move_: lib.memo.remove.clone(),
 
             function: lib.func.new.clone(),
             apply: lib.func.apply.clone(),
@@ -120,66 +119,68 @@ impl CorePrelude {
 }
 
 impl Prelude for CorePrelude {
-    fn extend(&self, memo: &mut Memo) {
-        memo_put_func(memo, "not", &self.not);
-        memo_put_func(memo, "and", &self.and);
-        memo_put_func(memo, "or", &self.or);
-        memo_put_func(memo, "xor", &self.xor);
-        memo_put_func(memo, "imply", &self.imply);
+    fn extend(&self, map: &mut Map<Key, Val>) {
+        map_put_func(map, "not", &self.not);
+        map_put_func(map, "and", &self.and);
+        map_put_func(map, "or", &self.or);
+        map_put_func(map, "xor", &self.xor);
+        map_put_func(map, "imply", &self.imply);
 
-        memo_put_func(memo, "+", &self.add);
-        memo_put_func(memo, "-", &self.subtract);
-        memo_put_func(memo, "*", &self.multiply);
-        memo_put_func(memo, "/", &self.divide);
-        memo_put_func(memo, "<", &self.less_than);
-        memo_put_func(memo, "<=", &self.less_equal);
-        memo_put_func(memo, ">", &self.greater_than);
-        memo_put_func(memo, ">=", &self.greater_equal);
-        memo_put_func(memo, "<>", &self.less_greater);
+        map_put_func(map, "+", &self.add);
+        map_put_func(map, "-", &self.subtract);
+        map_put_func(map, "*", &self.multiply);
+        map_put_func(map, "/", &self.divide);
+        map_put_func(map, "<", &self.less_than);
+        map_put_func(map, "<=", &self.less_equal);
+        map_put_func(map, ">", &self.greater_than);
+        map_put_func(map, ">=", &self.greater_equal);
+        map_put_func(map, "<>", &self.less_greater);
 
-        memo_put_func(memo, "call", &self.call);
+        map_put_func(map, "call", &self.call);
 
-        memo_put_func(memo, "exist", &self.exist);
-        memo_put_func(memo, "import", &self.import);
-        memo_put_func(memo, "export", &self.export);
-        memo_put_func(memo, "with", &self.with);
+        map_put_func(map, "move", &self.move_);
 
-        memo_put_func(memo, "move", &self.move_);
+        map_put_func(map, "exist", &self.exist);
+        map_put_func(map, "import", &self.import);
+        map_put_func(map, "export", &self.export);
+        map_put_func(map, "with", &self.with);
 
-        memo_put_func(memo, "function", &self.function);
-        memo_put_func(memo, "apply", &self.apply);
+        map_put_func(map, "function", &self.function);
+        map_put_func(map, "apply", &self.apply);
 
-        memo_put_func(memo, "get", &self.get);
-        memo_put_func(memo, "set", &self.set);
-        memo_put_func(memo, "form", &self.form);
-        memo_put_func(memo, "=", &self.repr);
-        memo_put_func(memo, "which", &self.which);
+        map_put_func(map, "get", &self.get);
+        map_put_func(map, "set", &self.set);
+        map_put_func(map, "form", &self.form);
+        map_put_func(map, "=", &self.repr);
+        map_put_func(map, "which", &self.which);
 
-        memo_put_func(memo, "do", &self.do_);
-        memo_put_func(memo, "test", &self.test);
-        memo_put_func(memo, "switch", &self.switch);
-        memo_put_func(memo, "match", &self.match_);
-        memo_put_func(memo, "loop", &self.loop_);
-        memo_put_func(memo, "iterate", &self.iterate);
+        map_put_func(map, "do", &self.do_);
+        map_put_func(map, "test", &self.test);
+        map_put_func(map, "switch", &self.switch);
+        map_put_func(map, "match", &self.match_);
+        map_put_func(map, "loop", &self.loop_);
+        map_put_func(map, "iterate", &self.iterate);
 
-        memo_put_func(memo, "type", &self.type_);
-        memo_put_func(memo, "==", &self.equal);
+        map_put_func(map, "type", &self.type_);
+        map_put_func(map, "==", &self.equal);
 
-        memo_put_func(memo, "data", &self.data);
-        memo_put_func(memo, "id", &self.id);
-        memo_put_func(memo, "code", &self.code);
-        memo_put_func(memo, "eval", &self.eval);
+        map_put_func(map, "data", &self.data);
+        map_put_func(map, "id", &self.id);
+        map_put_func(map, "code", &self.code);
+        map_put_func(map, "eval", &self.eval);
     }
 }
 
-pub fn memo_put_func<V: Clone + Into<FuncVal>>(memo: &mut Memo, name: &'static str, val: &V) {
+pub fn map_put_func<V: Clone + Into<FuncVal>>(
+    map: &mut Map<Key, Val>, name: &'static str, val: &V,
+) {
     let name = Key::from_str_unchecked(name);
-    let v = memo.put(name, Val::Func(val.clone().into()), Contract::None);
-    assert!(matches!(v, Ok(None)), "names of preludes should be unique");
+    let v = map.insert(name, Val::Func(val.clone().into()));
+    assert!(v.is_none(), "names of preludes should be unique");
 }
 
-pub fn prelude_repr<T: Prelude>(t: T) -> Memo {
-    let mut memo = Memo::default();
-    t.extend(&mut memo);
-    memo
+pub fn prelude_repr<T: Prelude>(t: T) -> Map<Key, Val> {
+    let mut map = Map::default();
+    t.extend(&mut map);
+    map
 }

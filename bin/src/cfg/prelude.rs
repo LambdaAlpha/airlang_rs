@@ -1,11 +1,10 @@
 use airlang::cfg::prelude::Prelude;
-use airlang::cfg::prelude::memo_put_func;
-use airlang::semantics::memo::Contract;
-use airlang::semantics::memo::Memo;
+use airlang::cfg::prelude::map_put_func;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::TextVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Key;
+use airlang::type_::Map;
 use airlang_ext::cfg::prelude::StdPrelude;
 
 use crate::cfg::lib::BinLib;
@@ -28,13 +27,9 @@ impl BinPrelude {
 }
 
 impl Prelude for BinPrelude {
-    fn extend(&self, memo: &mut Memo) {
-        self.std.extend(memo);
-        let _ = memo.put(
-            Key::from_str_unchecked("help"),
-            Val::Text(self.help.clone()),
-            Contract::default(),
-        );
-        memo_put_func(memo, ";", &self.call);
+    fn extend(&self, map: &mut Map<Key, Val>) {
+        self.std.extend(map);
+        let _ = map.insert(Key::from_str_unchecked("help"), Val::Text(self.help.clone()));
+        map_put_func(map, ";", &self.call);
     }
 }

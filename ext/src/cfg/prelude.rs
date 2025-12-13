@@ -1,6 +1,8 @@
 use airlang::cfg::prelude::CorePrelude;
 use airlang::cfg::prelude::Prelude;
-use airlang::semantics::memo::Memo;
+use airlang::semantics::val::Val;
+use airlang::type_::Key;
+use airlang::type_::Map;
 
 use crate::cfg::lib::StdLib;
 
@@ -16,7 +18,7 @@ impl StdPrelude {
 }
 
 impl Prelude for StdPrelude {
-    fn extend(&self, memo: &mut Memo) {
-        self.core.extend(memo);
+    fn extend(&self, map: &mut Map<Key, Val>) {
+        self.core.extend(map);
     }
 }

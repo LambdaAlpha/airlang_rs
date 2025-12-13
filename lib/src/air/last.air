@@ -1,9 +1,6 @@
 _ do [
-    .prelude_link set _ import _prelude,
-    .link_set set _ import _link.set,
-    _prelude set prelude_link link_set .,
+    .prelude set _ import _prelude,
+    .link_which set _ import _link.which,
     
-    _prelude which set apply .empty : _ data '',
-    
-    prelude_link link_set _ move _prelude,
+    prelude link_which set apply .empty : _ data '',
 ]

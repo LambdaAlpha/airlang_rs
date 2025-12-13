@@ -3,6 +3,7 @@ recursive call
 _ do [
     .f set _ function {
         code : (__ : .i) : .i,
+        context : {},
     },
     _ f _ not true
 ]
@@ -13,7 +14,8 @@ call external func
 -----
 _ do [
     .f set _ function {
-        code : (__ : .i) : _ form _ not .i
+        code : (__ : .i) : _ form _ not .i,
+        context : {},
     },
     _ f _ not true
 ]
@@ -23,11 +25,10 @@ true
 call internal func
 -----
 _ do [
-    .memory set _ import _memory.new,
     .f set _ function {
         code : (__ : .i) : _ form _ .not .i,
-        memory : _ memory {
-            not : . : not
+        context : {
+            not : not
         },
     },
     _ f _ not true
@@ -38,11 +39,10 @@ true
 call rename
 -----
 _ do [
-    .memory set _ import _memory.new,
     .f set _ function {
         code : (__ : .a) : _ form _ .n .a,
-        memory : _ memory {
-            n : . : not
+        context : {
+            n : not
         },
     },
     _ f _ not true
@@ -53,19 +53,17 @@ true
 stateful
 -----
 _ do [
-    .memory set _ import _memory.new,
     .new_link set _ import _link.new,
-    .link_get set _ import _link.get,
-    .link_set set _ import _link.set,
+    .link_which set _ import _link.which,
     .f set _ function {
         context_access : _free,
         code : __ : _ form _ do [
-            ..i set .a link_get _,
-            .a link_set .i + 1,
+            ..i set .a link_which _ get _i,
+            .a link_which _i set .i + 1,
             .i
         ],
-        memory : _ memory {
-            a : . : _ new_link 0
+        context : {
+            a : _ new_link {_i : 0}
         },
     },
     [_ f ., _ f ., _ f .]
@@ -76,19 +74,17 @@ _ do [
 multiple stateful
 -----
 _ do [
-    .memory set _ import _memory.new,
     .new_link set _ import _link.new,
-    .link_get set _ import _link.get,
-    .link_set set _ import _link.set,
+    .link_which set _ import _link.which,
     .f set _ data _ function {
         context_access : _free,
         code : __ : _ form _ do [
-            ..i set .a link_get _,
-            .a link_set .i + 1,
+            ..i set .a link_which _ get _i,
+            .a link_which _i set .i + 1,
             .i
         ],
-        memory : _ memory {
-            a : . : _ new_link 0
+        context : {
+            a : _ new_link {_i : 0}
         },
     },
     .f1 set _ eval f,
@@ -101,10 +97,12 @@ _ do [
 const const
 -----
 _ do [
+    .link_which set _ import _link.which,
     _a set 1,
     .f set _ function {
-        code : (_c : __) : _ form _c which _ get _a,
+        code : (.c : __) : _ form .c link_which _ get _a,
         context_access : _constant,
+        context : {},
     },
     _ f .
 ]
@@ -114,10 +112,12 @@ _ do [
 mutable const
 -----
 _ do [
+    .link_which set _ import _link.which,
     _a set 1,
     .f set _ function {
-        code : (_c : __) : _ form _c which _ get _a,
+        code : (.c : __) : _ form .c link_which _ get _a,
         context_access : _mutable,
+        context : {},
     },
     _ f .
 ]
@@ -127,9 +127,11 @@ _ do [
 mutable mutate
 -----
 _ do [
+    .link_which set _ import _link.which,
     .f set _ function {
-        code : (_c : .i) : _ form _c which .i set 2,
+        code : (.c : .i) : _ form .c link_which .i set 2,
         context_access : _mutable,
+        context : {},
     },
     .a set 1,
     _ f .a,
@@ -141,9 +143,11 @@ _ do [
 const mutate fail
 -----
 _ do [
+    .link_which set _ import _link.which,
     .f set _ function {
-        code : (_c : .i) : _ form _c which .i set 2,
+        code : (.c : .i) : _ form .c link_which .i set 2,
         context_access : _constant,
+        context : {},
     },
     .a set 1,
     _ f .a,
@@ -159,6 +163,7 @@ _ do [
     .f set _ function {
         code : (__c : __) : 1,
         context_access : _constant,
+        context : {},
     },
     a which _ f .
 ]
@@ -168,13 +173,12 @@ _ do [
 ctx name occupied
 -----
 _ do [
-    .memory set _ import _memory.new,
     .a set 1,
     .f set _ function {
         code : (_ctx : __) : 2,
         context_access : _constant,
-        memory : _ memory {
-            ctx : _constant : 3
+        context : {
+            ctx : 3
         },
     },
     _ f .,
@@ -204,10 +208,12 @@ _ do [
 ctx explicit
 -----
 _ do [
+    .link_which set _ import _link.which,
     .set_first set _ import _pair.set_first,
     .a set 1 : 2,
     .f set _ function {
-        code : (_p : .i) : _ form _p which _ set_first .i,
+        code : (.p : .i) : _ form .p link_which _ set_first .i,
+        context : {},
     },
     a which _ f 3,
     a
@@ -220,12 +226,13 @@ repr
 _ do [
     .represent set _ import _function.represent,
     _ represent _ function {
-        code : (.c : .i) : .i
+        code : (.c : .i) : .i,
+        context : {},
     }
 ]
 
 -----
-{code : (c : i) : i}
+{code : (c : i) : i, context : {}}
 =====
 repr primitive free
 -----
@@ -380,15 +387,13 @@ _ do [
 ctx
 -----
 _ do [
-    .memory.new set _ import _memory.new,
-    .function.memory set _ import _function.memory,
-    .memo set _ memory.new {
-        a : . : 1
-    },
+    .function.context set _ import _function.context,
+    .any set _ import _value.any,
+    .ctx set _ any .,
     .f set _ function {
-        memory : memo
+        context : ctx
     },
-    (f which _ function.memory .) == memo
+    (f which _ function.context .) == ctx
 ]
 -----
 true
@@ -441,6 +446,7 @@ _ do [
             ]
         ],
         context_access : _free,
+        context : {},
     },
     g g 10
 ]

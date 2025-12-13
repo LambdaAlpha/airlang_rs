@@ -136,11 +136,6 @@ fn test_cfg() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_memo() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/memo.air"), "test/memo.air")
-}
-
-#[test]
 fn test_func() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/func.air"), "test/func.air")
 }

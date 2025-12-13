@@ -4,7 +4,6 @@ pub use self::call::Call;
 pub use self::either::Either;
 pub use self::int::Int;
 pub use self::key::Key;
-pub use self::link::Link;
 pub use self::list::List;
 pub use self::map::Map;
 pub use self::number::Number;
@@ -41,5 +40,3 @@ mod call;
 mod list;
 
 mod map;
-
-mod link;

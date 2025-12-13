@@ -12,6 +12,7 @@ _ do [
             .sum
         ],
         context_access : _free,
+        context : {},
     },
     _ f 100
 ]

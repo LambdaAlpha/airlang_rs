@@ -7,7 +7,6 @@ use rand::distr::SampleString;
 use rand::distr::StandardUniform;
 use rand::distr::weighted::WeightedIndex;
 use rand::prelude::Distribution;
-use rand::prelude::IndexedRandom;
 
 use crate::semantics::cfg::Cfg;
 use crate::semantics::func::ConstCompFunc;
@@ -15,13 +14,10 @@ use crate::semantics::func::DynComposite;
 use crate::semantics::func::FreeCompFunc;
 use crate::semantics::func::FreeComposite;
 use crate::semantics::func::MutCompFunc;
-use crate::semantics::memo::Contract;
-use crate::semantics::memo::Memo;
-use crate::semantics::memo::MemoMap;
-use crate::semantics::memo::MemoValue;
 use crate::semantics::val::ConstCompFuncVal;
 use crate::semantics::val::FreeCompFuncVal;
 use crate::semantics::val::FuncVal;
+use crate::semantics::val::LinkVal;
 use crate::semantics::val::MutCompFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
@@ -30,7 +26,6 @@ use crate::type_::Call;
 use crate::type_::Either;
 use crate::type_::Int;
 use crate::type_::Key;
-use crate::type_::Link;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Number;
@@ -59,7 +54,6 @@ impl Arbitrary for Val {
             1,      // map
             1,      // link
             1,      // cfg
-            1,      // memo
             1,      // func
         ];
         let i = sample(rng, weights);
@@ -77,10 +71,9 @@ impl Arbitrary for Val {
             8 => Val::Call(Call::<Val, Val>::any(rng, depth).into()),
             9 => Val::List(List::<Val>::any(rng, depth).into()),
             10 => Val::Map(Map::<Key, Val>::any(rng, depth).into()),
-            11 => Val::Link(Link::any(rng, depth)),
+            11 => Val::Link(LinkVal::any(rng, depth)),
             12 => Val::Cfg(Cfg::any(rng, depth).into()),
-            13 => Val::Memo(Memo::any(rng, depth).into()),
-            14 => Val::Func(FuncVal::any(rng, depth)),
+            13 => Val::Func(FuncVal::any(rng, depth)),
             _ => unreachable!(),
         }
     }
@@ -224,10 +217,12 @@ where
     }
 }
 
-impl<T: Arbitrary> Arbitrary for Link<T> {
+impl Arbitrary for LinkVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
-        Link::new(T::any(rng, depth))
+        let val = Val::any(rng, depth);
+        let const_ = rng.random();
+        LinkVal::new(val, const_)
     }
 }
 
@@ -240,29 +235,6 @@ impl Arbitrary for Cfg {
             cfg.extend_scope(Key::any(rng, depth), Val::any(rng, depth));
         }
         cfg
-    }
-}
-
-impl Arbitrary for Contract {
-    fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
-        const CONTRACT: [Contract; 5] =
-            [Contract::None, Contract::Static, Contract::Still, Contract::Final, Contract::Const];
-        *(CONTRACT.choose(rng).unwrap())
-    }
-}
-
-impl Arbitrary for MemoValue {
-    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let depth = depth + 1;
-        MemoValue::new(Val::any(rng, depth), Contract::any(rng, depth))
-    }
-}
-
-impl Arbitrary for Memo {
-    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let depth = depth + 1;
-        let variables = MemoMap::new(Map::any(rng, depth));
-        Memo::new(variables)
     }
 }
 
@@ -307,14 +279,23 @@ impl Arbitrary for FuncVal {
 impl Arbitrary for FreeComposite {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
-        FreeComposite { body: Arbitrary::any(rng, depth), input_name: Arbitrary::any(rng, depth) }
+        FreeComposite {
+            ctx: Arbitrary::any(rng, depth),
+            body: Arbitrary::any(rng, depth),
+            input_name: Arbitrary::any(rng, depth),
+        }
     }
 }
 
 impl Arbitrary for DynComposite {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
-        DynComposite { free: Arbitrary::any(rng, depth), ctx_name: Arbitrary::any(rng, depth) }
+        DynComposite {
+            ctx: Arbitrary::any(rng, depth),
+            body: Arbitrary::any(rng, depth),
+            input_name: Arbitrary::any(rng, depth),
+            ctx_name: Arbitrary::any(rng, depth),
+        }
     }
 }
 
@@ -325,7 +306,6 @@ impl Arbitrary for FreeCompFuncVal {
             id: Arbitrary::any(rng, depth),
             raw_input: rng.random(),
             comp: Arbitrary::any(rng, depth),
-            memo: Arbitrary::any(rng, depth),
         };
         FreeCompFuncVal::from(func)
     }
@@ -338,7 +318,6 @@ impl Arbitrary for ConstCompFuncVal {
             id: Arbitrary::any(rng, depth),
             raw_input: rng.random(),
             comp: Arbitrary::any(rng, depth),
-            memo: Arbitrary::any(rng, depth),
         };
         ConstCompFuncVal::from(func)
     }
@@ -351,7 +330,6 @@ impl Arbitrary for MutCompFuncVal {
             id: Arbitrary::any(rng, depth),
             raw_input: rng.random(),
             comp: Arbitrary::any(rng, depth),
-            memo: Arbitrary::any(rng, depth),
         };
         MutCompFuncVal::from(func)
     }

@@ -4,33 +4,35 @@ use log::trace;
 use crate::cfg::CoreCfg;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::cfg::StepsExceed;
-use crate::semantics::func::composite_call;
-use crate::semantics::memo::Memo;
+use crate::semantics::core::Eval;
+use crate::semantics::func::MutFn;
+use crate::semantics::val::MapVal;
 use crate::semantics::val::Val;
 
 #[derive(Debug, Clone)]
 pub struct Air {
     cfg: Cfg,
-    memo: Memo,
+    ctx: Val,
 }
 
 impl Air {
     pub fn new(cfg: Cfg) -> Option<Self> {
         info!("cfg len {}", cfg.len());
-        let memo = CoreCfg::prelude(&cfg).unwrap();
-        Some(Self { cfg, memo })
+        let ctx = CoreCfg::prelude(&cfg).unwrap();
+        let ctx = Val::Map(MapVal::from(ctx));
+        Some(Self { cfg, ctx })
     }
 
     pub fn interpret(&mut self, input: Val) -> Val {
         let old_steps = self.cfg.steps();
-        let output = StepsExceed::catch(|| composite_call(&mut self.cfg, &mut self.memo, input));
+        let output = StepsExceed::catch(|| Eval.mut_call(&mut self.cfg, &mut self.ctx, input));
         let new_steps = self.cfg.steps();
-        trace!("takes {} steps, remains {} steps", old_steps - new_steps, new_steps);
+        trace!("takes {} steps", old_steps - new_steps);
         output.unwrap_or_default()
     }
 
-    pub fn memo_mut(&mut self) -> &mut Memo {
-        &mut self.memo
+    pub fn ctx_mut(&mut self) -> &mut Val {
+        &mut self.ctx
     }
 
     pub fn cfg_mut(&mut self) -> &mut Cfg {

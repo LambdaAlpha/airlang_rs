@@ -286,12 +286,11 @@ false
 is_constant true
 -----
 _ do [
-    .new set _ import _memory.new,
-    .set_contract set _ import _memory.set_contract,
     .is_constant set _ import _context.is_constant,
-    _a set _ new {},
-    _a set_contract _final,
-    _a which _ is_constant .
+    .const_link set _ import _link.new_constant,
+    .link_which set _ import _link.which,
+    .a set _ const_link .,
+    a link_which _ is_constant .
 ]
 -----
 true
@@ -299,9 +298,8 @@ true
 is_constant false
 -----
 _ do [
-    .new set _ import _memory.new,
     .is_constant set _ import _context.is_constant,
-    .a set _ new {},
+    .a set {},
     a which _ is_constant .
 ]
 -----
@@ -310,9 +308,8 @@ false
 which 1
 -----
 _ do [
-    .new set _ import _memory.new,
     .set_first set _ import _pair.set_first,
-    _a set _ new {_p : . : 1 : 2},
+    _a set {_p : 1 : 2},
     _a which _ eval _ form _p which _ set_first 3,
     _a which _ move _p,
 ]
@@ -322,11 +319,10 @@ _ do [
 which 2
 -----
 _ do [
-    .new set _ import _memory.new,
     .set_first set _ import _pair.set_first,
-    _a set _ new {
-        _p : . : 1 : 2,
-        _b : . : 3,
+    _a set {
+        _p : 1 : 2,
+        _b : 3,
     },
     _a which _ eval _ form _p which _ set_first _ get _b,
     _a which _ move _p,
@@ -337,12 +333,11 @@ _ do [
 which 3
 -----
 _ do [
-    .new set _ import _memory.new,
     .set_first set _ import _pair.set_first,
-    _a set _ new {
-        set_first : . : set_first,
-        _p : . : 1 : 2,
-        b : . : 3,
+    _a set {
+        set_first : set_first,
+        _p : 1 : 2,
+        b : 3,
     },
     _a which _ eval _ form _p which _ .set_first .b,
     _a which _ move _p,
@@ -353,8 +348,7 @@ _ do [
 which recursive
 -----
 _ do [
-    .new set _ import _memory.new,
-    _a set _ new {_b : . : _ new {_c : . : 1}},
+    _a set {_b : {_c : 1}},
     _a which _ eval _ form _b which _ get _c
 ]
 -----
@@ -386,10 +380,10 @@ self non-sync
 _ do [
     .any set _ import _value.any,
     .self set _ import _context.self,
-    .exist set _ import _memory.exist,
+    .contain set _ import _map.contain,
     .a set _ self .,
     _b set _ any .,
-    a which _ exist _b
+    a which _ contain _b
 ]
 -----
 false

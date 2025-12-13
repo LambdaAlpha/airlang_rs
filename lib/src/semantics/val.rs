@@ -9,9 +9,9 @@ pub use self::func::FuncVal;
 pub use self::func::MutCompFuncVal;
 pub use self::func::MutPrimFuncVal;
 pub use self::int::IntVal;
+pub use self::link::LinkVal;
 pub use self::list::ListVal;
 pub use self::map::MapVal;
-pub use self::memo::MemoVal;
 pub use self::number::NumberVal;
 pub use self::pair::PairVal;
 pub use self::text::TextVal;
@@ -31,7 +31,6 @@ use crate::type_::Byte;
 use crate::type_::Call;
 use crate::type_::Int;
 use crate::type_::Key;
-use crate::type_::Link;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Number;
@@ -65,13 +64,10 @@ pub enum Val {
 
     Link(LinkVal),
     Cfg(CfgVal),
-    Memo(MemoVal),
     Func(FuncVal),
 
     Dyn(Box<dyn DynVal>),
 }
-
-pub type LinkVal = Link<Val>;
 
 pub(crate) const UNIT: &str = "unit";
 pub(crate) const BIT: &str = "bit";
@@ -86,7 +82,6 @@ pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
 pub(crate) const LINK: &str = "link";
 pub(crate) const CFG: &str = "config";
-pub(crate) const MEMO: &str = "memory";
 pub(crate) const FUNC: &str = "function";
 
 impl Default for Val {
@@ -159,7 +154,6 @@ macro_rules! match_val {
             $crate::semantics::val::Val::Map($name) => $body,
             $crate::semantics::val::Val::Link($name) => $body,
             $crate::semantics::val::Val::Cfg($name) => $body,
-            $crate::semantics::val::Val::Memo($name) => $body,
             $crate::semantics::val::Val::Func($name) => $body,
             $crate::semantics::val::Val::Dyn($name) => $body,
         }
@@ -193,8 +187,8 @@ mod list;
 
 mod map;
 
-mod cfg;
+mod link;
 
-mod memo;
+mod cfg;
 
 mod func;

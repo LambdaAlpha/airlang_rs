@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use log::error;
 use log::info;
 
@@ -5,14 +7,14 @@ use self::lib::CoreLib;
 use crate::cfg::prelude::CorePrelude;
 use crate::cfg::prelude::prelude_repr;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::memo::Memo;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
+use crate::semantics::val::LinkVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Key;
-use crate::type_::Link;
+use crate::type_::Map;
 
 pub trait CfgMod {
     fn extend(self, cfg: &Cfg);
@@ -37,7 +39,7 @@ impl CfgMod for CoreCfg {
         self.lib.extend(cfg);
         let prelude = prelude_repr(self.prelude);
         info!("core prelude len {}", prelude.len());
-        let prelude = Val::Link(Link::new(Val::Memo(prelude.into())));
+        let prelude = Val::Link(LinkVal::new(Val::Map(prelude.into()), false));
         cfg.extend_scope(Key::from_str_unchecked(Self::PRELUDE), prelude);
     }
 }
@@ -45,22 +47,25 @@ impl CfgMod for CoreCfg {
 impl CoreCfg {
     pub const PRELUDE: &'static str = "_prelude";
 
-    pub fn prelude(cfg: &Cfg) -> Option<Memo> {
+    pub fn prelude(cfg: &Cfg) -> Option<Map<Key, Val>> {
         let prelude = cfg.import(Key::from_str_unchecked(Self::PRELUDE));
         let Some(prelude) = prelude else {
             error!("prelude should exist in cfg");
             return None;
         };
-        let Val::Link(link) = prelude else {
+        let Val::Link(prelude) = prelude else {
             error!("prelude in cfg should be a link");
             return None;
         };
-        let prelude = link.get_clone();
-        let Val::Memo(prelude) = prelude else {
-            error!("prelude in cfg should be a link of memo");
+        let Ok(prelude) = prelude.try_borrow() else {
+            error!("prelude should not be borrowed");
             return None;
         };
-        Some(Memo::from(prelude))
+        let Val::Map(prelude) = prelude.deref().clone() else {
+            error!("prelude in cfg should be a link of map");
+            return None;
+        };
+        Some(Map::from(prelude))
     }
 }
 

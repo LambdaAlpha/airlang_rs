@@ -129,16 +129,6 @@ _ do [
 -----
 _link
 =====
-any memory
------
-_ do [
-    .any set _ import _value.any,
-    .m set _ any _memory,
-    m which _ type .
-]
------
-_memory
-=====
 any function
 -----
 _ do [
@@ -258,16 +248,6 @@ _ do [
 -----
 _link
 =====
-type memory
------
-_ do [
-    .new_memory set _ import _memory.new,
-    .a set _ new_memory {},
-    a which _ type .
-]
------
-_memory
-=====
 type function
 -----
 _ do [
@@ -349,17 +329,6 @@ _ do [
     .new_link set _ import _link.new,
     .a set _ new_link .,
     .b set a,
-    (a == b) and _ not a == .
-]
------
-true
-=====
-== memory
------
-_ do [
-    .new_memory set _ import _memory.new,
-    .a set _ new_memory {},
-    .b set _ new_memory {},
     (a == b) and _ not a == .
 ]
 -----

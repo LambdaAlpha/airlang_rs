@@ -18,7 +18,6 @@ use crate::semantics::func::FreeFn;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
-use crate::semantics::val::MemoVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
@@ -36,7 +35,7 @@ pub struct FuncLib {
     pub is_primitive: ConstPrimFuncVal,
     pub id: ConstPrimFuncVal,
     pub code: ConstPrimFuncVal,
-    pub memo: ConstPrimFuncVal,
+    pub ctx: ConstPrimFuncVal,
 }
 
 impl Default for FuncLib {
@@ -50,7 +49,7 @@ impl Default for FuncLib {
             is_primitive: is_primitive(),
             id: id(),
             code: code(),
-            memo: memo(),
+            ctx: ctx(),
         }
     }
 }
@@ -65,7 +64,7 @@ impl CfgMod for FuncLib {
         self.is_primitive.extend(cfg);
         self.id.extend(cfg);
         self.code.extend(cfg);
-        self.memo.extend(cfg);
+        self.ctx.extend(cfg);
     }
 }
 
@@ -209,20 +208,20 @@ fn fn_code(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     code
 }
 
-pub fn memo() -> ConstPrimFuncVal {
-    DynPrimFn { id: "_function.memory", raw_input: false, f: const_impl(fn_memo) }.const_()
+pub fn ctx() -> ConstPrimFuncVal {
+    DynPrimFn { id: "_function.context", raw_input: false, f: const_impl(fn_ctx) }.const_()
 }
 
-fn fn_memo(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_ctx(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
         return illegal_ctx(cfg);
     };
-    let Some(memo) = func.memo() else {
-        error!("func {func:?} should have an inner memory");
+    let Some(ctx) = func.ctx() else {
+        error!("func {func:?} should have an inner context");
         return illegal_ctx(cfg);
     };
-    Val::Memo(MemoVal::from(memo.clone()))
+    ctx.clone()
 }
 
 mod repr;

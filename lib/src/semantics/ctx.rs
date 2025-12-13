@@ -2,10 +2,9 @@ use std::ops::BitAnd;
 
 use derive_more::IsVariant;
 
-use crate::type_::DynRef;
-
 pub trait DynCtx<Input, Output> {
-    fn ref_(&mut self, input: Input) -> Option<DynRef<'_, Output>>;
+    fn ref_(&self, input: Input) -> Option<&Output>;
+    fn ref_mut(&mut self, input: Input) -> Option<&mut Output>;
     fn set(&mut self, input: Input, value: Output) -> Option<Output>;
 }
 

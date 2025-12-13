@@ -1,45 +1,58 @@
-new get
+new which self
 -----
 _ do [
     .any set _ import _value.any,
     .new set _ import _link.new,
-    .link.get set _ import _link.get,
+    .which set _ import _link.which,
+    .self set _ import _context.self,
     .a set _ any .,
     .l set _ new a,
-    .a1 set l link.get _,
+    .a1 set l which _ self .,
     a == a1
 ]
 -----
 true
 =====
-set get
+new_constant which self
 -----
 _ do [
     .any set _ import _value.any,
-    .new set _ import _link.new,
-    .link.set set _ import _link.set,
-    .link.get set _ import _link.get,
-    .l set _ new _ any .,
+    .new set _ import _link.new_constant,
+    .which set _ import _link.which,
+    .self set _ import _context.self,
     .a set _ any .,
-    l link.set a,
-    .a1 set l link.get _,
+    .l set _ new a,
+    .a1 set l which _ self .,
     a == a1
 ]
 -----
 true
+=====
+const not mutable
+-----
+_ do [
+    .any set _ import _value.any,
+    .new set _ import _link.new_constant,
+    .which set _ import _link.which,
+    .contain set _ import _map.contain,
+    .l set _ new {},
+    l which _a set _ any .,
+    l which _ contain _a
+]
+-----
+false
 =====
 sync
 -----
 _ do [
     .any set _ import _value.any,
     .new set _ import _link.new,
-    .link.set set _ import _link.set,
-    .link.get set _ import _link.get,
-    .l set _ new _ any .,
+    .which set _ import _link.which,
+    .l set _ new {},
     .l1 set l,
     .a set _ any .,
-    l link.set a,
-    .a1 set l1 link.get _,
+    l which set apply _a : a,
+    .a1 set l1 which _ get _a,
     a == a1
 ]
 -----
@@ -50,9 +63,9 @@ leak no panic
 _ do [
     .any set _ import _value.any,
     .new set _ import _link.new,
-    .link.set set _ import _link.set,
-    .l set _ new _ any .,
-    l link.set l,
+    .which set _ import _link.which,
+    .l set _ new {},
+    l which _a set l,
     .l move _,
     .
 ]
@@ -64,10 +77,10 @@ cycle recover
 _ do [
     .any set _ import _value.any,
     .new set _ import _link.new,
-    .link.set set _ import _link.set,
-    .l set _ new _ any .,
-    l link.set l,
-    .l1 set l link.set _ any .,
+    .which set _ import _link.which,
+    .l set _ new {},
+    l which _a set l,
+    .l1 set l which _ move _a,
     l == l1
 ]
 -----
