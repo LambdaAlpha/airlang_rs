@@ -1,3 +1,4 @@
+use std::env;
 use std::error::Error;
 
 use airlang_dev::init_logger;
@@ -48,11 +49,23 @@ fn test_interpret(air: Air, input: &str, file_name: &str) -> Result<(), Box<dyn 
             eprintln!("file {file_name} case ({title}): output ({o}) parse failed\n{e}");
             e
         })?;
-        assert_eq!(
-            ret, ret_expected,
-            "file {file_name} case({title}) input({i}): expect({o}) != real({ret:#?})\n\
-            current context: {air:#?}",
-        );
+        let show_env = if let Ok(show) = env::var("AIR_TEST_SHOW_CFG_CTX") {
+            show == "1" || show == "on" || show == "true"
+        } else {
+            false
+        };
+        if show_env {
+            assert_eq!(
+                ret, ret_expected,
+                "file {file_name} case({title}) input({i}): expect({o}) != real({ret:#?})\n\
+                current cfg and ctx: {air:#?}",
+            );
+        } else {
+            assert_eq!(
+                ret, ret_expected,
+                "file {file_name} case({title}) input({i}): expect({o}) != real({ret:#?})",
+            );
+        }
     }
     Ok(())
 }
