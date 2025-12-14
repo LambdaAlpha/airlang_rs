@@ -6,7 +6,7 @@ use num_traits::Signed;
 use num_traits::ToPrimitive;
 
 use super::DynPrimFn;
-use super::mut_impl;
+use super::dyn_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::exception::fail;
 use crate::cfg::exception::illegal_input;
@@ -24,6 +24,7 @@ use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Byte;
 use crate::type_::Call;
+use crate::type_::DynRef;
 use crate::type_::Int;
 use crate::type_::Key;
 use crate::type_::List;
@@ -96,21 +97,21 @@ impl Block {
         Some(Block { statements: items })
     }
 
-    fn flow(self, cfg: &mut Cfg, ctx: &mut Val) -> (Val, Result<CtrlFlow, ()>) {
+    fn flow(self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> (Val, Result<CtrlFlow, ()>) {
         let mut output = Val::default();
         for statement in self.statements {
             match statement {
                 Statement::Normal(val) => {
-                    output = Eval.mut_call(cfg, ctx, val);
+                    output = Eval.dyn_call(cfg, ctx.reborrow(), val);
                 }
                 Statement::Condition { ctrl_flow, condition, body } => {
-                    let condition = Eval.mut_call(cfg, ctx, condition);
+                    let condition = Eval.dyn_call(cfg, ctx.reborrow(), condition);
                     let Val::Bit(condition) = condition else {
                         error!("condition {condition:?} should be a bit");
                         return (Val::default(), Err(()));
                     };
                     if *condition {
-                        let output = Eval.mut_call(cfg, ctx, body);
+                        let output = Eval.dyn_call(cfg, ctx, body);
                         return (output, Ok(ctrl_flow));
                     }
                     output = Val::default();
@@ -120,7 +121,7 @@ impl Block {
         (output, Ok(CtrlFlow::Continue))
     }
 
-    fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
+    fn eval(self, cfg: &mut Cfg, ctx: DynRef<Val>) -> Val {
         self.flow(cfg, ctx).0
     }
 }
@@ -161,10 +162,10 @@ impl CtrlFlow {
 }
 
 pub fn do_() -> MutPrimFuncVal {
-    DynPrimFn { id: "_control.do", raw_input: true, f: mut_impl(fn_do) }.mut_()
+    DynPrimFn { id: "_control.do", raw_input: true, f: dyn_impl(fn_do) }.mut_()
 }
 
-fn fn_do(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+fn fn_do(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
     let Some(block) = Block::parse(input) else {
         return illegal_input(cfg);
     };
@@ -172,10 +173,10 @@ fn fn_do(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn test() -> MutPrimFuncVal {
-    DynPrimFn { id: "_control.test", raw_input: true, f: mut_impl(fn_test) }.mut_()
+    DynPrimFn { id: "_control.test", raw_input: true, f: dyn_impl(fn_test) }.mut_()
 }
 
-fn fn_test(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+fn fn_test(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
     let Some(test) = Test::parse(input) else {
         return illegal_input(cfg);
     };
@@ -206,8 +207,8 @@ impl Test {
         Some(Test { condition, branch_then, branch_else })
     }
 
-    fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
-        let condition = Eval.mut_call(cfg, ctx, self.condition);
+    fn eval(self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> Val {
+        let condition = Eval.dyn_call(cfg, ctx.reborrow(), self.condition);
         let Val::Bit(b) = condition else {
             error!("condition {condition:?} should be a bit");
             return illegal_input(cfg);
@@ -218,10 +219,10 @@ impl Test {
 }
 
 pub fn switch() -> MutPrimFuncVal {
-    DynPrimFn { id: "_control.switch", raw_input: true, f: mut_impl(fn_switch) }.mut_()
+    DynPrimFn { id: "_control.switch", raw_input: true, f: dyn_impl(fn_switch) }.mut_()
 }
 
-fn fn_switch(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+fn fn_switch(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
     let Some(switch) = Switch::parse(input) else {
         return illegal_input(cfg);
     };
@@ -268,8 +269,8 @@ impl Switch {
         Map::from(map).into_iter().map(|(k, v)| Some((k, Block::parse(v)?))).collect()
     }
 
-    fn eval(mut self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
-        let val = Eval.mut_call(cfg, ctx, self.val);
+    fn eval(mut self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> Val {
+        let val = Eval.dyn_call(cfg, ctx.reborrow(), self.val);
         let Val::Key(key) = val else {
             error!("input.first {val:?} should be a key");
             return illegal_input(cfg);
@@ -282,10 +283,10 @@ impl Switch {
 }
 
 pub fn match_() -> MutPrimFuncVal {
-    DynPrimFn { id: "_control.match", raw_input: true, f: mut_impl(fn_match) }.mut_()
+    DynPrimFn { id: "_control.match", raw_input: true, f: dyn_impl(fn_match) }.mut_()
 }
 
-fn fn_match(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+fn fn_match(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
     let Some(match_) = Match::parse(input) else {
         return illegal_input(cfg);
     };
@@ -328,16 +329,18 @@ impl Match {
             .collect()
     }
 
-    fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
-        let val = Eval.mut_call(cfg, ctx, self.val);
+    fn eval(self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> Val {
+        let val = Eval.dyn_call(cfg, ctx.reborrow(), self.val);
         for (pattern, block) in self.arms {
-            let pattern = Eval.mut_call(cfg, ctx, pattern);
+            let pattern = Eval.dyn_call(cfg, ctx.reborrow(), pattern);
             let Some(pattern) = pattern.parse() else {
                 error!("parse pattern failed");
                 return fail(cfg);
             };
             if pattern.match_(&val) {
-                pattern.assign(ctx, val);
+                if !ctx.is_const() {
+                    pattern.assign(ctx.reborrow().unwrap(), val);
+                }
                 return block.eval(cfg, ctx);
             }
         }
@@ -346,10 +349,10 @@ impl Match {
 }
 
 pub fn loop_() -> MutPrimFuncVal {
-    DynPrimFn { id: "_control.loop", raw_input: true, f: mut_impl(fn_loop) }.mut_()
+    DynPrimFn { id: "_control.loop", raw_input: true, f: dyn_impl(fn_loop) }.mut_()
 }
 
-fn fn_loop(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+fn fn_loop(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
     let Some(loop_) = Loop::parse(input) else {
         return illegal_input(cfg);
     };
@@ -373,9 +376,9 @@ impl Loop {
         Some(Self { condition, body })
     }
 
-    fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
+    fn eval(self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> Val {
         loop {
-            let cond = Eval.mut_call(cfg, ctx, self.condition.clone());
+            let cond = Eval.dyn_call(cfg, ctx.reborrow(), self.condition.clone());
             let Val::Bit(bit) = cond else {
                 error!("condition {cond:?} should be a bit");
                 return fail(cfg);
@@ -383,7 +386,7 @@ impl Loop {
             if !*bit {
                 break;
             }
-            let (output, ctrl_flow) = self.body.clone().flow(cfg, ctx);
+            let (output, ctrl_flow) = self.body.clone().flow(cfg, ctx.reborrow());
             match ctrl_flow {
                 Ok(CtrlFlow::Continue) => {}
                 Ok(CtrlFlow::Return) => return output,
@@ -395,10 +398,10 @@ impl Loop {
 }
 
 pub fn iterate() -> MutPrimFuncVal {
-    DynPrimFn { id: "_control.iterate", raw_input: true, f: mut_impl(fn_iterate) }.mut_()
+    DynPrimFn { id: "_control.iterate", raw_input: true, f: dyn_impl(fn_iterate) }.mut_()
 }
 
-fn fn_iterate(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+fn fn_iterate(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
     let Some(iterate) = Iterate::parse(input) else {
         return illegal_input(cfg);
     };
@@ -432,8 +435,8 @@ impl Iterate {
         Some(Self { val, name, body })
     }
 
-    fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
-        let val = Eval.mut_call(cfg, ctx, self.val);
+    fn eval(self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> Val {
+        let val = Eval.dyn_call(cfg, ctx.reborrow(), self.val);
         match val {
             Val::Int(i) => {
                 let i = Int::from(i);
@@ -488,12 +491,14 @@ impl Iterate {
 }
 
 fn iterate_val<ValIter>(
-    cfg: &mut Cfg, ctx: &mut Val, body: Block, name: Key, values: ValIter,
+    cfg: &mut Cfg, mut ctx: DynRef<Val>, body: Block, name: Key, values: ValIter,
 ) -> Val
 where ValIter: Iterator<Item = Val> {
     for val in values {
-        let _ = ctx.set(name.clone(), val);
-        let (output, ctrl_flow) = body.clone().flow(cfg, ctx);
+        if !ctx.is_const() {
+            let _ = ctx.reborrow().unwrap().set(name.clone(), val);
+        }
+        let (output, ctrl_flow) = body.clone().flow(cfg, ctx.reborrow());
         match ctrl_flow {
             Ok(CtrlFlow::Continue) => {}
             Ok(CtrlFlow::Return) => return output,

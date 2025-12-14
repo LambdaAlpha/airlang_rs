@@ -27,6 +27,10 @@ where T: ConstFn<Cfg, Ctx, I, O>
     fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Ctx>, input: I) -> O {
         (**self).const_call(cfg, ctx, input)
     }
+
+    fn opt_const_call(&self, cfg: &mut Cfg, ctx: Option<ConstRef<Ctx>>, input: I) -> O {
+        (**self).opt_const_call(cfg, ctx, input)
+    }
 }
 
 impl<Cfg, Ctx, I, O, T> ConstFn<Cfg, Ctx, I, O> for &mut T
@@ -34,6 +38,10 @@ where T: ConstFn<Cfg, Ctx, I, O>
 {
     fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Ctx>, input: I) -> O {
         (**self).const_call(cfg, ctx, input)
+    }
+
+    fn opt_const_call(&self, cfg: &mut Cfg, ctx: Option<ConstRef<Ctx>>, input: I) -> O {
+        (**self).opt_const_call(cfg, ctx, input)
     }
 }
 

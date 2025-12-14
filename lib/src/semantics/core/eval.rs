@@ -16,6 +16,7 @@ use crate::semantics::val::PairVal;
 use crate::semantics::val::Val;
 use crate::type_::Call;
 use crate::type_::ConstRef;
+use crate::type_::DynRef;
 use crate::type_::Key;
 
 pub(crate) struct CallEval<'a, Func> {
@@ -72,6 +73,22 @@ where Func: MutFn<Cfg, Val, Val, Val>
         let input = if func.raw_input() { call.input } else { Eval.mut_call(cfg, ctx, call.input) };
         func.mut_call(cfg, ctx, input)
     }
+
+    fn dyn_call(&self, cfg: &mut Cfg, mut ctx: DynRef<Val>, call: CallVal) -> Val {
+        cfg.step();
+        let call = Call::from(call);
+        let func = self.func.dyn_call(cfg, ctx.reborrow(), call.func);
+        let Val::Func(func) = func else {
+            error!("func {func:?} should be a func");
+            return Val::default();
+        };
+        let input = if func.raw_input() {
+            call.input
+        } else {
+            Eval.dyn_call(cfg, ctx.reborrow(), call.input)
+        };
+        func.dyn_call(cfg, ctx, input)
+    }
 }
 
 #[derive(Debug, Default, Copy, Clone)]
@@ -114,6 +131,17 @@ impl MutFn<Cfg, Val, Val, Val> for Eval {
             v => Id.mut_call(cfg, ctx, v),
         }
     }
+
+    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
+        match input {
+            Val::Key(key) => self.dyn_call(cfg, ctx, key),
+            Val::Pair(pair) => self.dyn_call(cfg, ctx, pair),
+            Val::Call(call) => self.dyn_call(cfg, ctx, call),
+            Val::List(list) => self.dyn_call(cfg, ctx, list),
+            Val::Map(map) => self.dyn_call(cfg, ctx, map),
+            v => Id.dyn_call(cfg, ctx, v),
+        }
+    }
 }
 
 impl FreeFn<Cfg, Key, Val> for Eval {
@@ -131,6 +159,10 @@ impl ConstFn<Cfg, Val, Key, Val> for Eval {
 impl MutFn<Cfg, Val, Key, Val> for Eval {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Key) -> Val {
         KeyEval.mut_call(cfg, ctx, input)
+    }
+
+    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, input: Key) -> Val {
+        KeyEval.dyn_call(cfg, ctx, input)
     }
 }
 
@@ -150,6 +182,10 @@ impl MutFn<Cfg, Val, PairVal, Val> for Eval {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: PairVal) -> Val {
         PairForm { first: self, second: self }.mut_call(cfg, ctx, input)
     }
+
+    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, input: PairVal) -> Val {
+        PairForm { first: self, second: self }.dyn_call(cfg, ctx, input)
+    }
 }
 
 impl FreeFn<Cfg, CallVal, Val> for Eval {
@@ -167,6 +203,10 @@ impl ConstFn<Cfg, Val, CallVal, Val> for Eval {
 impl MutFn<Cfg, Val, CallVal, Val> for Eval {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: CallVal) -> Val {
         CallEval { func: self }.mut_call(cfg, ctx, input)
+    }
+
+    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, input: CallVal) -> Val {
+        CallEval { func: self }.dyn_call(cfg, ctx, input)
     }
 }
 
@@ -186,6 +226,10 @@ impl MutFn<Cfg, Val, ListVal, Val> for Eval {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: ListVal) -> Val {
         ListForm { item: self }.mut_call(cfg, ctx, input)
     }
+
+    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, input: ListVal) -> Val {
+        ListForm { item: self }.dyn_call(cfg, ctx, input)
+    }
 }
 
 impl FreeFn<Cfg, MapVal, Val> for Eval {
@@ -203,5 +247,9 @@ impl ConstFn<Cfg, Val, MapVal, Val> for Eval {
 impl MutFn<Cfg, Val, MapVal, Val> for Eval {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: MapVal) -> Val {
         MapForm { value: self }.mut_call(cfg, ctx, input)
+    }
+
+    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, input: MapVal) -> Val {
+        MapForm { value: self }.dyn_call(cfg, ctx, input)
     }
 }

@@ -4,8 +4,8 @@ use log::error;
 
 use super::DynPrimFn;
 use super::FreePrimFn;
+use super::dyn_impl;
 use super::free_impl;
-use super::mut_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::exception::fail;
 use crate::cfg::exception::illegal_input;
@@ -19,6 +19,7 @@ use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Call;
 use crate::type_::ConstRef;
+use crate::type_::DynRef;
 use crate::type_::Pair;
 
 // todo design
@@ -60,16 +61,16 @@ fn fn_new_const(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn which() -> MutPrimFuncVal {
-    DynPrimFn { id: "_link.which", raw_input: true, f: mut_impl(fn_which) }.mut_()
+    DynPrimFn { id: "_link.which", raw_input: true, f: dyn_impl(fn_which) }.mut_()
 }
 
-fn fn_which(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+fn fn_which(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let link = Eval.mut_call(cfg, ctx, pair.first);
+    let link = Eval.dyn_call(cfg, ctx.reborrow(), pair.first);
     let Val::Link(link) = link else {
         error!("input.first {link:?} should be a link");
         return illegal_input(cfg);
@@ -79,11 +80,12 @@ fn fn_which(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let call = Call::from(call);
-    let Val::Func(func) = Eval.mut_call(cfg, ctx, call.func) else {
+    let Val::Func(func) = Eval.dyn_call(cfg, ctx.reborrow(), call.func) else {
         error!("input.second.func should be a func");
         return fail(cfg);
     };
-    let input = if func.raw_input() { call.input } else { Eval.mut_call(cfg, ctx, call.input) };
+    let input =
+        if func.raw_input() { call.input } else { Eval.dyn_call(cfg, ctx.reborrow(), call.input) };
     let Ok(mut ctx) = link.try_borrow_mut() else {
         error!("link is already borrowed");
         return Val::default();

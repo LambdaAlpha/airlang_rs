@@ -6,18 +6,16 @@ use crate::cfg::CfgMod;
 use crate::cfg::exception::illegal_input;
 use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::FreePrimFn;
-use crate::cfg::lib::MutImpl;
+use crate::cfg::lib::dyn_impl;
 use crate::cfg::lib::free_impl;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::cfg::StepsExceed;
 use crate::semantics::core::Eval;
-use crate::semantics::func::ConstFn;
-use crate::semantics::func::FreeFn;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
-use crate::type_::ConstRef;
+use crate::type_::DynRef;
 use crate::type_::Int;
 use crate::type_::Pair;
 
@@ -61,88 +59,33 @@ fn fn_available_steps(cfg: &mut Cfg, _input: Val) -> Val {
 }
 
 pub fn measure_steps() -> MutPrimFuncVal {
-    DynPrimFn {
-        id: "_resource.measure_steps",
-        raw_input: true,
-        f: MutImpl::new(fn_measure_steps_free, fn_measure_steps_const, fn_measure_steps_mut),
-    }
-    .mut_()
+    DynPrimFn { id: "_resource.measure_steps", raw_input: true, f: dyn_impl(fn_measure_steps) }
+        .mut_()
 }
 
-fn fn_measure_steps_free(cfg: &mut Cfg, input: Val) -> Val {
+fn fn_measure_steps(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
     let old_steps = cfg.steps();
-    let output = Eval.free_call(cfg, input);
-    let steps = cfg.steps() - old_steps;
-    let steps = Val::Int(Int::from(steps).into());
-    Val::Pair(Pair::new(output, steps).into())
-}
-
-fn fn_measure_steps_const(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let old_steps = cfg.steps();
-    let output = Eval.const_call(cfg, ctx, input);
-    let steps = cfg.steps() - old_steps;
-    let steps = Val::Int(Int::from(steps).into());
-    Val::Pair(Pair::new(output, steps).into())
-}
-
-fn fn_measure_steps_mut(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
-    let old_steps = cfg.steps();
-    let output = Eval.mut_call(cfg, ctx, input);
+    let output = Eval.dyn_call(cfg, ctx, input);
     let steps = old_steps - cfg.steps();
     let steps = Val::Int(Int::from(steps).into());
     Val::Pair(Pair::new(output, steps).into())
 }
 
 pub fn limit_steps() -> MutPrimFuncVal {
-    DynPrimFn {
-        id: "_resource.limit_steps",
-        raw_input: false,
-        f: MutImpl::new(fn_limit_steps_free, fn_limit_steps_const, fn_limit_steps_mut),
-    }
-    .mut_()
+    DynPrimFn { id: "_resource.limit_steps", raw_input: false, f: dyn_impl(fn_limit_steps) }.mut_()
 }
 
-fn fn_limit_steps_free(cfg: &mut Cfg, input: Val) -> Val {
+fn fn_limit_steps(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
     let (steps, input) = match steps_input(cfg, input) {
         Ok((steps, input)) => (steps, input),
         Err(val) => return val,
     };
     let cur_steps = cfg.steps();
     if steps > cur_steps {
-        return Eval.free_call(cfg, input);
+        return Eval.dyn_call(cfg, ctx, input);
     }
     cfg.set_steps_unchecked(steps);
-    let output = StepsExceed::catch(|| Eval.free_call(cfg, input));
-    cfg.set_steps_unchecked(cur_steps - (steps - cfg.steps()));
-    output.unwrap_or_default()
-}
-
-fn fn_limit_steps_const(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let (steps, input) = match steps_input(cfg, input) {
-        Ok((steps, input)) => (steps, input),
-        Err(val) => return val,
-    };
-    let cur_steps = cfg.steps();
-    if steps > cur_steps {
-        return Eval.const_call(cfg, ctx, input);
-    }
-    cfg.set_steps_unchecked(steps);
-    let output = StepsExceed::catch(|| Eval.const_call(cfg, ctx, input));
-    cfg.set_steps_unchecked(cur_steps - (steps - cfg.steps()));
-    output.unwrap_or_default()
-}
-
-fn fn_limit_steps_mut(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
-    let (steps, input) = match steps_input(cfg, input) {
-        Ok((steps, input)) => (steps, input),
-        Err(val) => return val,
-    };
-    let cur_steps = cfg.steps();
-    if steps > cur_steps {
-        return Eval.mut_call(cfg, ctx, input);
-    }
-    cfg.set_steps_unchecked(steps);
-    let output = StepsExceed::catch(|| Eval.mut_call(cfg, ctx, input));
+    let output = StepsExceed::catch(|| Eval.dyn_call(cfg, ctx, input));
     cfg.set_steps_unchecked(cur_steps - (steps - cfg.steps()));
     output.unwrap_or_default()
 }

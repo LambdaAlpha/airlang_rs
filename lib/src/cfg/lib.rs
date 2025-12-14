@@ -208,6 +208,44 @@ impl<Cfg, Ctx, I, O> MutImpl<Cfg, Ctx, I, O> {
         Self { free, const_, mut_ }
     }
 
+    pub fn default(_cfg: &mut Cfg, _ctx: &mut Ctx, _input: I) -> O
+    where O: Default {
+        O::default()
+    }
+}
+
+pub struct DynImpl<Cfg, Ctx, I, O> {
+    pub free: fn(&mut Cfg, I) -> O,
+    pub dyn_: fn(&mut Cfg, DynRef<Ctx>, I) -> O,
+}
+
+impl<Cfg, Ctx, I, O> FreeFn<Cfg, I, O> for DynImpl<Cfg, Ctx, I, O> {
+    fn free_call(&self, cfg: &mut Cfg, input: I) -> O {
+        (self.free)(cfg, input)
+    }
+}
+
+impl<Cfg, Ctx, I, O> ConstFn<Cfg, Ctx, I, O> for DynImpl<Cfg, Ctx, I, O> {
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Ctx>, input: I) -> O {
+        (self.dyn_)(cfg, ctx.into_dyn(), input)
+    }
+}
+
+impl<Cfg, Ctx, I, O> MutFn<Cfg, Ctx, I, O> for DynImpl<Cfg, Ctx, I, O> {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Ctx, input: I) -> O {
+        (self.dyn_)(cfg, DynRef::new_mut(ctx), input)
+    }
+
+    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Ctx>, input: I) -> O {
+        (self.dyn_)(cfg, ctx, input)
+    }
+}
+
+impl<Cfg, Ctx, I, O> DynImpl<Cfg, Ctx, I, O> {
+    pub fn new(free: fn(&mut Cfg, I) -> O, dyn_: fn(&mut Cfg, DynRef<Ctx>, I) -> O) -> Self {
+        Self { free, dyn_ }
+    }
+
     pub fn default(_cfg: &mut Cfg, _ctx: DynRef<Ctx>, _input: I) -> O
     where O: Default {
         O::default()
@@ -224,6 +262,10 @@ pub fn const_impl(func: fn(&mut Cfg, ConstRef<Val>, Val) -> Val) -> ConstImpl<Cf
 
 pub fn mut_impl(func: fn(&mut Cfg, &mut Val, Val) -> Val) -> MutImpl<Cfg, Val, Val, Val> {
     MutImpl::new(FreeImpl::default, ConstImpl::default, func)
+}
+
+pub fn dyn_impl(func: fn(&mut Cfg, DynRef<Val>, Val) -> Val) -> DynImpl<Cfg, Val, Val, Val> {
+    DynImpl::new(FreeImpl::default, func)
 }
 
 pub mod unit;

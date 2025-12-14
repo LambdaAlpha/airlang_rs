@@ -7,6 +7,7 @@ use crate::semantics::func::FreeFn;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
+use crate::type_::DynRef;
 use crate::type_::Key;
 
 pub(crate) struct KeyEval;
@@ -66,17 +67,10 @@ impl ConstFn<Cfg, Val, Key, Val> for KeyEval {
 
 impl MutFn<Cfg, Val, Key, Val> for KeyEval {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Key) -> Val {
-        cfg.step();
-        let (mode, s) = self.recognize(input);
-        match mode {
-            KeyMode::Id => Val::Key(s),
-            KeyMode::Shift => Val::Key(s),
-            KeyMode::Ctx => {
-                let Some(val) = ctx.ref_(s) else {
-                    return Val::default();
-                };
-                val.clone()
-            }
-        }
+        self.const_call(cfg, ConstRef::new(ctx), input)
+    }
+
+    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, input: Key) -> Val {
+        self.const_call(cfg, ctx.into_const(), input)
     }
 }

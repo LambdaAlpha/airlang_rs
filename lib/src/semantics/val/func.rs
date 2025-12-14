@@ -16,6 +16,7 @@ use crate::semantics::func::MutFn;
 use crate::semantics::func::MutPrimFunc;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
+use crate::type_::DynRef;
 use crate::type_::Key;
 use crate::type_::wrap::rc_wrap;
 
@@ -71,6 +72,17 @@ impl ConstFn<Cfg, Val, Val, Val> for FuncVal {
             FuncVal::MutComp(f) => f.const_call(cfg, ctx, input),
         }
     }
+
+    fn opt_const_call(&self, cfg: &mut Cfg, ctx: Option<ConstRef<Val>>, input: Val) -> Val {
+        match self {
+            FuncVal::FreePrim(f) => f.free_call(cfg, input),
+            FuncVal::FreeComp(f) => f.free_call(cfg, input),
+            FuncVal::ConstPrim(f) => f.opt_const_call(cfg, ctx, input),
+            FuncVal::ConstComp(f) => f.opt_const_call(cfg, ctx, input),
+            FuncVal::MutPrim(f) => f.opt_const_call(cfg, ctx, input),
+            FuncVal::MutComp(f) => f.opt_const_call(cfg, ctx, input),
+        }
+    }
 }
 
 impl MutFn<Cfg, Val, Val, Val> for FuncVal {
@@ -82,6 +94,28 @@ impl MutFn<Cfg, Val, Val, Val> for FuncVal {
             FuncVal::ConstComp(f) => f.const_call(cfg, ConstRef::new(ctx), input),
             FuncVal::MutPrim(f) => f.mut_call(cfg, ctx, input),
             FuncVal::MutComp(f) => f.mut_call(cfg, ctx, input),
+        }
+    }
+
+    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
+        match self {
+            FuncVal::FreePrim(f) => f.free_call(cfg, input),
+            FuncVal::FreeComp(f) => f.free_call(cfg, input),
+            FuncVal::ConstPrim(f) => f.const_call(cfg, ctx.into_const(), input),
+            FuncVal::ConstComp(f) => f.const_call(cfg, ctx.into_const(), input),
+            FuncVal::MutPrim(f) => f.dyn_call(cfg, ctx, input),
+            FuncVal::MutComp(f) => f.dyn_call(cfg, ctx, input),
+        }
+    }
+
+    fn opt_dyn_call(&self, cfg: &mut Cfg, ctx: Option<DynRef<Val>>, input: Val) -> Val {
+        match self {
+            FuncVal::FreePrim(f) => f.free_call(cfg, input),
+            FuncVal::FreeComp(f) => f.free_call(cfg, input),
+            FuncVal::ConstPrim(f) => f.opt_const_call(cfg, ctx.map(DynRef::into_const), input),
+            FuncVal::ConstComp(f) => f.opt_const_call(cfg, ctx.map(DynRef::into_const), input),
+            FuncVal::MutPrim(f) => f.opt_dyn_call(cfg, ctx, input),
+            FuncVal::MutComp(f) => f.opt_dyn_call(cfg, ctx, input),
         }
     }
 }

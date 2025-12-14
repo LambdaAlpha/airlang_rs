@@ -7,6 +7,7 @@ use super::DynPrimFn;
 use super::FreeImpl;
 use super::MutImpl;
 use super::const_impl;
+use super::dyn_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::exception::fail;
@@ -22,6 +23,7 @@ use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::Call;
 use crate::type_::ConstRef;
+use crate::type_::DynRef;
 use crate::type_::Pair;
 
 #[derive(Clone)]
@@ -134,10 +136,10 @@ fn fn_self(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn which() -> MutPrimFuncVal {
-    DynPrimFn { id: "_context.which", raw_input: true, f: mut_impl(fn_which) }.mut_()
+    DynPrimFn { id: "_context.which", raw_input: true, f: dyn_impl(fn_which) }.mut_()
 }
 
-fn fn_which(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+fn fn_which(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input: {:?} should be a pair", input);
         return illegal_input(cfg);
@@ -148,16 +150,18 @@ fn fn_which(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let call = Call::from(call);
-    let Val::Func(func) = Eval.mut_call(cfg, ctx, call.func) else {
+    let Val::Func(func) = Eval.dyn_call(cfg, ctx.reborrow(), call.func) else {
         error!("input.second.func should be a func");
         return fail(cfg);
     };
-    let input = if func.raw_input() { call.input } else { Eval.mut_call(cfg, ctx, call.input) };
-    let Some(ctx) = ctx.ref_mut(pair.first) else {
+    let input =
+        if func.raw_input() { call.input } else { Eval.dyn_call(cfg, ctx.reborrow(), call.input) };
+    let const_ = ctx.is_const();
+    let Some(ctx) = ctx.reborrow().unwrap().ref_mut(pair.first) else {
         error!("input.first should be a valid reference");
         return fail(cfg);
     };
-    func.mut_call(cfg, ctx, input)
+    func.dyn_call(cfg, DynRef::new(ctx, const_), input)
 }
 
 pub(in crate::cfg) mod pattern;

@@ -38,4 +38,8 @@ impl MutFn<Cfg, Val, Val, Val> for MutCompFunc {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         self.comp.call(cfg, DynRef::new_mut(ctx), input)
     }
+
+    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
+        self.comp.call(cfg, ctx, input)
+    }
 }

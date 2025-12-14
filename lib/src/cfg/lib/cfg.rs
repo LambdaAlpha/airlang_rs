@@ -6,8 +6,8 @@ use crate::cfg::CfgMod;
 use crate::cfg::exception::illegal_input;
 use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::FreePrimFn;
+use crate::cfg::lib::dyn_impl;
 use crate::cfg::lib::free_impl;
-use crate::cfg::lib::mut_impl;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::cfg::StepsExceed;
 use crate::semantics::core::Eval;
@@ -16,6 +16,7 @@ use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
+use crate::type_::DynRef;
 use crate::type_::Int;
 use crate::type_::List;
 use crate::type_::Map;
@@ -178,10 +179,10 @@ fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn with() -> MutPrimFuncVal {
-    DynPrimFn { id: "_config.with", raw_input: false, f: mut_impl(fn_with) }.mut_()
+    DynPrimFn { id: "_config.with", raw_input: false, f: dyn_impl(fn_with) }.mut_()
 }
 
-fn fn_with(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+fn fn_with(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
     cfg.begin_scope();
     guard(
         cfg,
@@ -199,17 +200,17 @@ fn fn_with(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
             for (k, v) in map {
                 cfg.extend_scope(k, v);
             }
-            Eval.mut_call(&mut **cfg, ctx, pair.second)
+            Eval.dyn_call(&mut **cfg, ctx, pair.second)
         },
         Cfg::end_scope,
     )
 }
 
 pub fn where_() -> MutPrimFuncVal {
-    DynPrimFn { id: "_config.where", raw_input: false, f: mut_impl(fn_where) }.mut_()
+    DynPrimFn { id: "_config.where", raw_input: false, f: dyn_impl(fn_where) }.mut_()
 }
 
-fn fn_where(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+fn fn_where(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return illegal_input(cfg);
@@ -220,5 +221,5 @@ fn fn_where(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let mut new_cfg = Cfg::from(new_cfg);
-    StepsExceed::catch(|| Eval.mut_call(&mut new_cfg, ctx, pair.second)).unwrap_or_default()
+    StepsExceed::catch(|| Eval.dyn_call(&mut new_cfg, ctx, pair.second)).unwrap_or_default()
 }

@@ -36,6 +36,14 @@ where T: MutFn<Cfg, Ctx, I, O>
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Ctx, input: I) -> O {
         (**self).mut_call(cfg, ctx, input)
     }
+
+    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Ctx>, input: I) -> O {
+        (**self).dyn_call(cfg, ctx, input)
+    }
+
+    fn opt_dyn_call(&self, cfg: &mut Cfg, ctx: Option<DynRef<Ctx>>, input: I) -> O {
+        (**self).opt_dyn_call(cfg, ctx, input)
+    }
 }
 
 impl<Cfg, Ctx, I, O, T> MutFn<Cfg, Ctx, I, O> for &mut T
@@ -43,6 +51,14 @@ where T: MutFn<Cfg, Ctx, I, O>
 {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Ctx, input: I) -> O {
         (**self).mut_call(cfg, ctx, input)
+    }
+
+    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Ctx>, input: I) -> O {
+        (**self).dyn_call(cfg, ctx, input)
+    }
+
+    fn opt_dyn_call(&self, cfg: &mut Cfg, ctx: Option<DynRef<Ctx>>, input: I) -> O {
+        (**self).opt_dyn_call(cfg, ctx, input)
     }
 }
 
