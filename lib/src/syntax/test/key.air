@@ -134,13 +134,17 @@ _
 -----
 =
 =====
-->
+all symbols
 -----
-'->'
+' ()[]{}<>\|/^"".,:;!?_~-+=*^^`@#$%&'
 =====
 alphabet + number
 -----
 abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789
+=====
+->
+-----
+'->'
 =====
 alphabet single lower case
 -----
