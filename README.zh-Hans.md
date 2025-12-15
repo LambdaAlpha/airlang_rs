@@ -49,7 +49,7 @@ a.b.c
 
 ' abcdefghijklmnopqrstuvwxyz
 | ABCDEFGHIJKLMNOPQRSTUVWXYZ
-|(()[]{}<>\|/'".,:;!?_~-+=*^`@#$%&
+|(()[]{}<>\|/'"`^~-+=*_.,:;!?@#$%&
 |)0123456789'
 ```
 

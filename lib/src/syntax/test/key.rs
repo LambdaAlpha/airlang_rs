@@ -37,7 +37,7 @@ pub(super) fn expected() -> Vec<Repr> {
         key("+"),
         key("_"),
         key("="),
-        key(" ()[]{}<>\\|/'\".,:;!?_~-+=*^`@#$%&"),
+        key(" ()[]{}<>\\|/'\"`^~-+=*_.,:;!?@#$%&"),
         key("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"),
         key("->"),
         key("a"),
