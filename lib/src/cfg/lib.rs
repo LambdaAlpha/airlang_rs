@@ -6,6 +6,7 @@ use self::call::CallLib;
 use self::cfg::CfgLib;
 use self::ctrl::CtrlLib;
 use self::ctx::CtxLib;
+use self::decimal::DecimalLib;
 use self::func::FuncLib;
 use self::int::IntLib;
 use self::key::KeyLib;
@@ -13,7 +14,6 @@ use self::lang::LangLib;
 use self::link::LinkLib;
 use self::list::ListLib;
 use self::map::MapLib;
-use self::number::NumberLib;
 use self::pair::PairLib;
 use self::resource::ResourceLib;
 use self::text::TextLib;
@@ -42,7 +42,7 @@ pub struct CoreLib {
     pub key: KeyLib,
     pub text: TextLib,
     pub int: IntLib,
-    pub number: NumberLib,
+    pub decimal: DecimalLib,
     pub byte: ByteLib,
     pub pair: PairLib,
     pub call: CallLib,
@@ -65,7 +65,7 @@ impl CfgMod for CoreLib {
         self.key.extend(cfg);
         self.text.extend(cfg);
         self.int.extend(cfg);
-        self.number.extend(cfg);
+        self.decimal.extend(cfg);
         self.byte.extend(cfg);
         self.pair.extend(cfg);
         self.call.extend(cfg);
@@ -278,7 +278,7 @@ pub mod text;
 
 pub mod int;
 
-pub mod number;
+pub mod decimal;
 
 pub mod byte;
 

@@ -1,6 +1,7 @@
 use std::cmp::min;
 use std::hash::Hash;
 
+use bigdecimal::BigDecimal;
 use num_bigint::BigInt;
 use rand::Rng;
 use rand::distr::SampleString;
@@ -23,12 +24,12 @@ use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
+use crate::type_::Decimal;
 use crate::type_::Either;
 use crate::type_::Int;
 use crate::type_::Key;
 use crate::type_::List;
 use crate::type_::Map;
-use crate::type_::Number;
 use crate::type_::Pair;
 use crate::type_::Text;
 use crate::type_::Unit;
@@ -46,7 +47,7 @@ impl Arbitrary for Val {
             weight, // key
             weight, // text
             weight, // int
-            weight, // number
+            weight, // decimal
             weight, // byte
             1,      // pair
             1,      // call
@@ -65,7 +66,7 @@ impl Arbitrary for Val {
             2 => Val::Key(Key::any(rng, depth)),
             3 => Val::Text(Text::any(rng, depth).into()),
             4 => Val::Int(Int::any(rng, depth).into()),
-            5 => Val::Number(Number::any(rng, depth).into()),
+            5 => Val::Decimal(Decimal::any(rng, depth).into()),
             6 => Val::Byte(Byte::any(rng, depth).into()),
             7 => Val::Pair(Pair::<Val, Val>::any(rng, depth).into()),
             8 => Val::Call(Call::<Val, Val>::any(rng, depth).into()),
@@ -131,13 +132,12 @@ impl Arbitrary for Int {
     }
 }
 
-impl Arbitrary for Number {
+impl Arbitrary for Decimal {
     fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
         let int: i64 = rng.random();
         let int = BigInt::from(int);
         let exp: i8 = rng.random();
-        let exp = BigInt::from(exp);
-        Number::new(int, 10, exp)
+        Decimal::new(BigDecimal::from_bigint(int, exp as i64))
     }
 }
 

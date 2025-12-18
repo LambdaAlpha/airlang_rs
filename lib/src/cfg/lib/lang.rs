@@ -112,7 +112,7 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
             Val::Key(key) => GenRepr::Key(key),
             Val::Text(text) => GenRepr::Text(text),
             Val::Int(int) => GenRepr::Int(int),
-            Val::Number(number) => GenRepr::Number(number),
+            Val::Decimal(decimal) => GenRepr::Decimal(decimal),
             Val::Byte(byte) => GenRepr::Byte(byte),
             Val::Pair(pair) => {
                 let first = (&pair.first).try_into()?;

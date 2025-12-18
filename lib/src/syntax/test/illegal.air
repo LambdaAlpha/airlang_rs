@@ -190,37 +190,57 @@ int norm hexadecimal prefix 0
 -----
 integer'0Xff'
 =====
-number lower case tag
+int +0
 -----
-1.0e-1
+0+0
 =====
-number wrong exponent
+int -0
 -----
-1.Ea
+0-0
 =====
-number exponent no digit
+decimal lower case tag
 -----
-1.E+
+0e-1*1.0
 =====
-number wrong order
+decimal wrong exponent
 -----
-0X-1.0
+0Ea*1.
 =====
-number hexadecimal no base
+decimal exponent no digit
 -----
-0ff.0
+0E+*1.
 =====
-number _
+decimal wrong order
+-----
+0E100*-1.2
+=====
+decimal _
 -----
 1_0.00__1
 =====
-number norm prefixed 0
+decimal norm prefixed 0
 -----
-number'0-1.0'
+decimal'0-1.0'
 =====
-number norm hexadecimal prefixed 0
+decimal +0.0
 -----
-number'0X1.0'
+0+0.0
+=====
+decimal -0.0
+-----
+0-0.0
+=====
+decimal E+0
+-----
+0E+0*1.0
+=====
+decimal E-0
+-----
+0E-0*1.0
+=====
+decimal significand 0.
+-----
+0E1*0.1
 =====
 byte wrong length
 -----

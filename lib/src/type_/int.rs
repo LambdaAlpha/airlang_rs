@@ -1,6 +1,7 @@
 use std::ops::Add;
 use std::ops::Div;
 use std::ops::Mul;
+use std::ops::Neg;
 use std::ops::Rem;
 use std::ops::Sub;
 
@@ -21,6 +22,10 @@ pub struct Int(BigInt);
 impl Int {
     pub(crate) fn new(int: BigInt) -> Self {
         Self(int)
+    }
+
+    pub(crate) fn unwrap(self) -> BigInt {
+        self.0
     }
 
     pub(crate) fn add(self, other: Int) -> Int {
@@ -70,5 +75,12 @@ impl Int {
 
     pub(crate) fn less_greater(&self, other: &Int) -> Bit {
         Bit::from(self.0.ne(&other.0))
+    }
+}
+
+impl Neg for Int {
+    type Output = Int;
+    fn neg(self) -> Int {
+        Int(-self.0)
     }
 }

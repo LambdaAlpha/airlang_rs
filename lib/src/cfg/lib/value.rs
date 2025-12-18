@@ -22,6 +22,7 @@ use crate::semantics::val::BYTE;
 use crate::semantics::val::CALL;
 use crate::semantics::val::CFG;
 use crate::semantics::val::ConstPrimFuncVal;
+use crate::semantics::val::DECIMAL;
 use crate::semantics::val::FUNC;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
@@ -31,7 +32,6 @@ use crate::semantics::val::LINK;
 use crate::semantics::val::LIST;
 use crate::semantics::val::LinkVal;
 use crate::semantics::val::MAP;
-use crate::semantics::val::NUMBER;
 use crate::semantics::val::PAIR;
 use crate::semantics::val::TEXT;
 use crate::semantics::val::UNIT;
@@ -40,11 +40,11 @@ use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
 use crate::type_::ConstRef;
+use crate::type_::Decimal;
 use crate::type_::Int;
 use crate::type_::Key;
 use crate::type_::List;
 use crate::type_::Map;
-use crate::type_::Number;
 use crate::type_::Pair;
 use crate::type_::Text;
 use crate::type_::Unit;
@@ -76,7 +76,7 @@ const TYPE_BIT: &str = concatcp!(PREFIX_ID, BIT);
 const TYPE_KEY: &str = concatcp!(PREFIX_ID, KEY);
 const TYPE_TEXT: &str = concatcp!(PREFIX_ID, TEXT);
 const TYPE_INT: &str = concatcp!(PREFIX_ID, INT);
-const TYPE_NUMBER: &str = concatcp!(PREFIX_ID, NUMBER);
+const TYPE_DECIMAL: &str = concatcp!(PREFIX_ID, DECIMAL);
 const TYPE_BYTE: &str = concatcp!(PREFIX_ID, BYTE);
 const TYPE_PAIR: &str = concatcp!(PREFIX_ID, PAIR);
 const TYPE_CALL: &str = concatcp!(PREFIX_ID, CALL);
@@ -103,7 +103,7 @@ fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
             TYPE_KEY => Val::Key(Key::any(rng, DEPTH)),
             TYPE_TEXT => Val::Text(Text::any(rng, DEPTH).into()),
             TYPE_INT => Val::Int(Int::any(rng, DEPTH).into()),
-            TYPE_NUMBER => Val::Number(Number::any(rng, DEPTH).into()),
+            TYPE_DECIMAL => Val::Decimal(Decimal::any(rng, DEPTH).into()),
             TYPE_BYTE => Val::Byte(Byte::any(rng, DEPTH).into()),
             TYPE_PAIR => Val::Pair(Pair::<Val, Val>::any(rng, DEPTH).into()),
             TYPE_CALL => Val::Call(Call::<Val, Val>::any(rng, DEPTH).into()),
@@ -132,7 +132,7 @@ fn fn_type(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
         Val::Key(_) => TYPE_KEY,
         Val::Text(_) => TYPE_TEXT,
         Val::Int(_) => TYPE_INT,
-        Val::Number(_) => TYPE_NUMBER,
+        Val::Decimal(_) => TYPE_DECIMAL,
         Val::Byte(_) => TYPE_BYTE,
         Val::Pair(_) => TYPE_PAIR,
         Val::Call(_) => TYPE_CALL,

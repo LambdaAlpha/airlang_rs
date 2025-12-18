@@ -3,15 +3,15 @@ use crate::semantics::cfg::Cfg;
 
 // todo design
 #[derive(Clone)]
-pub struct NumberLib {}
+pub struct DecimalLib {}
 
 #[expect(clippy::derivable_impls)]
-impl Default for NumberLib {
+impl Default for DecimalLib {
     fn default() -> Self {
-        NumberLib {}
+        DecimalLib {}
     }
 }
 
-impl CfgMod for NumberLib {
+impl CfgMod for DecimalLib {
     fn extend(self, _cfg: &Cfg) {}
 }

@@ -56,7 +56,7 @@ pub(crate) const LEFT: &str = "<";
 pub(crate) const RIGHT: &str = ">";
 
 pub(crate) const INT: &str = "integer";
-pub(crate) const NUMBER: &str = "number";
+pub(crate) const DECIMAL: &str = "decimal";
 pub(crate) const BYTE: &str = "byte";
 // } prefixes
 

@@ -1,10 +1,12 @@
 use std::hash::Hash;
-use std::ops::Neg;
 use std::str::FromStr;
 
+use bigdecimal::BigDecimal;
 use const_format::concatcp;
 use num_bigint::BigInt;
+use num_bigint::Sign;
 use num_traits::Num;
+use num_traits::Zero;
 use winnow::ModalResult;
 use winnow::Parser;
 use winnow::Result;
@@ -33,6 +35,7 @@ use winnow::token::take_until;
 use winnow::token::take_while;
 
 use super::BYTE;
+use super::DECIMAL;
 use super::Direction;
 use super::EMPTY;
 use super::FALSE;
@@ -43,7 +46,6 @@ use super::LIST_LEFT;
 use super::LIST_RIGHT;
 use super::MAP_LEFT;
 use super::MAP_RIGHT;
-use super::NUMBER;
 use super::PAIR;
 use super::RIGHT;
 use super::SCOPE_LEFT;
@@ -57,11 +59,11 @@ use super::is_delimiter;
 use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
+use crate::type_::Decimal;
 use crate::type_::Int;
 use crate::type_::Key;
 use crate::type_::List;
 use crate::type_::Map;
-use crate::type_::Number;
 use crate::type_::Pair;
 use crate::type_::Text;
 use crate::type_::Unit;
@@ -74,7 +76,7 @@ pub trait ParseRepr:
     + From<Key>
     + From<Text>
     + From<Int>
-    + From<Number>
+    + From<Decimal>
     + From<Byte>
     + From<Pair<Self, Self>>
     + From<Call<Self, Self>>
@@ -172,7 +174,7 @@ macro_rules! impl_parse_repr_for_comment {
     };
 }
 
-impl_parse_repr_for_comment!(Unit Bit Key Text Int Number Byte);
+impl_parse_repr_for_comment!(Unit Bit Key Text Int Decimal Byte);
 impl_parse_repr_for_comment!(Pair<C, C> Call<C, C> List<C> Map<Key, C>);
 impl ParseRepr for C {}
 
@@ -233,7 +235,7 @@ fn token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<'a, T>, 
         SPACE => fail.parse_next(i),
         TEXT_QUOTE => text.map(T::from).map(Token::Default).parse_next(i),
         KEY_QUOTE => key.map(T::from).map(Token::Default).parse_next(i),
-        '0' ..= '9' => int_or_number.map(Token::Default).parse_next(i),
+        '0' ..= '9' => number.map(Token::Default).parse_next(i),
         _ => cut_err(key_token(ctx)).parse_next(i),
     })
     .context(label("token"))
@@ -271,7 +273,7 @@ fn prefix<'a, T: ParseRepr>(prefix: &str, ctx: ParseCtx) -> impl Parser<&'a str,
                 _ => fail.context(label("prefix token")).parse_next(i),
             },
             INT => int.map(T::from).parse_next(i),
-            NUMBER => number.map(T::from).parse_next(i),
+            DECIMAL => decimal.map(T::from).parse_next(i),
             BYTE => byte.map(T::from).parse_next(i),
             LEFT => scope(ctx.direction(Direction::Left)).parse_next(i),
             RIGHT => scope(ctx.direction(Direction::Right)).parse_next(i),
@@ -667,45 +669,97 @@ impl StrFragment<'_> {
     }
 }
 
-fn int_or_number<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
-    let norm = preceded('0', (sign, significand, opt(exponent)));
-    let short = (empty.value(true), significand_radix(10, is_decimal, "decimal"), opt(exponent));
+fn number<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
+    let int = norm_int.map(T::from);
+    let decimal = norm_decimal.map(T::from);
+    let prefixed = preceded('0', alt((int, decimal, plain_number)));
+    let f = alt((prefixed, plain_number));
     let end = not(one_of(|c| is_trivial_key(c) || LEFT_DELIMITERS.contains(&c)));
-    let f = alt((norm, short))
-        .map(|(sign, significand, exponent)| build_int_or_number(sign, significand, exponent));
-    cut_err(terminated(f, end).context(label("int or number"))).parse_next(i)
+    cut_err(terminated(f, end).context(label("number"))).parse_next(i)
 }
 
 fn int(i: &mut &str) -> ModalResult<Int> {
-    key.verify_map(|key| {
-        let mut int = (sign, integral).map(|(sign, i)| build_int(sign, i));
-        int.parse(&*key).ok()
-    })
-    .context(label("int"))
-    .parse_next(i)
+    key.verify_map(|key| alt((norm_int, plain_int)).parse(&*key).ok())
+        .context(label("int"))
+        .parse_next(i)
 }
 
-fn number(i: &mut &str) -> ModalResult<Number> {
-    key.verify_map(|key| {
-        let mut number = (sign, significand, opt(exponent))
-            .map(|(sign, significand, exponent)| build_number(sign, significand, exponent));
-        number.parse(&*key).ok()
-    })
-    .context(label("number"))
-    .parse_next(i)
+fn decimal(i: &mut &str) -> ModalResult<Decimal> {
+    key.verify_map(|key| alt((norm_decimal, plain_decimal)).parse(&*key).ok())
+        .context(label("decimal"))
+        .parse_next(i)
 }
 
-fn sign(i: &mut &str) -> ModalResult<bool> {
-    alt(('+'.value(true), '-'.value(false), empty.value(true))).parse_next(i)
-}
-
-fn integral(i: &mut &str) -> ModalResult<BigInt> {
-    let dec_no_tag = int_radix(10, is_decimal, "decimal");
+fn norm_int(i: &mut &str) -> ModalResult<Int> {
     let hex = preceded('X', cut_err(int_radix(16, is_hexadecimal, "hexadecimal")));
     let bin = preceded('B', cut_err(int_radix(2, is_binary, "binary")));
     let dec = preceded('D', cut_err(int_radix(10, is_decimal, "decimal")));
+    let f = (sign, alt((hex, bin, dec))).verify_map(|(sign, i)| {
+        if i.is_zero() && sign != Sign::NoSign {
+            return None;
+        }
+        let int = if sign == Sign::Minus { -i } else { i };
+        Some(Int::new(int))
+    });
+    f.context(label("norm_int")).parse_next(i)
+}
 
-    alt((dec_no_tag, hex, bin, dec)).context(label("integral")).parse_next(i)
+fn norm_decimal(i: &mut &str) -> ModalResult<Decimal> {
+    let exp = preceded('E', cut_err(plain_int));
+    let head = one_of(is_decimal);
+    let tail = take_while(0 .., is_decimal);
+    let f = (sign, exp, '*', head, '.', tail).verify_map(|(sign, exp, _, head, _, tail)| {
+        let Ok(exp) = i64::try_from(exp.unwrap()) else {
+            return None;
+        };
+        let significand = format!("{head}{tail}");
+        let significand = BigInt::from_str(&significand).unwrap();
+        if significand.is_zero() {
+            if sign != Sign::NoSign {
+                return None;
+            }
+        } else {
+            if head == '0' {
+                return None;
+            }
+        }
+        let significand = if sign == Sign::Minus { -significand } else { significand };
+        let scale = tail.len() as i64 - exp;
+        let decimal = BigDecimal::from_bigint(significand, scale);
+        Some(Decimal::new(decimal))
+    });
+    f.context(label("norm_decimal")).parse_next(i)
+}
+
+fn plain_number<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
+    let integral = take_while(1 .., is_decimal);
+    let fraction = opt(preceded('.', take_while(0 .., is_decimal)));
+    let f = (sign, integral, fraction).verify_map(|(sign, int, frac)| {
+        if let Some(frac) = frac {
+            build_decimal(sign, int, frac).map(T::from)
+        } else {
+            build_int(sign, int).map(T::from)
+        }
+    });
+    f.context(label("plain_number")).parse_next(i)
+}
+
+fn plain_int(i: &mut &str) -> ModalResult<Int> {
+    let int = take_while(1 .., is_decimal);
+    let f = (sign, int).verify_map(|(sign, int)| build_int(sign, int));
+    f.context(label("plain_int")).parse_next(i)
+}
+
+fn plain_decimal(i: &mut &str) -> ModalResult<Decimal> {
+    let integral = take_while(1 .., is_decimal);
+    let fraction = take_while(0 .., is_decimal);
+    let f = (sign, integral, '.', fraction)
+        .verify_map(|(sign, int, _, frac)| build_decimal(sign, int, frac));
+    f.context(label("plain_decimal")).parse_next(i)
+}
+
+fn sign(i: &mut &str) -> ModalResult<Sign> {
+    alt(('+'.value(Sign::Plus), '-'.value(Sign::Minus), empty.value(Sign::NoSign))).parse_next(i)
 }
 
 fn int_radix<'a>(
@@ -716,76 +770,25 @@ fn int_radix<'a>(
         .context(expect_desc(desc))
 }
 
-struct Significand {
-    int: BigInt,
-    radix: u8,
-    shift: Option<usize>,
-}
-
-fn significand(i: &mut &str) -> ModalResult<Significand> {
-    let dec_no_tag = significand_radix(10, is_decimal, "decimal");
-    let hex = preceded('X', cut_err(significand_radix(16, is_hexadecimal, "hexadecimal")));
-    let bin = preceded('B', cut_err(significand_radix(2, is_binary, "binary")));
-    let dec = preceded('D', cut_err(significand_radix(10, is_decimal, "decimal")));
-
-    alt((dec_no_tag, hex, bin, dec)).context(label("significand")).parse_next(i)
-}
-
-fn significand_radix<'a>(
-    radix: u8, f: fn(char) -> bool, desc: &'static str,
-) -> impl Parser<&'a str, Significand, E> {
-    (move |i: &mut _| {
-        let int = take_while(1 .., f).parse_next(i)?;
-        let fraction =
-            opt(preceded('.', cut_err(take_while(0 .., f).context(expect_desc("fraction")))))
-                .parse_next(i)?;
-        Ok(build_significand(radix, int, fraction))
-    })
-    .context(expect_desc(desc))
-}
-
-fn build_significand(radix: u8, int: &str, fraction: Option<&str>) -> Significand {
-    if let Some(fraction) = fraction {
-        let sig = format!("{int}{fraction}");
-        let int = BigInt::from_str_radix(&sig, radix as u32).unwrap();
-        let shift = Some(fraction.len());
-        Significand { int, radix, shift }
-    } else {
-        let int = BigInt::from_str_radix(int, radix as u32).unwrap();
-        Significand { int, radix, shift: None }
+fn build_int(sign: Sign, int: &str) -> Option<Int> {
+    let int = BigInt::from_str(int).unwrap();
+    if int.is_zero() && sign != Sign::NoSign {
+        return None;
     }
+    let int = if sign == Sign::Minus { -int } else { int };
+    Some(Int::from(int))
 }
 
-fn exponent(i: &mut &str) -> ModalResult<BigInt> {
-    let exp = (sign, take_while(1 .., is_decimal)).map(|(sign, exp)| build_exponent(sign, exp));
-    preceded('E', cut_err(exp)).context(label("exponent")).parse_next(i)
-}
-
-fn build_exponent(sign: bool, exp: &str) -> BigInt {
-    let i = BigInt::from_str(exp).unwrap();
-    if sign { i } else { i.neg() }
-}
-
-fn build_int(sign: bool, i: BigInt) -> Int {
-    Int::new(if sign { i } else { i.neg() })
-}
-
-fn build_number(sign: bool, significand: Significand, exp: Option<BigInt>) -> Number {
-    let int = significand.int;
-    let int = if sign { int } else { int.neg() };
-    let shift = significand.shift.unwrap_or(0);
-    let exp = exp.unwrap_or_default() - shift;
-    Number::new(int, significand.radix, exp)
-}
-
-fn build_int_or_number<T: ParseRepr>(
-    sign: bool, significand: Significand, exp: Option<BigInt>,
-) -> T {
-    if significand.shift.is_some() || exp.is_some() {
-        T::from(build_number(sign, significand, exp))
-    } else {
-        T::from(build_int(sign, significand.int))
+fn build_decimal(sign: Sign, int: &str, frac: &str) -> Option<Decimal> {
+    let significand = format!("{int}{frac}");
+    let significand = BigInt::from_str(&significand).unwrap();
+    if significand.is_zero() && sign != Sign::NoSign {
+        return None;
     }
+    let significand = if sign == Sign::Minus { -significand } else { significand };
+    let scale = frac.len() as i64;
+    let decimal = BigDecimal::from_bigint(significand, scale);
+    Some(Decimal::new(decimal))
 }
 
 fn byte(i: &mut &str) -> ModalResult<Byte> {

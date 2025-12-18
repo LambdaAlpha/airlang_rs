@@ -5,8 +5,6 @@ pub(super) fn expected() -> Vec<Repr> {
     vec![
         int("0", 10),
         int("00", 10),
-        int("0", 10),
-        int("-0", 10),
         int("123", 10),
         int("123", 10),
         int("-123", 10),

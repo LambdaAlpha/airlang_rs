@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::str::FromStr;
 
+use bigdecimal::BigDecimal;
 use num_bigint::BigInt;
 use num_traits::Num;
 
@@ -13,10 +14,10 @@ use super::repr::Repr;
 use crate::test::parse_test_file;
 use crate::type_::Bit;
 use crate::type_::Call;
+use crate::type_::Decimal;
 use crate::type_::Int;
 use crate::type_::Key;
 use crate::type_::Map;
-use crate::type_::Number;
 use crate::type_::Pair;
 use crate::type_::Text;
 use crate::type_::Unit;
@@ -42,11 +43,12 @@ fn int(s: &str, radix: u8) -> Repr {
     Repr::Int(i)
 }
 
-fn number(radix: u8, significand: &str, shift: usize, exp: &str) -> Repr {
-    let i = BigInt::from_str_radix(significand, radix as u32).unwrap();
-    let exp = BigInt::from_str(exp).unwrap();
-    let num = Number::new(i, radix, exp - shift);
-    Repr::Number(num)
+fn decimal(sign: bool, exp: i64, significand: &str) -> Repr {
+    let i = BigInt::from_str(significand).unwrap();
+    let i = if sign { i } else { -i };
+    let scale = significand.len() as i64 - 1 - exp;
+    let decimal = Decimal::new(BigDecimal::from_bigint(i, scale));
+    Repr::Decimal(decimal)
 }
 
 fn byte(b: Vec<u8>) -> Repr {
@@ -212,13 +214,13 @@ fn test_generate_int() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_number() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/number.air"), "test/number.air", number::expected)
+fn test_parse_decimal() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/decimal.air"), "test/decimal.air", decimal::expected)
 }
 
 #[test]
-fn test_generate_number() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/number.air"), "test/number.air")
+fn test_generate_decimal() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/decimal.air"), "test/decimal.air")
 }
 
 #[test]
@@ -291,7 +293,7 @@ mod text;
 
 mod int;
 
-mod number;
+mod decimal;
 
 mod byte;
 

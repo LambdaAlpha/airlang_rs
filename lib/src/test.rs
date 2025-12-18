@@ -96,8 +96,8 @@ fn test_int() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_number() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/number.air"), "test/number.air")
+fn test_decimal() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/decimal.air"), "test/decimal.air")
 }
 
 #[test]

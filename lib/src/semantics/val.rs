@@ -1,6 +1,7 @@
 pub use self::byte::ByteVal;
 pub use self::call::CallVal;
 pub use self::cfg::CfgVal;
+pub use self::decimal::DecimalVal;
 pub use self::func::ConstCompFuncVal;
 pub use self::func::ConstPrimFuncVal;
 pub use self::func::FreeCompFuncVal;
@@ -12,7 +13,6 @@ pub use self::int::IntVal;
 pub use self::link::LinkVal;
 pub use self::list::ListVal;
 pub use self::map::MapVal;
-pub use self::number::NumberVal;
 pub use self::pair::PairVal;
 pub use self::text::TextVal;
 
@@ -29,11 +29,11 @@ use crate::trait_::dyn_safe::dyn_any_debug_clone_eq;
 use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
+use crate::type_::Decimal;
 use crate::type_::Int;
 use crate::type_::Key;
 use crate::type_::List;
 use crate::type_::Map;
-use crate::type_::Number;
 use crate::type_::Pair;
 use crate::type_::Text;
 use crate::type_::Unit;
@@ -53,7 +53,7 @@ pub enum Val {
 
     Text(TextVal),
     Int(IntVal),
-    Number(NumberVal),
+    Decimal(DecimalVal),
     Byte(ByteVal),
 
     Pair(PairVal),
@@ -74,7 +74,7 @@ pub(crate) const BIT: &str = "bit";
 pub(crate) const KEY: &str = "key";
 pub(crate) const TEXT: &str = "text";
 pub(crate) const INT: &str = "integer";
-pub(crate) const NUMBER: &str = "number";
+pub(crate) const DECIMAL: &str = "decimal";
 pub(crate) const BYTE: &str = "byte";
 pub(crate) const PAIR: &str = "pair";
 pub(crate) const CALL: &str = "call";
@@ -102,9 +102,9 @@ impl From<Int> for Val {
     }
 }
 
-impl From<Number> for Val {
-    fn from(value: Number) -> Self {
-        Val::Number(NumberVal::from(value))
+impl From<Decimal> for Val {
+    fn from(value: Decimal) -> Self {
+        Val::Decimal(DecimalVal::from(value))
     }
 }
 
@@ -146,7 +146,7 @@ macro_rules! match_val {
             $crate::semantics::val::Val::Key($name) => $body,
             $crate::semantics::val::Val::Text($name) => $body,
             $crate::semantics::val::Val::Int($name) => $body,
-            $crate::semantics::val::Val::Number($name) => $body,
+            $crate::semantics::val::Val::Decimal($name) => $body,
             $crate::semantics::val::Val::Byte($name) => $body,
             $crate::semantics::val::Val::Pair($name) => $body,
             $crate::semantics::val::Val::Call($name) => $body,
@@ -175,7 +175,7 @@ mod text;
 
 mod int;
 
-mod number;
+mod decimal;
 
 mod byte;
 

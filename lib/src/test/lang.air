@@ -6,7 +6,7 @@ _ do [
     .generate set _ import _language.syntax.generate,
     .get set _ import _list.get,
     .% set _ import _integer.remainder,
-    .atom set [_unit, _bit, _key, _text, _integer, _number, _byte],
+    .atom set [_unit, _bit, _key, _text, _integer, _decimal, _byte],
     .i set 3 + (_ any _integer) % 4,
     .a set _ any atom which _ get i,
     (_ any _bit) loop [

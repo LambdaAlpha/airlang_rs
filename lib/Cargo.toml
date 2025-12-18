@@ -27,6 +27,7 @@ num-integer = "0.1"
 const_format = "0.2"
 # for once_map
 stable_deref_trait = "1.2"
+bigdecimal = "0.4"
 
 [dependencies.log]
 version = "0.4"
@@ -70,7 +71,7 @@ default-features = false
 features = ["std"]
 
 [dev-dependencies]
-criterion = "0.7"
+criterion = "0.8"
 
 [dev-dependencies.airlang_dev]
 path = "../dev"

@@ -59,15 +59,15 @@ _ do [
 -----
 _integer
 =====
-any number
+any decimal
 -----
 _ do [
     .any set _ import _value.any,
-    .n set _ any _number,
+    .n set _ any _decimal,
     n which _ type .
 ]
 -----
-_number
+_decimal
 =====
 any byte
 -----
@@ -184,14 +184,14 @@ _ do [
 -----
 _integer
 =====
-type number
+type decimal
 -----
 _ do [
     .a set 1.0,
     a which _ type .
 ]
 -----
-_number
+_decimal
 =====
 type byte
 -----
@@ -293,7 +293,7 @@ true
 -----
 true
 =====
-== number
+== decimal
 -----
 1.0 == 1.0
 -----

@@ -1,5 +1,6 @@
 use std::fmt::Write;
 
+use bigdecimal::BigDecimal;
 use const_format::concatcp;
 use derive_more::IsVariant;
 use num_traits::Signed;
@@ -27,11 +28,11 @@ use super::keyword;
 use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
+use crate::type_::Decimal;
 use crate::type_::Int;
 use crate::type_::Key;
 use crate::type_::List;
 use crate::type_::Map;
-use crate::type_::Number;
 use crate::type_::Pair;
 use crate::type_::Text;
 use crate::type_::Unit;
@@ -43,7 +44,7 @@ pub enum GenRepr<'a> {
     Bit(&'a Bit),
     Key(&'a Key),
     Int(&'a Int),
-    Number(&'a Number),
+    Decimal(&'a Decimal),
     Text(&'a Text),
     Byte(&'a Byte),
     Pair(Box<Pair<GenRepr<'a>, GenRepr<'a>>>),
@@ -126,7 +127,7 @@ impl Gen for GenRepr<'_> {
             GenRepr::Key(key) => key.gen_(ctx, s),
             GenRepr::Text(text) => text.gen_(ctx, s),
             GenRepr::Int(int) => int.gen_(ctx, s),
-            GenRepr::Number(number) => number.gen_(ctx, s),
+            GenRepr::Decimal(decimal) => decimal.gen_(ctx, s),
             GenRepr::Byte(byte) => byte.gen_(ctx, s),
             GenRepr::Pair(pair) => pair.gen_(ctx, s),
             GenRepr::Call(call) => call.gen_(ctx, s),
@@ -260,25 +261,23 @@ impl Gen for &Int {
     }
 }
 
-impl Gen for &Number {
+impl Gen for &Decimal {
     fn gen_(self, _ctx: GenCtx, s: &mut String) {
-        let int = self.int();
-        let radix = self.radix();
-        if int.is_negative() || radix != 10 {
-            s.push('0');
-        }
-        if int.is_negative() {
+        s.push('0');
+        if self.is_negative() {
             s.push('-');
         }
-        match radix {
-            16 => s.push('X'),
-            2 => s.push('B'),
-            10 => {}
-            _ => unreachable!(),
-        }
-        s.push_str(&int.abs().to_str_radix(radix as u32));
         s.push('E');
-        write!(s, "{}", self.exp()).unwrap();
+        write!(s, "{}", self.order_of_magnitude()).unwrap();
+        s.push('*');
+        let (i, _exp) = self.abs().into_bigint_and_scale();
+        let scale = (self.digits() - 1) as i64;
+        let significand = BigDecimal::from_bigint(i, scale);
+        let no_frac = significand.fractional_digit_count() <= 0;
+        significand.write_plain_string(s).unwrap();
+        if no_frac {
+            s.push('.');
+        }
     }
 }
 

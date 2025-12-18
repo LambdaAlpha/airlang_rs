@@ -14,11 +14,11 @@ use super::parser::ParseRepr;
 use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
+use crate::type_::Decimal;
 use crate::type_::Int;
 use crate::type_::Key;
 use crate::type_::List;
 use crate::type_::Map;
-use crate::type_::Number;
 use crate::type_::Pair;
 use crate::type_::Text;
 use crate::type_::Unit;
@@ -32,7 +32,7 @@ pub enum Repr {
 
     Text(Text),
     Int(Int),
-    Number(Number),
+    Decimal(Decimal),
     Byte(Byte),
 
     Pair(Box<PairRepr>),
@@ -112,7 +112,7 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
             Repr::Key(key) => GenRepr::Key(key),
             Repr::Text(text) => GenRepr::Text(text),
             Repr::Int(int) => GenRepr::Int(int),
-            Repr::Number(number) => GenRepr::Number(number),
+            Repr::Decimal(decimal) => GenRepr::Decimal(decimal),
             Repr::Byte(byte) => GenRepr::Byte(byte),
             Repr::Pair(pair) => {
                 let first = (&pair.first).try_into()?;

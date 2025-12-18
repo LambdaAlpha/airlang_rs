@@ -76,13 +76,13 @@ integer'-123'
 0-B1110
 ```
 
-**number**
+**decimal**
 
 ```air
 0.1
 0-0.1
-1.0E-1
-number'-0.1'
+0-E-12*3.456
+decimal'-0.1'
 ```
 
 **byte**

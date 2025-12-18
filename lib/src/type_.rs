@@ -1,12 +1,12 @@
 pub use self::bit::Bit;
 pub use self::byte::Byte;
 pub use self::call::Call;
+pub use self::decimal::Decimal;
 pub use self::either::Either;
 pub use self::int::Int;
 pub use self::key::Key;
 pub use self::list::List;
 pub use self::map::Map;
-pub use self::number::Number;
 pub use self::pair::Pair;
 pub use self::ref_::ConstRef;
 pub use self::ref_::DynRef;
@@ -27,7 +27,7 @@ mod text;
 
 mod int;
 
-mod number;
+mod decimal;
 
 mod byte;
 
