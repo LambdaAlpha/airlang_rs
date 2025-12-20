@@ -28,11 +28,7 @@ negative decimal
 =====
 big decimal
 -----
-11111111_22222222_33333333_44444444
-=====
-group
------
-1_1111111_22_222222_333_33333_4444_4444
+11111111222222223333333344444444
 =====
 explicit decimal
 -----
@@ -52,19 +48,15 @@ hexadecimal redundant 0
 =====
 hexadecimal a-f
 -----
-0Xa0_b1_c2_d3
+0Xa0b1c2d3
 =====
 negative hexadecimal a-f
 -----
-0-Xa0_b1_c2_d3
+0-Xa0b1c2d3
 =====
 big hexadecimal
 -----
-0X99999999_00000000_aaaaaaaa_bbbbbbbb_cccccccc
-=====
-hexadecimal group
------
-0X9_9999999_00_000000_aaa_aaaaa_bbbb_bbbb_ccccc_ccc
+0X9999999900000000aaaaaaaabbbbbbbbcccccccc
 =====
 binary 0
 -----
@@ -72,48 +64,48 @@ binary 0
 =====
 positive binary
 -----
-0B1101_0010
+0B11010010
 =====
 negative binary
 -----
-0-B1101_0010
+0-B11010010
 =====
 norm 0
 -----
-integer(0)
+integer'0'
 =====
 norm unsigned
 -----
-integer(1)
+integer'1'
 =====
 norm signed positive
 -----
-integer(+1)
+integer'+1'
 =====
 norm signed negative
 -----
-integer(-1)
+integer'-1'
 =====
 norm positive decimal
 -----
-integer(+D123)
+integer'+D123'
 =====
 norm negative decimal
 -----
-integer(-D123)
+integer'-D123'
 =====
 norm positive hexadecimal
 -----
-integer(Xa0_b1_c2_d3)
+integer'Xa0^ b1^ c2^ d3'
 =====
 norm negative hexadecimal
 -----
-integer(-Xa0_b1_c2_d3)
+integer'-Xa0^ b1^ c2^ d3'
 =====
 norm positive binary
 -----
-integer(B1101_0010)
+integer'B1101^ 0010'
 =====
 norm negative binary
 -----
-integer(-B1101_0010)
+integer'-B1101^ 0010'

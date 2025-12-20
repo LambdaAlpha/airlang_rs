@@ -196,7 +196,7 @@ _number
 type byte
 -----
 _ do [
-    .a set byte(ff),
+    .a set byte'ff',
     a which _ type .
 ]
 -----
@@ -296,6 +296,12 @@ true
 == number
 -----
 1.0 == 1.0
+-----
+true
+=====
+== byte
+-----
+byte'ff' == byte'ff'
 -----
 true
 =====

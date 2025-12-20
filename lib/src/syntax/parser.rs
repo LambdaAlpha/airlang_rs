@@ -8,7 +8,6 @@ use num_traits::Num;
 use winnow::ModalResult;
 use winnow::Parser;
 use winnow::Result;
-use winnow::ascii::digit1;
 use winnow::ascii::line_ending;
 use winnow::combinator::alt;
 use winnow::combinator::cut_err;
@@ -670,34 +669,30 @@ impl StrFragment<'_> {
 
 fn int_or_number<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
     let norm = preceded('0', (sign, significand, opt(exponent)));
-    let short = (empty.value(true), significand_radix(10, digit1, "decimal"), opt(exponent));
+    let short = (empty.value(true), significand_radix(10, is_decimal, "decimal"), opt(exponent));
     let end = not(one_of(|c| is_trivial_key(c) || LEFT_DELIMITERS.contains(&c)));
     let f = alt((norm, short))
         .map(|(sign, significand, exponent)| build_int_or_number(sign, significand, exponent));
     cut_err(terminated(f, end).context(label("int or number"))).parse_next(i)
 }
 
-// todo design support spaces
 fn int(i: &mut &str) -> ModalResult<Int> {
-    let int = (sign, integral).map(|(sign, i)| build_int(sign, i));
-    scoped_trim(int).context(label("int")).parse_next(i)
+    key.verify_map(|key| {
+        let mut int = (sign, integral).map(|(sign, i)| build_int(sign, i));
+        int.parse(&*key).ok()
+    })
+    .context(label("int"))
+    .parse_next(i)
 }
 
-// todo design support spaces
 fn number(i: &mut &str) -> ModalResult<Number> {
-    let number = (sign, significand, opt(exponent))
-        .map(|(sign, significand, exponent)| build_number(sign, significand, exponent));
-    scoped_trim(number).context(label("number")).parse_next(i)
-}
-
-fn trim_num0<'a, F>(f: F) -> impl Parser<&'a str, String, E>
-where F: Parser<&'a str, &'a str, E> {
-    separated(0 .., f, EMPTY).map(|s: Vec<&str>| s.join(""))
-}
-
-fn trim_num1<'a, F>(f: F) -> impl Parser<&'a str, String, E>
-where F: Parser<&'a str, &'a str, E> {
-    separated(1 .., f, EMPTY).map(|s: Vec<&str>| s.join(""))
+    key.verify_map(|key| {
+        let mut number = (sign, significand, opt(exponent))
+            .map(|(sign, significand, exponent)| build_number(sign, significand, exponent));
+        number.parse(&*key).ok()
+    })
+    .context(label("number"))
+    .parse_next(i)
 }
 
 fn sign(i: &mut &str) -> ModalResult<bool> {
@@ -705,18 +700,19 @@ fn sign(i: &mut &str) -> ModalResult<bool> {
 }
 
 fn integral(i: &mut &str) -> ModalResult<BigInt> {
-    let dec_no_tag = int_radix(10, digit1, "decimal");
-    let hex = preceded('X', cut_err(int_radix(16, hexadecimal1, "hexadecimal")));
-    let bin = preceded('B', cut_err(int_radix(2, binary1, "binary")));
-    let dec = preceded('D', cut_err(int_radix(10, digit1, "decimal")));
+    let dec_no_tag = int_radix(10, is_decimal, "decimal");
+    let hex = preceded('X', cut_err(int_radix(16, is_hexadecimal, "hexadecimal")));
+    let bin = preceded('B', cut_err(int_radix(2, is_binary, "binary")));
+    let dec = preceded('D', cut_err(int_radix(10, is_decimal, "decimal")));
 
     alt((dec_no_tag, hex, bin, dec)).context(label("integral")).parse_next(i)
 }
 
-fn int_radix<'a, F>(radix: u8, f: F, desc: &'static str) -> impl Parser<&'a str, BigInt, E>
-where F: Parser<&'a str, &'a str, E> {
-    trim_num1(f)
-        .map(move |int| BigInt::from_str_radix(&int, radix as u32).unwrap())
+fn int_radix<'a>(
+    radix: u8, f: fn(char) -> bool, desc: &'static str,
+) -> impl Parser<&'a str, BigInt, E> {
+    take_while(1 .., f)
+        .map(move |int| BigInt::from_str_radix(int, radix as u32).unwrap())
         .context(expect_desc(desc))
 }
 
@@ -727,47 +723,46 @@ struct Significand {
 }
 
 fn significand(i: &mut &str) -> ModalResult<Significand> {
-    let dec_no_tag = significand_radix(10, digit1, "decimal");
-    let hex = preceded('X', cut_err(significand_radix(16, hexadecimal1, "hexadecimal")));
-    let bin = preceded('B', cut_err(significand_radix(2, binary1, "binary")));
-    let dec = preceded('D', cut_err(significand_radix(10, digit1, "decimal")));
+    let dec_no_tag = significand_radix(10, is_decimal, "decimal");
+    let hex = preceded('X', cut_err(significand_radix(16, is_hexadecimal, "hexadecimal")));
+    let bin = preceded('B', cut_err(significand_radix(2, is_binary, "binary")));
+    let dec = preceded('D', cut_err(significand_radix(10, is_decimal, "decimal")));
 
     alt((dec_no_tag, hex, bin, dec)).context(label("significand")).parse_next(i)
 }
 
-fn significand_radix<'a, F>(
-    radix: u8, mut f: F, desc: &'static str,
-) -> impl Parser<&'a str, Significand, E>
-where F: Parser<&'a str, &'a str, E> {
+fn significand_radix<'a>(
+    radix: u8, f: fn(char) -> bool, desc: &'static str,
+) -> impl Parser<&'a str, Significand, E> {
     (move |i: &mut _| {
-        let int = trim_num1(f.by_ref()).parse_next(i)?;
+        let int = take_while(1 .., f).parse_next(i)?;
         let fraction =
-            opt(preceded('.', cut_err(trim_num0(f.by_ref()).context(expect_desc("fraction")))))
+            opt(preceded('.', cut_err(take_while(0 .., f).context(expect_desc("fraction")))))
                 .parse_next(i)?;
         Ok(build_significand(radix, int, fraction))
     })
     .context(expect_desc(desc))
 }
 
-fn build_significand(radix: u8, int: String, fraction: Option<String>) -> Significand {
+fn build_significand(radix: u8, int: &str, fraction: Option<&str>) -> Significand {
     if let Some(fraction) = fraction {
         let sig = format!("{int}{fraction}");
         let int = BigInt::from_str_radix(&sig, radix as u32).unwrap();
         let shift = Some(fraction.len());
         Significand { int, radix, shift }
     } else {
-        let int = BigInt::from_str_radix(&int, radix as u32).unwrap();
+        let int = BigInt::from_str_radix(int, radix as u32).unwrap();
         Significand { int, radix, shift: None }
     }
 }
 
 fn exponent(i: &mut &str) -> ModalResult<BigInt> {
-    let exp = (sign, trim_num1(digit1)).map(|(sign, exp)| build_exponent(sign, exp));
+    let exp = (sign, take_while(1 .., is_decimal)).map(|(sign, exp)| build_exponent(sign, exp));
     preceded('E', cut_err(exp)).context(label("exponent")).parse_next(i)
 }
 
-fn build_exponent(sign: bool, exp: String) -> BigInt {
-    let i = BigInt::from_str(&exp).unwrap();
+fn build_exponent(sign: bool, exp: &str) -> BigInt {
+    let i = BigInt::from_str(exp).unwrap();
     if sign { i } else { i.neg() }
 }
 
@@ -793,40 +788,40 @@ fn build_int_or_number<T: ParseRepr>(
     }
 }
 
-// todo design support spaces
 fn byte(i: &mut &str) -> ModalResult<Byte> {
-    let hex = preceded('X', cut_err(hexadecimal_byte));
-    let bin = preceded('B', cut_err(binary_byte));
-    let byte = alt((hex, bin, hexadecimal_byte));
-    scoped_trim(byte).context(label("byte")).parse_next(i)
+    key.verify_map(|key| {
+        let hex = preceded('X', cut_err(hexadecimal_byte));
+        let bin = preceded('B', cut_err(binary_byte));
+        let mut byte = alt((hex, bin, hexadecimal_byte));
+        byte.parse(&*key).ok()
+    })
+    .context(label("byte"))
+    .parse_next(i)
 }
 
 fn hexadecimal_byte(i: &mut &str) -> ModalResult<Byte> {
-    let digits = hexadecimal1.verify(|s: &str| s.len().is_multiple_of(2));
-    trim_num0(digits)
-        .map(|s| Byte::from(hex_str_to_vec_u8(&s).unwrap()))
+    take_while(0 .., is_hexadecimal)
+        .verify(|s: &str| s.len().is_multiple_of(2))
+        .map(|s| Byte::from(hex_str_to_vec_u8(s).unwrap()))
         .context(expect_desc("hexadecimal"))
         .parse_next(i)
 }
 
 fn binary_byte(i: &mut &str) -> ModalResult<Byte> {
-    let digits = binary1.verify(|s: &str| s.len().is_multiple_of(8));
-    trim_num0(digits)
-        .map(|s| Byte::from(bin_str_to_vec_u8(&s).unwrap()))
+    take_while(0 .., is_binary)
+        .verify(|s: &str| s.len().is_multiple_of(8))
+        .map(|s| Byte::from(bin_str_to_vec_u8(s).unwrap()))
         .context(expect_desc("binary"))
         .parse_next(i)
 }
 
-fn hexadecimal1<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
-    take_while(1 .., is_hexadecimal).parse_next(i)
+#[expect(clippy::manual_is_ascii_check)]
+fn is_decimal(c: char) -> bool {
+    matches!(c, '0' ..= '9')
 }
 
 fn is_hexadecimal(c: char) -> bool {
     matches!(c, '0'..='9' | 'a'..='f')
-}
-
-fn binary1<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
-    take_while(1 .., is_binary).parse_next(i)
 }
 
 fn is_binary(c: char) -> bool {

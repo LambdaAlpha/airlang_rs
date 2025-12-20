@@ -138,13 +138,13 @@ _ do [
     _ into_utf8 "abc"
 ]
 -----
-byte(616263)
+byte'616263'
 =====
 from_utf8
 -----
 _ do [
     .from_utf8 set _ import _text.from_utf8,
-    _ from_utf8 byte(616263)
+    _ from_utf8 byte'616263'
 ]
 -----
 "abc"

@@ -178,33 +178,17 @@ int hexadecimal no base
 -----
 0ff
 =====
-int unexpected _
+int _
 -----
-0X_0
-=====
-int long _ 1
------
-0B0__0
-=====
-int long _ 2
------
-1__2
-=====
-int trailing _ 1
------
-0X0_
-=====
-int trailing _ 2
------
-1_
+0X0_1
 =====
 int norm prefixed 0
 -----
-integer(0-1)
+integer'0-1'
 =====
 int norm hexadecimal prefix 0
 -----
-integer(0Xff)
+integer'0Xff'
 =====
 number lower case tag
 -----
@@ -226,97 +210,41 @@ number hexadecimal no base
 -----
 0ff.0
 =====
-number long _ integral
+number _
 -----
-1__0.
-=====
-number long _ fractional
------
-1.0__0
-=====
-number long _ exponent
------
-1.E2__2
-=====
-number unexpected _ 1
------
-1_.
-=====
-number unexpected _ 2
------
-1._0
-=====
-number trailing _ 1
------
-1.0_
-=====
-number trailing _ 2
------
-1.E2_
+1_0.00__1
 =====
 number norm prefixed 0
 -----
-number(0-1.0)
+number'0-1.0'
 =====
 number norm hexadecimal prefixed 0
 -----
-number(0X1.0)
+number'0X1.0'
 =====
 byte wrong length
 -----
-byte(B0000)
-=====
-byte illegal group
------
-byte(B0000_0000)
+byte'B0000'
 =====
 byte illegal digit
 -----
-byte(B00000002)
-=====
-byte unexpected _
------
-byte(B_00000000)
-=====
-byte trailing _
------
-byte(B00000000_)
-=====
-byte long _
------
-byte(B00000000__00000000)
+byte'B00000002'
 =====
 byte hexadecimal wrong length
 -----
-byte(Xf)
-=====
-byte hexadecimal illegal group
------
-byte(Xf_f)
-=====
-byte hexadecimal unexpected _
------
-byte(X_ff)
-=====
-byte hexadecimal trailing _
------
-byte(Xff_)
-=====
-byte hexadecimal long _
------
-byte(Xff__ff)
+byte'Xf'
 =====
 byte hexadecimal illegal digit
 -----
-byte(Xfg)
+byte'Xfg'
 =====
 byte unknown base
 -----
-byte(z)
+byte'Z'
 =====
 byte point
 -----
-byte(Xff.)
+byte'Xff.'
 =====
 unquoted key with [
 -----
@@ -433,18 +361,6 @@ illegal unicode
 comment in unicode
 -----
 "^u(_(a) 123)"
-=====
-comment in int
------
-integer(_(1) 2)
-=====
-comment in number
------
-number(1 _(2))
-=====
-comment in byte
------
-byte(_('a') 11)
 =====
 comment unpaired
 -----

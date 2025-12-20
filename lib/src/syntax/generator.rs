@@ -283,12 +283,13 @@ impl Gen for &Number {
 }
 
 impl Gen for &Byte {
-    fn gen_(self, ctx: GenCtx, s: &mut String) {
-        prefixed(ctx, s, BYTE, |_ctx, s| {
-            if !self.is_empty() {
-                utils::conversion::u8_array_to_hex_string_mut(self, s);
-            }
-        });
+    fn gen_(self, _ctx: GenCtx, s: &mut String) {
+        s.push_str(BYTE);
+        s.push(KEY_QUOTE);
+        if !self.is_empty() {
+            utils::conversion::u8_array_to_hex_string_mut(self, s);
+        }
+        s.push(KEY_QUOTE);
     }
 }
 

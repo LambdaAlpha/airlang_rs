@@ -556,13 +556,13 @@ iterate byte
 _ do [
     .push set _ import _list.push,
     .b set [],
-    byte(1122334455) iterate i : [
+    byte'1122334455' iterate i : [
         b which _ push i
     ],
     b
 ]
 -----
-[byte(11), byte(22), byte(33), byte(44), byte(55)]
+[byte'11', byte'22', byte'33', byte'44', byte'55']
 =====
 iterate key
 -----

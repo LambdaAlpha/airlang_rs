@@ -1,35 +1,35 @@
 empty
 -----
-byte()
+byte''
 =====
 binary empty
 -----
-byte(B)
+byte'B'
 =====
 hexadecimal empty
 -----
-byte(X)
+byte'X'
 =====
 binary 0
 -----
-byte(B00000000)
+byte'B00000000'
 =====
 hexadecimal 0
 -----
-byte(X00000000)
+byte'X00000000'
 =====
 hexadecimal a-f
 -----
-byte(Xff)
+byte'Xff'
 =====
 binary group
 -----
-byte(B0000111100001111_00001111)
+byte'B0000111100001111^ 00001111'
 =====
 hexadecimal group
 -----
-byte(X0011_ff_ee)
+byte'X0011^ ff^ ee'
 =====
 default base
 -----
-byte(0123456789abcdef)
+byte'0123456789abcdef'

@@ -30,13 +30,13 @@ no point
 -----
 1E2
 =====
-group
+normal
 -----
-0-1_2_3.4_55_666E-1_2_3
+0-123.455666E-123
 =====
 big
 -----
-1.1111111111_1111111111_1111111111E100
+1.111111111111111111111111111111E100
 =====
 unsigned hexadecimal
 -----
@@ -76,44 +76,44 @@ e
 =====
 norm int 0
 -----
-number(0)
+number'0'
 =====
 norm unsigned int 1
 -----
-number(1)
+number'1'
 =====
 norm positive int 1
 -----
-number(+1)
+number'+1'
 =====
 norm negative int 1
 -----
-number(-1)
+number'-1'
 =====
 norm signed decimal int
 -----
-number(+D123)
+number'+D123'
 =====
 norm signed decimal
 -----
-number(-D123.)
+number'-D123.'
 =====
 norm unsigned hexadecimal
 -----
-number(X1f.f1E-3)
+number'X1f.f1E-3'
 =====
 norm signed hexadecimal
 -----
-number(-X1f.f1)
+number'-X1f.f1'
 =====
 norm unsigned binary
 -----
-number(B1.01)
+number'B1.01'
 =====
 norm signed binary
 -----
-number(-B1.01E-3)
+number'-B1.01E-3'
 =====
 norm group
 -----
-number(1_2_3.4_5)
+number'1^ 2^ 3.4^ 5'

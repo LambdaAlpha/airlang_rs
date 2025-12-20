@@ -6,7 +6,7 @@ _ do [
     .push set _ import _byte.push,
     .b set _ any _byte,
     .l set b which _ length .,
-    b which _ push byte(00),
+    b which _ push byte'00',
     .l1 set b which _ length .,
     l1 == l + 1
 ]
@@ -34,7 +34,7 @@ length empty
 -----
 _ do [
     .length set _ import _byte.length,
-    .b set byte(),
+    .b set byte'',
     b which _ length .
 ]
 -----
@@ -44,7 +44,7 @@ length else
 -----
 _ do [
     .length set _ import _byte.length,
-    .b set byte(ff),
+    .b set byte'ff',
     b which _ length .
 ]
 -----
@@ -70,34 +70,34 @@ push
 -----
 _ do [
     .push set _ import _byte.push,
-    .a set byte(00),
-    .b set byte(1122),
+    .a set byte'00',
+    .b set byte'1122',
     a which _ push b,
     a
 ]
 -----
-byte(001122)
+byte'001122'
 =====
 join empty
 -----
 _ do [
     .join set _ import _byte.join,
-    byte() join [byte(1234), byte(56)]
+    byte'' join [byte'1234', byte'56']
 ]
 -----
-byte(123456)
+byte'123456'
 =====
 join unit
 -----
 _ do [
     .join set _ import _byte.join,
-    .a set byte(1234),
-    .b set byte(5678),
-    .c set byte(9abc),
+    .a set byte'1234',
+    .b set byte'5678',
+    .c set byte'9abc',
     . join [a, b, c]
 ]
 -----
-byte(123456789abc)
+byte'123456789abc'
 =====
 join no byte
 -----
@@ -106,13 +106,13 @@ _ do [
     . join []
 ]
 -----
-byte()
+byte''
 =====
 join else
 -----
 _ do [
     .join set _ import _byte.join,
-    byte(00) join [byte(1111), byte(22)]
+    byte'00' join [byte'1111', byte'22']
 ]
 -----
-byte(11110022)
+byte'11110022'
