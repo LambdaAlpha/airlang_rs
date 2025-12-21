@@ -1,17 +1,324 @@
+use std::num::NonZeroU64;
+
+use const_format::concatcp;
+use log::error;
+
 use crate::cfg::CfgMod;
+use crate::cfg::exception::illegal_cfg;
+use crate::cfg::exception::illegal_input;
+use crate::cfg::lib::FreePrimFn;
+use crate::cfg::lib::free_impl;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::PREFIX_ID;
+use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::Val;
+use crate::type_::Decimal;
+use crate::type_::DecimalConfig;
+use crate::type_::Key;
+use crate::type_::Pair;
+use crate::type_::RoundingMode;
 
 // todo design
 #[derive(Clone)]
-pub struct DecimalLib {}
+pub struct DecimalLib {
+    pub add: FreePrimFuncVal,
+    pub subtract: FreePrimFuncVal,
+    pub multiply: FreePrimFuncVal,
+    pub divide: FreePrimFuncVal,
+    pub less_than: FreePrimFuncVal,
+    pub less_equal: FreePrimFuncVal,
+    pub greater_than: FreePrimFuncVal,
+    pub greater_equal: FreePrimFuncVal,
+    pub less_greater: FreePrimFuncVal,
+}
 
-#[expect(clippy::derivable_impls)]
 impl Default for DecimalLib {
     fn default() -> Self {
-        DecimalLib {}
+        DecimalLib {
+            add: add(),
+            subtract: subtract(),
+            multiply: multiply(),
+            divide: divide(),
+            less_than: less_than(),
+            less_equal: less_equal(),
+            greater_than: greater_than(),
+            greater_equal: greater_equal(),
+            less_greater: less_greater(),
+        }
     }
 }
 
 impl CfgMod for DecimalLib {
-    fn extend(self, _cfg: &Cfg) {}
+    fn extend(self, cfg: &Cfg) {
+        self.add.extend(cfg);
+        self.subtract.extend(cfg);
+        self.multiply.extend(cfg);
+        self.divide.extend(cfg);
+        self.less_than.extend(cfg);
+        self.less_equal.extend(cfg);
+        self.greater_than.extend(cfg);
+        self.greater_equal.extend(cfg);
+        self.less_greater.extend(cfg);
+    }
+}
+
+impl DecimalLib {
+    pub const ROUNDING_MODE: &str = "_decimal.rounding.mode";
+    pub const ROUNDING_PRECISION: &str = "_decimal.rounding.precision";
+
+    pub fn decimal_config(cfg: &Cfg) -> Option<DecimalConfig> {
+        let mode = cfg.import(Key::from_str_unchecked(Self::ROUNDING_MODE))?;
+        let Val::Key(mode) = mode else {
+            return None;
+        };
+        let mode = parse_rounding_mode(&mode)?;
+        let precision = cfg.import(Key::from_str_unchecked(Self::ROUNDING_PRECISION))?;
+        let Val::Int(precision) = precision else {
+            return None;
+        };
+        let precision: u64 = precision.unwrap().unwrap().try_into().ok()?;
+        let precision = NonZeroU64::new(precision)?;
+        let config = DecimalConfig::new(precision, mode);
+        Some(config)
+    }
+}
+
+const MODE_INFINITY: &str = concatcp!(PREFIX_ID, "infinity");
+const MODE_ZERO: &str = concatcp!(PREFIX_ID, "zero");
+const MODE_POSITIVE: &str = concatcp!(PREFIX_ID, "positive");
+const MODE_NEGATIVE: &str = concatcp!(PREFIX_ID, "negative");
+const MODE_HALF_INFINITY: &str = concatcp!(PREFIX_ID, "half_infinity");
+const MODE_HALF_ZERO: &str = concatcp!(PREFIX_ID, "half_zero");
+const MODE_HALF_EVEN: &str = concatcp!(PREFIX_ID, "half_even");
+
+fn parse_rounding_mode(key: &str) -> Option<RoundingMode> {
+    let mode = match key {
+        MODE_INFINITY => RoundingMode::Infinity,
+        MODE_ZERO => RoundingMode::Zero,
+        MODE_POSITIVE => RoundingMode::Positive,
+        MODE_NEGATIVE => RoundingMode::Negative,
+        MODE_HALF_INFINITY => RoundingMode::HalfInfinity,
+        MODE_HALF_ZERO => RoundingMode::HalfZero,
+        MODE_HALF_EVEN => RoundingMode::HalfEven,
+        _ => return None,
+    };
+    Some(mode)
+}
+
+pub fn add() -> FreePrimFuncVal {
+    FreePrimFn { id: "_decimal.add", raw_input: false, f: free_impl(fn_add) }.free()
+}
+
+fn fn_add(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
+        return illegal_input(cfg);
+    };
+    let pair = Pair::from(pair);
+    let Val::Decimal(d1) = pair.first else {
+        error!("input.first {:?} should be a decimal", pair.first);
+        return illegal_input(cfg);
+    };
+    let Val::Decimal(d2) = pair.second else {
+        error!("input.second {:?} should be a decimal", pair.second);
+        return illegal_input(cfg);
+    };
+    let Some(config) = DecimalLib::decimal_config(cfg) else {
+        error!("decimal config should exist and be valid");
+        return illegal_cfg(cfg);
+    };
+    let d1 = Decimal::from(d1);
+    let d2 = Decimal::from(d2);
+    Val::Decimal(d1.add(d2, config).into())
+}
+
+pub fn subtract() -> FreePrimFuncVal {
+    FreePrimFn { id: "_decimal.subtract", raw_input: false, f: free_impl(fn_subtract) }.free()
+}
+
+fn fn_subtract(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
+        return illegal_input(cfg);
+    };
+    let pair = Pair::from(pair);
+    let Val::Decimal(d1) = pair.first else {
+        error!("input.first {:?} should be a decimal", pair.first);
+        return illegal_input(cfg);
+    };
+    let Val::Decimal(d2) = pair.second else {
+        error!("input.second {:?} should be a decimal", pair.second);
+        return illegal_input(cfg);
+    };
+    let Some(config) = DecimalLib::decimal_config(cfg) else {
+        error!("decimal config should exist and be valid");
+        return illegal_cfg(cfg);
+    };
+    let d1 = Decimal::from(d1);
+    let d2 = Decimal::from(d2);
+    Val::Decimal(d1.subtract(d2, config).into())
+}
+
+pub fn multiply() -> FreePrimFuncVal {
+    FreePrimFn { id: "_decimal.multiply", raw_input: false, f: free_impl(fn_multiply) }.free()
+}
+
+fn fn_multiply(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
+        return illegal_input(cfg);
+    };
+    let pair = Pair::from(pair);
+    let Val::Decimal(d1) = pair.first else {
+        error!("input.first {:?} should be a decimal", pair.first);
+        return illegal_input(cfg);
+    };
+    let Val::Decimal(d2) = pair.second else {
+        error!("input.second {:?} should be a decimal", pair.second);
+        return illegal_input(cfg);
+    };
+    let Some(config) = DecimalLib::decimal_config(cfg) else {
+        error!("decimal config should exist and be valid");
+        return illegal_cfg(cfg);
+    };
+    let d1 = Decimal::from(d1);
+    let d2 = Decimal::from(d2);
+    Val::Decimal(d1.multiply(d2, config).into())
+}
+
+pub fn divide() -> FreePrimFuncVal {
+    FreePrimFn { id: "_decimal.divide", raw_input: false, f: free_impl(fn_divide) }.free()
+}
+
+fn fn_divide(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
+        return illegal_input(cfg);
+    };
+    let pair = Pair::from(pair);
+    let Val::Decimal(d1) = pair.first else {
+        error!("input.first {:?} should be a decimal", pair.first);
+        return illegal_input(cfg);
+    };
+    let Val::Decimal(d2) = pair.second else {
+        error!("input.second {:?} should be a decimal", pair.second);
+        return illegal_input(cfg);
+    };
+    let Some(config) = DecimalLib::decimal_config(cfg) else {
+        error!("decimal config should exist and be valid");
+        return illegal_cfg(cfg);
+    };
+    let d1 = Decimal::from(d1);
+    let d2 = Decimal::from(d2);
+    let Some(d) = d1.divide(d2, config) else {
+        return illegal_input(cfg);
+    };
+    Val::Decimal(d.into())
+}
+
+pub fn less_than() -> FreePrimFuncVal {
+    FreePrimFn { id: "_decimal.less", raw_input: false, f: free_impl(fn_less_than) }.free()
+}
+
+fn fn_less_than(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
+        return illegal_input(cfg);
+    };
+    let pair = Pair::from(pair);
+    let Val::Decimal(d1) = pair.first else {
+        error!("input.first {:?} should be a decimal", pair.first);
+        return illegal_input(cfg);
+    };
+    let Val::Decimal(d2) = pair.second else {
+        error!("input.second {:?} should be a decimal", pair.second);
+        return illegal_input(cfg);
+    };
+    Val::Bit(d1.less_than(&d2))
+}
+
+pub fn less_equal() -> FreePrimFuncVal {
+    FreePrimFn { id: "_decimal.less_equal", raw_input: false, f: free_impl(fn_less_equal) }.free()
+}
+
+fn fn_less_equal(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
+        return illegal_input(cfg);
+    };
+    let pair = Pair::from(pair);
+    let Val::Decimal(d1) = pair.first else {
+        error!("input.first {:?} should be a decimal", pair.first);
+        return illegal_input(cfg);
+    };
+    let Val::Decimal(d2) = pair.second else {
+        error!("input.second {:?} should be a decimal", pair.second);
+        return illegal_input(cfg);
+    };
+    Val::Bit(d1.less_equal(&d2))
+}
+
+pub fn greater_than() -> FreePrimFuncVal {
+    FreePrimFn { id: "_decimal.greater", raw_input: false, f: free_impl(fn_greater_than) }.free()
+}
+
+fn fn_greater_than(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
+        return illegal_input(cfg);
+    };
+    let pair = Pair::from(pair);
+    let Val::Decimal(d1) = pair.first else {
+        error!("input.first {:?} should be a decimal", pair.first);
+        return illegal_input(cfg);
+    };
+    let Val::Decimal(d2) = pair.second else {
+        error!("input.second {:?} should be a decimal", pair.second);
+        return illegal_input(cfg);
+    };
+    Val::Bit(d1.greater_than(&d2))
+}
+
+pub fn greater_equal() -> FreePrimFuncVal {
+    FreePrimFn { id: "_decimal.greater_equal", raw_input: false, f: free_impl(fn_greater_equal) }
+        .free()
+}
+
+fn fn_greater_equal(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
+        return illegal_input(cfg);
+    };
+    let pair = Pair::from(pair);
+    let Val::Decimal(d1) = pair.first else {
+        error!("input.first {:?} should be a decimal", pair.first);
+        return illegal_input(cfg);
+    };
+    let Val::Decimal(d2) = pair.second else {
+        error!("input.second {:?} should be a decimal", pair.second);
+        return illegal_input(cfg);
+    };
+    Val::Bit(d1.greater_equal(&d2))
+}
+
+pub fn less_greater() -> FreePrimFuncVal {
+    FreePrimFn { id: "_decimal.less_greater", raw_input: false, f: free_impl(fn_less_greater) }
+        .free()
+}
+
+fn fn_less_greater(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
+        return illegal_input(cfg);
+    };
+    let pair = Pair::from(pair);
+    let Val::Decimal(d1) = pair.first else {
+        error!("input.first {:?} should be a decimal", pair.first);
+        return illegal_input(cfg);
+    };
+    let Val::Decimal(d2) = pair.second else {
+        error!("input.second {:?} should be a decimal", pair.second);
+        return illegal_input(cfg);
+    };
+    Val::Bit(d1.less_greater(&d2))
 }

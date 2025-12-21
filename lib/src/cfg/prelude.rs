@@ -15,15 +15,25 @@ pub struct CorePrelude {
     pub xor: FreePrimFuncVal,
     pub imply: FreePrimFuncVal,
 
-    pub add: FreePrimFuncVal,
-    pub subtract: FreePrimFuncVal,
-    pub multiply: FreePrimFuncVal,
-    pub divide: FreePrimFuncVal,
-    pub less_than: FreePrimFuncVal,
-    pub less_equal: FreePrimFuncVal,
-    pub greater_than: FreePrimFuncVal,
-    pub greater_equal: FreePrimFuncVal,
-    pub less_greater: FreePrimFuncVal,
+    pub int_add: FreePrimFuncVal,
+    pub int_subtract: FreePrimFuncVal,
+    pub int_multiply: FreePrimFuncVal,
+    pub int_divide: FreePrimFuncVal,
+    pub int_less_than: FreePrimFuncVal,
+    pub int_less_equal: FreePrimFuncVal,
+    pub int_greater_than: FreePrimFuncVal,
+    pub int_greater_equal: FreePrimFuncVal,
+    pub int_less_greater: FreePrimFuncVal,
+
+    pub decimal_add: FreePrimFuncVal,
+    pub decimal_subtract: FreePrimFuncVal,
+    pub decimal_multiply: FreePrimFuncVal,
+    pub decimal_divide: FreePrimFuncVal,
+    pub decimal_less_than: FreePrimFuncVal,
+    pub decimal_less_equal: FreePrimFuncVal,
+    pub decimal_greater_than: FreePrimFuncVal,
+    pub decimal_greater_equal: FreePrimFuncVal,
+    pub decimal_less_greater: FreePrimFuncVal,
 
     pub call: FreePrimFuncVal,
 
@@ -72,15 +82,25 @@ impl CorePrelude {
             xor: lib.bit.xor.clone(),
             imply: lib.bit.imply.clone(),
 
-            add: lib.int.add.clone(),
-            subtract: lib.int.subtract.clone(),
-            multiply: lib.int.multiply.clone(),
-            divide: lib.int.divide.clone(),
-            less_than: lib.int.less_than.clone(),
-            less_equal: lib.int.less_equal.clone(),
-            greater_than: lib.int.greater_than.clone(),
-            greater_equal: lib.int.greater_equal.clone(),
-            less_greater: lib.int.less_greater.clone(),
+            int_add: lib.int.add.clone(),
+            int_subtract: lib.int.subtract.clone(),
+            int_multiply: lib.int.multiply.clone(),
+            int_divide: lib.int.divide.clone(),
+            int_less_than: lib.int.less_than.clone(),
+            int_less_equal: lib.int.less_equal.clone(),
+            int_greater_than: lib.int.greater_than.clone(),
+            int_greater_equal: lib.int.greater_equal.clone(),
+            int_less_greater: lib.int.less_greater.clone(),
+
+            decimal_add: lib.decimal.add.clone(),
+            decimal_subtract: lib.decimal.subtract.clone(),
+            decimal_multiply: lib.decimal.multiply.clone(),
+            decimal_divide: lib.decimal.divide.clone(),
+            decimal_less_than: lib.decimal.less_than.clone(),
+            decimal_less_equal: lib.decimal.less_equal.clone(),
+            decimal_greater_than: lib.decimal.greater_than.clone(),
+            decimal_greater_equal: lib.decimal.greater_equal.clone(),
+            decimal_less_greater: lib.decimal.less_greater.clone(),
 
             call: lib.call.new.clone(),
 
@@ -126,15 +146,25 @@ impl Prelude for CorePrelude {
         map_put_func(map, "xor", &self.xor);
         map_put_func(map, "imply", &self.imply);
 
-        map_put_func(map, "+", &self.add);
-        map_put_func(map, "-", &self.subtract);
-        map_put_func(map, "*", &self.multiply);
-        map_put_func(map, "/", &self.divide);
-        map_put_func(map, "<", &self.less_than);
-        map_put_func(map, "<=", &self.less_equal);
-        map_put_func(map, ">", &self.greater_than);
-        map_put_func(map, ">=", &self.greater_equal);
-        map_put_func(map, "<>", &self.less_greater);
+        map_put_func(map, "+", &self.int_add);
+        map_put_func(map, "-", &self.int_subtract);
+        map_put_func(map, "*", &self.int_multiply);
+        map_put_func(map, "/", &self.int_divide);
+        map_put_func(map, "<", &self.int_less_than);
+        map_put_func(map, "<=", &self.int_less_equal);
+        map_put_func(map, ">", &self.int_greater_than);
+        map_put_func(map, ">=", &self.int_greater_equal);
+        map_put_func(map, "<>", &self.int_less_greater);
+
+        map_put_func(map, "+.", &self.decimal_add);
+        map_put_func(map, "-.", &self.decimal_subtract);
+        map_put_func(map, "*.", &self.decimal_multiply);
+        map_put_func(map, "/.", &self.decimal_divide);
+        map_put_func(map, "<.", &self.decimal_less_than);
+        map_put_func(map, "<=.", &self.decimal_less_equal);
+        map_put_func(map, ">.", &self.decimal_greater_than);
+        map_put_func(map, ">=.", &self.decimal_greater_equal);
+        map_put_func(map, "<>.", &self.decimal_less_greater);
 
         map_put_func(map, "call", &self.call);
 

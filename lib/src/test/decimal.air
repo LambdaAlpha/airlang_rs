@@ -1,0 +1,271 @@
++
+-----
+100.0 +. 0.001
+-----
+100.001
+=====
+-
+-----
+987.654 -. 32.1
+-----
+955.554
+=====
+*
+-----
+123.45 *. 0-0.06789
+-----
+0-8.3810205
+=====
+/ exact
+-----
+99999.99999 /. 11111.11111
+-----
+9.
+=====
+/ 0
+-----
+1.0 /. 0.
+-----
+.
+=====
+precision
+-----
+_ do [
+    {
+        _decimal.rounding.precision : 10,
+    } with _ data 987654321. /. 13579.
+]
+-----
+72733.95103
+=====
+rounding mode infinity 1
+-----
+_ do [
+    {
+        _decimal.rounding.precision : 10,
+        _decimal.rounding.mode : _infinity,
+    } with _ data 987654321. /. 13579.
+]
+-----
+72733.95103
+=====
+rounding mode infinity 2
+-----
+_ do [
+    {
+        _decimal.rounding.precision : 10,
+        _decimal.rounding.mode : _infinity,
+    } with _ data 987654321. /. 0-13579.
+]
+-----
+0-72733.95103
+=====
+rounding mode zero 1
+-----
+_ do [
+    {
+        _decimal.rounding.precision : 10,
+        _decimal.rounding.mode : _zero,
+    } with _ data 987654321. /. 13579.
+]
+-----
+72733.95102
+=====
+rounding mode zero 2
+-----
+_ do [
+    {
+        _decimal.rounding.precision : 10,
+        _decimal.rounding.mode : _zero,
+    } with _ data 987654321. /. 0-13579.
+]
+-----
+0-72733.95102
+=====
+rounding mode positive 1
+-----
+_ do [
+    {
+        _decimal.rounding.precision : 10,
+        _decimal.rounding.mode : _positive,
+    } with _ data 987654321. /. 13579.
+]
+-----
+72733.95103
+=====
+rounding mode positive 2
+-----
+_ do [
+    {
+        _decimal.rounding.precision : 10,
+        _decimal.rounding.mode : _positive,
+    } with _ data 987654321. /. 0-13579.
+]
+-----
+0-72733.95102
+=====
+rounding mode negative 1
+-----
+_ do [
+    {
+        _decimal.rounding.precision : 10,
+        _decimal.rounding.mode : _negative,
+    } with _ data 987654321. /. 13579.
+]
+-----
+72733.95102
+=====
+rounding mode negative 2
+-----
+_ do [
+    {
+        _decimal.rounding.precision : 10,
+        _decimal.rounding.mode : _negative,
+    } with _ data 987654321. /. 0-13579.
+]
+-----
+0-72733.95103
+=====
+rounding mode half infinity 1
+-----
+_ do [
+    {
+        _decimal.rounding.precision : 10,
+        _decimal.rounding.mode : _half_infinity,
+    } with _ data 281366922235. /. 230.
+]
+-----
+1223334445.
+=====
+rounding mode half infinity 2
+-----
+_ do [
+    {
+        _decimal.rounding.precision : 10,
+        _decimal.rounding.mode : _half_infinity,
+    } with _ data 281366922235. /. 0-230.
+]
+-----
+0-1223334445.
+=====
+rounding mode half zero 1
+-----
+_ do [
+    {
+        _decimal.rounding.precision : 10,
+        _decimal.rounding.mode : _half_zero,
+    } with _ data 281366922235. /. 230.
+]
+-----
+1223334444.
+=====
+rounding mode half zero 2
+-----
+_ do [
+    {
+        _decimal.rounding.precision : 10,
+        _decimal.rounding.mode : _half_zero,
+    } with _ data 281366922235. /. 0-230.
+]
+-----
+0-1223334444.
+=====
+rounding mode half even 1
+-----
+_ do [
+    {
+        _decimal.rounding.precision : 10,
+        _decimal.rounding.mode : _half_even,
+    } with _ data 281366922235. /. 230.
+]
+-----
+1223334444.
+=====
+rounding mode half even 2
+-----
+_ do [
+    {
+        _decimal.rounding.precision : 10,
+        _decimal.rounding.mode : _half_even,
+    } with _ data 281366922465. /. 230.
+]
+-----
+1223334446.
+=====
+< <
+-----
+0-1.0 <. 1.0
+-----
+true
+=====
+< >=
+-----
+1.0 <. 1.00
+-----
+false
+=====
+<= <
+-----
+0-1.0 <. 1.0
+-----
+true
+=====
+<= =
+-----
+1.0 <=. 1.00
+-----
+true
+=====
+<= >
+-----
+1.0 <. 0.0
+-----
+false
+=====
+> >
+-----
+1.1 >. 1.0
+-----
+true
+=====
+> <=
+-----
+1.0 >. 1.00
+-----
+false
+=====
+>= >
+-----
+1.1 >=. 1.0
+-----
+true
+=====
+>= =
+-----
+1.1 >=. 1.10
+-----
+true
+=====
+>= <
+-----
+1.00 >=. 1.1
+-----
+false
+=====
+<> <
+-----
+1.0 <>. 1.1
+-----
+true
+=====
+<> >
+-----
+1.1 <>. 1.0
+-----
+true
+=====
+<> =
+-----
+1.1 <>. 1.10
+-----
+false

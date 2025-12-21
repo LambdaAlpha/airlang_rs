@@ -2,6 +2,8 @@ pub use self::bit::Bit;
 pub use self::byte::Byte;
 pub use self::call::Call;
 pub use self::decimal::Decimal;
+pub use self::decimal::DecimalConfig;
+pub use self::decimal::RoundingMode;
 pub use self::either::Either;
 pub use self::int::Int;
 pub use self::key::Key;
