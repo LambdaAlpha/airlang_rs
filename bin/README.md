@@ -12,7 +12,7 @@
 
 ### Minimalist Syntax
 
-Air's syntax is extremely concise. It only includes comments and 11 data types, with no semantic-specific syntax for functions, types, modules, etc. Its rules are very simple, using prefixes to avoid ambiguity, and it has only 5 keywords (`_`, `.`, `:`, `true`, `false`). This makes it highly suitable as a configuration language or data interchange format.
+Air's syntax is extremely concise. It only includes comments and 11 data types, with no semantic-specific syntax for control flows, functions, types, modules, etc. Its rules are very simple, using prefixes to avoid ambiguity, and it has only 5 keywords (`_`, `.`, `:`, `true`, `false`). This makes it highly suitable as a configuration language or data interchange format.
 
 **comment**
 
