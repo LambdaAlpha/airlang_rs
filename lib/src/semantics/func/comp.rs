@@ -9,7 +9,7 @@ use crate::semantics::val::LinkVal;
 use crate::semantics::val::Val;
 use crate::type_::DynRef;
 use crate::type_::Key;
-use crate::utils::gurad::guard;
+use crate::utils::guard::guard;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub(crate) struct FreeComposite {

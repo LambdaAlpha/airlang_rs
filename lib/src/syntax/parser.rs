@@ -125,11 +125,6 @@ fn top<T: ParseRepr>(src: &mut &str) -> ModalResult<T> {
     trim_comment(ctx, compose(ctx)).parse_next(src)
 }
 
-fn trim<'a, O, F>(f: F) -> impl Parser<&'a str, O, E>
-where F: Parser<&'a str, O, E> {
-    delimited(opt(spaces), f, opt(spaces))
-}
-
 fn trim_comment<'a, O, F>(ctx: ParseCtx, f: F) -> impl Parser<&'a str, O, E>
 where F: Parser<&'a str, O, E> {
     delimited(opt(spaces_comment(ctx)), f, opt(spaces_comment(ctx)))
@@ -137,11 +132,13 @@ where F: Parser<&'a str, O, E> {
 
 fn spaces(i: &mut &str) -> ModalResult<()> {
     let spaces = take_while(1 .., |c| matches!(c, ' ' | '\t' | '\n'));
-    repeat(1 .., alt((spaces, "\r\n")).void()).context(label("spaces")).parse_next(i)
+    let f = repeat(1 .., alt((spaces, "\r\n")).void());
+    f.context(label("spaces")).parse_next(i)
 }
 
-fn space_tab(i: &mut &str) -> ModalResult<()> {
-    take_while(1 .., |c| matches!(c, ' ' | '\t')).void().context(label("space_tab")).parse_next(i)
+fn space_tab0(i: &mut &str) -> ModalResult<()> {
+    let f = take_while(0 .., |c| matches!(c, ' ' | '\t')).void();
+    f.context(label("space_tab0")).parse_next(i)
 }
 
 fn spaces_comment<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
@@ -150,14 +147,14 @@ fn spaces_comment<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
 
 fn comment<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
     let comment_tokens = repeat(0 .., comment_token(ctx));
-    let comment = delimited_cut(SCOPE_LEFT, comment_tokens, SCOPE_RIGHT);
-    preceded(EMPTY, comment).context(label("comment"))
+    let f = preceded(EMPTY, delimited_cut(SCOPE_LEFT, comment_tokens, SCOPE_RIGHT));
+    f.context(label("comment"))
 }
 
 fn comment_token<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
     // to avoid error[E0720]: cannot resolve opaque type
     move |i: &mut _| {
-        alt((spaces, comment(ctx), SEPARATOR.void(), token::<C>(ctx).void())).parse_next(i)
+        alt((spaces, SEPARATOR.void(), comment(ctx), token::<C>(ctx).void())).parse_next(i)
     }
 }
 
@@ -185,21 +182,11 @@ where F: Parser<&'a str, T, E> {
     delimited(left, cut_err(f), cut_err(right))
 }
 
-fn delimited_trim<'a, T, F>(left: char, f: F, right: char) -> impl Parser<&'a str, T, E>
-where F: Parser<&'a str, T, E> {
-    delimited_cut(left, trim(f), right)
-}
-
 fn delimited_trim_comment<'a, T, F>(
     ctx: ParseCtx, left: char, f: F, right: char,
 ) -> impl Parser<&'a str, T, E>
 where F: Parser<&'a str, T, E> {
     delimited_cut(left, trim_comment(ctx, f), right)
-}
-
-fn scoped_trim<'a, T, F>(f: F) -> impl Parser<&'a str, T, E>
-where F: Parser<&'a str, T, E> {
-    delimited_trim(SCOPE_LEFT, f, SCOPE_RIGHT)
 }
 
 fn scoped_trim_comment<'a, T, F>(ctx: ParseCtx, f: F) -> impl Parser<&'a str, T, E>
@@ -224,7 +211,7 @@ fn is_key(c: char) -> bool {
 }
 
 fn token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<'a, T>, E> {
-    (move |i: &mut _| match peek(any).parse_next(i)? {
+    let f = move |i: &mut _| match peek(any).parse_next(i)? {
         LIST_LEFT => list(ctx).map(Token::Default).parse_next(i),
         LIST_RIGHT => fail.parse_next(i),
         MAP_LEFT => map(ctx).map(Token::Default).parse_next(i),
@@ -237,8 +224,8 @@ fn token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<'a, T>, 
         KEY_QUOTE => key.map(T::from).map(Token::Default).parse_next(i),
         '0' ..= '9' => number.map(Token::Default).parse_next(i),
         _ => cut_err(key_token(ctx)).parse_next(i),
-    })
-    .context(label("token"))
+    };
+    f.context(label("token"))
 }
 
 fn key_token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<'a, T>, E> {
@@ -455,14 +442,15 @@ fn list<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
         }
         Ok(T::from(List::from(list)))
     };
-    delimited_trim_comment(ctx, LIST_LEFT, items, LIST_RIGHT).context(label("list"))
+    let f = delimited_trim_comment(ctx, LIST_LEFT, items, LIST_RIGHT);
+    f.context(label("list"))
 }
 
 fn raw_list<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
-    let repr_list = separated(0 .., repr::<T>(ctx), spaces_comment(ctx));
-    delimited_trim_comment(ctx, LIST_LEFT, repr_list, LIST_RIGHT)
-        .map(|tokens: Vec<_>| T::from(List::from(tokens)))
-        .context(label("raw list"))
+    let repr_list = separated(0 .., repr::<T>(ctx), spaces_comment(ctx))
+        .map(|tokens: Vec<_>| T::from(List::from(tokens)));
+    let f = delimited_trim_comment(ctx, LIST_LEFT, repr_list, LIST_RIGHT);
+    f.context(label("raw list"))
 }
 
 fn map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
@@ -495,7 +483,8 @@ fn map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
         }
         Ok(T::from(map))
     };
-    delimited_trim_comment(ctx, MAP_LEFT, items, MAP_RIGHT).context(label("map"))
+    let f = delimited_trim_comment(ctx, MAP_LEFT, items, MAP_RIGHT);
+    f.context(label("map"))
 }
 
 fn raw_map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
@@ -512,7 +501,8 @@ fn raw_map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
         }
         Ok(T::from(map))
     };
-    delimited_trim_comment(ctx, MAP_LEFT, items, MAP_RIGHT).context(label("raw map"))
+    let f = delimited_trim_comment(ctx, MAP_LEFT, items, MAP_RIGHT);
+    f.context(label("raw map"))
 }
 
 fn any_key(i: &mut &str) -> ModalResult<Key> {
@@ -560,22 +550,19 @@ fn key(i: &mut &str) -> ModalResult<Key> {
 }
 
 fn key_escaped<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
-    preceded('^', move |i: &mut _| match any.parse_next(i)? {
+    let f = preceded('^', move |i: &mut _| match any.parse_next(i)? {
         '^' => empty.value("^").parse_next(i),
         '_' => empty.value(" ").parse_next(i),
         TEXT_QUOTE => empty.value(concatcp!(KEY_QUOTE)).parse_next(i),
-        ' ' | '\t' => opt(space_tab).value("").parse_next(i),
+        ' ' | '\t' => space_tab0.value("").parse_next(i),
         _ => fail.parse_next(i),
-    })
-    .context(expect_desc("escape character"))
-    .parse_next(i)
+    });
+    f.context(expect_desc("escape character")).parse_next(i)
 }
 
 fn key_newline(i: &mut &str) -> ModalResult<()> {
-    (line_ending, opt(space_tab), '|'.context(expect_char('|')))
-        .void()
-        .context(expect_desc("newline"))
-        .parse_next(i)
+    let f = (line_ending, space_tab0, '|'.context(expect_char('|'))).void();
+    f.context(expect_desc("newline")).parse_next(i)
 }
 
 fn text(i: &mut &str) -> ModalResult<Text> {
@@ -620,7 +607,7 @@ fn text(i: &mut &str) -> ModalResult<Text> {
 }
 
 fn text_escaped<'a>(i: &mut &'a str) -> ModalResult<StrFragment<'a>> {
-    preceded('^', move |i: &mut _| match any.parse_next(i)? {
+    let f = preceded('^', move |i: &mut _| match any.parse_next(i)? {
         'u' => unicode.map(StrFragment::Char).parse_next(i),
         'n' => empty.value(StrFragment::Char('\n')).parse_next(i),
         'r' => empty.value(StrFragment::Char('\r')).parse_next(i),
@@ -628,30 +615,25 @@ fn text_escaped<'a>(i: &mut &'a str) -> ModalResult<StrFragment<'a>> {
         '^' => empty.value(StrFragment::Char('^')).parse_next(i),
         '_' => empty.value(StrFragment::Char(' ')).parse_next(i),
         KEY_QUOTE => empty.value(StrFragment::Char(TEXT_QUOTE)).parse_next(i),
-        ' ' | '\t' => opt(space_tab).value(StrFragment::Str("")).parse_next(i),
+        ' ' | '\t' => space_tab0.value(StrFragment::Str("")).parse_next(i),
         _ => fail.parse_next(i),
-    })
-    .context(expect_desc("escape character"))
-    .parse_next(i)
+    });
+    f.context(expect_desc("escape character")).parse_next(i)
 }
 
 fn unicode(i: &mut &str) -> ModalResult<char> {
     let digit = take_while(1 .. 7, is_hexadecimal);
-    scoped_trim(digit)
-        .map(move |hex| u32::from_str_radix(hex, 16).unwrap())
-        .verify_map(std::char::from_u32)
-        .context(expect_desc("unicode"))
-        .parse_next(i)
+    let f = delimited_cut(SCOPE_LEFT, digit, SCOPE_RIGHT)
+        .verify_map(|hex| char::from_u32(u32::from_str_radix(hex, 16).unwrap()));
+    f.context(expect_desc("unicode")).parse_next(i)
 }
 
 fn text_newline<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
     let newline = alt(('+'.value(true), '|'.value(false)))
         .context(expect_char('+'))
         .context(expect_char('|'));
-    ("\n", opt(space_tab), newline)
-        .map(|(_, _, newline): (&str, _, _)| if newline { "\n" } else { "" })
-        .context(expect_desc("newline"))
-        .parse_next(i)
+    let f = preceded(("\n", space_tab0), newline).map(|new| if new { "\n" } else { "" });
+    f.context(expect_desc("newline")).parse_next(i)
 }
 
 #[derive(Clone)]
@@ -679,15 +661,13 @@ fn number<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
 }
 
 fn int(i: &mut &str) -> ModalResult<Int> {
-    key.verify_map(|key| alt((norm_int, plain_int)).parse(&*key).ok())
-        .context(label("int"))
-        .parse_next(i)
+    let f = key.verify_map(|key| alt((norm_int, plain_int)).parse(&*key).ok());
+    cut_err(f).context(label("int")).parse_next(i)
 }
 
 fn decimal(i: &mut &str) -> ModalResult<Decimal> {
-    key.verify_map(|key| alt((norm_decimal, plain_decimal)).parse(&*key).ok())
-        .context(label("decimal"))
-        .parse_next(i)
+    let f = key.verify_map(|key| alt((norm_decimal, plain_decimal)).parse(&*key).ok());
+    cut_err(f).context(label("decimal")).parse_next(i)
 }
 
 fn norm_int(i: &mut &str) -> ModalResult<Int> {
@@ -765,9 +745,8 @@ fn sign(i: &mut &str) -> ModalResult<Sign> {
 fn int_radix<'a>(
     radix: u8, f: fn(char) -> bool, desc: &'static str,
 ) -> impl Parser<&'a str, BigInt, E> {
-    take_while(1 .., f)
-        .map(move |int| BigInt::from_str_radix(int, radix as u32).unwrap())
-        .context(expect_desc(desc))
+    let f = take_while(1 .., f).map(move |int| BigInt::from_str_radix(int, radix as u32).unwrap());
+    f.context(expect_desc(desc))
 }
 
 fn build_int(sign: Sign, int: &str) -> Option<Int> {
@@ -792,30 +771,27 @@ fn build_decimal(sign: Sign, int: &str, frac: &str) -> Option<Decimal> {
 }
 
 fn byte(i: &mut &str) -> ModalResult<Byte> {
-    key.verify_map(|key| {
+    let f = key.verify_map(|key| {
         let hex = preceded('X', cut_err(hexadecimal_byte));
         let bin = preceded('B', cut_err(binary_byte));
         let mut byte = alt((hex, bin, hexadecimal_byte));
         byte.parse(&*key).ok()
-    })
-    .context(label("byte"))
-    .parse_next(i)
+    });
+    cut_err(f).context(label("byte")).parse_next(i)
 }
 
 fn hexadecimal_byte(i: &mut &str) -> ModalResult<Byte> {
-    take_while(0 .., is_hexadecimal)
+    let f = take_while(0 .., is_hexadecimal)
         .verify(|s: &str| s.len().is_multiple_of(2))
-        .map(|s| Byte::from(hex_str_to_vec_u8(s).unwrap()))
-        .context(expect_desc("hexadecimal"))
-        .parse_next(i)
+        .map(|s| Byte::from(hex_str_to_vec_u8(s).unwrap()));
+    f.context(expect_desc("hexadecimal")).parse_next(i)
 }
 
 fn binary_byte(i: &mut &str) -> ModalResult<Byte> {
-    take_while(0 .., is_binary)
+    let f = take_while(0 .., is_binary)
         .verify(|s: &str| s.len().is_multiple_of(8))
-        .map(|s| Byte::from(bin_str_to_vec_u8(s).unwrap()))
-        .context(expect_desc("binary"))
-        .parse_next(i)
+        .map(|s| Byte::from(bin_str_to_vec_u8(s).unwrap()));
+    f.context(expect_desc("binary")).parse_next(i)
 }
 
 #[expect(clippy::manual_is_ascii_check)]

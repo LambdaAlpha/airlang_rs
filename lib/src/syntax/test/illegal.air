@@ -62,6 +62,10 @@ unicode not exist
 -----
 "^u(1234567)"
 =====
+unicode space
+-----
+"^u( 1f701 )"
+=====
 raw text unpaired
 -----
 "

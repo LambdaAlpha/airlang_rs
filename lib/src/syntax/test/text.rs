@@ -10,7 +10,6 @@ pub(super) fn expected() -> Vec<Repr> {
         text("  \n\r\t\u{1f701}"),
         text(" ^_^n^r^t^u(1f701)"),
         text(" ^ ^\n^\r^\t^\u{1f701}"),
-        text("\u{1f701}"),
         text(" \t\r\n \t\r\n"),
         text(" \t\r\n\n \t\r\n"),
         text("^_^t^r^n^_^t^r^n()[]{}<>\\|/'\"`^*+=-~_.,:;!?@#$%&\n"),

@@ -274,6 +274,11 @@ fn test_generate_map() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_doc() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/doc.air"), "test/doc.air", doc::expected)
+}
+
+#[test]
 fn test_parse_illegal_example() -> Result<(), Box<dyn Error>> {
     test_parse_illegal(include_str!("test/illegal.air"), "test/illegal.air")
 }
@@ -308,3 +313,5 @@ mod map;
 mod space;
 
 mod scope;
+
+mod doc;

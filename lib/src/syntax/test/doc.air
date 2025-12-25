@@ -1,0 +1,128 @@
+comment list item
+-----
+[1, _(2, 3,) 4]
+=====
+comment map item
+-----
+{a : _(1, b :) 2}
+=====
+key unquote
+-----
+key
+=====
+key punctuation
+-----
+>=
+=====
+key mix
+-----
+a.b.c
+=====
+key quote
+-----
+'[0, 1, 2]'
+=====
+key all
+-----
+' abcdefghijklmnopqrstuvwxyz
+| ABCDEFGHIJKLMNOPQRSTUVWXYZ
+|(()[]{}<>\|/'"`^*+=-~_.,:;!?@#$%&
+|)0123456789'
+=====
+text unicode
+-----
+"🜁^u(1f701)"
+=====
+text escape
+-----
+"- a^r^n^t- a.1^r^n^t- a.2"
+=====
+text multiline
+-----
+ "- a
++   - a.1
++   - a.2"
+=====
+integer plain
+-----
+123
+=====
+integer prefix 0
+-----
+0-123
+=====
+integer prefix id
+-----
+integer'-123'
+=====
+integer hex
+-----
+0X7f
+=====
+integer binary
+-----
+0-B1110
+=====
+decimal plain
+-----
+0.1
+=====
+decimal prefix plain
+-----
+0-0.1
+=====
+decimal prefix normal
+-----
+0-E-12*3.456
+=====
+decimal prefix id
+-----
+decimal'-0.1'
+=====
+byte binary
+-----
+byte'B00001111'
+=====
+byte hex
+-----
+byte'X00ffff'
+=====
+pair diff type
+-----
+a : 1
+=====
+pair recursive
+-----
+a : b : c
+=====
+list same type
+-----
+[0, 1, 2]
+=====
+list diff type
+-----
+[., false, 0, '',]
+=====
+map same type
+-----
+{a : 1, b : 2, c : 3}
+=====
+map diff type
+-----
+{a : 1, b : true, c : ' ',}
+=====
+map set
+-----
+{a, b, c}
+=====
+call one input
+-----
+_ not true
+=====
+call pair input
+-----
+1 + 1
+=====
+call recursive
+-----
+a and b or c

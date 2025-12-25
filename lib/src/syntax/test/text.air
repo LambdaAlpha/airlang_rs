@@ -26,10 +26,6 @@ triple escape
 -----
 " ^^^_^^^n^^^r^^^t^^^u(1f701)"
 =====
-unicode space
------
-"^u( 1f701 )"
-=====
 multiline rich
 -----
 "^_^t^r^n

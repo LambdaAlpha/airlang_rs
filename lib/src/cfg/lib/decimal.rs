@@ -25,9 +25,9 @@ pub struct DecimalLib {
     pub subtract: FreePrimFuncVal,
     pub multiply: FreePrimFuncVal,
     pub divide: FreePrimFuncVal,
-    pub less_than: FreePrimFuncVal,
+    pub less: FreePrimFuncVal,
     pub less_equal: FreePrimFuncVal,
-    pub greater_than: FreePrimFuncVal,
+    pub greater: FreePrimFuncVal,
     pub greater_equal: FreePrimFuncVal,
     pub less_greater: FreePrimFuncVal,
 }
@@ -39,9 +39,9 @@ impl Default for DecimalLib {
             subtract: subtract(),
             multiply: multiply(),
             divide: divide(),
-            less_than: less_than(),
+            less: less(),
             less_equal: less_equal(),
-            greater_than: greater_than(),
+            greater: greater(),
             greater_equal: greater_equal(),
             less_greater: less_greater(),
         }
@@ -54,9 +54,9 @@ impl CfgMod for DecimalLib {
         self.subtract.extend(cfg);
         self.multiply.extend(cfg);
         self.divide.extend(cfg);
-        self.less_than.extend(cfg);
+        self.less.extend(cfg);
         self.less_equal.extend(cfg);
-        self.greater_than.extend(cfg);
+        self.greater.extend(cfg);
         self.greater_equal.extend(cfg);
         self.less_greater.extend(cfg);
     }
@@ -216,11 +216,11 @@ fn fn_divide(cfg: &mut Cfg, input: Val) -> Val {
     Val::Decimal(d.into())
 }
 
-pub fn less_than() -> FreePrimFuncVal {
-    FreePrimFn { id: "_decimal.less", raw_input: false, f: free_impl(fn_less_than) }.free()
+pub fn less() -> FreePrimFuncVal {
+    FreePrimFn { id: "_decimal.less", raw_input: false, f: free_impl(fn_less) }.free()
 }
 
-fn fn_less_than(cfg: &mut Cfg, input: Val) -> Val {
+fn fn_less(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return illegal_input(cfg);
@@ -258,11 +258,11 @@ fn fn_less_equal(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(d1.less_equal(&d2))
 }
 
-pub fn greater_than() -> FreePrimFuncVal {
-    FreePrimFn { id: "_decimal.greater", raw_input: false, f: free_impl(fn_greater_than) }.free()
+pub fn greater() -> FreePrimFuncVal {
+    FreePrimFn { id: "_decimal.greater", raw_input: false, f: free_impl(fn_greater) }.free()
 }
 
-fn fn_greater_than(cfg: &mut Cfg, input: Val) -> Val {
+fn fn_greater(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return illegal_input(cfg);
