@@ -7,6 +7,7 @@ use super::free_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::exception::illegal_ctx;
 use crate::cfg::exception::illegal_input;
+use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
@@ -33,15 +34,15 @@ impl Default for KeyLib {
 
 impl CfgMod for KeyLib {
     fn extend(self, cfg: &Cfg) {
-        self.from_text.extend(cfg);
-        self.into_text.extend(cfg);
-        self.length.extend(cfg);
-        self.join.extend(cfg);
+        extend_func(cfg, "_key.from_text", self.from_text);
+        extend_func(cfg, "_key.into_text", self.into_text);
+        extend_func(cfg, "_key.length", self.length);
+        extend_func(cfg, "_key.join", self.join);
     }
 }
 
 pub fn from_text() -> FreePrimFuncVal {
-    FreePrimFn { id: "_key.from_text", raw_input: false, f: free_impl(fn_from_text) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_from_text) }.free()
 }
 
 fn fn_from_text(cfg: &mut Cfg, input: Val) -> Val {
@@ -59,7 +60,7 @@ fn fn_from_text(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn into_text() -> FreePrimFuncVal {
-    FreePrimFn { id: "_key.into_text", raw_input: false, f: free_impl(fn_into_text) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_into_text) }.free()
 }
 
 fn fn_into_text(cfg: &mut Cfg, input: Val) -> Val {
@@ -71,7 +72,7 @@ fn fn_into_text(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn length() -> ConstPrimFuncVal {
-    DynPrimFn { id: "_key.length", raw_input: false, f: const_impl(fn_length) }.const_()
+    DynPrimFn { raw_input: false, f: const_impl(fn_length) }.const_()
 }
 
 fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -85,7 +86,7 @@ fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 
 // todo design
 pub fn join() -> FreePrimFuncVal {
-    FreePrimFn { id: "_key.join", raw_input: false, f: free_impl(fn_join) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_join) }.free()
 }
 
 fn fn_join(cfg: &mut Cfg, input: Val) -> Val {

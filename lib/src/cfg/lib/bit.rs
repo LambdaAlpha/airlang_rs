@@ -2,6 +2,7 @@ use super::FreePrimFn;
 use super::free_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::exception::illegal_input;
+use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
@@ -23,16 +24,16 @@ impl Default for BitLib {
 
 impl CfgMod for BitLib {
     fn extend(self, cfg: &Cfg) {
-        self.not.extend(cfg);
-        self.and.extend(cfg);
-        self.or.extend(cfg);
-        self.xor.extend(cfg);
-        self.imply.extend(cfg);
+        extend_func(cfg, "_bit.not", self.not);
+        extend_func(cfg, "_bit.and", self.and);
+        extend_func(cfg, "_bit.or", self.or);
+        extend_func(cfg, "_bit.xor", self.xor);
+        extend_func(cfg, "_bit.imply", self.imply);
     }
 }
 
 pub fn not() -> FreePrimFuncVal {
-    FreePrimFn { id: "_bit.not", raw_input: false, f: free_impl(fn_not) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_not) }.free()
 }
 
 fn fn_not(cfg: &mut Cfg, input: Val) -> Val {
@@ -43,7 +44,7 @@ fn fn_not(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn and() -> FreePrimFuncVal {
-    FreePrimFn { id: "_bit.and", raw_input: false, f: free_impl(fn_and) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_and) }.free()
 }
 
 fn fn_and(cfg: &mut Cfg, input: Val) -> Val {
@@ -60,7 +61,7 @@ fn fn_and(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn or() -> FreePrimFuncVal {
-    FreePrimFn { id: "_bit.or", raw_input: false, f: free_impl(fn_or) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_or) }.free()
 }
 
 fn fn_or(cfg: &mut Cfg, input: Val) -> Val {
@@ -77,7 +78,7 @@ fn fn_or(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn xor() -> FreePrimFuncVal {
-    FreePrimFn { id: "_bit.xor", raw_input: false, f: free_impl(fn_xor) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_xor) }.free()
 }
 
 fn fn_xor(cfg: &mut Cfg, input: Val) -> Val {
@@ -94,7 +95,7 @@ fn fn_xor(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn imply() -> FreePrimFuncVal {
-    FreePrimFn { id: "_bit.imply", raw_input: false, f: free_impl(fn_imply) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_imply) }.free()
 }
 
 fn fn_imply(cfg: &mut Cfg, input: Val) -> Val {

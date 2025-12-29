@@ -4,6 +4,7 @@ use num_traits::ToPrimitive;
 
 use crate::cfg::CfgMod;
 use crate::cfg::exception::illegal_input;
+use crate::cfg::extend_func;
 use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::FreePrimFn;
 use crate::cfg::lib::dyn_impl;
@@ -38,19 +39,14 @@ impl Default for ResourceLib {
 
 impl CfgMod for ResourceLib {
     fn extend(self, cfg: &Cfg) {
-        self.available_steps.extend(cfg);
-        self.measure_steps.extend(cfg);
-        self.limit_steps.extend(cfg);
+        extend_func(cfg, "_resource.available_steps", self.available_steps);
+        extend_func(cfg, "_resource.measure_steps", self.measure_steps);
+        extend_func(cfg, "_resource.limit_steps", self.limit_steps);
     }
 }
 
 pub fn available_steps() -> FreePrimFuncVal {
-    FreePrimFn {
-        id: "_resource.available_steps",
-        raw_input: false,
-        f: free_impl(fn_available_steps),
-    }
-    .free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_available_steps) }.free()
 }
 
 fn fn_available_steps(cfg: &mut Cfg, _input: Val) -> Val {
@@ -59,8 +55,7 @@ fn fn_available_steps(cfg: &mut Cfg, _input: Val) -> Val {
 }
 
 pub fn measure_steps() -> MutPrimFuncVal {
-    DynPrimFn { id: "_resource.measure_steps", raw_input: true, f: dyn_impl(fn_measure_steps) }
-        .mut_()
+    DynPrimFn { raw_input: true, f: dyn_impl(fn_measure_steps) }.mut_()
 }
 
 fn fn_measure_steps(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
@@ -72,7 +67,7 @@ fn fn_measure_steps(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
 }
 
 pub fn limit_steps() -> MutPrimFuncVal {
-    DynPrimFn { id: "_resource.limit_steps", raw_input: false, f: dyn_impl(fn_limit_steps) }.mut_()
+    DynPrimFn { raw_input: false, f: dyn_impl(fn_limit_steps) }.mut_()
 }
 
 fn fn_limit_steps(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {

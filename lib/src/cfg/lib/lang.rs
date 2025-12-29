@@ -2,6 +2,7 @@ use log::error;
 
 use crate::cfg::CfgMod;
 use crate::cfg::exception::illegal_input;
+use crate::cfg::extend_func;
 use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::FreePrimFn;
 use crate::cfg::lib::free_impl;
@@ -45,33 +46,33 @@ impl Default for LangLib {
 
 impl CfgMod for LangLib {
     fn extend(self, cfg: &Cfg) {
-        self.data.extend(cfg);
-        self.id.extend(cfg);
-        self.code.extend(cfg);
-        self.eval.extend(cfg);
-        self.parse.extend(cfg);
-        self.generate.extend(cfg);
+        extend_func(cfg, "_language.semantics.data", self.data);
+        extend_func(cfg, "_language.semantics.id", self.id);
+        extend_func(cfg, "_language.semantics.code", self.code);
+        extend_func(cfg, "_language.semantics.eval", self.eval);
+        extend_func(cfg, "_language.syntax.parse", self.parse);
+        extend_func(cfg, "_language.syntax.generate", self.generate);
     }
 }
 
 pub fn data() -> FreePrimFuncVal {
-    FreePrimFn { id: "_language.semantics.data", raw_input: true, f: Id }.free()
+    FreePrimFn { raw_input: true, f: Id }.free()
 }
 
 pub fn id() -> FreePrimFuncVal {
-    FreePrimFn { id: "_language.semantics.id", raw_input: false, f: Id }.free()
+    FreePrimFn { raw_input: false, f: Id }.free()
 }
 
 pub fn code() -> MutPrimFuncVal {
-    DynPrimFn { id: "_language.semantics.code", raw_input: true, f: Eval }.mut_()
+    DynPrimFn { raw_input: true, f: Eval }.mut_()
 }
 
 pub fn eval() -> MutPrimFuncVal {
-    DynPrimFn { id: "_language.semantics.eval", raw_input: false, f: Eval }.mut_()
+    DynPrimFn { raw_input: false, f: Eval }.mut_()
 }
 
 pub fn parse() -> FreePrimFuncVal {
-    FreePrimFn { id: "_language.syntax.parse", raw_input: false, f: free_impl(fn_parse) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_parse) }.free()
 }
 
 fn fn_parse(cfg: &mut Cfg, input: Val) -> Val {
@@ -87,8 +88,7 @@ fn fn_parse(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn generate() -> FreePrimFuncVal {
-    FreePrimFn { id: "_language.syntax.generate", raw_input: false, f: free_impl(fn_generate) }
-        .free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_generate) }.free()
 }
 
 fn fn_generate(cfg: &mut Cfg, input: Val) -> Val {

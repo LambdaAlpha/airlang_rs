@@ -7,6 +7,7 @@ use airlang::Air;
 use airlang::cfg::CfgMod;
 use airlang::cfg::exception::fail;
 use airlang::cfg::exception::illegal_input;
+use airlang::cfg::extend_func;
 use airlang::cfg::lib::FreeImpl;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::semantics::cfg::Cfg;
@@ -30,14 +31,14 @@ impl Default for BuildLib {
 
 impl CfgMod for BuildLib {
     fn extend(self, cfg: &Cfg) {
-        self.load.extend(cfg);
+        extend_func(cfg, "_build.load", self.load);
     }
 }
 
 // todo rename
 // todo design
 pub fn load() -> FreePrimFuncVal {
-    FreePrimFn { id: "_build.load", raw_input: false, f: FreeImpl::new(fn_load) }.free()
+    FreePrimFn { raw_input: false, f: FreeImpl::new(fn_load) }.free()
 }
 
 // todo rename

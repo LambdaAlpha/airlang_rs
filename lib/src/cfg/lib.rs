@@ -33,7 +33,6 @@ use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::DynRef;
-use crate::type_::Key;
 
 #[derive(Default, Clone)]
 pub struct CoreLib {
@@ -83,46 +82,32 @@ impl CfgMod for CoreLib {
 }
 
 pub struct FreePrimFn<F> {
-    pub id: &'static str,
     pub raw_input: bool,
     pub f: F,
 }
 
 pub struct DynPrimFn<F> {
-    pub id: &'static str,
     pub raw_input: bool,
     pub f: F,
 }
 
 impl<F: FreeFn<Cfg, Val, Val> + 'static> FreePrimFn<F> {
     pub fn free(self) -> FreePrimFuncVal {
-        let func = FreePrimFunc {
-            id: Key::from_str_unchecked(self.id),
-            raw_input: self.raw_input,
-            fn_: Rc::new(self.f),
-        };
+        let func = FreePrimFunc { raw_input: self.raw_input, fn_: Rc::new(self.f) };
         FreePrimFuncVal::from(func)
     }
 }
 
 impl<F: ConstFn<Cfg, Val, Val, Val> + 'static> DynPrimFn<F> {
     pub fn const_(self) -> ConstPrimFuncVal {
-        let func = ConstPrimFunc {
-            id: Key::from_str_unchecked(self.id),
-            raw_input: self.raw_input,
-            fn_: Rc::new(self.f),
-        };
+        let func = ConstPrimFunc { raw_input: self.raw_input, fn_: Rc::new(self.f) };
         ConstPrimFuncVal::from(func)
     }
 }
 
 impl<F: MutFn<Cfg, Val, Val, Val> + 'static> DynPrimFn<F> {
     pub fn mut_(self) -> MutPrimFuncVal {
-        let func = MutPrimFunc {
-            id: Key::from_str_unchecked(self.id),
-            raw_input: self.raw_input,
-            fn_: Rc::new(self.f),
-        };
+        let func = MutPrimFunc { raw_input: self.raw_input, fn_: Rc::new(self.f) };
         MutPrimFuncVal::from(func)
     }
 }

@@ -6,6 +6,7 @@ use std::io::stdout;
 use airlang::cfg::CfgMod;
 use airlang::cfg::exception::illegal_ctx;
 use airlang::cfg::exception::illegal_input;
+use airlang::cfg::extend_func;
 use airlang::cfg::lib::DynPrimFn;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::free_impl;
@@ -43,18 +44,18 @@ impl Default for IoLib {
 
 impl CfgMod for IoLib {
     fn extend(self, cfg: &Cfg) {
-        self.read_line.extend(cfg);
-        self.print.extend(cfg);
-        self.print_line.extend(cfg);
-        self.flush.extend(cfg);
-        self.error_print.extend(cfg);
-        self.error_print_line.extend(cfg);
-        self.error_flush.extend(cfg);
+        extend_func(cfg, "_io.read_line", self.read_line);
+        extend_func(cfg, "_io.print", self.print);
+        extend_func(cfg, "_io.print_line", self.print_line);
+        extend_func(cfg, "_io.flush", self.flush);
+        extend_func(cfg, "_io.error_print", self.error_print);
+        extend_func(cfg, "_io.error_print_line", self.error_print_line);
+        extend_func(cfg, "_io.error_flush", self.error_flush);
     }
 }
 
 pub fn read_line() -> MutPrimFuncVal {
-    DynPrimFn { id: "_io.read_line", raw_input: false, f: mut_impl(fn_read_line) }.mut_()
+    DynPrimFn { raw_input: false, f: mut_impl(fn_read_line) }.mut_()
 }
 
 fn fn_read_line(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
@@ -67,7 +68,7 @@ fn fn_read_line(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
 }
 
 pub fn print() -> FreePrimFuncVal {
-    FreePrimFn { id: "_io.print", raw_input: false, f: free_impl(fn_print) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_print) }.free()
 }
 
 fn fn_print(cfg: &mut Cfg, input: Val) -> Val {
@@ -80,7 +81,7 @@ fn fn_print(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn print_line() -> FreePrimFuncVal {
-    FreePrimFn { id: "_io.print_line", raw_input: false, f: free_impl(fn_print_line) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_print_line) }.free()
 }
 
 fn fn_print_line(cfg: &mut Cfg, input: Val) -> Val {
@@ -93,7 +94,7 @@ fn fn_print_line(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn flush() -> FreePrimFuncVal {
-    FreePrimFn { id: "_io.flush", raw_input: false, f: free_impl(fn_flush) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_flush) }.free()
 }
 
 fn fn_flush(_cfg: &mut Cfg, _input: Val) -> Val {
@@ -102,7 +103,7 @@ fn fn_flush(_cfg: &mut Cfg, _input: Val) -> Val {
 }
 
 pub fn error_print() -> FreePrimFuncVal {
-    FreePrimFn { id: "_io.error_print", raw_input: false, f: free_impl(fn_error_print) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_error_print) }.free()
 }
 
 fn fn_error_print(cfg: &mut Cfg, input: Val) -> Val {
@@ -115,8 +116,7 @@ fn fn_error_print(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn error_print_line() -> FreePrimFuncVal {
-    FreePrimFn { id: "_io.error_print_line", raw_input: false, f: free_impl(fn_error_print_line) }
-        .free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_error_print_line) }.free()
 }
 
 fn fn_error_print_line(cfg: &mut Cfg, input: Val) -> Val {
@@ -129,7 +129,7 @@ fn fn_error_print_line(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn error_flush() -> FreePrimFuncVal {
-    FreePrimFn { id: "_io.error_flush", raw_input: false, f: free_impl(fn_error_flush) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_error_flush) }.free()
 }
 
 fn fn_error_flush(_cfg: &mut Cfg, _input: Val) -> Val {

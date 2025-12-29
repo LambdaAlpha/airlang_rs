@@ -7,11 +7,8 @@ use self::lib::CoreLib;
 use crate::cfg::prelude::CorePrelude;
 use crate::cfg::prelude::prelude_repr;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::val::ConstPrimFuncVal;
-use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::LinkVal;
-use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Key;
 use crate::type_::Map;
@@ -69,32 +66,12 @@ impl CoreCfg {
     }
 }
 
-pub(crate) trait Named {
-    fn name(&self) -> Key;
+pub fn extend(cfg: &Cfg, key: &str, val: impl Into<Val>) {
+    cfg.extend_scope(Key::from_str_unchecked(key), val.into());
 }
 
-impl Named for FreePrimFuncVal {
-    fn name(&self) -> Key {
-        self.id.clone()
-    }
-}
-
-impl Named for ConstPrimFuncVal {
-    fn name(&self) -> Key {
-        self.id.clone()
-    }
-}
-
-impl Named for MutPrimFuncVal {
-    fn name(&self) -> Key {
-        self.id.clone()
-    }
-}
-
-impl<F: Named + Into<FuncVal>> CfgMod for F {
-    fn extend(self, cfg: &Cfg) {
-        cfg.extend_scope(self.name(), Val::Func(self.into()));
-    }
+pub fn extend_func(cfg: &Cfg, key: &str, val: impl Into<FuncVal>) {
+    cfg.extend_scope(Key::from_str_unchecked(key), Val::Func(val.into()));
 }
 
 pub mod lib;

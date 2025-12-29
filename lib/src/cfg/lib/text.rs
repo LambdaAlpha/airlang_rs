@@ -8,6 +8,7 @@ use super::mut_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::exception::illegal_ctx;
 use crate::cfg::exception::illegal_input;
+use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
@@ -42,16 +43,16 @@ impl Default for TextLib {
 
 impl CfgMod for TextLib {
     fn extend(self, cfg: &Cfg) {
-        self.from_utf8.extend(cfg);
-        self.into_utf8.extend(cfg);
-        self.length.extend(cfg);
-        self.push.extend(cfg);
-        self.join.extend(cfg);
+        extend_func(cfg, "_text.from_utf8", self.from_utf8);
+        extend_func(cfg, "_text.into_utf8", self.into_utf8);
+        extend_func(cfg, "_text.length", self.length);
+        extend_func(cfg, "_text.push", self.push);
+        extend_func(cfg, "_text.join", self.join);
     }
 }
 
 pub fn from_utf8() -> FreePrimFuncVal {
-    FreePrimFn { id: "_text.from_utf8", raw_input: false, f: free_impl(fn_from_utf8) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_from_utf8) }.free()
 }
 
 fn fn_from_utf8(cfg: &mut Cfg, input: Val) -> Val {
@@ -68,7 +69,7 @@ fn fn_from_utf8(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn into_utf8() -> FreePrimFuncVal {
-    FreePrimFn { id: "_text.into_utf8", raw_input: false, f: free_impl(fn_into_utf8) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_into_utf8) }.free()
 }
 
 fn fn_into_utf8(cfg: &mut Cfg, input: Val) -> Val {
@@ -82,7 +83,7 @@ fn fn_into_utf8(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn length() -> ConstPrimFuncVal {
-    DynPrimFn { id: "_text.length", raw_input: false, f: const_impl(fn_length) }.const_()
+    DynPrimFn { raw_input: false, f: const_impl(fn_length) }.const_()
 }
 
 fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -95,7 +96,7 @@ fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn push() -> MutPrimFuncVal {
-    DynPrimFn { id: "_text.push", raw_input: false, f: mut_impl(fn_push) }.mut_()
+    DynPrimFn { raw_input: false, f: mut_impl(fn_push) }.mut_()
 }
 
 fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -113,7 +114,7 @@ fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 
 // todo design
 pub fn join() -> FreePrimFuncVal {
-    FreePrimFn { id: "_text.join", raw_input: false, f: free_impl(fn_join) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_join) }.free()
 }
 
 fn fn_join(cfg: &mut Cfg, input: Val) -> Val {

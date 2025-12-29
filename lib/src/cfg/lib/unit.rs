@@ -1,6 +1,7 @@
 use super::FreePrimFn;
 use super::free_impl;
 use crate::cfg::CfgMod;
+use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
@@ -19,12 +20,12 @@ impl Default for UnitLib {
 
 impl CfgMod for UnitLib {
     fn extend(self, cfg: &Cfg) {
-        self.unit.extend(cfg);
+        extend_func(cfg, "_unit.unit", self.unit);
     }
 }
 
 pub fn unit() -> FreePrimFuncVal {
-    FreePrimFn { id: "_unit.unit", raw_input: false, f: free_impl(fn_unit) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_unit) }.free()
 }
 
 fn fn_unit(_cfg: &mut Cfg, _input: Val) -> Val {

@@ -15,6 +15,7 @@ use super::free_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::exception::fail;
 use crate::cfg::exception::illegal_input;
+use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::val::BIT;
@@ -65,9 +66,9 @@ impl Default for ValueLib {
 
 impl CfgMod for ValueLib {
     fn extend(self, cfg: &Cfg) {
-        self.any.extend(cfg);
-        self.type_.extend(cfg);
-        self.equal.extend(cfg);
+        extend_func(cfg, "_value.any", self.any);
+        extend_func(cfg, "_value.type", self.type_);
+        extend_func(cfg, "_value.equal", self.equal);
     }
 }
 
@@ -88,7 +89,7 @@ const TYPE_FUNC: &str = concatcp!(PREFIX_ID, FUNC);
 
 // todo design pick value from cfg or ctx
 pub fn any() -> FreePrimFuncVal {
-    FreePrimFn { id: "_value.any", raw_input: false, f: free_impl(fn_any) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_any) }.free()
 }
 
 fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
@@ -122,7 +123,7 @@ fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn type_() -> ConstPrimFuncVal {
-    DynPrimFn { id: "_value.type", raw_input: false, f: const_impl(fn_type) }.const_()
+    DynPrimFn { raw_input: false, f: const_impl(fn_type) }.const_()
 }
 
 fn fn_type(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -148,7 +149,7 @@ fn fn_type(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 
 // todo design
 pub fn equal() -> FreePrimFuncVal {
-    FreePrimFn { id: "_value.equal", raw_input: false, f: free_impl(fn_equal) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_equal) }.free()
 }
 
 fn fn_equal(cfg: &mut Cfg, input: Val) -> Val {

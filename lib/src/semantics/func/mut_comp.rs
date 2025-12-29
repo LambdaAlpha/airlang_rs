@@ -1,3 +1,6 @@
+use std::fmt::Debug;
+use std::fmt::Formatter;
+
 use super::ConstFn;
 use super::FreeComposite;
 use super::FreeFn;
@@ -7,11 +10,9 @@ use crate::semantics::cfg::Cfg;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::DynRef;
-use crate::type_::Key;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct MutCompFunc {
-    pub(crate) id: Key,
     pub(crate) raw_input: bool,
     pub(crate) comp: DynComposite,
 }
@@ -41,5 +42,17 @@ impl MutFn<Cfg, Val, Val, Val> for MutCompFunc {
 
     fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
         self.comp.call(cfg, ctx, input)
+    }
+}
+
+impl Debug for MutCompFunc {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MutCompFunc")
+            .field("raw_input", &self.raw_input)
+            .field("ctx", &self.comp.ctx)
+            .field("ctx_name", &self.comp.ctx_name)
+            .field("input_name", &self.comp.input_name)
+            .field("body", &self.comp.body)
+            .finish()
     }
 }

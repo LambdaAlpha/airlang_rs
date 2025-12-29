@@ -15,8 +15,6 @@ pub(crate) use self::comp::FreeComposite;
 
 _____!();
 
-mod prim;
-
 mod comp;
 
 mod free_prim;

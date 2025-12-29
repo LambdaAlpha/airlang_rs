@@ -17,7 +17,6 @@ use crate::semantics::func::MutPrimFunc;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::DynRef;
-use crate::type_::Key;
 use crate::type_::wrap::rc_wrap;
 
 #[derive(Clone, PartialEq, Eq, From)]
@@ -121,10 +120,6 @@ impl MutFn<Cfg, Val, Val, Val> for FuncVal {
 }
 
 impl FuncVal {
-    pub fn id(&self) -> Key {
-        match_func_val!(self, f => f.id.clone())
-    }
-
     pub fn raw_input(&self) -> bool {
         match_func_val!(self, f => f.raw_input)
     }

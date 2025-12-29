@@ -4,6 +4,7 @@ use log::error;
 
 use crate::cfg::CfgMod;
 use crate::cfg::exception::illegal_input;
+use crate::cfg::extend_func;
 use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::FreePrimFn;
 use crate::cfg::lib::dyn_impl;
@@ -27,7 +28,7 @@ use crate::utils::guard::guard;
 #[derive(Clone)]
 pub struct CfgLib {
     pub new: FreePrimFuncVal,
-    pub repr: FreePrimFuncVal,
+    pub represent: FreePrimFuncVal,
     pub length: FreePrimFuncVal,
     pub snapshot: FreePrimFuncVal,
     pub exist: FreePrimFuncVal,
@@ -41,7 +42,7 @@ impl Default for CfgLib {
     fn default() -> Self {
         CfgLib {
             new: new(),
-            repr: repr(),
+            represent: represent(),
             length: length(),
             snapshot: snapshot(),
             exist: exist(),
@@ -55,20 +56,20 @@ impl Default for CfgLib {
 
 impl CfgMod for CfgLib {
     fn extend(self, cfg: &Cfg) {
-        self.new.extend(cfg);
-        self.repr.extend(cfg);
-        self.length.extend(cfg);
-        self.snapshot.extend(cfg);
-        self.exist.extend(cfg);
-        self.import.extend(cfg);
-        self.export.extend(cfg);
-        self.with.extend(cfg);
-        self.where_.extend(cfg);
+        extend_func(cfg, "_config.new", self.new);
+        extend_func(cfg, "_config.represent", self.represent);
+        extend_func(cfg, "_config.length", self.length);
+        extend_func(cfg, "_config.snapshot", self.snapshot);
+        extend_func(cfg, "_config.exist", self.exist);
+        extend_func(cfg, "_config.import", self.import);
+        extend_func(cfg, "_config.export", self.export);
+        extend_func(cfg, "_config.with", self.with);
+        extend_func(cfg, "_config.where", self.where_);
     }
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { id: "_config.new", raw_input: false, f: free_impl(fn_new) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_new) }.free()
 }
 
 fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
@@ -93,11 +94,11 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
     Val::Cfg(new_cfg.into())
 }
 
-pub fn repr() -> FreePrimFuncVal {
-    FreePrimFn { id: "_config.represent", raw_input: false, f: free_impl(fn_repr) }.free()
+pub fn represent() -> FreePrimFuncVal {
+    FreePrimFn { raw_input: false, f: free_impl(fn_represent) }.free()
 }
 
-fn fn_repr(cfg: &mut Cfg, input: Val) -> Val {
+fn fn_represent(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Cfg(new_cfg) = input else {
         error!("input {input:?} should be a cfg");
         return illegal_input(cfg);
@@ -120,7 +121,7 @@ fn fn_repr(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn length() -> FreePrimFuncVal {
-    FreePrimFn { id: "_config.length", raw_input: false, f: free_impl(fn_length) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_length) }.free()
 }
 
 fn fn_length(cfg: &mut Cfg, _input: Val) -> Val {
@@ -128,7 +129,7 @@ fn fn_length(cfg: &mut Cfg, _input: Val) -> Val {
 }
 
 pub fn snapshot() -> FreePrimFuncVal {
-    FreePrimFn { id: "_config.snapshot", raw_input: false, f: free_impl(fn_snapshot) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_snapshot) }.free()
 }
 
 fn fn_snapshot(cfg: &mut Cfg, _input: Val) -> Val {
@@ -136,7 +137,7 @@ fn fn_snapshot(cfg: &mut Cfg, _input: Val) -> Val {
 }
 
 pub fn exist() -> FreePrimFuncVal {
-    FreePrimFn { id: "_config.exist", raw_input: false, f: free_impl(fn_exist) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_exist) }.free()
 }
 
 fn fn_exist(cfg: &mut Cfg, input: Val) -> Val {
@@ -149,7 +150,7 @@ fn fn_exist(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn import() -> FreePrimFuncVal {
-    FreePrimFn { id: "_config.import", raw_input: false, f: free_impl(fn_import) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_import) }.free()
 }
 
 fn fn_import(cfg: &mut Cfg, input: Val) -> Val {
@@ -161,7 +162,7 @@ fn fn_import(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn export() -> FreePrimFuncVal {
-    FreePrimFn { id: "_config.export", raw_input: false, f: free_impl(fn_export) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_export) }.free()
 }
 
 fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
@@ -179,7 +180,7 @@ fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn with() -> MutPrimFuncVal {
-    DynPrimFn { id: "_config.with", raw_input: false, f: dyn_impl(fn_with) }.mut_()
+    DynPrimFn { raw_input: false, f: dyn_impl(fn_with) }.mut_()
 }
 
 fn fn_with(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
@@ -207,7 +208,7 @@ fn fn_with(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
 }
 
 pub fn where_() -> MutPrimFuncVal {
-    DynPrimFn { id: "_config.where", raw_input: false, f: dyn_impl(fn_where) }.mut_()
+    DynPrimFn { raw_input: false, f: dyn_impl(fn_where) }.mut_()
 }
 
 fn fn_where(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {

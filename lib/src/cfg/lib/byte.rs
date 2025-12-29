@@ -8,6 +8,7 @@ use super::mut_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::exception::illegal_ctx;
 use crate::cfg::exception::illegal_input;
+use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
@@ -33,14 +34,14 @@ impl Default for ByteLib {
 
 impl CfgMod for ByteLib {
     fn extend(self, cfg: &Cfg) {
-        self.length.extend(cfg);
-        self.push.extend(cfg);
-        self.join.extend(cfg);
+        extend_func(cfg, "_byte.length", self.length);
+        extend_func(cfg, "_byte.push", self.push);
+        extend_func(cfg, "_byte.join", self.join);
     }
 }
 
 pub fn length() -> ConstPrimFuncVal {
-    DynPrimFn { id: "_byte.length", raw_input: false, f: const_impl(fn_length) }.const_()
+    DynPrimFn { raw_input: false, f: const_impl(fn_length) }.const_()
 }
 
 fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -53,7 +54,7 @@ fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn push() -> MutPrimFuncVal {
-    DynPrimFn { id: "_byte.push", raw_input: false, f: mut_impl(fn_push) }.mut_()
+    DynPrimFn { raw_input: false, f: mut_impl(fn_push) }.mut_()
 }
 
 fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -71,7 +72,7 @@ fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 
 // todo design
 pub fn join() -> FreePrimFuncVal {
-    FreePrimFn { id: "_byte.join", raw_input: false, f: free_impl(fn_join) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_join) }.free()
 }
 
 fn fn_join(cfg: &mut Cfg, input: Val) -> Val {

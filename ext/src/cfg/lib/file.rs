@@ -1,6 +1,7 @@
 use airlang::cfg::CfgMod;
 use airlang::cfg::exception::fail;
 use airlang::cfg::exception::illegal_input;
+use airlang::cfg::extend_func;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::free_impl;
 use airlang::semantics::cfg::Cfg;
@@ -22,12 +23,12 @@ impl Default for FileLib {
 
 impl CfgMod for FileLib {
     fn extend(self, cfg: &Cfg) {
-        self.read_to_text.extend(cfg);
+        extend_func(cfg, "_file.read_to_text", self.read_to_text);
     }
 }
 
 pub fn read_to_text() -> FreePrimFuncVal {
-    FreePrimFn { id: "_file.read_to_text", raw_input: false, f: free_impl(fn_read_to_text) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_read_to_text) }.free()
 }
 
 fn fn_read_to_text(cfg: &mut Cfg, input: Val) -> Val {

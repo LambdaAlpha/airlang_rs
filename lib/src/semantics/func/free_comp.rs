@@ -1,12 +1,13 @@
+use std::fmt::Debug;
+use std::fmt::Formatter;
+
 use super::FreeFn;
 use super::comp::FreeComposite;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::Val;
-use crate::type_::Key;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct FreeCompFunc {
-    pub(crate) id: Key,
     pub(crate) raw_input: bool,
     pub(crate) comp: FreeComposite,
 }
@@ -20,5 +21,16 @@ impl FreeFn<Cfg, Val, Val> for FreeCompFunc {
             self.comp.input_name.clone(),
             self.comp.body.clone(),
         )
+    }
+}
+
+impl Debug for FreeCompFunc {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("FreeCompFunc")
+            .field("raw_input", &self.raw_input)
+            .field("ctx", &self.comp.ctx)
+            .field("input_name", &self.comp.input_name)
+            .field("body", &self.comp.body)
+            .finish()
     }
 }

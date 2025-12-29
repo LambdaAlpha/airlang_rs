@@ -50,7 +50,7 @@ pub struct CorePrelude {
     pub get: ConstPrimFuncVal,
     pub set: MutPrimFuncVal,
     pub form: ConstPrimFuncVal,
-    pub repr: MutPrimFuncVal,
+    pub represent: MutPrimFuncVal,
     pub which: MutPrimFuncVal,
 
     pub do_: MutPrimFuncVal,
@@ -117,7 +117,7 @@ impl CorePrelude {
             get: lib.ctx.get.clone(),
             set: lib.ctx.set.clone(),
             form: lib.ctx.form.clone(),
-            repr: lib.ctx.repr.clone(),
+            represent: lib.ctx.represent.clone(),
             which: lib.ctx.which.clone(),
 
             do_: lib.ctrl.do_.clone(),
@@ -181,7 +181,7 @@ impl Prelude for CorePrelude {
         map_put_func(map, "get", &self.get);
         map_put_func(map, "set", &self.set);
         map_put_func(map, "form", &self.form);
-        map_put_func(map, "=", &self.repr);
+        map_put_func(map, "=", &self.represent);
         map_put_func(map, "which", &self.which);
 
         map_put_func(map, "do", &self.do_);

@@ -302,11 +302,7 @@ impl Arbitrary for DynComposite {
 impl Arbitrary for FreeCompFuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
-        let func = FreeCompFunc {
-            id: Arbitrary::any(rng, depth),
-            raw_input: rng.random(),
-            comp: Arbitrary::any(rng, depth),
-        };
+        let func = FreeCompFunc { raw_input: rng.random(), comp: Arbitrary::any(rng, depth) };
         FreeCompFuncVal::from(func)
     }
 }
@@ -314,11 +310,7 @@ impl Arbitrary for FreeCompFuncVal {
 impl Arbitrary for ConstCompFuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
-        let func = ConstCompFunc {
-            id: Arbitrary::any(rng, depth),
-            raw_input: rng.random(),
-            comp: Arbitrary::any(rng, depth),
-        };
+        let func = ConstCompFunc { raw_input: rng.random(), comp: Arbitrary::any(rng, depth) };
         ConstCompFuncVal::from(func)
     }
 }
@@ -326,11 +318,7 @@ impl Arbitrary for ConstCompFuncVal {
 impl Arbitrary for MutCompFuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
-        let func = MutCompFunc {
-            id: Arbitrary::any(rng, depth),
-            raw_input: rng.random(),
-            comp: Arbitrary::any(rng, depth),
-        };
+        let func = MutCompFunc { raw_input: rng.random(), comp: Arbitrary::any(rng, depth) };
         MutCompFuncVal::from(func)
     }
 }

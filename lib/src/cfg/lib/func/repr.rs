@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use const_format::concatcp;
 use log::error;
 
@@ -19,6 +21,7 @@ use crate::semantics::val::MutCompFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
+use crate::type_::Int;
 use crate::type_::Key;
 use crate::type_::Map;
 use crate::type_::Pair;
@@ -26,7 +29,6 @@ use crate::type_::Pair;
 // todo rename
 const CODE: &str = "code";
 const CTX: &str = "context";
-const ID: &str = "id";
 const RAW_INPUT: &str = "raw_input";
 // todo rename
 const CTX_ACCESS: &str = "context_access";
@@ -41,30 +43,28 @@ pub(in crate::cfg) fn parse_func(input: Val) -> Option<FuncVal> {
         error!("{input:?} should be a map");
         return None;
     };
-
-    let id = parse_id(map_remove(&mut map, ID))?;
     let raw_input = parse_raw_input(map_remove(&mut map, RAW_INPUT))?;
     // todo design
-    let FuncCode { ctx_name, input_name, body } = parse_code(map_remove(&mut map, CODE))?;
+    let CompCode { ctx_name, input_name, body } = parse_code(map_remove(&mut map, CODE))?;
     let ctx = map_remove(&mut map, CTX);
     let ctx_access = map_remove(&mut map, CTX_ACCESS);
     let ctx_access = parse_ctx_access(&ctx_access)?;
     let func = match ctx_access {
         FREE => {
             let comp = FreeComposite { ctx, body, input_name };
-            let func = FreeCompFunc { id, raw_input, comp };
+            let func = FreeCompFunc { raw_input, comp };
             FuncVal::FreeComp(FreeCompFuncVal::from(func))
         }
         CONST => {
             let ctx_name = ctx_name?;
             let comp = DynComposite { ctx, body, input_name, ctx_name };
-            let func = ConstCompFunc { id, raw_input, comp };
+            let func = ConstCompFunc { raw_input, comp };
             FuncVal::ConstComp(ConstCompFuncVal::from(func))
         }
         MUTABLE => {
             let ctx_name = ctx_name?;
             let comp = DynComposite { ctx, body, input_name, ctx_name };
-            let func = MutCompFunc { id, raw_input, comp };
+            let func = MutCompFunc { raw_input, comp };
             FuncVal::MutComp(MutCompFuncVal::from(func))
         }
         s => {
@@ -75,11 +75,14 @@ pub(in crate::cfg) fn parse_func(input: Val) -> Option<FuncVal> {
     Some(func)
 }
 
-fn parse_id(id: Val) -> Option<Key> {
-    match id {
-        Val::Unit(_) => Some(Key::default()),
-        Val::Key(id) => Some(id),
-        _ => None,
+pub(in crate::cfg) fn generate_func(f: FuncVal) -> Val {
+    match f {
+        FuncVal::FreePrim(f) => generate_free_prim(f),
+        FuncVal::FreeComp(f) => generate_free_comp(f),
+        FuncVal::ConstPrim(f) => generate_const_prim(f),
+        FuncVal::ConstComp(f) => generate_const_comp(f),
+        FuncVal::MutPrim(f) => generate_mut_prim(f),
+        FuncVal::MutComp(f) => generate_mut_comp(f),
     }
 }
 
@@ -91,15 +94,15 @@ fn parse_raw_input(id: Val) -> Option<bool> {
     }
 }
 
-struct FuncCode {
+struct CompCode {
     ctx_name: Option<Key>,
     input_name: Key,
     body: Val,
 }
 
-fn parse_code(code: Val) -> Option<FuncCode> {
+fn parse_code(code: Val) -> Option<CompCode> {
     let code = match code {
-        Val::Unit(_) => FuncCode {
+        Val::Unit(_) => CompCode {
             ctx_name: Some(Key::default()),
             input_name: Key::default(),
             body: Val::default(),
@@ -116,14 +119,14 @@ fn parse_code(code: Val) -> Option<FuncCode> {
                         error!("input {:?} should be a key", ctx_input.second);
                         return None;
                     };
-                    FuncCode {
+                    CompCode {
                         ctx_name: Some(ctx.clone()),
                         input_name: input.clone(),
                         body: names_body.second,
                     }
                 }
                 Val::Key(input) => {
-                    FuncCode { ctx_name: None, input_name: input, body: names_body.second }
+                    CompCode { ctx_name: None, input_name: input, body: names_body.second }
                 }
                 v => {
                     error!("name {v:?} should be a key or a pair of key");
@@ -139,94 +142,21 @@ fn parse_code(code: Val) -> Option<FuncCode> {
     Some(code)
 }
 
-fn parse_ctx_access(access: &Val) -> Option<&str> {
-    match &access {
-        Val::Key(s) => Some(&**s),
-        Val::Unit(_) => Some(MUTABLE),
-        v => {
-            error!("ctx access {v:?} should be a key or a unit");
-            None
-        }
-    }
-}
-
-pub(in crate::cfg) fn generate_func(f: FuncVal) -> Val {
-    match f {
-        FuncVal::FreePrim(f) => generate_free_prim(f),
-        FuncVal::FreeComp(f) => generate_free_comp(f),
-        FuncVal::ConstPrim(f) => generate_const_prim(f),
-        FuncVal::ConstComp(f) => generate_const_comp(f),
-        FuncVal::MutPrim(f) => generate_mut_prim(f),
-        FuncVal::MutComp(f) => generate_mut_comp(f),
-    }
-}
-
-fn generate_free_prim(f: FreePrimFuncVal) -> Val {
-    generate_prim(f.id.clone())
-}
-
-fn generate_free_comp(f: FreeCompFuncVal) -> Val {
-    let mut repr = Map::<Key, Val>::default();
-    repr.insert(Key::from_str_unchecked(CODE), free_code(&f.comp));
-    let comp = CompRepr {
-        id: f.id.clone(),
-        access: FREE,
-        raw_input: f.raw_input,
-        ctx: f.comp.ctx.clone(),
-    };
-    generate_comp(&mut repr, comp);
-    Val::Map(repr.into())
-}
-
-fn generate_const_prim(f: ConstPrimFuncVal) -> Val {
-    generate_prim(f.id.clone())
-}
-
-fn generate_const_comp(f: ConstCompFuncVal) -> Val {
-    let mut repr = Map::<Key, Val>::default();
-    repr.insert(Key::from_str_unchecked(CODE), dyn_code(&f.comp));
-    let comp = CompRepr {
-        id: f.id.clone(),
-        access: CONST,
-        raw_input: f.raw_input,
-        ctx: f.comp.ctx.clone(),
-    };
-    generate_comp(&mut repr, comp);
-    Val::Map(repr.into())
-}
-
-fn generate_mut_prim(f: MutPrimFuncVal) -> Val {
-    generate_prim(f.id.clone())
-}
-
-fn generate_mut_comp(f: MutCompFuncVal) -> Val {
-    let mut repr = Map::<Key, Val>::default();
-    repr.insert(Key::from_str_unchecked(CODE), dyn_code(&f.comp));
-    let comp = CompRepr {
-        id: f.id.clone(),
-        access: MUTABLE,
-        raw_input: f.raw_input,
-        ctx: f.comp.ctx.clone(),
-    };
-    generate_comp(&mut repr, comp);
-    Val::Map(repr.into())
-}
-
-fn generate_prim(id: Key) -> Val {
-    let mut repr = Map::<Key, Val>::default();
-    repr.insert(Key::from_str_unchecked(ID), Val::Key(id));
-    Val::Map(repr.into())
-}
-
-pub(in crate::cfg) fn generate_code(func: &FuncVal) -> Option<Val> {
+pub(in crate::cfg) fn generate_code(func: &FuncVal) -> Val {
     match func {
-        FuncVal::FreePrim(_) => None,
-        FuncVal::FreeComp(f) => Some(free_code(&f.comp)),
-        FuncVal::ConstPrim(_) => None,
-        FuncVal::ConstComp(f) => Some(dyn_code(&f.comp)),
-        FuncVal::MutPrim(_) => None,
-        FuncVal::MutComp(f) => Some(dyn_code(&f.comp)),
+        FuncVal::FreePrim(f) => prim_code(&f.fn_),
+        FuncVal::FreeComp(f) => free_code(&f.comp),
+        FuncVal::ConstPrim(f) => prim_code(&f.fn_),
+        FuncVal::ConstComp(f) => dyn_code(&f.comp),
+        FuncVal::MutPrim(f) => prim_code(&f.fn_),
+        FuncVal::MutComp(f) => dyn_code(&f.comp),
     }
+}
+
+fn prim_code<T: ?Sized>(fn_: &Rc<T>) -> Val {
+    let ptr = Rc::as_ptr(fn_).addr();
+    let int = Int::from(ptr);
+    Val::Int(int.into())
 }
 
 fn free_code(comp: &FreeComposite) -> Val {
@@ -242,25 +172,14 @@ fn dyn_code(comp: &DynComposite) -> Val {
     Val::Pair(Pair::new(names, comp.body.clone()).into())
 }
 
-struct CompRepr {
-    id: Key,
-    access: &'static str,
-    raw_input: bool,
-    ctx: Val,
-}
-
-fn generate_comp(repr: &mut Map<Key, Val>, comp: CompRepr) {
-    if !comp.id.is_empty() {
-        repr.insert(Key::from_str_unchecked(ID), Val::Key(comp.id));
-    }
-    if comp.access != MUTABLE {
-        repr.insert(Key::from_str_unchecked(CTX_ACCESS), key(comp.access));
-    }
-    if comp.raw_input {
-        repr.insert(Key::from_str_unchecked(RAW_INPUT), Val::Bit(Bit::true_()));
-    }
-    if !comp.ctx.is_unit() {
-        repr.insert(Key::from_str_unchecked(CTX), comp.ctx);
+fn parse_ctx_access(access: &Val) -> Option<&str> {
+    match &access {
+        Val::Key(s) => Some(&**s),
+        Val::Unit(_) => Some(MUTABLE),
+        v => {
+            error!("ctx access {v:?} should be a key or a unit");
+            None
+        }
     }
 }
 
@@ -270,4 +189,77 @@ pub(in crate::cfg) fn generate_ctx_access(ctx_access: CtxAccess) -> &'static str
         CtxAccess::Const => CONST,
         CtxAccess::Mut => MUTABLE,
     }
+}
+
+fn generate_free_prim(f: FreePrimFuncVal) -> Val {
+    generate_prim(PrimRepr {
+        common: CommonRepr { access: FREE, raw_input: f.raw_input, code: prim_code(&f.fn_) },
+    })
+}
+
+fn generate_free_comp(f: FreeCompFuncVal) -> Val {
+    generate_comp(CompRepr {
+        common: CommonRepr { access: FREE, raw_input: f.raw_input, code: free_code(&f.comp) },
+        ctx: f.comp.ctx.clone(),
+    })
+}
+
+fn generate_const_prim(f: ConstPrimFuncVal) -> Val {
+    generate_prim(PrimRepr {
+        common: CommonRepr { access: CONST, raw_input: f.raw_input, code: prim_code(&f.fn_) },
+    })
+}
+
+fn generate_const_comp(f: ConstCompFuncVal) -> Val {
+    generate_comp(CompRepr {
+        common: CommonRepr { access: CONST, raw_input: f.raw_input, code: dyn_code(&f.comp) },
+        ctx: f.comp.ctx.clone(),
+    })
+}
+
+fn generate_mut_prim(f: MutPrimFuncVal) -> Val {
+    generate_prim(PrimRepr {
+        common: CommonRepr { access: MUTABLE, raw_input: f.raw_input, code: prim_code(&f.fn_) },
+    })
+}
+
+fn generate_mut_comp(f: MutCompFuncVal) -> Val {
+    generate_comp(CompRepr {
+        common: CommonRepr { access: MUTABLE, raw_input: f.raw_input, code: dyn_code(&f.comp) },
+        ctx: f.comp.ctx.clone(),
+    })
+}
+
+struct CommonRepr {
+    access: &'static str,
+    raw_input: bool,
+    code: Val,
+}
+
+fn generate_common(repr: &mut Map<Key, Val>, common: CommonRepr) {
+    repr.insert(Key::from_str_unchecked(CTX_ACCESS), key(common.access));
+    repr.insert(Key::from_str_unchecked(RAW_INPUT), Val::Bit(Bit::from(common.raw_input)));
+    repr.insert(Key::from_str_unchecked(CODE), common.code);
+}
+
+struct PrimRepr {
+    common: CommonRepr,
+}
+
+fn generate_prim(prim: PrimRepr) -> Val {
+    let mut repr = Map::<Key, Val>::default();
+    generate_common(&mut repr, prim.common);
+    Val::Map(repr.into())
+}
+
+struct CompRepr {
+    common: CommonRepr,
+    ctx: Val,
+}
+
+fn generate_comp(comp: CompRepr) -> Val {
+    let mut repr = Map::<Key, Val>::default();
+    generate_common(&mut repr, comp.common);
+    repr.insert(Key::from_str_unchecked(CTX), comp.ctx);
+    Val::Map(repr.into())
 }

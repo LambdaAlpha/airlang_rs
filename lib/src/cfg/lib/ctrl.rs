@@ -10,6 +10,7 @@ use super::dyn_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::exception::fail;
 use crate::cfg::exception::illegal_input;
+use crate::cfg::extend_func;
 use crate::cfg::lib::ctx::pattern::PatternAssign;
 use crate::cfg::lib::ctx::pattern::PatternMatch;
 use crate::cfg::lib::ctx::pattern::PatternParse;
@@ -57,12 +58,12 @@ impl Default for CtrlLib {
 
 impl CfgMod for CtrlLib {
     fn extend(self, cfg: &Cfg) {
-        self.do_.extend(cfg);
-        self.test.extend(cfg);
-        self.switch.extend(cfg);
-        self.match_.extend(cfg);
-        self.loop_.extend(cfg);
-        self.iterate.extend(cfg);
+        extend_func(cfg, "_control.do", self.do_);
+        extend_func(cfg, "_control.test", self.test);
+        extend_func(cfg, "_control.switch", self.switch);
+        extend_func(cfg, "_control.match", self.match_);
+        extend_func(cfg, "_control.loop", self.loop_);
+        extend_func(cfg, "_control.iterate", self.iterate);
     }
 }
 
@@ -162,7 +163,7 @@ impl CtrlFlow {
 }
 
 pub fn do_() -> MutPrimFuncVal {
-    DynPrimFn { id: "_control.do", raw_input: true, f: dyn_impl(fn_do) }.mut_()
+    DynPrimFn { raw_input: true, f: dyn_impl(fn_do) }.mut_()
 }
 
 fn fn_do(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
@@ -173,7 +174,7 @@ fn fn_do(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
 }
 
 pub fn test() -> MutPrimFuncVal {
-    DynPrimFn { id: "_control.test", raw_input: true, f: dyn_impl(fn_test) }.mut_()
+    DynPrimFn { raw_input: true, f: dyn_impl(fn_test) }.mut_()
 }
 
 fn fn_test(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
@@ -219,7 +220,7 @@ impl Test {
 }
 
 pub fn switch() -> MutPrimFuncVal {
-    DynPrimFn { id: "_control.switch", raw_input: true, f: dyn_impl(fn_switch) }.mut_()
+    DynPrimFn { raw_input: true, f: dyn_impl(fn_switch) }.mut_()
 }
 
 fn fn_switch(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
@@ -283,7 +284,7 @@ impl Switch {
 }
 
 pub fn match_() -> MutPrimFuncVal {
-    DynPrimFn { id: "_control.match", raw_input: true, f: dyn_impl(fn_match) }.mut_()
+    DynPrimFn { raw_input: true, f: dyn_impl(fn_match) }.mut_()
 }
 
 fn fn_match(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
@@ -349,7 +350,7 @@ impl Match {
 }
 
 pub fn loop_() -> MutPrimFuncVal {
-    DynPrimFn { id: "_control.loop", raw_input: true, f: dyn_impl(fn_loop) }.mut_()
+    DynPrimFn { raw_input: true, f: dyn_impl(fn_loop) }.mut_()
 }
 
 fn fn_loop(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
@@ -398,7 +399,7 @@ impl Loop {
 }
 
 pub fn iterate() -> MutPrimFuncVal {
-    DynPrimFn { id: "_control.iterate", raw_input: true, f: dyn_impl(fn_iterate) }.mut_()
+    DynPrimFn { raw_input: true, f: dyn_impl(fn_iterate) }.mut_()
 }
 
 fn fn_iterate(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {

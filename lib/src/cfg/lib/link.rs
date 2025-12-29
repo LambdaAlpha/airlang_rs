@@ -9,6 +9,7 @@ use super::free_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::exception::fail;
 use crate::cfg::exception::illegal_input;
+use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::func::ConstFn;
@@ -26,42 +27,42 @@ use crate::type_::Pair;
 #[derive(Clone)]
 pub struct LinkLib {
     pub new: FreePrimFuncVal,
-    pub new_const: FreePrimFuncVal,
+    pub new_constant: FreePrimFuncVal,
     pub which: MutPrimFuncVal,
 }
 
 impl Default for LinkLib {
     fn default() -> Self {
-        LinkLib { new: new(), new_const: new_const(), which: which() }
+        LinkLib { new: new(), new_constant: new_constant(), which: which() }
     }
 }
 
 impl CfgMod for LinkLib {
     fn extend(self, cfg: &Cfg) {
-        self.new.extend(cfg);
-        self.new_const.extend(cfg);
-        self.which.extend(cfg);
+        extend_func(cfg, "_link.new", self.new);
+        extend_func(cfg, "_link.new_constant", self.new_constant);
+        extend_func(cfg, "_link.which", self.which);
     }
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { id: "_link.new", raw_input: false, f: free_impl(fn_new) }.free()
+    FreePrimFn { raw_input: false, f: free_impl(fn_new) }.free()
 }
 
 fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
     Val::Link(LinkVal::new(input, false))
 }
 
-pub fn new_const() -> FreePrimFuncVal {
-    FreePrimFn { id: "_link.new_constant", raw_input: false, f: free_impl(fn_new_const) }.free()
+pub fn new_constant() -> FreePrimFuncVal {
+    FreePrimFn { raw_input: false, f: free_impl(fn_new_constant) }.free()
 }
 
-fn fn_new_const(_cfg: &mut Cfg, input: Val) -> Val {
+fn fn_new_constant(_cfg: &mut Cfg, input: Val) -> Val {
     Val::Link(LinkVal::new(input, true))
 }
 
 pub fn which() -> MutPrimFuncVal {
-    DynPrimFn { id: "_link.which", raw_input: true, f: dyn_impl(fn_which) }.mut_()
+    DynPrimFn { raw_input: true, f: dyn_impl(fn_which) }.mut_()
 }
 
 fn fn_which(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {

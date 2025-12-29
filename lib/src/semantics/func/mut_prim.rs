@@ -1,13 +1,13 @@
+use std::fmt::Debug;
+use std::fmt::Formatter;
 use std::rc::Rc;
 
 use super::ConstFn;
 use super::FreeFn;
-use super::prim::impl_prim_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::Either;
-use crate::type_::Key;
 use crate::type_::ref_::DynRef;
 
 pub trait MutFn<Cfg, Ctx, I, O>: ConstFn<Cfg, Ctx, I, O> {
@@ -64,7 +64,6 @@ where T: MutFn<Cfg, Ctx, I, O>
 
 #[derive(Clone)]
 pub struct MutPrimFunc {
-    pub(crate) id: Key,
     pub(crate) raw_input: bool,
     pub(crate) fn_: Rc<dyn MutFn<Cfg, Val, Val, Val>>,
 }
@@ -87,4 +86,19 @@ impl MutFn<Cfg, Val, Val, Val> for MutPrimFunc {
     }
 }
 
-impl_prim_func!(MutPrimFunc);
+impl PartialEq for MutPrimFunc {
+    fn eq(&self, other: &MutPrimFunc) -> bool {
+        self.raw_input == other.raw_input && Rc::ptr_eq(&self.fn_, &other.fn_)
+    }
+}
+
+impl Eq for MutPrimFunc {}
+
+impl Debug for MutPrimFunc {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MutPrimFunc")
+            .field("raw_input", &self.raw_input)
+            .field("fn", &Rc::as_ptr(&self.fn_))
+            .finish()
+    }
+}

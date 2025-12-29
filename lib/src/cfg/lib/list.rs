@@ -10,6 +10,7 @@ use crate::cfg::CfgMod;
 use crate::cfg::exception::fail;
 use crate::cfg::exception::illegal_ctx;
 use crate::cfg::exception::illegal_input;
+use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
@@ -61,25 +62,25 @@ impl Default for ListLib {
 
 impl CfgMod for ListLib {
     fn extend(self, cfg: &Cfg) {
-        self.length.extend(cfg);
-        self.set.extend(cfg);
-        self.set_many.extend(cfg);
-        self.get.extend(cfg);
-        self.get_many.extend(cfg);
-        self.insert.extend(cfg);
-        self.insert_many.extend(cfg);
-        self.remove.extend(cfg);
-        self.remove_many.extend(cfg);
-        self.push.extend(cfg);
-        self.push_many.extend(cfg);
-        self.pop.extend(cfg);
-        self.pop_many.extend(cfg);
-        self.clear.extend(cfg);
+        extend_func(cfg, "_list.length", self.length);
+        extend_func(cfg, "_list.set", self.set);
+        extend_func(cfg, "_list.set_many", self.set_many);
+        extend_func(cfg, "_list.get", self.get);
+        extend_func(cfg, "_list.get_many", self.get_many);
+        extend_func(cfg, "_list.insert", self.insert);
+        extend_func(cfg, "_list.insert_many", self.insert_many);
+        extend_func(cfg, "_list.remove", self.remove);
+        extend_func(cfg, "_list.remove_many", self.remove_many);
+        extend_func(cfg, "_list.push", self.push);
+        extend_func(cfg, "_list.push_many", self.push_many);
+        extend_func(cfg, "_list.pop", self.pop);
+        extend_func(cfg, "_list.pop_many", self.pop_many);
+        extend_func(cfg, "_list.clear", self.clear);
     }
 }
 
 pub fn length() -> ConstPrimFuncVal {
-    DynPrimFn { id: "_list.length", raw_input: false, f: const_impl(fn_length) }.const_()
+    DynPrimFn { raw_input: false, f: const_impl(fn_length) }.const_()
 }
 
 fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -92,7 +93,7 @@ fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn set() -> MutPrimFuncVal {
-    DynPrimFn { id: "_list.set", raw_input: false, f: mut_impl(fn_set) }.mut_()
+    DynPrimFn { raw_input: false, f: mut_impl(fn_set) }.mut_()
 }
 
 fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -120,7 +121,7 @@ fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn set_many() -> MutPrimFuncVal {
-    DynPrimFn { id: "_list.set_many", raw_input: false, f: mut_impl(fn_set_many) }.mut_()
+    DynPrimFn { raw_input: false, f: mut_impl(fn_set_many) }.mut_()
 }
 
 fn fn_set_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -153,7 +154,7 @@ fn fn_set_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn get() -> ConstPrimFuncVal {
-    DynPrimFn { id: "_list.get", raw_input: false, f: const_impl(fn_get) }.const_()
+    DynPrimFn { raw_input: false, f: const_impl(fn_get) }.const_()
 }
 
 fn fn_get(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -173,7 +174,7 @@ fn fn_get(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn get_many() -> ConstPrimFuncVal {
-    DynPrimFn { id: "_list.get_many", raw_input: false, f: const_impl(fn_get_many) }.const_()
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_many) }.const_()
 }
 
 fn fn_get_many(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -200,7 +201,7 @@ fn fn_get_many(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn insert() -> MutPrimFuncVal {
-    DynPrimFn { id: "_list.insert", raw_input: false, f: mut_impl(fn_insert) }.mut_()
+    DynPrimFn { raw_input: false, f: mut_impl(fn_insert) }.mut_()
 }
 
 fn fn_insert(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -228,7 +229,7 @@ fn fn_insert(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn insert_many() -> MutPrimFuncVal {
-    DynPrimFn { id: "_list.insert_many", raw_input: false, f: mut_impl(fn_insert_many) }.mut_()
+    DynPrimFn { raw_input: false, f: mut_impl(fn_insert_many) }.mut_()
 }
 
 fn fn_insert_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -260,7 +261,7 @@ fn fn_insert_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn remove() -> MutPrimFuncVal {
-    DynPrimFn { id: "_list.remove", raw_input: false, f: mut_impl(fn_remove) }.mut_()
+    DynPrimFn { raw_input: false, f: mut_impl(fn_remove) }.mut_()
 }
 
 fn fn_remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -280,7 +281,7 @@ fn fn_remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn remove_many() -> MutPrimFuncVal {
-    DynPrimFn { id: "_list.remove_many", raw_input: false, f: mut_impl(fn_remove_many) }.mut_()
+    DynPrimFn { raw_input: false, f: mut_impl(fn_remove_many) }.mut_()
 }
 
 fn fn_remove_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -308,7 +309,7 @@ fn fn_remove_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn push() -> MutPrimFuncVal {
-    DynPrimFn { id: "_list.push", raw_input: false, f: mut_impl(fn_push) }.mut_()
+    DynPrimFn { raw_input: false, f: mut_impl(fn_push) }.mut_()
 }
 
 fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -321,7 +322,7 @@ fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn push_many() -> MutPrimFuncVal {
-    DynPrimFn { id: "_list.push_many", raw_input: false, f: mut_impl(fn_push_many) }.mut_()
+    DynPrimFn { raw_input: false, f: mut_impl(fn_push_many) }.mut_()
 }
 
 fn fn_push_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -338,7 +339,7 @@ fn fn_push_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn pop() -> MutPrimFuncVal {
-    DynPrimFn { id: "_list.pop", raw_input: false, f: mut_impl(fn_pop) }.mut_()
+    DynPrimFn { raw_input: false, f: mut_impl(fn_pop) }.mut_()
 }
 
 fn fn_pop(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -354,7 +355,7 @@ fn fn_pop(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn pop_many() -> MutPrimFuncVal {
-    DynPrimFn { id: "_list.pop_many", raw_input: false, f: mut_impl(fn_pop_many) }.mut_()
+    DynPrimFn { raw_input: false, f: mut_impl(fn_pop_many) }.mut_()
 }
 
 fn fn_pop_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -382,7 +383,7 @@ fn fn_pop_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn clear() -> MutPrimFuncVal {
-    DynPrimFn { id: "_list.clear", raw_input: false, f: mut_impl(fn_clear) }.mut_()
+    DynPrimFn { raw_input: false, f: mut_impl(fn_clear) }.mut_()
 }
 
 fn fn_clear(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {

@@ -232,16 +232,28 @@ _ do [
 ]
 
 -----
-{code : (c : i) : i, context : {}}
+{
+    context_access : _mutable,
+    raw_input : false,
+    code : (c : i) : i,
+    context : {}
+}
 =====
 repr primitive free
 -----
 _ do [
     .represent set _ import _function.represent,
-    _ represent not
+    .function.code set _ import _function.code,
+    .not_code set not which _ function.code .,
+    .repr set {
+        context_access : _free,
+        raw_input : false,
+        code : not_code,
+    },
+    repr == _ represent not
 ]
 -----
-{id : _bit.not}
+true
 =====
 repr const
 -----
@@ -253,25 +265,38 @@ _ do [
     }
 ]
 -----
-{code : (_c : i) : i, context_access : _constant}
+{
+    context_access : _constant,
+    raw_input : false,
+    code : (_c : i) : i,
+    context : .,
+}
 =====
 repr primitive const
 -----
 _ do [
     .represent set _ import _function.represent,
-    _ represent ==
+    .function.code set _ import _function.code,
+    .type_code set type which _ function.code .,
+    .repr set {
+        context_access : _constant,
+        raw_input : false,
+        code : type_code,
+    },
+    repr == _ represent type
 ]
 -----
-{id : _value.equal}
+true
 =====
 repr composite
 -----
 _ do [
     .represent set _ import _function.represent,
     .repr set {
-        id : _f,
-        code : (_ctx : .in) : .in,
         context_access : _constant,
+        raw_input : false,
+        code : (_ctx : .in) : .in,
+        context : {},
     },
     .new_repr set _ represent _ function repr,
     repr == new_repr
@@ -353,33 +378,14 @@ _ do [
 -----
 false
 =====
-id primitive
------
-_ do [
-    .id set _ import _function.id,
-    not which _ id .
-]
------
-_bit.not
-=====
-id rename
------
-_ do [
-    .id set _ import _function.id,
-    .neg set not,
-    neg which _ id .
-]
------
-_bit.not
-=====
 code
 -----
 _ do [
-    .code set _ import _function.code,
+    .function.code set _ import _function.code,
     .f set _ function {
         code : (_ctx : .i) : .i
     },
-    f which _ code .
+    f which _ function.code .
 ]
 -----
 (_ctx : i) : i

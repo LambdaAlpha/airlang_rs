@@ -1,9 +1,9 @@
+use std::fmt::Debug;
+use std::fmt::Formatter;
 use std::rc::Rc;
 
-use super::prim::impl_prim_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::Val;
-use crate::type_::Key;
 
 pub trait FreeFn<Cfg, I, O> {
     fn free_call(&self, cfg: &mut Cfg, input: I) -> O;
@@ -27,7 +27,6 @@ where T: FreeFn<Cfg, I, O>
 
 #[derive(Clone)]
 pub struct FreePrimFunc {
-    pub(crate) id: Key,
     pub(crate) raw_input: bool,
     pub(crate) fn_: Rc<dyn FreeFn<Cfg, Val, Val>>,
 }
@@ -46,8 +45,23 @@ impl Default for FreePrimFunc {
                 Val::default()
             }
         }
-        Self { id: Key::default(), fn_: Rc::new(F), raw_input: false }
+        Self { fn_: Rc::new(F), raw_input: false }
     }
 }
 
-impl_prim_func!(FreePrimFunc);
+impl PartialEq for FreePrimFunc {
+    fn eq(&self, other: &FreePrimFunc) -> bool {
+        self.raw_input == other.raw_input && Rc::ptr_eq(&self.fn_, &other.fn_)
+    }
+}
+
+impl Eq for FreePrimFunc {}
+
+impl Debug for FreePrimFunc {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("FreePrimFunc")
+            .field("raw_input", &self.raw_input)
+            .field("fn", &Rc::as_ptr(&self.fn_))
+            .finish()
+    }
+}

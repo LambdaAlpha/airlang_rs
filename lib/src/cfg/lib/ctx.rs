@@ -12,6 +12,7 @@ use super::mut_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::exception::fail;
 use crate::cfg::exception::illegal_input;
+use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::Form;
@@ -31,8 +32,8 @@ pub struct CtxLib {
     pub get: ConstPrimFuncVal,
     pub set: MutPrimFuncVal,
     pub form: ConstPrimFuncVal,
-    pub repr: MutPrimFuncVal,
-    pub is_const: MutPrimFuncVal,
+    pub represent: MutPrimFuncVal,
+    pub is_constant: MutPrimFuncVal,
     pub self_: ConstPrimFuncVal,
     pub which: MutPrimFuncVal,
 }
@@ -43,8 +44,8 @@ impl Default for CtxLib {
             get: get(),
             set: set(),
             form: form(),
-            repr: repr(),
-            is_const: is_const(),
+            represent: represent(),
+            is_constant: is_constant(),
             self_: self_(),
             which: which(),
         }
@@ -53,18 +54,18 @@ impl Default for CtxLib {
 
 impl CfgMod for CtxLib {
     fn extend(self, cfg: &Cfg) {
-        self.get.extend(cfg);
-        self.set.extend(cfg);
-        self.form.extend(cfg);
-        self.repr.extend(cfg);
-        self.is_const.extend(cfg);
-        self.self_.extend(cfg);
-        self.which.extend(cfg);
+        extend_func(cfg, "_context.get", self.get);
+        extend_func(cfg, "_context.set", self.set);
+        extend_func(cfg, "_context.form", self.form);
+        extend_func(cfg, "_context.represent", self.represent);
+        extend_func(cfg, "_context.is_constant", self.is_constant);
+        extend_func(cfg, "_context.self", self.self_);
+        extend_func(cfg, "_context.which", self.which);
     }
 }
 
 pub fn get() -> ConstPrimFuncVal {
-    DynPrimFn { id: "_context.get", raw_input: false, f: const_impl(fn_get) }.const_()
+    DynPrimFn { raw_input: false, f: const_impl(fn_get) }.const_()
 }
 
 fn fn_get(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -75,7 +76,7 @@ fn fn_get(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn set() -> MutPrimFuncVal {
-    DynPrimFn { id: "_context.set", raw_input: false, f: mut_impl(fn_set) }.mut_()
+    DynPrimFn { raw_input: false, f: mut_impl(fn_set) }.mut_()
 }
 
 fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -89,14 +90,14 @@ fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn form() -> ConstPrimFuncVal {
-    DynPrimFn { id: "_context.form", raw_input: true, f: Form }.const_()
+    DynPrimFn { raw_input: true, f: Form }.const_()
 }
 
-pub fn repr() -> MutPrimFuncVal {
-    DynPrimFn { id: "_context.represent", raw_input: false, f: mut_impl(fn_repr) }.mut_()
+pub fn represent() -> MutPrimFuncVal {
+    DynPrimFn { raw_input: false, f: mut_impl(fn_represent) }.mut_()
 }
 
-fn fn_repr(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+fn fn_represent(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return illegal_input(cfg);
@@ -110,13 +111,8 @@ fn fn_repr(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     if pattern.match_(&val) { pattern.assign(ctx, val) } else { fail(cfg) }
 }
 
-pub fn is_const() -> MutPrimFuncVal {
-    DynPrimFn {
-        id: "_context.is_constant",
-        raw_input: false,
-        f: MutImpl::new(FreeImpl::default, fn_const, fn_mut),
-    }
-    .mut_()
+pub fn is_constant() -> MutPrimFuncVal {
+    DynPrimFn { raw_input: false, f: MutImpl::new(FreeImpl::default, fn_const, fn_mut) }.mut_()
 }
 
 fn fn_const(_cfg: &mut Cfg, _ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -128,7 +124,7 @@ fn fn_mut(_cfg: &mut Cfg, _ctx: &mut Val, _input: Val) -> Val {
 }
 
 pub fn self_() -> ConstPrimFuncVal {
-    DynPrimFn { id: "_context.self", raw_input: false, f: const_impl(fn_self) }.const_()
+    DynPrimFn { raw_input: false, f: const_impl(fn_self) }.const_()
 }
 
 fn fn_self(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -136,7 +132,7 @@ fn fn_self(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn which() -> MutPrimFuncVal {
-    DynPrimFn { id: "_context.which", raw_input: true, f: dyn_impl(fn_which) }.mut_()
+    DynPrimFn { raw_input: true, f: dyn_impl(fn_which) }.mut_()
 }
 
 fn fn_which(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {

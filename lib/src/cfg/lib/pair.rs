@@ -7,6 +7,7 @@ use super::const_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::exception::illegal_ctx;
+use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
@@ -34,15 +35,15 @@ impl Default for PairLib {
 
 impl CfgMod for PairLib {
     fn extend(self, cfg: &Cfg) {
-        self.first.extend(cfg);
-        self.set_first.extend(cfg);
-        self.second.extend(cfg);
-        self.set_second.extend(cfg);
+        extend_func(cfg, "_pair.first", self.first);
+        extend_func(cfg, "_pair.set_first", self.set_first);
+        extend_func(cfg, "_pair.second", self.second);
+        extend_func(cfg, "_pair.set_second", self.set_second);
     }
 }
 
 pub fn first() -> ConstPrimFuncVal {
-    DynPrimFn { id: "_pair.first", raw_input: false, f: const_impl(fn_first) }.const_()
+    DynPrimFn { raw_input: false, f: const_impl(fn_first) }.const_()
 }
 
 fn fn_first(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -54,7 +55,7 @@ fn fn_first(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn set_first() -> MutPrimFuncVal {
-    DynPrimFn { id: "_pair.set_first", raw_input: false, f: mut_impl(fn_set_first) }.mut_()
+    DynPrimFn { raw_input: false, f: mut_impl(fn_set_first) }.mut_()
 }
 
 fn fn_set_first(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
@@ -67,7 +68,7 @@ fn fn_set_first(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
 }
 
 pub fn second() -> ConstPrimFuncVal {
-    DynPrimFn { id: "_pair.second", raw_input: false, f: const_impl(fn_second) }.const_()
+    DynPrimFn { raw_input: false, f: const_impl(fn_second) }.const_()
 }
 
 fn fn_second(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
@@ -79,7 +80,7 @@ fn fn_second(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
 }
 
 pub fn set_second() -> MutPrimFuncVal {
-    DynPrimFn { id: "_pair.set_second", raw_input: false, f: mut_impl(fn_set_second) }.mut_()
+    DynPrimFn { raw_input: false, f: mut_impl(fn_set_second) }.mut_()
 }
 
 fn fn_set_second(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
