@@ -3,9 +3,9 @@ name = "airlang"
 version = "0.21.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
-description = "Air Programming Language"
+description = "Air is a minimalist and universal programming language."
 repository = "https://github.com/LambdaAlpha/airlang_rs"
-keywords = ["abstraction", "optimizer", "specification", "solver", "reflect"]
+keywords = ["programming-language", "dsl", "config", "configuration", "serde"]
 categories = ["compilers"]
 
 [[bench]]

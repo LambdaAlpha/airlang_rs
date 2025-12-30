@@ -12,7 +12,7 @@
 
 ### Minimalist Syntax
 
-Air's syntax is extremely concise. It only includes comments and 11 data types, with no semantic-specific syntax for control flows, functions, types, modules, etc. Its rules are very simple, using prefixes to avoid ambiguity, and it has only 5 keywords (`_`, `.`, `:`, `true`, `false`). This makes it highly suitable as a configuration language or data interchange format.
+Air's syntax is extremely concise. It only includes comments and 11 data types, with no semantic-specific syntax for control flows, functions, types, modules, etc. Its rules are very simple, using prefixes to avoid ambiguity, and it has only 5 keywords (`_`, `.`, `:`, `true`, `false`). This makes it highly suitable for configuration or data interchange.
 
 **comment**
 
@@ -199,7 +199,7 @@ _ do [
    Focus on expanding core expressiveness to lay the foundation for subsequent capabilities.
 
 2. **Introduce Abstract Semantics and Program Optimization Framework**  
-   Introduce an abstract semantics model based on "concrete value + abstract constraint," enabling optimization of values within the same class while maintaining semantic equivalence, and build a general program optimization framework based on this.
+   Introduce an abstract semantics model based on "concrete value + abstract constraint", enabling optimization of values within the same class while maintaining semantic equivalence, and build a general program optimization framework based on this.
 
 3. **Develop Intelligent Optimization Algorithms**  
    Develop automated, intelligent optimization algorithms based on abstract semantics to systematically optimize program resource usage.
