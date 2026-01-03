@@ -23,25 +23,25 @@ enum KeyMode {
 }
 
 impl KeyEval {
-    fn recognize(&self, input: Key) -> (KeyMode, Key) {
-        match input.chars().next() {
-            Some(PREFIX_ID) => (KeyMode::Id, input),
-            Some(PREFIX_SHIFT) => (KeyMode::Shift, Key::from_str_unchecked(&input[1 ..])),
-            Some(PREFIX_CTX) => (KeyMode::Ctx, Key::from_str_unchecked(&input[1 ..])),
-            _ => (KeyMode::Ctx, input),
+    fn recognize(&self, key: Key) -> (KeyMode, Key) {
+        match key.chars().next() {
+            Some(PREFIX_ID) => (KeyMode::Id, key),
+            Some(PREFIX_SHIFT) => (KeyMode::Shift, Key::from_str_unchecked(&key[1 ..])),
+            Some(PREFIX_CTX) => (KeyMode::Ctx, Key::from_str_unchecked(&key[1 ..])),
+            _ => (KeyMode::Ctx, key),
         }
     }
 }
 
 impl FreeFn<Cfg, Key, Val> for KeyEval {
-    fn free_call(&self, cfg: &mut Cfg, input: Key) -> Val {
+    fn free_call(&self, cfg: &mut Cfg, key: Key) -> Val {
         cfg.step();
-        let (mode, s) = self.recognize(input.clone());
+        let (mode, s) = self.recognize(key.clone());
         match mode {
             KeyMode::Id => Val::Key(s),
             KeyMode::Shift => Val::Key(s),
             KeyMode::Ctx => {
-                error!("key {input:?} should be evaluated in a ctx");
+                error!("key {key:?} should be evaluated in a ctx");
                 Val::default()
             }
         }
@@ -49,9 +49,9 @@ impl FreeFn<Cfg, Key, Val> for KeyEval {
 }
 
 impl ConstFn<Cfg, Val, Key, Val> for KeyEval {
-    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Key) -> Val {
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, key: Key) -> Val {
         cfg.step();
-        let (mode, s) = self.recognize(input);
+        let (mode, s) = self.recognize(key);
         match mode {
             KeyMode::Id => Val::Key(s),
             KeyMode::Shift => Val::Key(s),
@@ -66,11 +66,11 @@ impl ConstFn<Cfg, Val, Key, Val> for KeyEval {
 }
 
 impl MutFn<Cfg, Val, Key, Val> for KeyEval {
-    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Key) -> Val {
-        self.const_call(cfg, ConstRef::new(ctx), input)
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, key: Key) -> Val {
+        self.const_call(cfg, ConstRef::new(ctx), key)
     }
 
-    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, input: Key) -> Val {
-        self.const_call(cfg, ctx.into_const(), input)
+    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, key: Key) -> Val {
+        self.const_call(cfg, ctx.into_const(), key)
     }
 }

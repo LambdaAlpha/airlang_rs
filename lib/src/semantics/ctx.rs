@@ -2,10 +2,10 @@ use std::ops::BitAnd;
 
 use derive_more::IsVariant;
 
-pub trait DynCtx<Input, Output> {
-    fn ref_(&self, input: Input) -> Option<&Output>;
-    fn ref_mut(&mut self, input: Input) -> Option<&mut Output>;
-    fn set(&mut self, input: Input, value: Output) -> Option<Output>;
+pub trait DynCtx<Key, Value> {
+    fn ref_(&self, key: Key) -> Option<&Value>;
+    fn ref_mut(&mut self, key: Key) -> Option<&mut Value>;
+    fn set(&mut self, key: Key, value: Value) -> Option<Value>;
 }
 
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash, IsVariant)]

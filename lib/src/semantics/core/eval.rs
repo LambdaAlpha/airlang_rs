@@ -95,8 +95,8 @@ where Func: MutFn<Cfg, Val, Val, Val>
 pub(crate) struct Eval;
 
 impl FreeFn<Cfg, Val, Val> for Eval {
-    fn free_call(&self, cfg: &mut Cfg, input: Val) -> Val {
-        match input {
+    fn free_call(&self, cfg: &mut Cfg, val: Val) -> Val {
+        match val {
             Val::Key(key) => self.free_call(cfg, key),
             Val::Pair(pair) => self.free_call(cfg, pair),
             Val::Call(call) => self.free_call(cfg, call),
@@ -108,8 +108,8 @@ impl FreeFn<Cfg, Val, Val> for Eval {
 }
 
 impl ConstFn<Cfg, Val, Val, Val> for Eval {
-    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-        match input {
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, val: Val) -> Val {
+        match val {
             Val::Key(key) => self.const_call(cfg, ctx, key),
             Val::Pair(pair) => self.const_call(cfg, ctx, pair),
             Val::Call(call) => self.const_call(cfg, ctx, call),
@@ -121,8 +121,8 @@ impl ConstFn<Cfg, Val, Val, Val> for Eval {
 }
 
 impl MutFn<Cfg, Val, Val, Val> for Eval {
-    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
-        match input {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, val: Val) -> Val {
+        match val {
             Val::Key(key) => self.mut_call(cfg, ctx, key),
             Val::Pair(pair) => self.mut_call(cfg, ctx, pair),
             Val::Call(call) => self.mut_call(cfg, ctx, call),
@@ -132,8 +132,8 @@ impl MutFn<Cfg, Val, Val, Val> for Eval {
         }
     }
 
-    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
-        match input {
+    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, val: Val) -> Val {
+        match val {
             Val::Key(key) => self.dyn_call(cfg, ctx, key),
             Val::Pair(pair) => self.dyn_call(cfg, ctx, pair),
             Val::Call(call) => self.dyn_call(cfg, ctx, call),
@@ -145,111 +145,111 @@ impl MutFn<Cfg, Val, Val, Val> for Eval {
 }
 
 impl FreeFn<Cfg, Key, Val> for Eval {
-    fn free_call(&self, cfg: &mut Cfg, input: Key) -> Val {
-        KeyEval.free_call(cfg, input)
+    fn free_call(&self, cfg: &mut Cfg, key: Key) -> Val {
+        KeyEval.free_call(cfg, key)
     }
 }
 
 impl ConstFn<Cfg, Val, Key, Val> for Eval {
-    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Key) -> Val {
-        KeyEval.const_call(cfg, ctx, input)
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, key: Key) -> Val {
+        KeyEval.const_call(cfg, ctx, key)
     }
 }
 
 impl MutFn<Cfg, Val, Key, Val> for Eval {
-    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Key) -> Val {
-        KeyEval.mut_call(cfg, ctx, input)
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, key: Key) -> Val {
+        KeyEval.mut_call(cfg, ctx, key)
     }
 
-    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, input: Key) -> Val {
-        KeyEval.dyn_call(cfg, ctx, input)
+    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, key: Key) -> Val {
+        KeyEval.dyn_call(cfg, ctx, key)
     }
 }
 
 impl FreeFn<Cfg, PairVal, Val> for Eval {
-    fn free_call(&self, cfg: &mut Cfg, input: PairVal) -> Val {
-        PairForm { first: self, second: self }.free_call(cfg, input)
+    fn free_call(&self, cfg: &mut Cfg, pair: PairVal) -> Val {
+        Val::Pair(PairForm { first: self, second: self }.free_call(cfg, pair))
     }
 }
 
 impl ConstFn<Cfg, Val, PairVal, Val> for Eval {
-    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: PairVal) -> Val {
-        PairForm { first: self, second: self }.const_call(cfg, ctx, input)
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, pair: PairVal) -> Val {
+        Val::Pair(PairForm { first: self, second: self }.const_call(cfg, ctx, pair))
     }
 }
 
 impl MutFn<Cfg, Val, PairVal, Val> for Eval {
-    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: PairVal) -> Val {
-        PairForm { first: self, second: self }.mut_call(cfg, ctx, input)
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, pair: PairVal) -> Val {
+        Val::Pair(PairForm { first: self, second: self }.mut_call(cfg, ctx, pair))
     }
 
-    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, input: PairVal) -> Val {
-        PairForm { first: self, second: self }.dyn_call(cfg, ctx, input)
+    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, pair: PairVal) -> Val {
+        Val::Pair(PairForm { first: self, second: self }.dyn_call(cfg, ctx, pair))
     }
 }
 
 impl FreeFn<Cfg, CallVal, Val> for Eval {
-    fn free_call(&self, cfg: &mut Cfg, input: CallVal) -> Val {
-        CallEval { func: self }.free_call(cfg, input)
+    fn free_call(&self, cfg: &mut Cfg, call: CallVal) -> Val {
+        CallEval { func: self }.free_call(cfg, call)
     }
 }
 
 impl ConstFn<Cfg, Val, CallVal, Val> for Eval {
-    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: CallVal) -> Val {
-        CallEval { func: self }.const_call(cfg, ctx, input)
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, call: CallVal) -> Val {
+        CallEval { func: self }.const_call(cfg, ctx, call)
     }
 }
 
 impl MutFn<Cfg, Val, CallVal, Val> for Eval {
-    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: CallVal) -> Val {
-        CallEval { func: self }.mut_call(cfg, ctx, input)
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, call: CallVal) -> Val {
+        CallEval { func: self }.mut_call(cfg, ctx, call)
     }
 
-    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, input: CallVal) -> Val {
-        CallEval { func: self }.dyn_call(cfg, ctx, input)
+    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, call: CallVal) -> Val {
+        CallEval { func: self }.dyn_call(cfg, ctx, call)
     }
 }
 
 impl FreeFn<Cfg, ListVal, Val> for Eval {
-    fn free_call(&self, cfg: &mut Cfg, input: ListVal) -> Val {
-        ListForm { item: self }.free_call(cfg, input)
+    fn free_call(&self, cfg: &mut Cfg, list: ListVal) -> Val {
+        Val::List(ListForm { item: self }.free_call(cfg, list))
     }
 }
 
 impl ConstFn<Cfg, Val, ListVal, Val> for Eval {
-    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: ListVal) -> Val {
-        ListForm { item: self }.const_call(cfg, ctx, input)
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, list: ListVal) -> Val {
+        Val::List(ListForm { item: self }.const_call(cfg, ctx, list))
     }
 }
 
 impl MutFn<Cfg, Val, ListVal, Val> for Eval {
-    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: ListVal) -> Val {
-        ListForm { item: self }.mut_call(cfg, ctx, input)
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, list: ListVal) -> Val {
+        Val::List(ListForm { item: self }.mut_call(cfg, ctx, list))
     }
 
-    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, input: ListVal) -> Val {
-        ListForm { item: self }.dyn_call(cfg, ctx, input)
+    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, list: ListVal) -> Val {
+        Val::List(ListForm { item: self }.dyn_call(cfg, ctx, list))
     }
 }
 
 impl FreeFn<Cfg, MapVal, Val> for Eval {
-    fn free_call(&self, cfg: &mut Cfg, input: MapVal) -> Val {
-        MapForm { value: self }.free_call(cfg, input)
+    fn free_call(&self, cfg: &mut Cfg, map: MapVal) -> Val {
+        Val::Map(MapForm { value: self }.free_call(cfg, map))
     }
 }
 
 impl ConstFn<Cfg, Val, MapVal, Val> for Eval {
-    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: MapVal) -> Val {
-        MapForm { value: self }.const_call(cfg, ctx, input)
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, map: MapVal) -> Val {
+        Val::Map(MapForm { value: self }.const_call(cfg, ctx, map))
     }
 }
 
 impl MutFn<Cfg, Val, MapVal, Val> for Eval {
-    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: MapVal) -> Val {
-        MapForm { value: self }.mut_call(cfg, ctx, input)
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, map: MapVal) -> Val {
+        Val::Map(MapForm { value: self }.mut_call(cfg, ctx, map))
     }
 
-    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, input: MapVal) -> Val {
-        MapForm { value: self }.dyn_call(cfg, ctx, input)
+    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, map: MapVal) -> Val {
+        Val::Map(MapForm { value: self }.dyn_call(cfg, ctx, map))
     }
 }
