@@ -158,8 +158,9 @@ Second, the evaluation rule for calls is `_ f i` ➔ `o`, with the following ste
 2. `if vf.raw_input then i else eval(i)` ➔ `vi`
 3. `vf(vi)` ➔ `o`
 
-Third, the evaluation rules for pairs, lists, and maps are as follows:
+Third, the evaluation rules for cells, pairs, lists, and maps are as follows:
 
+- `.(v)` ➔ `.(eval(v))`
 - `v1 : v2` ➔ `eval(v1) : eval(v2)`
 - `[v1, v2, ..., vn]` ➔ `[eval(v1), eval(v2), ..., eval(vn)]`
 - `{k1 : v1, k2 : v2, ..., kn : vn}` ➔ `{k1 : eval(v1), k2 : eval(v2), kn : eval(vn)}`

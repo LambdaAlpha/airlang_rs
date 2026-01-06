@@ -157,8 +157,9 @@ Air 的求值规则非常简洁，只有四条规则。
 2. `if vf.raw_input then i else eval(i)` ➔ `vi`
 3. `vf(vi)` ➔ `o`
 
-第三，配对，列表，映射的求值规则如下：
+第三，单元格，配对，列表，映射的求值规则如下：
 
+- `.(v)` ➔ `.(eval(v))`
 - `v1 : v2` ➔ `eval(v1) : eval(v2)`
 - `[v1, v2, ..., vn]` ➔ `[eval(v1), eval(v2), ..., eval(vn)]`
 - `{k1 : v1, k2 : v2, ..., kn : vn}` ➔ `{k1 : eval(v1), k2 : eval(v2), kn : eval(vn)}`
