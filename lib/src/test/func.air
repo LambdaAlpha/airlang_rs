@@ -79,8 +79,8 @@ _ do [
     .f set _ data _ function {
         context_access : _free,
         code : __ : _ form _ do [
-            ..i set .a link_which _ get ..value,
-            .a link_which ..value set .i + 1,
+            ..i set .a link_which _ get _value,
+            .a link_which _value set .i + 1,
             .i
         ],
         context : {

@@ -72,7 +72,7 @@ cell ref
 -----
 _ do [
     .c set .(1),
-    c which _ do [value]
+    c which _ get _value
 ]
 -----
 1
@@ -81,37 +81,37 @@ pair ref
 -----
 _ do [
     .p set 1 : 2,
-    p which _ do [first : second]
+    p which _ eval _ form [_ get _first, _ get _second]
 ]
 -----
-1 : 2
+[1, 2]
 =====
 call ref
 -----
 _ do [
     .c set _ data _ func input,
-    c which _ do [function : input]
+    c which _ eval _ form [_ get _function, _ get _input]
 ]
 -----
-func : input
+[func, input]
 =====
 list ref
 -----
 _ do [
     .l set [0, 3, 6],
-    l which _ do [:0 : :1 : :2]
+    l which _ code [:0, :1, :2]
 ]
 -----
-0 : 3 : 6
+[0, 3, 6]
 =====
 map ref
 -----
 _ do [
     .m set {a : 1, b : 2},
-    m which _ do [a : b]
+    m which _ code [a, b]
 ]
 -----
-1 : 2
+[1, 2]
 =====
 cell eval
 -----
@@ -147,7 +147,7 @@ cell ctx value
 -----
 _ do [
     .c set .(1),
-    c which _ get .value
+    c which _ get _value
 ]
 -----
 1
@@ -156,7 +156,7 @@ pair ctx first
 -----
 _ do [
     .p set 1 : 2,
-    p which _ get .first
+    p which _ get _first
 ]
 -----
 1
@@ -165,7 +165,7 @@ pair ctx second
 -----
 _ do [
     .p set 1 : 2,
-    p which _ get .second
+    p which _ get _second
 ]
 -----
 2
@@ -174,7 +174,7 @@ call ctx func
 -----
 _ do [
     .c set _ data _ func input,
-    c which _ get .function
+    c which _ get _function
 ]
 -----
 func
@@ -183,7 +183,7 @@ call ctx input
 -----
 _ do [
     .c set _ data _ func input,
-    c which _ get .input
+    c which _ get _input
 ]
 -----
 input

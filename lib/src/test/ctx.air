@@ -243,8 +243,8 @@ _ do [
 -----
 _ do [
     .p set 1 : 2,
-    p which .first set 3,
-    p which _ get .first
+    p which _first set 3,
+    p which _ get _first
 ]
 -----
 3
@@ -253,8 +253,8 @@ _ do [
 -----
 _ do [
     .c set _ data _ func input,
-    c which .function set _f,
-    c which _ get .function
+    c which _function set _f,
+    c which _ get _function
 ]
 -----
 _f

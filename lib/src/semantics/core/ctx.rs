@@ -1,8 +1,10 @@
 use std::mem::swap;
 
+use const_format::concatcp;
 use log::error;
 use num_traits::ToPrimitive;
 
+use crate::semantics::core::PREFIX_ID;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::val::CallVal;
 use crate::semantics::val::CellVal;
@@ -13,7 +15,7 @@ use crate::semantics::val::PairVal;
 use crate::semantics::val::Val;
 use crate::type_::Key;
 
-const VALUE: &str = "value";
+const VALUE: &str = concatcp!(PREFIX_ID, "value");
 
 impl DynCtx<Key, Val> for CellVal {
     fn ref_(&self, key: Key) -> Option<&Val> {
@@ -45,8 +47,8 @@ impl DynCtx<Key, Val> for CellVal {
     }
 }
 
-const FIRST: &str = "first";
-const SECOND: &str = "second";
+const FIRST: &str = concatcp!(PREFIX_ID, "first");
+const SECOND: &str = concatcp!(PREFIX_ID, "second");
 
 impl DynCtx<Key, Val> for PairVal {
     fn ref_(&self, key: Key) -> Option<&Val> {
@@ -89,8 +91,8 @@ impl DynCtx<Key, Val> for PairVal {
     }
 }
 
-const FUNCTION: &str = "function";
-const INPUT: &str = "input";
+const FUNCTION: &str = concatcp!(PREFIX_ID, "function");
+const INPUT: &str = concatcp!(PREFIX_ID, "input");
 
 impl DynCtx<Key, Val> for CallVal {
     fn ref_(&self, key: Key) -> Option<&Val> {
