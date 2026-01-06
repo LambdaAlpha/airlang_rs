@@ -1,0 +1,39 @@
+get
+-----
+_ do [
+    .any set _ import _value.any,
+    .value set _ import _cell.value,
+    .v set _ any .,
+    .c set .(v),
+    v == c which _ value .
+]
+-----
+true
+=====
+set get
+-----
+_ do [
+    .any set _ import _value.any,
+    .value set _ import _cell.value,
+    .set_value set _ import _cell.set_value,
+    .c set _ any _cell,
+    .v set _ any .,
+    c which _ set_value v,
+    .v1 set c which _ value .,
+    v == v1
+]
+-----
+true
+=====
+set return
+-----
+_ do [
+    .any set _ import _value.any,
+    .set_value set _ import _cell.set_value,
+    .v1 set _ any .,
+    .c set .(v1),
+    .v2 set c which _ set_value _ any .,
+    v1 == v2
+]
+-----
+true

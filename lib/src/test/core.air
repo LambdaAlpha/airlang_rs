@@ -68,6 +68,15 @@ _ do [
 -----
 1
 =====
+cell ref
+-----
+_ do [
+    .c set .(1),
+    c which _ do [value]
+]
+-----
+1
+=====
 pair ref
 -----
 _ do [
@@ -104,6 +113,12 @@ _ do [
 -----
 1 : 2
 =====
+cell eval
+-----
+.(_ not false)
+-----
+.(true)
+=====
 pair eval
 -----
 (_ not false) : "1"
@@ -127,6 +142,15 @@ call recursive
 _ not _ not true
 -----
 true
+=====
+cell ctx value
+-----
+_ do [
+    .c set .(1),
+    c which _ get .value
+]
+-----
+1
 =====
 pair ctx first
 -----

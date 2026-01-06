@@ -3,6 +3,7 @@ use std::rc::Rc;
 use self::bit::BitLib;
 use self::byte::ByteLib;
 use self::call::CallLib;
+use self::cell::CellLib;
 use self::cfg::CfgLib;
 use self::ctrl::CtrlLib;
 use self::ctx::CtxLib;
@@ -43,6 +44,7 @@ pub struct CoreLib {
     pub int: IntLib,
     pub decimal: DecimalLib,
     pub byte: ByteLib,
+    pub cell: CellLib,
     pub pair: PairLib,
     pub call: CallLib,
     pub list: ListLib,
@@ -66,6 +68,7 @@ impl CfgMod for CoreLib {
         self.int.extend(cfg);
         self.decimal.extend(cfg);
         self.byte.extend(cfg);
+        self.cell.extend(cfg);
         self.pair.extend(cfg);
         self.call.extend(cfg);
         self.list.extend(cfg);
@@ -266,6 +269,8 @@ pub mod int;
 pub mod decimal;
 
 pub mod byte;
+
+pub mod cell;
 
 pub mod pair;
 

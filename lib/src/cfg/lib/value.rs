@@ -21,6 +21,7 @@ use crate::semantics::core::PREFIX_ID;
 use crate::semantics::val::BIT;
 use crate::semantics::val::BYTE;
 use crate::semantics::val::CALL;
+use crate::semantics::val::CELL;
 use crate::semantics::val::CFG;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::DECIMAL;
@@ -40,6 +41,7 @@ use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
+use crate::type_::Cell;
 use crate::type_::ConstRef;
 use crate::type_::Decimal;
 use crate::type_::Int;
@@ -79,6 +81,7 @@ const TYPE_TEXT: &str = concatcp!(PREFIX_ID, TEXT);
 const TYPE_INT: &str = concatcp!(PREFIX_ID, INT);
 const TYPE_DECIMAL: &str = concatcp!(PREFIX_ID, DECIMAL);
 const TYPE_BYTE: &str = concatcp!(PREFIX_ID, BYTE);
+const TYPE_CELL: &str = concatcp!(PREFIX_ID, CELL);
 const TYPE_PAIR: &str = concatcp!(PREFIX_ID, PAIR);
 const TYPE_CALL: &str = concatcp!(PREFIX_ID, CALL);
 const TYPE_LIST: &str = concatcp!(PREFIX_ID, LIST);
@@ -106,6 +109,7 @@ fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
             TYPE_INT => Val::Int(Int::any(rng, DEPTH).into()),
             TYPE_DECIMAL => Val::Decimal(Decimal::any(rng, DEPTH).into()),
             TYPE_BYTE => Val::Byte(Byte::any(rng, DEPTH).into()),
+            TYPE_CELL => Val::Cell(Cell::<Val>::any(rng, DEPTH).into()),
             TYPE_PAIR => Val::Pair(Pair::<Val, Val>::any(rng, DEPTH).into()),
             TYPE_CALL => Val::Call(Call::<Val, Val>::any(rng, DEPTH).into()),
             TYPE_LIST => Val::List(List::<Val>::any(rng, DEPTH).into()),
@@ -135,6 +139,7 @@ fn fn_type(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
         Val::Int(_) => TYPE_INT,
         Val::Decimal(_) => TYPE_DECIMAL,
         Val::Byte(_) => TYPE_BYTE,
+        Val::Cell(_) => TYPE_CELL,
         Val::Pair(_) => TYPE_PAIR,
         Val::Call(_) => TYPE_CALL,
         Val::List(_) => TYPE_LIST,

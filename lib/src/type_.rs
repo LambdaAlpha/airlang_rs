@@ -1,6 +1,7 @@
 pub use self::bit::Bit;
 pub use self::byte::Byte;
 pub use self::call::Call;
+pub use self::cell::Cell;
 pub use self::decimal::Decimal;
 pub use self::decimal::DecimalConfig;
 pub use self::decimal::RoundingMode;
@@ -32,6 +33,8 @@ mod int;
 mod decimal;
 
 mod byte;
+
+mod cell;
 
 mod pair;
 

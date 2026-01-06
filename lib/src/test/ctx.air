@@ -88,6 +88,24 @@ _ do [
 -----
 1
 =====
+= destruct cell
+-----
+_ do [
+    .(.v) = .(true),
+    v
+]
+-----
+true
+=====
+= destruct cell return
+-----
+_ do [
+    .v set 1,
+    .(.v) = .(2),
+]
+-----
+.(1)
+=====
 = destruct pair
 -----
 _ do [

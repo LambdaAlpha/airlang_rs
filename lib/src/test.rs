@@ -106,6 +106,11 @@ fn test_byte() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_cell() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/cell.air"), "test/cell.air")
+}
+
+#[test]
 fn test_pair() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/pair.air"), "test/pair.air")
 }

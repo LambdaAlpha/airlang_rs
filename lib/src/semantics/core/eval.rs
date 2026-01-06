@@ -1,6 +1,7 @@
 use log::error;
 
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::form::CellForm;
 use crate::semantics::core::form::ListForm;
 use crate::semantics::core::form::MapForm;
 use crate::semantics::core::form::PairForm;
@@ -10,6 +11,7 @@ use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::CallVal;
+use crate::semantics::val::CellVal;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::PairVal;
@@ -98,6 +100,7 @@ impl FreeFn<Cfg, Val, Val> for Eval {
     fn free_call(&self, cfg: &mut Cfg, val: Val) -> Val {
         match val {
             Val::Key(key) => self.free_call(cfg, key),
+            Val::Cell(cell) => self.free_call(cfg, cell),
             Val::Pair(pair) => self.free_call(cfg, pair),
             Val::Call(call) => self.free_call(cfg, call),
             Val::List(list) => self.free_call(cfg, list),
@@ -111,6 +114,7 @@ impl ConstFn<Cfg, Val, Val, Val> for Eval {
     fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, val: Val) -> Val {
         match val {
             Val::Key(key) => self.const_call(cfg, ctx, key),
+            Val::Cell(cell) => self.const_call(cfg, ctx, cell),
             Val::Pair(pair) => self.const_call(cfg, ctx, pair),
             Val::Call(call) => self.const_call(cfg, ctx, call),
             Val::List(list) => self.const_call(cfg, ctx, list),
@@ -124,6 +128,7 @@ impl MutFn<Cfg, Val, Val, Val> for Eval {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, val: Val) -> Val {
         match val {
             Val::Key(key) => self.mut_call(cfg, ctx, key),
+            Val::Cell(cell) => self.mut_call(cfg, ctx, cell),
             Val::Pair(pair) => self.mut_call(cfg, ctx, pair),
             Val::Call(call) => self.mut_call(cfg, ctx, call),
             Val::List(list) => self.mut_call(cfg, ctx, list),
@@ -135,6 +140,7 @@ impl MutFn<Cfg, Val, Val, Val> for Eval {
     fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, val: Val) -> Val {
         match val {
             Val::Key(key) => self.dyn_call(cfg, ctx, key),
+            Val::Cell(cell) => self.dyn_call(cfg, ctx, cell),
             Val::Pair(pair) => self.dyn_call(cfg, ctx, pair),
             Val::Call(call) => self.dyn_call(cfg, ctx, call),
             Val::List(list) => self.dyn_call(cfg, ctx, list),
@@ -163,6 +169,28 @@ impl MutFn<Cfg, Val, Key, Val> for Eval {
 
     fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, key: Key) -> Val {
         KeyEval.dyn_call(cfg, ctx, key)
+    }
+}
+
+impl FreeFn<Cfg, CellVal, Val> for Eval {
+    fn free_call(&self, cfg: &mut Cfg, cell: CellVal) -> Val {
+        Val::Cell(CellForm { value: self }.free_call(cfg, cell))
+    }
+}
+
+impl ConstFn<Cfg, Val, CellVal, Val> for Eval {
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, cell: CellVal) -> Val {
+        Val::Cell(CellForm { value: self }.const_call(cfg, ctx, cell))
+    }
+}
+
+impl MutFn<Cfg, Val, CellVal, Val> for Eval {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, cell: CellVal) -> Val {
+        Val::Cell(CellForm { value: self }.mut_call(cfg, ctx, cell))
+    }
+
+    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, cell: CellVal) -> Val {
+        Val::Cell(CellForm { value: self }.dyn_call(cfg, ctx, cell))
     }
 }
 

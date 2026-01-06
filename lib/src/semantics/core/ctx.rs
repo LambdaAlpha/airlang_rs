@@ -5,12 +5,45 @@ use num_traits::ToPrimitive;
 
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::val::CallVal;
+use crate::semantics::val::CellVal;
 use crate::semantics::val::IntVal;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::PairVal;
 use crate::semantics::val::Val;
 use crate::type_::Key;
+
+const VALUE: &str = "value";
+
+impl DynCtx<Key, Val> for CellVal {
+    fn ref_(&self, key: Key) -> Option<&Val> {
+        if &*key == VALUE {
+            Some(&self.value)
+        } else {
+            error!("key {key:?} should be value");
+            None
+        }
+    }
+
+    fn ref_mut(&mut self, key: Key) -> Option<&mut Val> {
+        if &*key == VALUE {
+            Some(&mut self.value)
+        } else {
+            error!("key {key:?} should be value");
+            None
+        }
+    }
+
+    fn set(&mut self, key: Key, mut value: Val) -> Option<Val> {
+        if &*key == VALUE {
+            swap(&mut self.value, &mut value);
+            Some(value)
+        } else {
+            error!("key {key:?} should be value");
+            None
+        }
+    }
+}
 
 const FIRST: &str = "first";
 const SECOND: &str = "second";
@@ -167,6 +200,7 @@ impl DynCtx<Key, Val> for MapVal {
 impl DynCtx<Key, Val> for Val {
     fn ref_(&self, key: Key) -> Option<&Val> {
         match self {
+            Val::Cell(cell) => cell.ref_(key),
             Val::Pair(pair) => pair.ref_(key),
             Val::Call(call) => call.ref_(key),
             Val::List(list) => list.ref_(key),
@@ -181,6 +215,7 @@ impl DynCtx<Key, Val> for Val {
 
     fn ref_mut(&mut self, key: Key) -> Option<&mut Val> {
         match self {
+            Val::Cell(cell) => cell.ref_mut(key),
             Val::Pair(pair) => pair.ref_mut(key),
             Val::Call(call) => call.ref_mut(key),
             Val::List(list) => list.ref_mut(key),
@@ -195,6 +230,7 @@ impl DynCtx<Key, Val> for Val {
 
     fn set(&mut self, key: Key, value: Val) -> Option<Val> {
         match self {
+            Val::Cell(cell) => cell.set(key, value),
             Val::Pair(pair) => pair.set(key, value),
             Val::Call(call) => call.set(key, value),
             Val::List(list) => list.set(key, value),

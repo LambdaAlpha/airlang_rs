@@ -3,11 +3,13 @@ use log::error;
 use crate::cfg::utils::key;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::val::CallVal;
+use crate::semantics::val::CellVal;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::PairVal;
 use crate::semantics::val::Val;
 use crate::type_::Call;
+use crate::type_::Cell;
 use crate::type_::Key;
 use crate::type_::List;
 use crate::type_::Map;
@@ -17,6 +19,7 @@ use crate::type_::Unit;
 pub(in crate::cfg) enum Pattern {
     Any(Key),
     Val(Val),
+    Cell(Box<Cell<Pattern>>),
     Pair(Box<Pair<Pattern, Pattern>>),
     Call(Box<Call<Pattern, Pattern>>),
     List(List<Pattern>),
@@ -31,6 +34,7 @@ impl PatternParse for Val {
     fn parse(self) -> Option<Pattern> {
         match self {
             Val::Key(key) => key.parse(),
+            Val::Cell(cell) => cell.parse(),
             Val::Pair(pair) => pair.parse(),
             Val::List(list) => list.parse(),
             Val::Map(map) => map.parse(),
@@ -51,6 +55,14 @@ impl PatternParse for Key {
             _ => Pattern::Any(self),
         };
         Some(pattern)
+    }
+}
+
+impl PatternParse for CellVal {
+    fn parse(self) -> Option<Pattern> {
+        let cell = Cell::from(self);
+        let value = cell.value.parse()?;
+        Some(Pattern::Cell(Box::new(Cell::new(value))))
     }
 }
 
@@ -98,6 +110,7 @@ impl PatternMatch<Val> for Pattern {
         match self {
             Pattern::Any(name) => name.match_(val),
             Pattern::Val(expected) => expected.match_(val),
+            Pattern::Cell(cell) => cell.match_(val),
             Pattern::Pair(pair) => pair.match_(val),
             Pattern::Call(call) => call.match_(val),
             Pattern::List(list) => list.match_(val),
@@ -115,6 +128,16 @@ impl PatternMatch<Val> for Key {
 impl PatternMatch<Val> for Val {
     fn match_(&self, val: &Val) -> bool {
         *self == *val
+    }
+}
+
+impl PatternMatch<Val> for Cell<Pattern> {
+    fn match_(&self, val: &Val) -> bool {
+        let Val::Cell(val) = val else {
+            error!("{val:?} should be a cell");
+            return false;
+        };
+        self.value.match_(&val.value)
     }
 }
 
@@ -178,6 +201,7 @@ impl PatternAssign<Val, Val> for Pattern {
         match self {
             Pattern::Any(name) => name.assign(ctx, val),
             Pattern::Val(expected) => expected.assign(ctx, val),
+            Pattern::Cell(cell) => cell.assign(ctx, val),
             Pattern::Pair(pair) => pair.assign(ctx, val),
             Pattern::Call(call) => call.assign(ctx, val),
             Pattern::List(list) => list.assign(ctx, val),
@@ -195,6 +219,18 @@ impl PatternAssign<Val, Val> for Key {
 impl PatternAssign<Val, Val> for Val {
     fn assign(self, _ctx: &mut Val, _val: Val) -> Val {
         Val::default()
+    }
+}
+
+impl PatternAssign<Val, Val> for Cell<Pattern> {
+    fn assign(self, ctx: &mut Val, val: Val) -> Val {
+        let Val::Cell(val) = val else {
+            error!("{val:?} should be a cell");
+            return Val::default();
+        };
+        let val = Cell::from(val);
+        let value = self.value.assign(ctx, val.value);
+        Val::Cell(Cell::new(value).into())
     }
 }
 

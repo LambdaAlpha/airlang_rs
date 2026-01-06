@@ -87,6 +87,18 @@ byte hex
 -----
 byte'X00ffff'
 =====
+cell bit
+-----
+.(true)
+=====
+cell key
+-----
+.(value)
+=====
+cell cell
+-----
+.(.("data"))
+=====
 pair diff type
 -----
 a : 1

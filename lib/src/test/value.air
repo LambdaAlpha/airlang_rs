@@ -79,6 +79,16 @@ _ do [
 -----
 _byte
 =====
+any cell
+-----
+_ do [
+    .any set _ import _value.any,
+    .c set _ any _cell,
+    c which _ type .
+]
+-----
+_cell
+=====
 any pair
 -----
 _ do [
@@ -202,6 +212,15 @@ _ do [
 -----
 _byte
 =====
+type cell
+-----
+_ do [
+    .a set .(1),
+    a which _ type .
+]
+-----
+_cell
+=====
 type pair
 -----
 _ do [
@@ -302,6 +321,12 @@ true
 == byte
 -----
 byte'ff' == byte'ff'
+-----
+true
+=====
+== cell
+-----
+.(1) == .(1)
 -----
 true
 =====

@@ -24,6 +24,7 @@ use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
+use crate::type_::Cell;
 use crate::type_::Decimal;
 use crate::type_::Either;
 use crate::type_::Int;
@@ -49,6 +50,7 @@ impl Arbitrary for Val {
             weight, // int
             weight, // decimal
             weight, // byte
+            1,      // cell
             1,      // pair
             1,      // call
             1,      // list
@@ -68,13 +70,14 @@ impl Arbitrary for Val {
             4 => Val::Int(Int::any(rng, depth).into()),
             5 => Val::Decimal(Decimal::any(rng, depth).into()),
             6 => Val::Byte(Byte::any(rng, depth).into()),
-            7 => Val::Pair(Pair::<Val, Val>::any(rng, depth).into()),
-            8 => Val::Call(Call::<Val, Val>::any(rng, depth).into()),
-            9 => Val::List(List::<Val>::any(rng, depth).into()),
-            10 => Val::Map(Map::<Key, Val>::any(rng, depth).into()),
-            11 => Val::Link(LinkVal::any(rng, depth)),
-            12 => Val::Cfg(Cfg::any(rng, depth).into()),
-            13 => Val::Func(FuncVal::any(rng, depth)),
+            7 => Val::Cell(Cell::<Val>::any(rng, depth).into()),
+            8 => Val::Pair(Pair::<Val, Val>::any(rng, depth).into()),
+            9 => Val::Call(Call::<Val, Val>::any(rng, depth).into()),
+            10 => Val::List(List::<Val>::any(rng, depth).into()),
+            11 => Val::Map(Map::<Key, Val>::any(rng, depth).into()),
+            12 => Val::Link(LinkVal::any(rng, depth)),
+            13 => Val::Cfg(Cfg::any(rng, depth).into()),
+            14 => Val::Func(FuncVal::any(rng, depth)),
             _ => unreachable!(),
         }
     }
@@ -147,6 +150,15 @@ impl Arbitrary for Byte {
         let mut byte = vec![0u8; len];
         rng.fill(&mut *byte);
         Byte::from(byte)
+    }
+}
+
+impl<Value> Arbitrary for Cell<Value>
+where Value: Arbitrary
+{
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
+        Cell::new(Value::any(rng, depth))
     }
 }
 

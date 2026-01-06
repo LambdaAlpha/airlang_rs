@@ -12,7 +12,7 @@
 
 ### Minimalist Syntax
 
-Air's syntax is extremely concise. It only includes comments and 11 data types, with no semantic-specific syntax for control flows, functions, types, modules, etc. Its rules are very simple, using prefixes to avoid ambiguity, and it has only 5 keywords (`_`, `.`, `:`, `true`, `false`). This makes it highly suitable for configuration or data interchange.
+Air's syntax is extremely concise. It only includes comments and 12 data types, with no semantic-specific syntax for control flows, functions, types, modules, etc. Its rules are very simple, using prefixes to avoid ambiguity, and it has only 5 keywords (`_`, `.`, `:`, `true`, `false`). This makes it highly suitable for configuration or data interchange.
 
 **comment**
 
@@ -90,6 +90,16 @@ decimal'-0.1'
 ```air
 byte'B00001111'
 byte'X00ffff'
+```
+
+**cell**
+
+`.(v)`
+
+```air
+.(true)
+.(value)
+.(.("data"))
 ```
 
 **pair**

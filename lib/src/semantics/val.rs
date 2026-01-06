@@ -1,5 +1,6 @@
 pub use self::byte::ByteVal;
 pub use self::call::CallVal;
+pub use self::cell::CellVal;
 pub use self::cfg::CfgVal;
 pub use self::decimal::DecimalVal;
 pub use self::func::ConstCompFuncVal;
@@ -29,6 +30,7 @@ use crate::trait_::dyn_safe::dyn_any_debug_clone_eq;
 use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
+use crate::type_::Cell;
 use crate::type_::Decimal;
 use crate::type_::Int;
 use crate::type_::Key;
@@ -56,6 +58,7 @@ pub enum Val {
     Decimal(DecimalVal),
     Byte(ByteVal),
 
+    Cell(CellVal),
     Pair(PairVal),
     Call(CallVal),
 
@@ -76,6 +79,7 @@ pub(crate) const TEXT: &str = "text";
 pub(crate) const INT: &str = "integer";
 pub(crate) const DECIMAL: &str = "decimal";
 pub(crate) const BYTE: &str = "byte";
+pub(crate) const CELL: &str = "cell";
 pub(crate) const PAIR: &str = "pair";
 pub(crate) const CALL: &str = "call";
 pub(crate) const LIST: &str = "list";
@@ -114,6 +118,12 @@ impl From<Byte> for Val {
     }
 }
 
+impl From<Cell<Val>> for Val {
+    fn from(value: Cell<Val>) -> Self {
+        Val::Cell(CellVal::from(value))
+    }
+}
+
 impl From<Pair<Val, Val>> for Val {
     fn from(value: Pair<Val, Val>) -> Self {
         Val::Pair(PairVal::from(value))
@@ -148,6 +158,7 @@ macro_rules! match_val {
             $crate::semantics::val::Val::Int($name) => $body,
             $crate::semantics::val::Val::Decimal($name) => $body,
             $crate::semantics::val::Val::Byte($name) => $body,
+            $crate::semantics::val::Val::Cell($name) => $body,
             $crate::semantics::val::Val::Pair($name) => $body,
             $crate::semantics::val::Val::Call($name) => $body,
             $crate::semantics::val::Val::List($name) => $body,
@@ -178,6 +189,8 @@ mod int;
 mod decimal;
 
 mod byte;
+
+mod cell;
 
 mod pair;
 

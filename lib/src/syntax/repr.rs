@@ -14,6 +14,7 @@ use super::parser::ParseRepr;
 use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
+use crate::type_::Cell;
 use crate::type_::Decimal;
 use crate::type_::Int;
 use crate::type_::Key;
@@ -35,12 +36,15 @@ pub enum Repr {
     Decimal(Decimal),
     Byte(Byte),
 
+    Cell(Box<CellRepr>),
     Pair(Box<PairRepr>),
     Call(Box<CallRepr>),
 
     List(ListRepr),
     Map(MapRepr),
 }
+
+pub type CellRepr = Cell<Repr>;
 
 pub type PairRepr = Pair<Repr, Repr>;
 
@@ -50,15 +54,21 @@ pub type ListRepr = List<Repr>;
 
 pub type MapRepr = Map<Key, Repr>;
 
+impl From<CellRepr> for Repr {
+    fn from(cell: CellRepr) -> Self {
+        Repr::Cell(Box::new(cell))
+    }
+}
+
 impl From<PairRepr> for Repr {
-    fn from(p: PairRepr) -> Self {
-        Repr::Pair(Box::new(p))
+    fn from(pair: PairRepr) -> Self {
+        Repr::Pair(Box::new(pair))
     }
 }
 
 impl From<CallRepr> for Repr {
-    fn from(t: CallRepr) -> Self {
-        Repr::Call(Box::new(t))
+    fn from(call: CallRepr) -> Self {
+        Repr::Call(Box::new(call))
     }
 }
 
@@ -114,6 +124,10 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
             Repr::Int(int) => GenRepr::Int(int),
             Repr::Decimal(decimal) => GenRepr::Decimal(decimal),
             Repr::Byte(byte) => GenRepr::Byte(byte),
+            Repr::Cell(cell) => {
+                let value = (&cell.value).try_into()?;
+                GenRepr::Cell(Box::new(Cell::new(value)))
+            }
             Repr::Pair(pair) => {
                 let first = (&pair.first).try_into()?;
                 let second = (&pair.second).try_into()?;

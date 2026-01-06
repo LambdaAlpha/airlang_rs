@@ -59,6 +59,7 @@ use super::is_delimiter;
 use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
+use crate::type_::Cell;
 use crate::type_::Decimal;
 use crate::type_::Int;
 use crate::type_::Key;
@@ -79,6 +80,7 @@ pub trait ParseRepr:
     + From<Decimal>
     + From<Byte>
     + From<Pair<Self, Self>>
+    + From<Cell<Self>>
     + From<Call<Self, Self>>
     + From<List<Self>>
     + From<Map<Key, Self>> {
@@ -172,7 +174,7 @@ macro_rules! impl_parse_repr_for_comment {
 }
 
 impl_parse_repr_for_comment!(Unit Bit Key Text Int Decimal Byte);
-impl_parse_repr_for_comment!(Pair<C, C> Call<C, C> List<C> Map<Key, C>);
+impl_parse_repr_for_comment!(Cell<C> Pair<C, C> Call<C, C> List<C> Map<Key, C>);
 impl ParseRepr for C {}
 
 fn delimited_cut<'a, T, F>(left: char, f: F, right: char) -> impl Parser<&'a str, T, E>
@@ -259,6 +261,7 @@ fn prefix<'a, T: ParseRepr>(prefix: &str, ctx: ParseCtx) -> impl Parser<&'a str,
                 MAP_LEFT => raw_map(ctx).parse_next(i),
                 _ => fail.context(label("prefix token")).parse_next(i),
             },
+            UNIT => cell(ctx).parse_next(i),
             INT => int.map(T::from).parse_next(i),
             DECIMAL => decimal.map(T::from).parse_next(i),
             BYTE => byte.map(T::from).parse_next(i),
@@ -424,6 +427,10 @@ fn input_repr<'a, T: ParseRepr>(i: &mut &'a str, input: InputToken<'a, T>) -> Mo
             Err(cut_expect_desc(QUOTE_EMPTY))
         }
     }
+}
+
+fn cell<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
+    scope(ctx).map(|v| T::from(Cell::new(v))).context(label("cell"))
 }
 
 fn list<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {

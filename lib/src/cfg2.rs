@@ -32,6 +32,7 @@ impl CoreCfg2 {
         Self::run(cfg, ctx, include_str!("air/lib/integer.air"), "/lib/integer").unwrap();
         Self::run(cfg, ctx, include_str!("air/lib/decimal.air"), "/lib/decimal").unwrap();
         Self::run(cfg, ctx, include_str!("air/lib/byte.air"), "/lib/byte").unwrap();
+        Self::run(cfg, ctx, include_str!("air/lib/cell.air"), "/lib/cell").unwrap();
         Self::run(cfg, ctx, include_str!("air/lib/pair.air"), "/lib/pair").unwrap();
         Self::run(cfg, ctx, include_str!("air/lib/call.air"), "/lib/call").unwrap();
         Self::run(cfg, ctx, include_str!("air/lib/list.air"), "/lib/list").unwrap();

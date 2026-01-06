@@ -2,6 +2,7 @@ use crate::syntax::repr::Repr;
 use crate::syntax::test::bit;
 use crate::syntax::test::byte;
 use crate::syntax::test::call;
+use crate::syntax::test::cell;
 use crate::syntax::test::decimal;
 use crate::syntax::test::infix_call;
 use crate::syntax::test::int;
@@ -38,6 +39,9 @@ pub(super) fn expected() -> Vec<Repr> {
         decimal(false, -1, "1"),
         byte(vec![0b00001111]),
         byte(vec![0x00, 0xff, 0xff]),
+        cell(bit(true)),
+        cell(key("value")),
+        cell(cell(text("data"))),
         pair(key("a"), int("1", 10)),
         pair(key("a"), pair(key("b"), key("c"))),
         list(vec![int("0", 10), int("1", 10), int("2", 10)]),

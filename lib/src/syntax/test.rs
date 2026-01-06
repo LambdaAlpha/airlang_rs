@@ -9,6 +9,7 @@ use super::generate_compact;
 use super::generate_key;
 use super::generate_pretty;
 use super::parse;
+use super::repr::CellRepr;
 use super::repr::PairRepr;
 use super::repr::Repr;
 use crate::test::parse_test_file;
@@ -53,6 +54,10 @@ fn decimal(sign: bool, exp: i64, significand: &str) -> Repr {
 
 fn byte(b: Vec<u8>) -> Repr {
     Repr::Byte(b.into())
+}
+
+fn cell(value: Repr) -> Repr {
+    Repr::Cell(Box::new(CellRepr::new(value)))
 }
 
 fn pair(first: Repr, second: Repr) -> Repr {
@@ -234,6 +239,16 @@ fn test_generate_byte() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_parse_cell() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/cell.air"), "test/cell.air", cell::expected)
+}
+
+#[test]
+fn test_generate_cell() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/cell.air"), "test/cell.air")
+}
+
+#[test]
 fn test_parse_pair() -> Result<(), Box<dyn Error>> {
     test_parse(include_str!("test/pair.air"), "test/pair.air", pair::expected)
 }
@@ -301,6 +316,8 @@ mod int;
 mod decimal;
 
 mod byte;
+
+mod cell;
 
 mod pair;
 

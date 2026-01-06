@@ -28,6 +28,7 @@ use super::keyword;
 use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
+use crate::type_::Cell;
 use crate::type_::Decimal;
 use crate::type_::Int;
 use crate::type_::Key;
@@ -47,6 +48,7 @@ pub enum GenRepr<'a> {
     Decimal(&'a Decimal),
     Text(&'a Text),
     Byte(&'a Byte),
+    Cell(Box<Cell<GenRepr<'a>>>),
     Pair(Box<Pair<GenRepr<'a>, GenRepr<'a>>>),
     Call(Box<Call<GenRepr<'a>, GenRepr<'a>>>),
     List(List<GenRepr<'a>>),
@@ -129,6 +131,7 @@ impl Gen for GenRepr<'_> {
             GenRepr::Int(int) => int.gen_(ctx, s),
             GenRepr::Decimal(decimal) => decimal.gen_(ctx, s),
             GenRepr::Byte(byte) => byte.gen_(ctx, s),
+            GenRepr::Cell(cell) => cell.gen_(ctx, s),
             GenRepr::Pair(pair) => pair.gen_(ctx, s),
             GenRepr::Call(call) => call.gen_(ctx, s),
             GenRepr::List(list) => list.gen_(ctx, s),
@@ -289,6 +292,15 @@ impl Gen for &Byte {
             utils::conversion::u8_array_to_hex_string_mut(self, s);
         }
         s.push(KEY_QUOTE);
+    }
+}
+
+impl<'a> Gen for Cell<GenRepr<'a>> {
+    fn gen_(self, ctx: GenCtx, s: &mut String) {
+        s.push_str(UNIT);
+        scoped(ctx, s, |ctx, s| {
+            self.value.gen_(ctx, s);
+        });
     }
 }
 

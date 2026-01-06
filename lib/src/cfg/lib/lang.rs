@@ -17,6 +17,7 @@ use crate::syntax::ParseRepr;
 use crate::syntax::ReprError;
 use crate::syntax::generate_pretty;
 use crate::type_::Call;
+use crate::type_::Cell;
 use crate::type_::List;
 use crate::type_::Pair;
 use crate::type_::Text;
@@ -114,6 +115,10 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
             Val::Int(int) => GenRepr::Int(int),
             Val::Decimal(decimal) => GenRepr::Decimal(decimal),
             Val::Byte(byte) => GenRepr::Byte(byte),
+            Val::Cell(cell) => {
+                let value = (&cell.value).try_into()?;
+                GenRepr::Cell(Box::new(Cell::new(value)))
+            }
             Val::Pair(pair) => {
                 let first = (&pair.first).try_into()?;
                 let second = (&pair.second).try_into()?;
