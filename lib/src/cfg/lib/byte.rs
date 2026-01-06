@@ -21,30 +21,30 @@ use crate::type_::Int;
 // todo design add more
 #[derive(Clone)]
 pub struct ByteLib {
-    pub length: ConstPrimFuncVal,
+    pub get_length: ConstPrimFuncVal,
     pub push: MutPrimFuncVal,
     pub join: FreePrimFuncVal,
 }
 
 impl Default for ByteLib {
     fn default() -> Self {
-        ByteLib { length: length(), push: push(), join: join() }
+        ByteLib { get_length: get_length(), push: push(), join: join() }
     }
 }
 
 impl CfgMod for ByteLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_byte.length", self.length);
+        extend_func(cfg, "_byte.get_length", self.get_length);
         extend_func(cfg, "_byte.push", self.push);
         extend_func(cfg, "_byte.join", self.join);
     }
 }
 
-pub fn length() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_length) }.const_()
+pub fn get_length() -> ConstPrimFuncVal {
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_length) }.const_()
 }
 
-fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Byte(byte) = &*ctx else {
         error!("ctx {ctx:?} should be a byte");
         return illegal_ctx(cfg);

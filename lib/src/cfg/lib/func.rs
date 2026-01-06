@@ -31,11 +31,11 @@ pub struct FuncLib {
     pub new: FreePrimFuncVal,
     pub represent: FreePrimFuncVal,
     pub apply: MutPrimFuncVal,
-    pub context_access: ConstPrimFuncVal,
-    pub raw_input: ConstPrimFuncVal,
+    pub get_context_access: ConstPrimFuncVal,
+    pub get_raw_input: ConstPrimFuncVal,
     pub is_primitive: ConstPrimFuncVal,
-    pub code: ConstPrimFuncVal,
-    pub context: ConstPrimFuncVal,
+    pub get_code: ConstPrimFuncVal,
+    pub get_context: ConstPrimFuncVal,
 }
 
 impl Default for FuncLib {
@@ -44,11 +44,11 @@ impl Default for FuncLib {
             new: new(),
             represent: represent(),
             apply: apply(),
-            context_access: context_access(),
-            raw_input: raw_input(),
+            get_context_access: get_context_access(),
+            get_raw_input: get_raw_input(),
             is_primitive: is_primitive(),
-            code: code(),
-            context: context(),
+            get_code: get_code(),
+            get_context: get_context(),
         }
     }
 }
@@ -58,11 +58,11 @@ impl CfgMod for FuncLib {
         extend_func(cfg, "_function.new", self.new);
         extend_func(cfg, "_function.represent", self.represent);
         extend_func(cfg, "_function.apply", self.apply);
-        extend_func(cfg, "_function.context_access", self.context_access);
-        extend_func(cfg, "_function.raw_input", self.raw_input);
+        extend_func(cfg, "_function.get_context_access", self.get_context_access);
+        extend_func(cfg, "_function.get_raw_input", self.get_raw_input);
         extend_func(cfg, "_function.is_primitive", self.is_primitive);
-        extend_func(cfg, "_function.code", self.code);
-        extend_func(cfg, "_function.context", self.context);
+        extend_func(cfg, "_function.get_code", self.get_code);
+        extend_func(cfg, "_function.get_context", self.get_context);
     }
 }
 
@@ -134,11 +134,11 @@ fn fn_apply_mut(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     func.mut_call(cfg, ctx, pair.second)
 }
 
-pub fn context_access() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_context_access) }.const_()
+pub fn get_context_access() -> ConstPrimFuncVal {
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_context_access) }.const_()
 }
 
-fn fn_context_access(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_context_access(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
         return illegal_ctx(cfg);
@@ -147,11 +147,11 @@ fn fn_context_access(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Key(Key::from_str_unchecked(access))
 }
 
-pub fn raw_input() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_raw_input) }.const_()
+pub fn get_raw_input() -> ConstPrimFuncVal {
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_raw_input) }.const_()
 }
 
-fn fn_raw_input(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_raw_input(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
         return illegal_ctx(cfg);
@@ -172,11 +172,11 @@ fn fn_is_primitive(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Bit(Bit::from(is_primitive))
 }
 
-pub fn code() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_code) }.const_()
+pub fn get_code() -> ConstPrimFuncVal {
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_code) }.const_()
 }
 
-fn fn_code(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_code(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
         return illegal_ctx(cfg);
@@ -184,11 +184,11 @@ fn fn_code(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     generate_code(func)
 }
 
-pub fn context() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_context) }.const_()
+pub fn get_context() -> ConstPrimFuncVal {
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_context) }.const_()
 }
 
-fn fn_context(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_context(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
         return illegal_ctx(cfg);

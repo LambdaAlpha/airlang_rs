@@ -16,28 +16,28 @@ use crate::type_::ConstRef;
 
 #[derive(Clone)]
 pub struct CellLib {
-    pub value: ConstPrimFuncVal,
+    pub get_value: ConstPrimFuncVal,
     pub set_value: MutPrimFuncVal,
 }
 
 impl Default for CellLib {
     fn default() -> Self {
-        CellLib { value: value(), set_value: set_value() }
+        CellLib { get_value: get_value(), set_value: set_value() }
     }
 }
 
 impl CfgMod for CellLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_cell.value", self.value);
+        extend_func(cfg, "_cell.get_value", self.get_value);
         extend_func(cfg, "_cell.set_value", self.set_value);
     }
 }
 
-pub fn value() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_value) }.const_()
+pub fn get_value() -> ConstPrimFuncVal {
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_value) }.const_()
 }
 
-fn fn_value(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_value(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Cell(cell) = &*ctx else {
         error!("ctx {ctx:?} should be a cell");
         return illegal_ctx(cfg);

@@ -29,7 +29,7 @@ use crate::utils::guard::guard;
 pub struct CfgLib {
     pub new: FreePrimFuncVal,
     pub represent: FreePrimFuncVal,
-    pub length: FreePrimFuncVal,
+    pub get_length: FreePrimFuncVal,
     pub snapshot: FreePrimFuncVal,
     pub exist: FreePrimFuncVal,
     pub import: FreePrimFuncVal,
@@ -43,7 +43,7 @@ impl Default for CfgLib {
         CfgLib {
             new: new(),
             represent: represent(),
-            length: length(),
+            get_length: get_length(),
             snapshot: snapshot(),
             exist: exist(),
             import: import(),
@@ -58,7 +58,7 @@ impl CfgMod for CfgLib {
     fn extend(self, cfg: &Cfg) {
         extend_func(cfg, "_config.new", self.new);
         extend_func(cfg, "_config.represent", self.represent);
-        extend_func(cfg, "_config.length", self.length);
+        extend_func(cfg, "_config.get_length", self.get_length);
         extend_func(cfg, "_config.snapshot", self.snapshot);
         extend_func(cfg, "_config.exist", self.exist);
         extend_func(cfg, "_config.import", self.import);
@@ -120,11 +120,11 @@ fn fn_represent(cfg: &mut Cfg, input: Val) -> Val {
     Val::List(list.into())
 }
 
-pub fn length() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_length) }.free()
+pub fn get_length() -> FreePrimFuncVal {
+    FreePrimFn { raw_input: false, f: free_impl(fn_get_length) }.free()
 }
 
-fn fn_length(cfg: &mut Cfg, _input: Val) -> Val {
+fn fn_get_length(cfg: &mut Cfg, _input: Val) -> Val {
     Val::Int(Int::from(cfg.len()).into())
 }
 

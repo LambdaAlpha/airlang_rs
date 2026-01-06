@@ -2,10 +2,10 @@ get
 -----
 _ do [
     .any set _ import _value.any,
-    .value set _ import _cell.value,
+    .get_value set _ import _cell.get_value,
     .v set _ any .,
     .c set .(v),
-    v == c which _ value .
+    v == c which _ get_value .
 ]
 -----
 true
@@ -14,12 +14,12 @@ set get
 -----
 _ do [
     .any set _ import _value.any,
-    .value set _ import _cell.value,
+    .get_value set _ import _cell.get_value,
     .set_value set _ import _cell.set_value,
     .c set _ any _cell,
     .v set _ any .,
     c which _ set_value v,
-    .v1 set c which _ value .,
+    .v1 set c which _ get_value .,
     v == v1
 ]
 -----

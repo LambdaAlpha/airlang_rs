@@ -9,25 +9,25 @@ use crate::type_::Unit;
 
 #[derive(Clone)]
 pub struct UnitLib {
-    pub unit: FreePrimFuncVal,
+    pub from_any: FreePrimFuncVal,
 }
 
 impl Default for UnitLib {
     fn default() -> Self {
-        UnitLib { unit: unit() }
+        UnitLib { from_any: from_any() }
     }
 }
 
 impl CfgMod for UnitLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_unit.unit", self.unit);
+        extend_func(cfg, "_unit.from_any", self.from_any);
     }
 }
 
-pub fn unit() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_unit) }.free()
+pub fn from_any() -> FreePrimFuncVal {
+    FreePrimFn { raw_input: false, f: free_impl(fn_from_any) }.free()
 }
 
-fn fn_unit(_cfg: &mut Cfg, _input: Val) -> Val {
+fn fn_from_any(_cfg: &mut Cfg, _input: Val) -> Val {
     Val::Unit(Unit)
 }

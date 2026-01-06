@@ -22,13 +22,18 @@ use crate::type_::Text;
 pub struct KeyLib {
     pub from_text: FreePrimFuncVal,
     pub into_text: FreePrimFuncVal,
-    pub length: ConstPrimFuncVal,
+    pub get_length: ConstPrimFuncVal,
     pub join: FreePrimFuncVal,
 }
 
 impl Default for KeyLib {
     fn default() -> Self {
-        KeyLib { from_text: from_text(), into_text: into_text(), length: length(), join: join() }
+        KeyLib {
+            from_text: from_text(),
+            into_text: into_text(),
+            get_length: get_length(),
+            join: join(),
+        }
     }
 }
 
@@ -36,7 +41,7 @@ impl CfgMod for KeyLib {
     fn extend(self, cfg: &Cfg) {
         extend_func(cfg, "_key.from_text", self.from_text);
         extend_func(cfg, "_key.into_text", self.into_text);
-        extend_func(cfg, "_key.length", self.length);
+        extend_func(cfg, "_key.get_length", self.get_length);
         extend_func(cfg, "_key.join", self.join);
     }
 }
@@ -71,11 +76,11 @@ fn fn_into_text(cfg: &mut Cfg, input: Val) -> Val {
     Val::Text(Text::from(String::from(key)).into())
 }
 
-pub fn length() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_length) }.const_()
+pub fn get_length() -> ConstPrimFuncVal {
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_length) }.const_()
 }
 
-fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Key(key) = &*ctx else {
         error!("ctx {ctx:?} should be a key");
         return illegal_ctx(cfg);

@@ -1,48 +1,48 @@
-length push
+get_length push
 -----
 _ do [
     .any set _ import _value.any,
-    .length set _ import _list.length,
+    .get_length set _ import _list.get_length,
     .push set _ import _list.push,
     .a set _ any _list,
-    .l1 set a which _ length .,
+    .l1 set a which _ get_length .,
     a which _ push .,
-    .l2 set a which _ length .,
+    .l2 set a which _ get_length .,
     l2 == l1 + 1
 ]
 -----
 true
 =====
-length push_many
+get_length push_many
 -----
 _ do [
     .any set _ import _value.any,
-    .length set _ import _list.length,
+    .get_length set _ import _list.get_length,
     .push_many set _ import _list.push_many,
     .a set _ any _list,
-    .la set a which _ length .,
+    .la set a which _ get_length .,
     .b set _ any _list,
-    .lb set b which _ length .,
+    .lb set b which _ get_length .,
     a which _ push_many b,
-    .lab set a which _ length .,
+    .lab set a which _ get_length .,
     lab == la + lb
 ]
 -----
 true
 =====
-length pop_many
+get_length pop_many
 -----
 _ do [
     .any set _ import _value.any,
-    .length set _ import _list.length,
+    .get_length set _ import _list.get_length,
     .pop_many set _ import _list.pop_many,
     .% set _ import _integer.remainder,
     .a set _ any _list,
-    .l1 set a which _ length .,
+    .l1 set a which _ get_length .,
     (l1 == 0) _return true,
     .i set (l1 + (_ any _integer) % l1) % l1,
     a which _ pop_many i,
-    .l2 set a which _ length .,
+    .l2 set a which _ get_length .,
     l2 == l1 - i
 ]
 -----
@@ -52,13 +52,13 @@ set get
 -----
 _ do [
     .any set _ import _value.any,
-    .length set _ import _list.length,
+    .get_length set _ import _list.get_length,
     .list.set set _ import _list.set,
     .list.get set _ import _list.get,
     .% set _ import _integer.remainder,
     .a set _ any _list,
     .b set a,
-    .l set a which _ length .,
+    .l set a which _ get_length .,
     (l == 0) _return true,
     .i set (l + (_ any _integer) % l) % l,
     .v1 set a which _ list.get i,
@@ -75,15 +75,15 @@ set_many get_many
 -----
 _ do [
     .any set _ import _value.any,
-    .length set _ import _list.length,
+    .get_length set _ import _list.get_length,
     .get_many set _ import _list.get_many,
     .set_many set _ import _list.set_many,
     .% set _ import _integer.remainder,
     .a set _ any _list,
-    .la set a which _ length .,
+    .la set a which _ get_length .,
     (la == 0) _return true,
     .b set _ any _list,
-    .lb set b which _ length .,
+    .lb set b which _ get_length .,
     (lb == 0) _return true,
     (la < lb) test [
         .t set a,
@@ -105,21 +105,21 @@ _ do [
 -----
 true
 =====
-insert get length
+insert get get_length
 -----
 _ do [
     .any set _ import _value.any,
-    .length set _ import _list.length,
+    .get_length set _ import _list.get_length,
     .insert set _ import _list.insert,
     .get set _ import _list.get,
     .% set _ import _integer.remainder,
     .a set _ any _list,
-    .l set 1 + a which _ length .,
+    .l set 1 + a which _ get_length .,
     .i set (l + (_ any _integer) % l) % l,
     .v set _ any .,
     a which _ insert i : v,
     .v1 set a which _ get i,
-    .l1 set a which _ length .,
+    .l1 set a which _ get_length .,
     (v == v1) and (l == l1)
 ]
 -----
@@ -129,13 +129,13 @@ insert remove
 -----
 _ do [
     .any set _ import _value.any,
-    .length set _ import _list.length,
+    .get_length set _ import _list.get_length,
     .insert set _ import _list.insert,
     .remove set _ import _list.remove,
     .% set _ import _integer.remainder,
     .a set _ any _list,
     .b set a,
-    .l set 1 + a which _ length .,
+    .l set 1 + a which _ get_length .,
     .i set (l + (_ any _integer) % l) % l,
     .v1 set _ any .,
     a which _ insert i : v1,
@@ -145,22 +145,22 @@ _ do [
 -----
 true
 =====
-insert_many get_many length
+insert_many get_many get_length
 -----
 _ do [
     .any set _ import _value.any,
-    .length set _ import _list.length,
+    .get_length set _ import _list.get_length,
     .insert_many set _ import _list.insert_many,
     .get_many set _ import _list.get_many,
     .% set _ import _integer.remainder,
     .a set _ any _list,
-    .l1 set 1 + a which _ length .,
+    .l1 set 1 + a which _ get_length .,
     .i set (l1 + (_ any _integer) % l1) % l1,
     .v1 set _ any _list,
-    .vl set v1 which _ length .,
+    .vl set v1 which _ get_length .,
     a which _ insert_many i : v1,
     .v2 set a which _ get_many i : i + vl,
-    .l2 set a which _ length .,
+    .l2 set a which _ get_length .,
     (v1 == v2) and l2 == l1 + vl - 1,
 ]
 -----
@@ -170,16 +170,16 @@ insert_many remove_many
 -----
 _ do [
     .any set _ import _value.any,
-    .length set _ import _list.length,
+    .get_length set _ import _list.get_length,
     .insert_many set _ import _list.insert_many,
     .remove_many set _ import _list.remove_many,
     .% set _ import _integer.remainder,
     .a set _ any _list,
     .b set a,
-    .l set 1 + a which _ length .,
+    .l set 1 + a which _ get_length .,
     .i set (l + (_ any _integer) % l) % l,
     .v1 set _ any _list,
-    .v1l set v1 which _ length .,
+    .v1l set v1 which _ get_length .,
     a which _ insert_many i : v1,
     .v2 set a which _ remove_many i : i + v1l,
     (v1 == v2) and a == b
@@ -207,13 +207,13 @@ push_many pop_many
 -----
 _ do [
     .any set _ import _value.any,
-    .length set _ import _list.length,
+    .get_length set _ import _list.get_length,
     .push_many set _ import _list.push_many,
     .pop_many set _ import _list.pop_many,
     .a1 set _ any _list,
     .a2 set a1,
     .b1 set _ any _list,
-    .lb set b1 which _ length .,
+    .lb set b1 which _ get_length .,
     a1 which _ push_many b1,
     .b2 set a1 which _ pop_many lb,
     (b1 == b2) and a1 == a2
@@ -233,22 +233,22 @@ _ do [
 -----
 true
 =====
-length empty
+get_length empty
 -----
 _ do [
-    .length set _ import _list.length,
+    .get_length set _ import _list.get_length,
     .l set [],
-    l which _ length .
+    l which _ get_length .
 ]
 -----
 0
 =====
-length else
+get_length else
 -----
 _ do [
-    .length set _ import _list.length,
+    .get_length set _ import _list.get_length,
     .l set [1, 2],
-    l which _ length .
+    l which _ get_length .
 ]
 -----
 2

@@ -1,7 +1,7 @@
 available_steps
 -----
 _ do [
-    .steps set _ import _resource.available_steps,
+    .steps set _ import _resource.get_available_steps,
     .s1 set _ steps .,
     .s2 set _ steps .,
     s1 - s2

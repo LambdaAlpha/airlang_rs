@@ -15,12 +15,12 @@ get
 -----
 _ do [
     .any set _ import _value.any,
-    .function set _ import _call.function,
-    .input set _ import _call.input,
+    .get_function set _ import _call.get_function,
+    .get_input set _ import _call.get_input,
     .f set _ any .,
     .i set _ any .,
     .c set _ form _ f i,
-    (f == c which _ function .) and (i == c which _ input .)
+    (f == c which _ get_function .) and (i == c which _ get_input .)
 ]
 -----
 true
@@ -29,8 +29,8 @@ set get
 -----
 _ do [
     .any set _ import _value.any,
-    .function set _ import _call.function,
-    .input set _ import _call.input,
+    .get_function set _ import _call.get_function,
+    .get_input set _ import _call.get_input,
     .set_function set _ import _call.set_function,
     .set_input set _ import _call.set_input,
     .c set _ any _call,
@@ -38,7 +38,7 @@ _ do [
     .i set _ any .,
     c which _ set_function f,
     c which _ set_input i,
-    (f == c which _ function .) and (i == c which _ input .)
+    (f == c which _ get_function .) and (i == c which _ get_input .)
 ]
 -----
 true

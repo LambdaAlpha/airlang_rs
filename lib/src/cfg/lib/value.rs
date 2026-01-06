@@ -56,20 +56,20 @@ use crate::type_::Unit;
 pub struct ValueLib {
     /// should be overridden if there are extension types
     pub any: FreePrimFuncVal,
-    pub type_: ConstPrimFuncVal,
+    pub get_type: ConstPrimFuncVal,
     pub equal: FreePrimFuncVal,
 }
 
 impl Default for ValueLib {
     fn default() -> Self {
-        ValueLib { any: any(), type_: type_(), equal: equal() }
+        ValueLib { any: any(), get_type: get_type(), equal: equal() }
     }
 }
 
 impl CfgMod for ValueLib {
     fn extend(self, cfg: &Cfg) {
         extend_func(cfg, "_value.any", self.any);
-        extend_func(cfg, "_value.type", self.type_);
+        extend_func(cfg, "_value.get_type", self.get_type);
         extend_func(cfg, "_value.equal", self.equal);
     }
 }
@@ -126,11 +126,11 @@ fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
     }
 }
 
-pub fn type_() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_type) }.const_()
+pub fn get_type() -> ConstPrimFuncVal {
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_type) }.const_()
 }
 
-fn fn_type(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_type(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let s = match &*ctx {
         Val::Unit(_) => TYPE_UNIT,
         Val::Bit(_) => TYPE_BIT,

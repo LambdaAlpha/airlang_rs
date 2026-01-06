@@ -60,7 +60,7 @@ pub struct CorePrelude {
     pub loop_: MutPrimFuncVal,
     pub iterate: MutPrimFuncVal,
 
-    pub type_: ConstPrimFuncVal,
+    pub get_type: ConstPrimFuncVal,
     pub equal: FreePrimFuncVal,
 
     pub data: FreePrimFuncVal,
@@ -127,7 +127,7 @@ impl CorePrelude {
             loop_: lib.ctrl.loop_.clone(),
             iterate: lib.ctrl.iterate.clone(),
 
-            type_: lib.value.type_.clone(),
+            get_type: lib.value.get_type.clone(),
             equal: lib.value.equal.clone(),
 
             data: lib.lang.data.clone(),
@@ -191,7 +191,7 @@ impl Prelude for CorePrelude {
         map_put_func(map, "loop", &self.loop_);
         map_put_func(map, "iterate", &self.iterate);
 
-        map_put_func(map, "type", &self.type_);
+        map_put_func(map, "get_type", &self.get_type);
         map_put_func(map, "==", &self.equal);
 
         map_put_func(map, "data", &self.data);

@@ -81,9 +81,9 @@ _ do [
 set special key 2
 -----
 _ do [
-    .first set _ import _pair.first,
+    .get_first set _ import _pair.get_first,
     .:p set 1 : 2,
-    :p which _ first .
+    :p which _ get_first .
 ]
 -----
 1

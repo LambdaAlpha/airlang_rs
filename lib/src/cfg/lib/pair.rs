@@ -16,18 +16,18 @@ use crate::type_::ConstRef;
 
 #[derive(Clone)]
 pub struct PairLib {
-    pub first: ConstPrimFuncVal,
+    pub get_first: ConstPrimFuncVal,
     pub set_first: MutPrimFuncVal,
-    pub second: ConstPrimFuncVal,
+    pub get_second: ConstPrimFuncVal,
     pub set_second: MutPrimFuncVal,
 }
 
 impl Default for PairLib {
     fn default() -> Self {
         PairLib {
-            first: first(),
+            get_first: get_first(),
             set_first: set_first(),
-            second: second(),
+            get_second: get_second(),
             set_second: set_second(),
         }
     }
@@ -35,18 +35,18 @@ impl Default for PairLib {
 
 impl CfgMod for PairLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_pair.first", self.first);
+        extend_func(cfg, "_pair.get_first", self.get_first);
         extend_func(cfg, "_pair.set_first", self.set_first);
-        extend_func(cfg, "_pair.second", self.second);
+        extend_func(cfg, "_pair.get_second", self.get_second);
         extend_func(cfg, "_pair.set_second", self.set_second);
     }
 }
 
-pub fn first() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_first) }.const_()
+pub fn get_first() -> ConstPrimFuncVal {
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_first) }.const_()
 }
 
-fn fn_first(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_first(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Pair(pair) = &*ctx else {
         error!("ctx {ctx:?} should be a pair");
         return illegal_ctx(cfg);
@@ -67,11 +67,11 @@ fn fn_set_first(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     input
 }
 
-pub fn second() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_second) }.const_()
+pub fn get_second() -> ConstPrimFuncVal {
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_second) }.const_()
 }
 
-fn fn_second(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_second(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Pair(pair) = &*ctx else {
         error!("ctx {ctx:?} should be a pair");
         return illegal_ctx(cfg);

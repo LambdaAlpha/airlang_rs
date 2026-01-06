@@ -243,8 +243,8 @@ repr primitive free
 -----
 _ do [
     .represent set _ import _function.represent,
-    .function.code set _ import _function.code,
-    .not_code set not which _ function.code .,
+    .function.get_code set _ import _function.get_code,
+    .not_code set not which _ function.get_code .,
     .repr set {
         context_access : _free,
         raw_input : false,
@@ -276,14 +276,14 @@ repr primitive const
 -----
 _ do [
     .represent set _ import _function.represent,
-    .function.code set _ import _function.code,
-    .type_code set type which _ function.code .,
+    .function.get_code set _ import _function.get_code,
+    .type_code set get_type which _ function.get_code .,
     .repr set {
         context_access : _constant,
         raw_input : false,
         code : type_code,
     },
-    repr == _ represent type
+    repr == _ represent get_type
 ]
 -----
 true
@@ -307,8 +307,8 @@ true
 access free
 -----
 _ do [
-    .context_access set _ import _function.context_access,
-    function which _ context_access .
+    .get_context_access set _ import _function.get_context_access,
+    function which _ get_context_access .
 ]
 -----
 _free
@@ -316,8 +316,8 @@ _free
 access const
 -----
 _ do [
-    .context_access set _ import _function.context_access,
-    get which _ context_access .
+    .get_context_access set _ import _function.get_context_access,
+    get which _ get_context_access .
 ]
 -----
 _constant
@@ -325,8 +325,8 @@ _constant
 access mutable
 -----
 _ do [
-    .context_access set _ import _function.context_access,
-    code which _ context_access .
+    .get_context_access set _ import _function.get_context_access,
+    code which _ get_context_access .
 ]
 -----
 _mutable
@@ -334,27 +334,27 @@ _mutable
 access default
 -----
 _ do [
-    .context_access set _ import _function.context_access,
+    .get_context_access set _ import _function.get_context_access,
     .f set _ function {},
-    f which _ context_access .
+    f which _ get_context_access .
 ]
 -----
 _mutable
 =====
-raw_input true
+get_raw_input true
 -----
 _ do [
-    .raw_input set _ import _function.raw_input,
-    data which _ raw_input .
+    .get_raw_input set _ import _function.get_raw_input,
+    data which _ get_raw_input .
 ]
 -----
 true
 =====
-raw_input false
+get_raw_input false
 -----
 _ do [
-    .raw_input set _ import _function.raw_input,
-    id which _ raw_input .
+    .get_raw_input set _ import _function.get_raw_input,
+    id which _ get_raw_input .
 ]
 -----
 false
@@ -378,14 +378,14 @@ _ do [
 -----
 false
 =====
-code
+get_code
 -----
 _ do [
-    .function.code set _ import _function.code,
+    .function.get_code set _ import _function.get_code,
     .f set _ function {
         code : (_ctx : .i) : .i
     },
-    f which _ function.code .
+    f which _ function.get_code .
 ]
 -----
 (_ctx : i) : i
@@ -393,13 +393,13 @@ _ do [
 ctx
 -----
 _ do [
-    .function.context set _ import _function.context,
+    .function.get_context set _ import _function.get_context,
     .any set _ import _value.any,
     .ctx set _ any .,
     .f set _ function {
         context : ctx
     },
-    (f which _ function.context .) == ctx
+    (f which _ function.get_context .) == ctx
 ]
 -----
 true

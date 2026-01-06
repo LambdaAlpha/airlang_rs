@@ -23,7 +23,7 @@ use crate::type_::Pair;
 // todo design
 #[derive(Clone)]
 pub struct ListLib {
-    pub length: ConstPrimFuncVal,
+    pub get_length: ConstPrimFuncVal,
     pub set: MutPrimFuncVal,
     pub set_many: MutPrimFuncVal,
     pub get: ConstPrimFuncVal,
@@ -42,7 +42,7 @@ pub struct ListLib {
 impl Default for ListLib {
     fn default() -> Self {
         ListLib {
-            length: length(),
+            get_length: get_length(),
             set: set(),
             set_many: set_many(),
             get: get(),
@@ -62,7 +62,7 @@ impl Default for ListLib {
 
 impl CfgMod for ListLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_list.length", self.length);
+        extend_func(cfg, "_list.get_length", self.get_length);
         extend_func(cfg, "_list.set", self.set);
         extend_func(cfg, "_list.set_many", self.set_many);
         extend_func(cfg, "_list.get", self.get);
@@ -79,11 +79,11 @@ impl CfgMod for ListLib {
     }
 }
 
-pub fn length() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_length) }.const_()
+pub fn get_length() -> ConstPrimFuncVal {
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_length) }.const_()
 }
 
-fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::List(list) = &*ctx else {
         error!("ctx {ctx:?} should be a list");
         return illegal_ctx(cfg);

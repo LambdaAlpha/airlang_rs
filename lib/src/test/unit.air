@@ -1,9 +1,9 @@
-unit return .
+from_any
 -----
 _ do [
     .any set _ import _value.any,
-    .unit set _ import _unit.unit,
-    _ unit _ any .
+    .from_any set _ import _unit.from_any,
+    _ from_any _ any .
 ]
 -----
 .

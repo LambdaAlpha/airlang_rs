@@ -24,7 +24,7 @@ use crate::type_::Text;
 pub struct TextLib {
     pub from_utf8: FreePrimFuncVal,
     pub into_utf8: FreePrimFuncVal,
-    pub length: ConstPrimFuncVal,
+    pub get_length: ConstPrimFuncVal,
     pub push: MutPrimFuncVal,
     pub join: FreePrimFuncVal,
 }
@@ -34,7 +34,7 @@ impl Default for TextLib {
         TextLib {
             from_utf8: from_utf8(),
             into_utf8: into_utf8(),
-            length: length(),
+            get_length: get_length(),
             push: push(),
             join: join(),
         }
@@ -45,7 +45,7 @@ impl CfgMod for TextLib {
     fn extend(self, cfg: &Cfg) {
         extend_func(cfg, "_text.from_utf8", self.from_utf8);
         extend_func(cfg, "_text.into_utf8", self.into_utf8);
-        extend_func(cfg, "_text.length", self.length);
+        extend_func(cfg, "_text.get_length", self.get_length);
         extend_func(cfg, "_text.push", self.push);
         extend_func(cfg, "_text.join", self.join);
     }
@@ -82,11 +82,11 @@ fn fn_into_utf8(cfg: &mut Cfg, input: Val) -> Val {
     Val::Byte(byte.into())
 }
 
-pub fn length() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_length) }.const_()
+pub fn get_length() -> ConstPrimFuncVal {
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_length) }.const_()
 }
 
-fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Text(t) = &*ctx else {
         error!("ctx {ctx:?} should be a text");
         return illegal_ctx(cfg);

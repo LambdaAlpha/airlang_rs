@@ -2,47 +2,47 @@ length set
 -----
 _ do [
     .any set _ import _value.any,
-    .length set _ import _map.length,
+    .get_length set _ import _map.get_length,
     .map.set set _ import _map.set,
     .contain set _ import _map.contain,
     .a set _ any _map,
-    .l1 set a which _ length .,
+    .l1 set a which _ get_length .,
     .k set _ any _key,
     .v set _ any .,
     .i set (a which _ contain k) test [0] : [1],
     a which _ map.set k : v,
-    .l2 set a which _ length .,
+    .l2 set a which _ get_length .,
     l2 == l1 + i
 ]
 -----
 true
 =====
-length set_many
+get_length set_many
 -----
 _ do [
     .any set _ import _value.any,
-    .length set _ import _map.length,
+    .get_length set _ import _map.get_length,
     .set_many set _ import _map.set_many,
     .a set _ any _map,
-    .la set a which _ length .,
+    .la set a which _ get_length .,
     .b set _ any _map,
-    .lb set b which _ length .,
+    .lb set b which _ get_length .,
     .c set a which _ set_many b,
-    .lc set c which _ length .,
-    .lab set a which _ length .,
+    .lc set c which _ get_length .,
+    .lab set a which _ get_length .,
     lab == la + lb - lc
 ]
 -----
 true
 =====
-items new
+get_items new
 -----
 _ do [
     .any set _ import _value.any,
     .new set _ import _map.new,
-    .items set _ import _map.items,
+    .get_items set _ import _map.get_items,
     .a1 set _ any _map,
-    .a2 set _ new a1 which _ items .,
+    .a2 set _ new a1 which _ get_items .,
     a1 == a2
 ]
 -----
@@ -62,15 +62,15 @@ _ do [
 -----
 true
 =====
-keys set
+get_keys set
 -----
 _ do [
     .any set _ import _value.any,
     .new_set set _ import _map.new_set,
-    .keys set _ import _map.keys,
+    .get_keys set _ import _map.get_keys,
     .set_many set _ import _map.set_many,
     .a1 set _ any _map,
-    .a2 set _ new_set a1 which _ keys .,
+    .a2 set _ new_set a1 which _ get_keys .,
     a1 which _ set_many a2,
     a1 == a2
 ]
@@ -82,10 +82,10 @@ into_keys set
 _ do [
     .any set _ import _value.any,
     .new_set set _ import _map.new_set,
-    .keys set _ import _map.keys,
+    .get_keys set _ import _map.get_keys,
     .into_keys set _ import _map.into_keys,
     .a1 set _ any _map,
-    .a2 set _ new_set a1 which _ keys .,
+    .a2 set _ new_set a1 which _ get_keys .,
     .a3 set _ new_set a1 which _ into_keys .,
     (a1 == {}) and (a2 == a3)
 ]
@@ -129,11 +129,11 @@ _ do [
     .any set _ import _value.any,
     .set_many set _ import _map.set_many,
     .contain_all set _ import _map.contain_all,
-    .keys set _ import _map.keys,
+    .get_keys set _ import _map.get_keys,
     .a set _ any _map,
     .b set _ any _map,
     a which _ set_many b,
-    a which _ contain_all b which _ keys .
+    a which _ contain_all b which _ get_keys .
 ]
 -----
 true
@@ -162,11 +162,11 @@ _ do [
     .any set _ import _value.any,
     .set_many set _ import _map.set_many,
     .get_many set _ import _map.get_many,
-    .keys set _ import _map.keys,
+    .get_keys set _ import _map.get_keys,
     .a set _ any _map,
     .b set _ any _map,
     a which _ set_many b,
-    .b1 set a which _ get_many b which _ keys .,
+    .b1 set a which _ get_many b which _ get_keys .,
     b == b1
 ]
 -----
@@ -222,35 +222,35 @@ _ do [
 -----
 true
 =====
-length
+get_length
 -----
 _ do [
-    .length set _ import _map.length,
+    .get_length set _ import _map.get_length,
     .m set {a : 1, b : 2},
-    m which _ length .
+    m which _ get_length .
 ]
 -----
 2
 =====
-items new 1
+get_items new 1
 -----
 _ do [
-    .items set _ import _map.items,
+    .get_items set _ import _map.get_items,
     .new set _ import _map.new,
     .m set {a : 1, b : 2},
-    .i set m which _ items .,
+    .i set m which _ get_items .,
     _ new i
 ]
 -----
 {a : 1, b : 2}
 =====
-keys new_set 1
+get_keys new_set 1
 -----
 _ do [
-    .keys set _ import _map.keys,
+    .get_keys set _ import _map.get_keys,
     .new_set set _ import _map.new_set,
     .m set {a : 1, b : 2},
-    .k set m which _ keys .,
+    .k set m which _ get_keys .,
     _ new_set k
 ]
 -----

@@ -23,9 +23,9 @@ use crate::type_::Pair;
 #[derive(Clone)]
 pub struct CallLib {
     pub new: FreePrimFuncVal,
-    pub function: ConstPrimFuncVal,
+    pub get_function: ConstPrimFuncVal,
     pub set_function: MutPrimFuncVal,
-    pub input: ConstPrimFuncVal,
+    pub get_input: ConstPrimFuncVal,
     pub set_input: MutPrimFuncVal,
 }
 
@@ -33,9 +33,9 @@ impl Default for CallLib {
     fn default() -> Self {
         CallLib {
             new: new(),
-            function: function(),
+            get_function: get_function(),
             set_function: set_function(),
-            input: input(),
+            get_input: get_input(),
             set_input: set_input(),
         }
     }
@@ -44,9 +44,9 @@ impl Default for CallLib {
 impl CfgMod for CallLib {
     fn extend(self, cfg: &Cfg) {
         extend_func(cfg, "_call.new", self.new);
-        extend_func(cfg, "_call.function", self.function);
+        extend_func(cfg, "_call.get_function", self.get_function);
         extend_func(cfg, "_call.set_function", self.set_function);
-        extend_func(cfg, "_call.input", self.input);
+        extend_func(cfg, "_call.get_input", self.get_input);
         extend_func(cfg, "_call.set_input", self.set_input);
     }
 }
@@ -64,11 +64,11 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
     Val::Call(Call::new(pair.first, pair.second).into())
 }
 
-pub fn function() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_function) }.const_()
+pub fn get_function() -> ConstPrimFuncVal {
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_function) }.const_()
 }
 
-fn fn_function(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_function(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Call(call) = &*ctx else {
         return illegal_ctx(cfg);
     };
@@ -87,11 +87,11 @@ fn fn_set_function(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     input
 }
 
-pub fn input() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_input) }.const_()
+pub fn get_input() -> ConstPrimFuncVal {
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_input) }.const_()
 }
 
-fn fn_input(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_input(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Call(call) = &*ctx else {
         return illegal_ctx(cfg);
     };

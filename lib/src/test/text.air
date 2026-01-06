@@ -2,50 +2,50 @@ length push
 -----
 _ do [
     .any set _ import _value.any,
-    .length set _ import _text.length,
+    .get_length set _ import _text.get_length,
     .push set _ import _text.push,
     .t set _ any _text,
-    .l set t which _ length .,
+    .l set t which _ get_length .,
     t which _ push "a",
-    .l1 set t which _ length .,
+    .l1 set t which _ get_length .,
     l1 == l + 1
 ]
 -----
 true
 =====
-length join
+get_length join
 -----
 _ do [
     .any set _ import _value.any,
-    .length set _ import _text.length,
+    .get_length set _ import _text.get_length,
     .join set _ import _text.join,
     .a set _ any _text,
-    .la set a which _ length .,
+    .la set a which _ get_length .,
     .b set _ any _text,
-    .lb set b which _ length .,
+    .lb set b which _ get_length .,
     .ab set . join [a, b],
-    .lab set ab which _ length .,
+    .lab set ab which _ get_length .,
     lab == la + lb
 ]
 -----
 true
 =====
-length empty
+get_length empty
 -----
 _ do [
-    .length set _ import _text.length,
+    .get_length set _ import _text.get_length,
     .t set "",
-    t which _ length .
+    t which _ get_length .
 ]
 -----
 0
 =====
-length else
+get_length else
 -----
 _ do [
-    .length set _ import _text.length,
+    .get_length set _ import _text.get_length,
     .t set "1",
-    t which _ length .
+    t which _ get_length .
 ]
 -----
 1

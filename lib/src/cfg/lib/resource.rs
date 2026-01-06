@@ -22,7 +22,7 @@ use crate::type_::Pair;
 
 #[derive(Clone)]
 pub struct ResourceLib {
-    pub available_steps: FreePrimFuncVal,
+    pub get_available_steps: FreePrimFuncVal,
     pub measure_steps: MutPrimFuncVal,
     pub limit_steps: MutPrimFuncVal,
 }
@@ -30,7 +30,7 @@ pub struct ResourceLib {
 impl Default for ResourceLib {
     fn default() -> Self {
         ResourceLib {
-            available_steps: available_steps(),
+            get_available_steps: get_available_steps(),
             measure_steps: measure_steps(),
             limit_steps: limit_steps(),
         }
@@ -39,17 +39,17 @@ impl Default for ResourceLib {
 
 impl CfgMod for ResourceLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_resource.available_steps", self.available_steps);
+        extend_func(cfg, "_resource.get_available_steps", self.get_available_steps);
         extend_func(cfg, "_resource.measure_steps", self.measure_steps);
         extend_func(cfg, "_resource.limit_steps", self.limit_steps);
     }
 }
 
-pub fn available_steps() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_available_steps) }.free()
+pub fn get_available_steps() -> FreePrimFuncVal {
+    FreePrimFn { raw_input: false, f: free_impl(fn_get_available_steps) }.free()
 }
 
-fn fn_available_steps(cfg: &mut Cfg, _input: Val) -> Val {
+fn fn_get_available_steps(cfg: &mut Cfg, _input: Val) -> Val {
     let steps = cfg.steps();
     Val::Int(Int::from(steps).into())
 }

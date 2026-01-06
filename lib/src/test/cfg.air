@@ -17,12 +17,12 @@ _ do [
 -----
 true
 =====
-length
+get_length
 -----
 _ do [
     .new set _ import _config.new,
     .where set _ import _config.where,
-    .length set _ import _config.length,
+    .get_length set _ import _config.get_length,
     .any set _ import _value.any,
     .c set _ new [
         {a : _ any ., b : _ any .},
@@ -31,24 +31,24 @@ _ do [
         {},
         {b : _ any .},
     ],
-    c where _ data _ length .
+    c where _ data _ get_length .
 ]
 -----
 3
 =====
-length == snapshot repr length
+get_length == snapshot repr length
 -----
 _ do [
-    .config.length set _ import _config.length,
-    .map.length set _ import _map.length,
+    .config.get_length set _ import _config.get_length,
+    .map.get_length set _ import _map.get_length,
     .snapshot set _ import _config.snapshot,
     .represent set _ import _config.represent,
     .any set _ import _value.any,
     .where set _ import _config.where,
     .c set _ any _config,
     [.m] = _ represent c where _ data _ snapshot .,
-    .lc set c where _ data _ config.length .,
-    .lm set m which _ map.length .,
+    .lc set c where _ data _ config.get_length .,
+    .lm set m which _ map.get_length .,
     lc == lm
 ]
 -----

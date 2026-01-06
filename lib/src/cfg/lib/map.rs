@@ -27,12 +27,12 @@ use crate::type_::Pair;
 // todo design
 #[derive(Clone)]
 pub struct MapLib {
-    pub length: ConstPrimFuncVal,
-    pub items: ConstPrimFuncVal,
+    pub get_length: ConstPrimFuncVal,
+    pub get_items: ConstPrimFuncVal,
     pub into_items: MutPrimFuncVal,
-    pub keys: ConstPrimFuncVal,
+    pub get_keys: ConstPrimFuncVal,
     pub into_keys: MutPrimFuncVal,
-    pub values: ConstPrimFuncVal,
+    pub get_values: ConstPrimFuncVal,
     pub into_values: MutPrimFuncVal,
     pub contain: ConstPrimFuncVal,
     pub contain_all: ConstPrimFuncVal,
@@ -51,12 +51,12 @@ pub struct MapLib {
 impl Default for MapLib {
     fn default() -> Self {
         MapLib {
-            length: length(),
-            items: items(),
+            get_length: get_length(),
+            get_items: get_items(),
             into_items: into_items(),
-            keys: keys(),
+            get_keys: get_keys(),
             into_keys: into_keys(),
-            values: values(),
+            get_values: get_values(),
             into_values: into_values(),
             contain: contain(),
             contain_all: contain_all(),
@@ -76,12 +76,12 @@ impl Default for MapLib {
 
 impl CfgMod for MapLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_map.length", self.length);
-        extend_func(cfg, "_map.items", self.items);
+        extend_func(cfg, "_map.get_length", self.get_length);
+        extend_func(cfg, "_map.get_items", self.get_items);
         extend_func(cfg, "_map.into_items", self.into_items);
-        extend_func(cfg, "_map.keys", self.keys);
+        extend_func(cfg, "_map.get_keys", self.get_keys);
         extend_func(cfg, "_map.into_keys", self.into_keys);
-        extend_func(cfg, "_map.values", self.values);
+        extend_func(cfg, "_map.get_values", self.get_values);
         extend_func(cfg, "_map.into_values", self.into_values);
         extend_func(cfg, "_map.contain", self.contain);
         extend_func(cfg, "_map.contain_all", self.contain_all);
@@ -98,11 +98,11 @@ impl CfgMod for MapLib {
     }
 }
 
-pub fn length() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_length) }.const_()
+pub fn get_length() -> ConstPrimFuncVal {
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_length) }.const_()
 }
 
-fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
         return illegal_ctx(cfg);
@@ -111,11 +111,11 @@ fn fn_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     Val::Int(len.into())
 }
 
-pub fn items() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_items) }.const_()
+pub fn get_items() -> ConstPrimFuncVal {
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_items) }.const_()
 }
 
-fn fn_items(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_items(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
         return illegal_ctx(cfg);
@@ -143,11 +143,11 @@ fn fn_into_items(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
     Val::List(items.into())
 }
 
-pub fn keys() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_keys) }.const_()
+pub fn get_keys() -> ConstPrimFuncVal {
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_keys) }.const_()
 }
 
-fn fn_keys(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_keys(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
         return illegal_ctx(cfg);
@@ -171,11 +171,11 @@ fn fn_into_keys(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
     Val::List(keys.into())
 }
 
-pub fn values() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_values) }.const_()
+pub fn get_values() -> ConstPrimFuncVal {
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_values) }.const_()
 }
 
-fn fn_values(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_values(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
         return illegal_ctx(cfg);
