@@ -9,7 +9,6 @@ use crate::semantics::val::LinkVal;
 use crate::semantics::val::Val;
 use crate::type_::DynRef;
 use crate::type_::Key;
-use crate::utils::guard::guard;
 
 #[derive(Clone, PartialEq, Eq)]
 pub(crate) struct FreeComposite {
@@ -43,14 +42,10 @@ impl DynComposite {
         let ctx = ctx.unwrap();
         let ctx_link = LinkVal::new(take(ctx), const_);
         let _ = new_ctx.set(self.ctx_name.clone(), Val::Link(ctx_link.clone()));
-        guard(
-            (ctx, ctx_link),
-            move |(_ctx, _link)| Eval.mut_call(cfg, new_ctx, self.body.clone()),
-            |(ctx, link)| {
-                let mut new_ctx =
-                    link.try_borrow_mut().expect("ctx link should not be borrowed after eval");
-                *ctx = take(new_ctx.deref_mut());
-            },
-        )
+        let output = Eval.mut_call(cfg, new_ctx, self.body.clone());
+        let mut new_ctx =
+            ctx_link.try_borrow_mut().expect("ctx link should not be borrowed after eval");
+        *ctx = take(new_ctx.deref_mut());
+        output
     }
 }

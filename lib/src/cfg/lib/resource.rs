@@ -10,7 +10,6 @@ use crate::cfg::lib::FreePrimFn;
 use crate::cfg::lib::dyn_impl;
 use crate::cfg::lib::free_impl;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::cfg::StepsExceed;
 use crate::semantics::core::Eval;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::FreePrimFuncVal;
@@ -80,9 +79,9 @@ fn fn_limit_steps(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
         return Eval.dyn_call(cfg, ctx, input);
     }
     cfg.set_steps_unchecked(steps);
-    let output = StepsExceed::catch(|| Eval.dyn_call(cfg, ctx, input));
+    let output = Eval.dyn_call(cfg, ctx, input);
     cfg.set_steps_unchecked(cur_steps - (steps - cfg.steps()));
-    output.unwrap_or_default()
+    output
 }
 
 fn steps_input(cfg: &mut Cfg, input: Val) -> Result<(u128, Val), Val> {

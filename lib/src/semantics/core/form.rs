@@ -1,7 +1,8 @@
 use std::mem::take;
 
+use log::error;
+
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::id::Id;
 use crate::semantics::core::key::KeyEval;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
@@ -24,7 +25,6 @@ impl<'a, Value> FreeFn<Cfg, CellVal, CellVal> for CellForm<'a, Value>
 where Value: FreeFn<Cfg, Val, Val>
 {
     fn free_call(&self, cfg: &mut Cfg, mut cell: CellVal) -> CellVal {
-        cfg.step();
         cell.value = self.value.free_call(cfg, take(&mut cell.value));
         cell
     }
@@ -34,7 +34,6 @@ impl<'a, Value, Ctx> ConstFn<Cfg, Ctx, CellVal, CellVal> for CellForm<'a, Value>
 where Value: ConstFn<Cfg, Ctx, Val, Val>
 {
     fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Ctx>, mut cell: CellVal) -> CellVal {
-        cfg.step();
         cell.value = self.value.const_call(cfg, ctx, take(&mut cell.value));
         cell
     }
@@ -44,13 +43,11 @@ impl<'a, Value, Ctx> MutFn<Cfg, Ctx, CellVal, CellVal> for CellForm<'a, Value>
 where Value: MutFn<Cfg, Ctx, Val, Val>
 {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Ctx, mut cell: CellVal) -> CellVal {
-        cfg.step();
         cell.value = self.value.mut_call(cfg, ctx, take(&mut cell.value));
         cell
     }
 
     fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Ctx>, mut cell: CellVal) -> CellVal {
-        cfg.step();
         cell.value = self.value.dyn_call(cfg, ctx, take(&mut cell.value));
         cell
     }
@@ -67,7 +64,6 @@ where
     Second: FreeFn<Cfg, Val, Val>,
 {
     fn free_call(&self, cfg: &mut Cfg, mut pair: PairVal) -> PairVal {
-        cfg.step();
         pair.first = self.first.free_call(cfg, take(&mut pair.first));
         pair.second = self.second.free_call(cfg, take(&mut pair.second));
         pair
@@ -80,7 +76,6 @@ where
     Second: ConstFn<Cfg, Ctx, Val, Val>,
 {
     fn const_call(&self, cfg: &mut Cfg, mut ctx: ConstRef<Ctx>, mut pair: PairVal) -> PairVal {
-        cfg.step();
         pair.first = self.first.const_call(cfg, ctx.reborrow(), take(&mut pair.first));
         pair.second = self.second.const_call(cfg, ctx, take(&mut pair.second));
         pair
@@ -93,14 +88,12 @@ where
     Second: MutFn<Cfg, Ctx, Val, Val>,
 {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Ctx, mut pair: PairVal) -> PairVal {
-        cfg.step();
         pair.first = self.first.mut_call(cfg, ctx, take(&mut pair.first));
         pair.second = self.second.mut_call(cfg, ctx, take(&mut pair.second));
         pair
     }
 
     fn dyn_call(&self, cfg: &mut Cfg, mut ctx: DynRef<Ctx>, mut pair: PairVal) -> PairVal {
-        cfg.step();
         pair.first = self.first.dyn_call(cfg, ctx.reborrow(), take(&mut pair.first));
         pair.second = self.second.dyn_call(cfg, ctx, take(&mut pair.second));
         pair
@@ -118,7 +111,6 @@ where
     Input: FreeFn<Cfg, Val, Val>,
 {
     fn free_call(&self, cfg: &mut Cfg, mut call: CallVal) -> CallVal {
-        cfg.step();
         call.func = self.func.free_call(cfg, take(&mut call.func));
         call.input = self.input.free_call(cfg, take(&mut call.input));
         call
@@ -131,7 +123,6 @@ where
     Input: ConstFn<Cfg, C, Val, Val>,
 {
     fn const_call(&self, cfg: &mut Cfg, mut ctx: ConstRef<C>, mut call: CallVal) -> CallVal {
-        cfg.step();
         call.func = self.func.const_call(cfg, ctx.reborrow(), take(&mut call.func));
         call.input = self.input.const_call(cfg, ctx, take(&mut call.input));
         call
@@ -144,14 +135,12 @@ where
     Input: MutFn<Cfg, Ctx, Val, Val>,
 {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Ctx, mut call: CallVal) -> CallVal {
-        cfg.step();
         call.func = self.func.mut_call(cfg, ctx, take(&mut call.func));
         call.input = self.input.mut_call(cfg, ctx, take(&mut call.input));
         call
     }
 
     fn dyn_call(&self, cfg: &mut Cfg, mut ctx: DynRef<Ctx>, mut call: CallVal) -> CallVal {
-        cfg.step();
         call.func = self.func.dyn_call(cfg, ctx.reborrow(), take(&mut call.func));
         call.input = self.input.dyn_call(cfg, ctx, take(&mut call.input));
         call
@@ -166,7 +155,6 @@ impl<'a, Item> FreeFn<Cfg, ListVal, ListVal> for ListForm<'a, Item>
 where Item: FreeFn<Cfg, Val, Val>
 {
     fn free_call(&self, cfg: &mut Cfg, mut list: ListVal) -> ListVal {
-        cfg.step();
         for v in list.iter_mut() {
             *v = self.item.free_call(cfg, take(v));
         }
@@ -178,7 +166,6 @@ impl<'a, Item, Ctx> ConstFn<Cfg, Ctx, ListVal, ListVal> for ListForm<'a, Item>
 where Item: ConstFn<Cfg, Ctx, Val, Val>
 {
     fn const_call(&self, cfg: &mut Cfg, mut ctx: ConstRef<Ctx>, mut list: ListVal) -> ListVal {
-        cfg.step();
         for v in list.iter_mut() {
             *v = self.item.const_call(cfg, ctx.reborrow(), take(v));
         }
@@ -190,7 +177,6 @@ impl<'a, Item, Ctx> MutFn<Cfg, Ctx, ListVal, ListVal> for ListForm<'a, Item>
 where Item: MutFn<Cfg, Ctx, Val, Val>
 {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Ctx, mut list: ListVal) -> ListVal {
-        cfg.step();
         for v in list.iter_mut() {
             *v = self.item.mut_call(cfg, ctx, take(v));
         }
@@ -198,7 +184,6 @@ where Item: MutFn<Cfg, Ctx, Val, Val>
     }
 
     fn dyn_call(&self, cfg: &mut Cfg, mut ctx: DynRef<Ctx>, mut list: ListVal) -> ListVal {
-        cfg.step();
         for v in list.iter_mut() {
             *v = self.item.dyn_call(cfg, ctx.reborrow(), take(v));
         }
@@ -214,7 +199,6 @@ impl<'a, Value> FreeFn<Cfg, MapVal, MapVal> for MapForm<'a, Value>
 where Value: FreeFn<Cfg, Val, Val>
 {
     fn free_call(&self, cfg: &mut Cfg, mut map: MapVal) -> MapVal {
-        cfg.step();
         for v in map.values_mut() {
             *v = self.value.free_call(cfg, take(v));
         }
@@ -226,7 +210,6 @@ impl<'a, Value, Ctx> ConstFn<Cfg, Ctx, MapVal, MapVal> for MapForm<'a, Value>
 where Value: ConstFn<Cfg, Ctx, Val, Val>
 {
     fn const_call(&self, cfg: &mut Cfg, mut ctx: ConstRef<Ctx>, mut map: MapVal) -> MapVal {
-        cfg.step();
         for v in map.values_mut() {
             *v = self.value.const_call(cfg, ctx.reborrow(), take(v));
         }
@@ -238,7 +221,6 @@ impl<'a, Value, Ctx> MutFn<Cfg, Ctx, MapVal, MapVal> for MapForm<'a, Value>
 where Value: MutFn<Cfg, Ctx, Val, Val>
 {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Ctx, mut map: MapVal) -> MapVal {
-        cfg.step();
         for v in map.values_mut() {
             *v = self.value.mut_call(cfg, ctx, take(v));
         }
@@ -246,7 +228,6 @@ where Value: MutFn<Cfg, Ctx, Val, Val>
     }
 
     fn dyn_call(&self, cfg: &mut Cfg, mut ctx: DynRef<Ctx>, mut map: MapVal) -> MapVal {
-        cfg.step();
         for v in map.values_mut() {
             *v = self.value.dyn_call(cfg, ctx.reborrow(), take(v));
         }
@@ -259,6 +240,10 @@ pub(crate) struct Form;
 
 impl FreeFn<Cfg, Val, Val> for Form {
     fn free_call(&self, cfg: &mut Cfg, val: Val) -> Val {
+        if !cfg.step() {
+            error!("steps exceed");
+            return Val::default();
+        }
         match val {
             Val::Key(key) => self.free_call(cfg, key),
             Val::Cell(cell) => Val::Cell(self.free_call(cfg, cell)),
@@ -266,13 +251,17 @@ impl FreeFn<Cfg, Val, Val> for Form {
             Val::Call(call) => Val::Call(self.free_call(cfg, call)),
             Val::List(list) => Val::List(self.free_call(cfg, list)),
             Val::Map(map) => Val::Map(self.free_call(cfg, map)),
-            v => Id.free_call(cfg, v),
+            v => v,
         }
     }
 }
 
 impl ConstFn<Cfg, Val, Val, Val> for Form {
     fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, val: Val) -> Val {
+        if !cfg.step() {
+            error!("steps exceed");
+            return Val::default();
+        }
         match val {
             Val::Key(key) => self.const_call(cfg, ctx, key),
             Val::Cell(cell) => Val::Cell(self.const_call(cfg, ctx, cell)),
@@ -280,13 +269,17 @@ impl ConstFn<Cfg, Val, Val, Val> for Form {
             Val::Call(call) => Val::Call(self.const_call(cfg, ctx, call)),
             Val::List(list) => Val::List(self.const_call(cfg, ctx, list)),
             Val::Map(map) => Val::Map(self.const_call(cfg, ctx, map)),
-            v => Id.const_call(cfg, ctx, v),
+            v => v,
         }
     }
 }
 
 impl MutFn<Cfg, Val, Val, Val> for Form {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, val: Val) -> Val {
+        if !cfg.step() {
+            error!("steps exceed");
+            return Val::default();
+        }
         match val {
             Val::Key(key) => self.mut_call(cfg, ctx, key),
             Val::Cell(cell) => Val::Cell(self.mut_call(cfg, ctx, cell)),
@@ -294,11 +287,15 @@ impl MutFn<Cfg, Val, Val, Val> for Form {
             Val::Call(call) => Val::Call(self.mut_call(cfg, ctx, call)),
             Val::List(list) => Val::List(self.mut_call(cfg, ctx, list)),
             Val::Map(map) => Val::Map(self.mut_call(cfg, ctx, map)),
-            v => Id.mut_call(cfg, ctx, v),
+            v => v,
         }
     }
 
     fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, val: Val) -> Val {
+        if !cfg.step() {
+            error!("steps exceed");
+            return Val::default();
+        }
         match val {
             Val::Key(key) => self.dyn_call(cfg, ctx, key),
             Val::Cell(cell) => Val::Cell(self.dyn_call(cfg, ctx, cell)),
@@ -306,7 +303,7 @@ impl MutFn<Cfg, Val, Val, Val> for Form {
             Val::Call(call) => Val::Call(self.dyn_call(cfg, ctx, call)),
             Val::List(list) => Val::List(self.dyn_call(cfg, ctx, list)),
             Val::Map(map) => Val::Map(self.dyn_call(cfg, ctx, map)),
-            v => Id.dyn_call(cfg, ctx, v),
+            v => v,
         }
     }
 }

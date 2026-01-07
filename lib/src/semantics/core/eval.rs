@@ -5,7 +5,6 @@ use crate::semantics::core::form::CellForm;
 use crate::semantics::core::form::ListForm;
 use crate::semantics::core::form::MapForm;
 use crate::semantics::core::form::PairForm;
-use crate::semantics::core::id::Id;
 use crate::semantics::core::key::KeyEval;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
@@ -29,7 +28,6 @@ impl<'a, Func> FreeFn<Cfg, CallVal, Val> for CallEval<'a, Func>
 where Func: FreeFn<Cfg, Val, Val>
 {
     fn free_call(&self, cfg: &mut Cfg, call: CallVal) -> Val {
-        cfg.step();
         let call = Call::from(call);
         let func = self.func.free_call(cfg, call.func);
         let Val::Func(func) = func else {
@@ -37,7 +35,10 @@ where Func: FreeFn<Cfg, Val, Val>
             return Val::default();
         };
         let input = if func.raw_input() { call.input } else { Eval.free_call(cfg, call.input) };
-        cfg.step();
+        if !cfg.step() {
+            error!("steps exceed");
+            return Val::default();
+        }
         func.free_call(cfg, input)
     }
 }
@@ -46,7 +47,6 @@ impl<'a, Func> ConstFn<Cfg, Val, CallVal, Val> for CallEval<'a, Func>
 where Func: ConstFn<Cfg, Val, Val, Val>
 {
     fn const_call(&self, cfg: &mut Cfg, mut ctx: ConstRef<Val>, call: CallVal) -> Val {
-        cfg.step();
         let call = Call::from(call);
         let func = self.func.const_call(cfg, ctx.reborrow(), call.func);
         let Val::Func(func) = func else {
@@ -58,7 +58,10 @@ where Func: ConstFn<Cfg, Val, Val, Val>
         } else {
             Eval.const_call(cfg, ctx.reborrow(), call.input)
         };
-        cfg.step();
+        if !cfg.step() {
+            error!("steps exceed");
+            return Val::default();
+        }
         func.const_call(cfg, ctx, input)
     }
 }
@@ -67,7 +70,6 @@ impl<'a, Func> MutFn<Cfg, Val, CallVal, Val> for CallEval<'a, Func>
 where Func: MutFn<Cfg, Val, Val, Val>
 {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, call: CallVal) -> Val {
-        cfg.step();
         let call = Call::from(call);
         let func = self.func.mut_call(cfg, ctx, call.func);
         let Val::Func(func) = func else {
@@ -75,12 +77,14 @@ where Func: MutFn<Cfg, Val, Val, Val>
             return Val::default();
         };
         let input = if func.raw_input() { call.input } else { Eval.mut_call(cfg, ctx, call.input) };
-        cfg.step();
+        if !cfg.step() {
+            error!("steps exceed");
+            return Val::default();
+        }
         func.mut_call(cfg, ctx, input)
     }
 
     fn dyn_call(&self, cfg: &mut Cfg, mut ctx: DynRef<Val>, call: CallVal) -> Val {
-        cfg.step();
         let call = Call::from(call);
         let func = self.func.dyn_call(cfg, ctx.reborrow(), call.func);
         let Val::Func(func) = func else {
@@ -92,7 +96,10 @@ where Func: MutFn<Cfg, Val, Val, Val>
         } else {
             Eval.dyn_call(cfg, ctx.reborrow(), call.input)
         };
-        cfg.step();
+        if !cfg.step() {
+            error!("steps exceed");
+            return Val::default();
+        }
         func.dyn_call(cfg, ctx, input)
     }
 }
@@ -102,6 +109,10 @@ pub(crate) struct Eval;
 
 impl FreeFn<Cfg, Val, Val> for Eval {
     fn free_call(&self, cfg: &mut Cfg, val: Val) -> Val {
+        if !cfg.step() {
+            error!("steps exceed");
+            return Val::default();
+        }
         match val {
             Val::Key(key) => self.free_call(cfg, key),
             Val::Cell(cell) => self.free_call(cfg, cell),
@@ -109,13 +120,17 @@ impl FreeFn<Cfg, Val, Val> for Eval {
             Val::Call(call) => self.free_call(cfg, call),
             Val::List(list) => self.free_call(cfg, list),
             Val::Map(map) => self.free_call(cfg, map),
-            v => Id.free_call(cfg, v),
+            v => v,
         }
     }
 }
 
 impl ConstFn<Cfg, Val, Val, Val> for Eval {
     fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, val: Val) -> Val {
+        if !cfg.step() {
+            error!("steps exceed");
+            return Val::default();
+        }
         match val {
             Val::Key(key) => self.const_call(cfg, ctx, key),
             Val::Cell(cell) => self.const_call(cfg, ctx, cell),
@@ -123,13 +138,17 @@ impl ConstFn<Cfg, Val, Val, Val> for Eval {
             Val::Call(call) => self.const_call(cfg, ctx, call),
             Val::List(list) => self.const_call(cfg, ctx, list),
             Val::Map(map) => self.const_call(cfg, ctx, map),
-            v => Id.const_call(cfg, ctx, v),
+            v => v,
         }
     }
 }
 
 impl MutFn<Cfg, Val, Val, Val> for Eval {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, val: Val) -> Val {
+        if !cfg.step() {
+            error!("steps exceed");
+            return Val::default();
+        }
         match val {
             Val::Key(key) => self.mut_call(cfg, ctx, key),
             Val::Cell(cell) => self.mut_call(cfg, ctx, cell),
@@ -137,11 +156,15 @@ impl MutFn<Cfg, Val, Val, Val> for Eval {
             Val::Call(call) => self.mut_call(cfg, ctx, call),
             Val::List(list) => self.mut_call(cfg, ctx, list),
             Val::Map(map) => self.mut_call(cfg, ctx, map),
-            v => Id.mut_call(cfg, ctx, v),
+            v => v,
         }
     }
 
     fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, val: Val) -> Val {
+        if !cfg.step() {
+            error!("steps exceed");
+            return Val::default();
+        }
         match val {
             Val::Key(key) => self.dyn_call(cfg, ctx, key),
             Val::Cell(cell) => self.dyn_call(cfg, ctx, cell),
@@ -149,7 +172,7 @@ impl MutFn<Cfg, Val, Val, Val> for Eval {
             Val::Call(call) => self.dyn_call(cfg, ctx, call),
             Val::List(list) => self.dyn_call(cfg, ctx, list),
             Val::Map(map) => self.dyn_call(cfg, ctx, map),
-            v => Id.dyn_call(cfg, ctx, v),
+            v => v,
         }
     }
 }

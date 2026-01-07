@@ -101,6 +101,10 @@ impl Block {
     fn flow(self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> (Val, Result<CtrlFlow, ()>) {
         let mut output = Val::default();
         for statement in self.statements {
+            if cfg.steps() == 0 {
+                error!("steps exceed");
+                return (Val::default(), Err(()));
+            }
             match statement {
                 Statement::Normal(val) => {
                     output = Eval.dyn_call(cfg, ctx.reborrow(), val);
@@ -333,6 +337,10 @@ impl Match {
     fn eval(self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> Val {
         let val = Eval.dyn_call(cfg, ctx.reborrow(), self.val);
         for (pattern, block) in self.arms {
+            if cfg.steps() == 0 {
+                error!("steps exceed");
+                return Val::default();
+            }
             let pattern = Eval.dyn_call(cfg, ctx.reborrow(), pattern);
             let Some(pattern) = pattern.parse() else {
                 error!("parse pattern failed");
@@ -496,6 +504,10 @@ fn iterate_val<ValIter>(
 ) -> Val
 where ValIter: Iterator<Item = Val> {
     for val in values {
+        if cfg.steps() == 0 {
+            error!("steps exceed");
+            return Val::default();
+        }
         if !ctx.is_const() {
             let _ = ctx.reborrow().unwrap().set(name.clone(), val);
         }

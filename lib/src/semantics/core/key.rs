@@ -34,8 +34,7 @@ impl KeyEval {
 }
 
 impl FreeFn<Cfg, Key, Val> for KeyEval {
-    fn free_call(&self, cfg: &mut Cfg, key: Key) -> Val {
-        cfg.step();
+    fn free_call(&self, _cfg: &mut Cfg, key: Key) -> Val {
         let (mode, s) = self.recognize(key.clone());
         match mode {
             KeyMode::Id => Val::Key(s),
@@ -49,8 +48,7 @@ impl FreeFn<Cfg, Key, Val> for KeyEval {
 }
 
 impl ConstFn<Cfg, Val, Key, Val> for KeyEval {
-    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, key: Key) -> Val {
-        cfg.step();
+    fn const_call(&self, _cfg: &mut Cfg, ctx: ConstRef<Val>, key: Key) -> Val {
         let (mode, s) = self.recognize(key);
         match mode {
             KeyMode::Id => Val::Key(s),

@@ -187,7 +187,7 @@ _ do [
 -----
 true
 =====
-ctx panic safe
+ctx limit_steps safe
 -----
 _ do [
     .limit_steps set _ import _resource.limit_steps,

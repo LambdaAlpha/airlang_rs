@@ -1,10 +1,6 @@
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::ops::Deref;
-use std::panic::AssertUnwindSafe;
-use std::panic::catch_unwind;
-use std::panic::panic_any;
-use std::panic::resume_unwind;
 
 use derive_more::Deref;
 use derive_more::DerefMut;
@@ -105,26 +101,29 @@ impl Cfg {
     }
 
     #[inline(always)]
-    pub fn step(&mut self) {
+    pub fn step(&mut self) -> bool {
         if self.steps == 0 {
-            panic_any(StepsExceed);
+            return false;
         }
         self.steps -= 1;
+        true
     }
 
     #[inline(always)]
-    pub fn step_n(&mut self, n: u128) {
+    pub fn step_n(&mut self, n: u128) -> bool {
         if self.steps < n {
-            panic_any(StepsExceed);
+            return false;
         }
         self.steps -= n;
+        true
     }
 
-    pub fn set_steps(&mut self, n: u128) {
+    pub fn set_steps(&mut self, n: u128) -> bool {
         if self.steps < n {
-            return;
+            return false;
         }
         self.steps = n;
+        true
     }
 
     pub(crate) fn set_steps_unchecked(&mut self, n: u128) {
@@ -133,18 +132,6 @@ impl Cfg {
 
     pub fn steps(&self) -> u128 {
         self.steps
-    }
-}
-
-impl StepsExceed {
-    pub fn catch<V: Default, F: FnOnce() -> V>(f: F) -> Option<V> {
-        match catch_unwind(AssertUnwindSafe(f)) {
-            Ok(val) => Some(val),
-            Err(err) => match err.downcast::<StepsExceed>() {
-                Ok(_) => None,
-                Err(err) => resume_unwind(err),
-            },
-        }
     }
 }
 

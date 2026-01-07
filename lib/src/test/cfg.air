@@ -132,7 +132,7 @@ _ do [
 -----
 true
 =====
-with panic safe
+with limit_steps safe
 -----
 _ do [
     .limit_steps set _ import _resource.limit_steps,

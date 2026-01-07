@@ -3,7 +3,6 @@ use log::trace;
 
 use crate::cfg::CoreCfg;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::cfg::StepsExceed;
 use crate::semantics::core::Eval;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::MapVal;
@@ -25,10 +24,10 @@ impl Air {
 
     pub fn interpret(&mut self, input: Val) -> Val {
         let old_steps = self.cfg.steps();
-        let output = StepsExceed::catch(|| Eval.mut_call(&mut self.cfg, &mut self.ctx, input));
+        let output = Eval.mut_call(&mut self.cfg, &mut self.ctx, input);
         let new_steps = self.cfg.steps();
         trace!("takes {} steps", old_steps - new_steps);
-        output.unwrap_or_default()
+        output
     }
 
     pub fn ctx_mut(&mut self) -> &mut Val {
