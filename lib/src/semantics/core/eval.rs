@@ -37,6 +37,7 @@ where Func: FreeFn<Cfg, Val, Val>
             return Val::default();
         };
         let input = if func.raw_input() { call.input } else { Eval.free_call(cfg, call.input) };
+        cfg.step();
         func.free_call(cfg, input)
     }
 }
@@ -57,6 +58,7 @@ where Func: ConstFn<Cfg, Val, Val, Val>
         } else {
             Eval.const_call(cfg, ctx.reborrow(), call.input)
         };
+        cfg.step();
         func.const_call(cfg, ctx, input)
     }
 }
@@ -73,6 +75,7 @@ where Func: MutFn<Cfg, Val, Val, Val>
             return Val::default();
         };
         let input = if func.raw_input() { call.input } else { Eval.mut_call(cfg, ctx, call.input) };
+        cfg.step();
         func.mut_call(cfg, ctx, input)
     }
 
@@ -89,6 +92,7 @@ where Func: MutFn<Cfg, Val, Val, Val>
         } else {
             Eval.dyn_call(cfg, ctx.reborrow(), call.input)
         };
+        cfg.step();
         func.dyn_call(cfg, ctx, input)
     }
 }

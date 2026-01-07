@@ -7,7 +7,7 @@ _ do [
     s1 - s2
 ]
 -----
-7
+9
 =====
 measure_steps 1
 -----
@@ -29,16 +29,16 @@ _ do [
     s
 ]
 -----
-5
+6
 =====
 limit_steps
 -----
 _ do [
     .limit_steps set _ import _resource.limit_steps,
-    .a4 set 4 limit_steps _ data 1 + 1,
     .a5 set 5 limit_steps _ data 1 + 1,
     .a6 set 6 limit_steps _ data 1 + 1,
-    (a4 == .) and (a5 == 2) and (a6 == 2)
+    .a7 set 7 limit_steps _ data 1 + 1,
+    (a5 == .) and (a6 == 2) and (a7 == 2)
 ]
 -----
 true
