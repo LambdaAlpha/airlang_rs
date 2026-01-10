@@ -75,6 +75,10 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
         error!("input {input:?} should be a list");
         return illegal_input(cfg);
     };
+    if list.is_empty() {
+        error!("input {list:?} should be non-empty");
+        return illegal_input(cfg);
+    }
     let mut new_cfg = Cfg::default();
     let list = List::from(list);
     for val in list {
@@ -216,5 +220,6 @@ fn fn_where(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let mut new_cfg = Cfg::from(new_cfg);
-    Eval.dyn_call(&mut new_cfg, ctx, pair.second)
+    let output = Eval.dyn_call(&mut new_cfg, ctx, pair.second);
+    Val::Pair(Pair::new(Val::Cfg(new_cfg.into()), output).into())
 }

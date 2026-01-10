@@ -63,6 +63,8 @@ pub struct CorePrelude {
     pub get_type: ConstPrimFuncVal,
     pub equal: FreePrimFuncVal,
 
+    pub abort: FreePrimFuncVal,
+
     pub data: FreePrimFuncVal,
     pub id: FreePrimFuncVal,
     pub code: MutPrimFuncVal,
@@ -130,6 +132,8 @@ impl CorePrelude {
             get_type: lib.value.get_type.clone(),
             equal: lib.value.equal.clone(),
 
+            abort: lib.error.abort.clone(),
+
             data: lib.lang.data.clone(),
             id: lib.lang.id.clone(),
             code: lib.lang.code.clone(),
@@ -193,6 +197,8 @@ impl Prelude for CorePrelude {
 
         map_put_func(map, "get_type", &self.get_type);
         map_put_func(map, "==", &self.equal);
+
+        map_put_func(map, "abort", &self.abort);
 
         map_put_func(map, "data", &self.data);
         map_put_func(map, "id", &self.id);

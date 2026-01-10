@@ -70,6 +70,7 @@ pub fn get_function() -> ConstPrimFuncVal {
 
 fn fn_get_function(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Call(call) = &*ctx else {
+        error!("ctx {ctx:?} should be a call");
         return illegal_ctx(cfg);
     };
     call.func.clone()
@@ -81,6 +82,7 @@ pub fn set_function() -> MutPrimFuncVal {
 
 fn fn_set_function(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Call(call) = ctx else {
+        error!("ctx {ctx:?} should be a call");
         return illegal_ctx(cfg);
     };
     swap(&mut call.func, &mut input);
@@ -93,6 +95,7 @@ pub fn get_input() -> ConstPrimFuncVal {
 
 fn fn_get_input(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
     let Val::Call(call) = &*ctx else {
+        error!("ctx {ctx:?} should be a call");
         return illegal_ctx(cfg);
     };
     call.input.clone()
@@ -104,6 +107,7 @@ pub fn set_input() -> MutPrimFuncVal {
 
 fn fn_set_input(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Call(call) = ctx else {
+        error!("ctx {ctx:?} should be a call");
         return illegal_ctx(cfg);
     };
     swap(&mut call.input, &mut input);

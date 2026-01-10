@@ -81,6 +81,9 @@ fn fn_limit_steps(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
     cfg.set_steps_unchecked(steps);
     let output = Eval.dyn_call(cfg, ctx, input);
     cfg.set_steps_unchecked(cur_steps - (steps - cfg.steps()));
+    if &*cfg.abort_reason() == Cfg::ABORT_REASON_STEPS_EXCEED {
+        cfg.resume();
+    }
     output
 }
 

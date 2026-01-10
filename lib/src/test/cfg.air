@@ -31,7 +31,8 @@ _ do [
         {},
         {b : _ any .},
     ],
-    c where _ data _ get_length .
+    (__ : .len) = c where _ data _ get_length .,
+    len
 ]
 -----
 3
@@ -46,8 +47,9 @@ _ do [
     .any set _ import _value.any,
     .where set _ import _config.where,
     .c set _ any _config,
-    [.m] = _ represent c where _ data _ snapshot .,
-    .lc set c where _ data _ config.get_length .,
+    (__ : .s) = c where _ data _ snapshot .,
+    [.m] = _ represent s,
+    (__ : .lc) = c where _ data _ config.get_length .,
     .lm set m which _ map.get_length .,
     lc == lm
 ]
@@ -70,7 +72,7 @@ _ do [
         {a : a1, b1 : b1},
         {a : a2, b2 : b2},
     ],
-    .c1 set c where _ data _ snapshot .,
+    (__ : .c1) = c where _ data _ snapshot .,
     .repr set _ represent c1,
     repr == [{a : a2, b1 : b1, b2 : b2}]
 ]
@@ -153,7 +155,7 @@ _ do [
     .where set _ import _config.where,
     .a set _ any .,
     .c set _ new [{_a : a}],
-    .a1 set c where _ data _ import _a,
+    (__ : .a1) = c where _ data _ import _a,
     a == a1
 ]
 -----

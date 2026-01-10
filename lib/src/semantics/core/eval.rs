@@ -36,7 +36,7 @@ where Func: FreeFn<Cfg, Val, Val>
         };
         let input = if func.raw_input() { call.input } else { Eval.free_call(cfg, call.input) };
         if !cfg.step() {
-            error!("steps exceed");
+            error!("aborted");
             return Val::default();
         }
         func.free_call(cfg, input)
@@ -59,7 +59,7 @@ where Func: ConstFn<Cfg, Val, Val, Val>
             Eval.const_call(cfg, ctx.reborrow(), call.input)
         };
         if !cfg.step() {
-            error!("steps exceed");
+            error!("aborted");
             return Val::default();
         }
         func.const_call(cfg, ctx, input)
@@ -78,7 +78,7 @@ where Func: MutFn<Cfg, Val, Val, Val>
         };
         let input = if func.raw_input() { call.input } else { Eval.mut_call(cfg, ctx, call.input) };
         if !cfg.step() {
-            error!("steps exceed");
+            error!("aborted");
             return Val::default();
         }
         func.mut_call(cfg, ctx, input)
@@ -97,7 +97,7 @@ where Func: MutFn<Cfg, Val, Val, Val>
             Eval.dyn_call(cfg, ctx.reborrow(), call.input)
         };
         if !cfg.step() {
-            error!("steps exceed");
+            error!("aborted");
             return Val::default();
         }
         func.dyn_call(cfg, ctx, input)
@@ -110,7 +110,7 @@ pub(crate) struct Eval;
 impl FreeFn<Cfg, Val, Val> for Eval {
     fn free_call(&self, cfg: &mut Cfg, val: Val) -> Val {
         if !cfg.step() {
-            error!("steps exceed");
+            error!("aborted");
             return Val::default();
         }
         match val {
@@ -128,7 +128,7 @@ impl FreeFn<Cfg, Val, Val> for Eval {
 impl ConstFn<Cfg, Val, Val, Val> for Eval {
     fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, val: Val) -> Val {
         if !cfg.step() {
-            error!("steps exceed");
+            error!("aborted");
             return Val::default();
         }
         match val {
@@ -146,7 +146,7 @@ impl ConstFn<Cfg, Val, Val, Val> for Eval {
 impl MutFn<Cfg, Val, Val, Val> for Eval {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, val: Val) -> Val {
         if !cfg.step() {
-            error!("steps exceed");
+            error!("aborted");
             return Val::default();
         }
         match val {
@@ -162,7 +162,7 @@ impl MutFn<Cfg, Val, Val, Val> for Eval {
 
     fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, val: Val) -> Val {
         if !cfg.step() {
-            error!("steps exceed");
+            error!("aborted");
             return Val::default();
         }
         match val {

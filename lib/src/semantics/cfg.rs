@@ -2,11 +2,13 @@ use std::fmt::Debug;
 use std::hash::Hash;
 use std::ops::Deref;
 
+use const_format::concatcp;
 use derive_more::Deref;
 use derive_more::DerefMut;
 use rustc_hash::FxBuildHasher;
 use stable_deref_trait::StableDeref;
 
+use crate::semantics::core::PREFIX_ID;
 use crate::semantics::val::Val;
 use crate::type_::Key;
 
@@ -14,18 +16,19 @@ use crate::type_::Key;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Cfg {
     steps: u128,
+    aborted: bool,
+    abort_reason: Key,
     max_scope: usize,
     // box is required for StableDeref, which is required for insert
     map: OnceMap<Key, Box<OnceMap<usize /*scope*/, Box<Val>>>>,
 }
 
-#[derive(Copy, Clone)]
-pub struct StepsExceed;
-
 #[derive(Debug, Default, Deref, DerefMut)]
 struct OnceMap<K, V>(once_map::unsync::OnceMap<K, V, FxBuildHasher>);
 
 impl Cfg {
+    pub const ABORT_REASON_STEPS_EXCEED: &str = concatcp!(PREFIX_ID, "steps_exceed");
+
     pub fn begin_scope(&mut self) {
         self.max_scope += 1;
     }
@@ -97,32 +100,20 @@ impl Cfg {
                 (k.clone(), Box::new(new_scopes))
             })
             .collect();
-        Self { steps: u128::MAX, max_scope: 0, map }
+        Self { steps: u128::MAX, aborted: false, abort_reason: Key::default(), max_scope: 0, map }
     }
 
     #[inline(always)]
     pub fn step(&mut self) -> bool {
+        if self.aborted {
+            return false;
+        }
         if self.steps == 0 {
+            self.aborted = true;
+            self.abort_reason = Key::from_str_unchecked(Self::ABORT_REASON_STEPS_EXCEED);
             return false;
         }
         self.steps -= 1;
-        true
-    }
-
-    #[inline(always)]
-    pub fn step_n(&mut self, n: u128) -> bool {
-        if self.steps < n {
-            return false;
-        }
-        self.steps -= n;
-        true
-    }
-
-    pub fn set_steps(&mut self, n: u128) -> bool {
-        if self.steps < n {
-            return false;
-        }
-        self.steps = n;
         true
     }
 
@@ -133,11 +124,35 @@ impl Cfg {
     pub fn steps(&self) -> u128 {
         self.steps
     }
+
+    pub fn abort(&mut self, reason: Key) {
+        self.aborted = true;
+        self.abort_reason = reason;
+    }
+
+    pub(crate) fn resume(&mut self) {
+        self.aborted = false;
+        self.abort_reason = Key::default();
+    }
+
+    pub fn is_aborted(&self) -> bool {
+        self.aborted
+    }
+
+    pub fn abort_reason(&self) -> Key {
+        self.abort_reason.clone()
+    }
 }
 
 impl Default for Cfg {
     fn default() -> Self {
-        Self { steps: u128::MAX, max_scope: 0, map: OnceMap::default() }
+        Self {
+            steps: u128::MAX,
+            aborted: false,
+            abort_reason: Key::default(),
+            max_scope: 0,
+            map: OnceMap::default(),
+        }
     }
 }
 

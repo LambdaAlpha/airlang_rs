@@ -1,0 +1,24 @@
+abort
+-----
+_ do [
+    _ abort _test,
+    1
+]
+-----
+.
+=====
+abort is_aborted get_abort_reason
+-----
+_ do [
+    .cfg_new set _ import _config.new,
+    .where set _ import _config.where,
+    .is_aborted set _ import _error.is_aborted,
+    .get_abort_reason set _ import _error.get_abort_reason,
+    .cfg set _ cfg_new [{}],
+    (.cfg : __) = cfg where _ form _ abort _test,
+    .aborted set cfg which _ is_aborted .,
+    .reason set cfg which _ get_abort_reason .,
+    aborted and reason == _test
+]
+-----
+true

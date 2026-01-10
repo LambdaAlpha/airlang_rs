@@ -8,6 +8,7 @@ use self::cfg::CfgLib;
 use self::ctrl::CtrlLib;
 use self::ctx::CtxLib;
 use self::decimal::DecimalLib;
+use self::error::ErrorLib;
 use self::func::FuncLib;
 use self::int::IntLib;
 use self::key::KeyLib;
@@ -56,6 +57,7 @@ pub struct CoreLib {
     pub ctrl: CtrlLib,
     pub value: ValueLib,
     pub resource: ResourceLib,
+    pub error: ErrorLib,
     pub lang: LangLib,
 }
 
@@ -80,6 +82,7 @@ impl CfgMod for CoreLib {
         self.ctrl.extend(cfg);
         self.value.extend(cfg);
         self.resource.extend(cfg);
+        self.error.extend(cfg);
         self.lang.extend(cfg);
     }
 }
@@ -295,5 +298,7 @@ pub mod ctrl;
 pub mod value;
 
 pub mod resource;
+
+pub mod error;
 
 pub mod lang;

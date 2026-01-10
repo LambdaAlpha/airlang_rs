@@ -187,6 +187,11 @@ fn test_resource() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_error() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/error.air"), "test/error.air")
+}
+
+#[test]
 fn test_lang() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/lang.air"), "test/lang.air")
 }

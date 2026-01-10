@@ -101,8 +101,8 @@ impl Block {
     fn flow(self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> (Val, Result<CtrlFlow, ()>) {
         let mut output = Val::default();
         for statement in self.statements {
-            if cfg.steps() == 0 {
-                error!("steps exceed");
+            if cfg.is_aborted() {
+                error!("aborted");
                 return (Val::default(), Err(()));
             }
             match statement {
@@ -337,8 +337,8 @@ impl Match {
     fn eval(self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> Val {
         let val = Eval.dyn_call(cfg, ctx.reborrow(), self.val);
         for (pattern, block) in self.arms {
-            if cfg.steps() == 0 {
-                error!("steps exceed");
+            if cfg.is_aborted() {
+                error!("aborted");
                 return Val::default();
             }
             let pattern = Eval.dyn_call(cfg, ctx.reborrow(), pattern);
@@ -504,8 +504,8 @@ fn iterate_val<ValIter>(
 ) -> Val
 where ValIter: Iterator<Item = Val> {
     for val in values {
-        if cfg.steps() == 0 {
-            error!("steps exceed");
+        if cfg.is_aborted() {
+            error!("aborted");
             return Val::default();
         }
         if !ctx.is_const() {
