@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use log::error;
 
 use crate::cfg::CfgMod;
-use crate::cfg::exception::illegal_input;
+use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::FreePrimFn;

@@ -4,8 +4,8 @@ use std::io::stdin;
 use std::io::stdout;
 
 use airlang::cfg::CfgMod;
-use airlang::cfg::exception::illegal_ctx;
-use airlang::cfg::exception::illegal_input;
+use airlang::cfg::error::illegal_ctx;
+use airlang::cfg::error::illegal_input;
 use airlang::cfg::extend_func;
 use airlang::cfg::lib::DynPrimFn;
 use airlang::cfg::lib::FreePrimFn;

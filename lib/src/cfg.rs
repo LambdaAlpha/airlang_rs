@@ -78,6 +78,6 @@ pub mod lib;
 
 pub mod prelude;
 
-pub mod exception;
+pub mod error;
 
 mod utils;

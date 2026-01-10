@@ -1,6 +1,6 @@
 use airlang::cfg::CfgMod;
-use airlang::cfg::exception::fail;
-use airlang::cfg::exception::illegal_input;
+use airlang::cfg::error::fail;
+use airlang::cfg::error::illegal_input;
 use airlang::cfg::extend_func;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::free_impl;

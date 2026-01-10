@@ -3,7 +3,7 @@ use log::error;
 use super::FreePrimFn;
 use super::free_impl;
 use crate::cfg::CfgMod;
-use crate::cfg::exception::illegal_input;
+use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::FreePrimFuncVal;

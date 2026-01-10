@@ -3,7 +3,7 @@ use std::mem::swap;
 use log::error;
 
 use crate::cfg::CfgMod;
-use crate::cfg::exception::illegal_ctx;
+use crate::cfg::error::illegal_ctx;
 use crate::cfg::extend_func;
 use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::const_impl;

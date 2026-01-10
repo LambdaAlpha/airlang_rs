@@ -4,8 +4,8 @@ use const_format::concatcp;
 use log::error;
 
 use crate::cfg::CfgMod;
-use crate::cfg::exception::illegal_cfg;
-use crate::cfg::exception::illegal_input;
+use crate::cfg::error::illegal_cfg;
+use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::cfg::lib::FreePrimFn;
 use crate::cfg::lib::free_impl;

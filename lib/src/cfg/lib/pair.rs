@@ -6,7 +6,7 @@ use super::DynPrimFn;
 use super::const_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
-use crate::cfg::exception::illegal_ctx;
+use crate::cfg::error::illegal_ctx;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::ConstPrimFuncVal;
