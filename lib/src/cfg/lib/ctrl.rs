@@ -281,7 +281,7 @@ impl Switch {
             return illegal_input(cfg);
         };
         let Some(body) = self.map.remove(&key).or(self.default) else {
-            return illegal_input(cfg);
+            return Val::default();
         };
         body.eval(cfg, ctx)
     }

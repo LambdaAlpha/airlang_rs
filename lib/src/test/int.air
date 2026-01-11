@@ -87,10 +87,10 @@ true
 _ do [
     .any set _ import _value.any,
     .a set _ any _integer,
-    . == a / 0
+    a / 0
 ]
 -----
-true
+.
 =====
 / 1
 -----
@@ -141,10 +141,10 @@ _ do [
     .any set _ import _value.any,
     .a set _ any _integer,
     .% set _ import _integer.remainder,
-    . == a % 0
+    a % 0
 ]
 -----
-true
+.
 =====
 remainder 1
 -----

@@ -1,3 +1,5 @@
+use log::error;
+
 use super::FreePrimFn;
 use super::free_impl;
 use crate::cfg::CfgMod;
@@ -38,6 +40,7 @@ pub fn not() -> FreePrimFuncVal {
 
 fn fn_not(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Bit(b) = input else {
+        error!("input {input:?} should be a bit");
         return illegal_input(cfg);
     };
     Val::Bit(b.not())
@@ -49,12 +52,15 @@ pub fn and() -> FreePrimFuncVal {
 
 fn fn_and(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return illegal_input(cfg);
     };
     let Val::Bit(left) = pair.first else {
+        error!("input.first {:?} should be a bit", pair.first);
         return illegal_input(cfg);
     };
     let Val::Bit(right) = pair.second else {
+        error!("input.second {:?} should be a bit", pair.second);
         return illegal_input(cfg);
     };
     Val::Bit(left.and(right))
@@ -66,12 +72,15 @@ pub fn or() -> FreePrimFuncVal {
 
 fn fn_or(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return illegal_input(cfg);
     };
     let Val::Bit(left) = pair.first else {
+        error!("input.first {:?} should be a bit", pair.first);
         return illegal_input(cfg);
     };
     let Val::Bit(right) = pair.second else {
+        error!("input.second {:?} should be a bit", pair.second);
         return illegal_input(cfg);
     };
     Val::Bit(left.or(right))
@@ -83,12 +92,15 @@ pub fn xor() -> FreePrimFuncVal {
 
 fn fn_xor(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return illegal_input(cfg);
     };
     let Val::Bit(left) = pair.first else {
+        error!("input.first {:?} should be a bit", pair.first);
         return illegal_input(cfg);
     };
     let Val::Bit(right) = pair.second else {
+        error!("input.second {:?} should be a bit", pair.second);
         return illegal_input(cfg);
     };
     Val::Bit(left.xor(right))
@@ -100,12 +112,15 @@ pub fn imply() -> FreePrimFuncVal {
 
 fn fn_imply(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
         return illegal_input(cfg);
     };
     let Val::Bit(left) = pair.first else {
+        error!("input.first {:?} should be a bit", pair.first);
         return illegal_input(cfg);
     };
     let Val::Bit(right) = pair.second else {
+        error!("input.second {:?} should be a bit", pair.second);
         return illegal_input(cfg);
     };
     Val::Bit(left.imply(right))
