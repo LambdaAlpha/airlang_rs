@@ -126,7 +126,11 @@ pub fn get_length() -> FreePrimFuncVal {
     FreePrimFn { raw_input: false, f: free_impl(fn_get_length) }.free()
 }
 
-fn fn_get_length(cfg: &mut Cfg, _input: Val) -> Val {
+fn fn_get_length(cfg: &mut Cfg, input: Val) -> Val {
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     Val::Int(Int::from(cfg.len()).into())
 }
 
@@ -134,7 +138,11 @@ pub fn snapshot() -> FreePrimFuncVal {
     FreePrimFn { raw_input: false, f: free_impl(fn_snapshot) }.free()
 }
 
-fn fn_snapshot(cfg: &mut Cfg, _input: Val) -> Val {
+fn fn_snapshot(cfg: &mut Cfg, input: Val) -> Val {
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     Val::Cfg(cfg.snapshot().into())
 }
 

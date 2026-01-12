@@ -83,11 +83,15 @@ pub fn get_length() -> ConstPrimFuncVal {
     DynPrimFn { raw_input: false, f: const_impl(fn_get_length) }.const_()
 }
 
-fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::List(list) = &*ctx else {
         error!("ctx {ctx:?} should be a list");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     let len: Int = list.len().into();
     Val::Int(len.into())
 }
@@ -386,11 +390,15 @@ pub fn clear() -> MutPrimFuncVal {
     DynPrimFn { raw_input: false, f: mut_impl(fn_clear) }.mut_()
 }
 
-fn fn_clear(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
+fn fn_clear(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         error!("ctx {ctx:?} should be a list");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     list.clear();
     Val::default()
 }

@@ -7,6 +7,7 @@ use super::const_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::error::illegal_ctx;
+use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::ConstPrimFuncVal;
@@ -46,11 +47,15 @@ pub fn get_first() -> ConstPrimFuncVal {
     DynPrimFn { raw_input: false, f: const_impl(fn_get_first) }.const_()
 }
 
-fn fn_get_first(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_first(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Pair(pair) = &*ctx else {
         error!("ctx {ctx:?} should be a pair");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     pair.first.clone()
 }
 
@@ -71,11 +76,15 @@ pub fn get_second() -> ConstPrimFuncVal {
     DynPrimFn { raw_input: false, f: const_impl(fn_get_second) }.const_()
 }
 
-fn fn_get_second(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_second(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Pair(pair) = &*ctx else {
         error!("ctx {ctx:?} should be a pair");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     pair.second.clone()
 }
 

@@ -4,6 +4,7 @@ use log::error;
 
 use crate::cfg::CfgMod;
 use crate::cfg::error::illegal_ctx;
+use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::const_impl;
@@ -37,11 +38,15 @@ pub fn get_value() -> ConstPrimFuncVal {
     DynPrimFn { raw_input: false, f: const_impl(fn_get_value) }.const_()
 }
 
-fn fn_get_value(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_value(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Cell(cell) = &*ctx else {
         error!("ctx {ctx:?} should be a cell");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     cell.value.clone()
 }
 

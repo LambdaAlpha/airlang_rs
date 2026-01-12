@@ -130,7 +130,11 @@ pub fn get_type() -> ConstPrimFuncVal {
     DynPrimFn { raw_input: false, f: const_impl(fn_get_type) }.const_()
 }
 
-fn fn_get_type(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_type(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     let s = match &*ctx {
         Val::Unit(_) => TYPE_UNIT,
         Val::Bit(_) => TYPE_BIT,

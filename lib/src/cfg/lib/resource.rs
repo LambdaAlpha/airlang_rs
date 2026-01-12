@@ -48,7 +48,11 @@ pub fn get_available_steps() -> FreePrimFuncVal {
     FreePrimFn { raw_input: false, f: free_impl(fn_get_available_steps) }.free()
 }
 
-fn fn_get_available_steps(cfg: &mut Cfg, _input: Val) -> Val {
+fn fn_get_available_steps(cfg: &mut Cfg, input: Val) -> Val {
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     let steps = cfg.steps();
     Val::Int(Int::from(steps).into())
 }

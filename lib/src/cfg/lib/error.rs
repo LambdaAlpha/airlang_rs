@@ -52,11 +52,15 @@ pub fn is_aborted() -> ConstPrimFuncVal {
     DynPrimFn { raw_input: true, f: const_impl(fn_is_aborted) }.const_()
 }
 
-fn fn_is_aborted(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_is_aborted(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Cfg(target_cfg) = &*ctx else {
         error!("ctx {ctx:?} should be a cfg");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     let aborted = target_cfg.is_aborted();
     Val::Bit(aborted.into())
 }
@@ -65,11 +69,15 @@ pub fn get_abort_reason() -> ConstPrimFuncVal {
     DynPrimFn { raw_input: true, f: const_impl(fn_get_abort_reason) }.const_()
 }
 
-fn fn_get_abort_reason(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_abort_reason(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Cfg(target_cfg) = &*ctx else {
         error!("ctx {ctx:?} should be a cfg");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     let abort_reason = target_cfg.abort_reason();
     Val::Key(abort_reason)
 }

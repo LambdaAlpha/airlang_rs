@@ -138,11 +138,15 @@ pub fn get_context_access() -> ConstPrimFuncVal {
     DynPrimFn { raw_input: false, f: const_impl(fn_get_context_access) }.const_()
 }
 
-fn fn_get_context_access(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_context_access(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     let access = generate_ctx_access(func.ctx_access());
     Val::Key(Key::from_str_unchecked(access))
 }
@@ -151,11 +155,15 @@ pub fn get_raw_input() -> ConstPrimFuncVal {
     DynPrimFn { raw_input: false, f: const_impl(fn_get_raw_input) }.const_()
 }
 
-fn fn_get_raw_input(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_raw_input(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     Val::Bit(Bit::from(func.raw_input()))
 }
 
@@ -163,11 +171,15 @@ pub fn is_primitive() -> ConstPrimFuncVal {
     DynPrimFn { raw_input: false, f: const_impl(fn_is_primitive) }.const_()
 }
 
-fn fn_is_primitive(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_is_primitive(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     let is_primitive = func.is_primitive();
     Val::Bit(Bit::from(is_primitive))
 }
@@ -176,11 +188,15 @@ pub fn get_code() -> ConstPrimFuncVal {
     DynPrimFn { raw_input: false, f: const_impl(fn_get_code) }.const_()
 }
 
-fn fn_get_code(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_code(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     generate_code(func)
 }
 
@@ -188,11 +204,15 @@ pub fn get_context() -> ConstPrimFuncVal {
     DynPrimFn { raw_input: false, f: const_impl(fn_get_context) }.const_()
 }
 
-fn fn_get_context(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_context(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         error!("ctx {ctx:?} should be a function");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     let Some(ctx) = func.ctx() else {
         error!("func {func:?} should have an inner context");
         return illegal_ctx(cfg);

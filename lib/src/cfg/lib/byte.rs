@@ -44,11 +44,15 @@ pub fn get_length() -> ConstPrimFuncVal {
     DynPrimFn { raw_input: false, f: const_impl(fn_get_length) }.const_()
 }
 
-fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Byte(byte) = &*ctx else {
         error!("ctx {ctx:?} should be a byte");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     let len: Int = byte.len().into();
     Val::Int(len.into())
 }

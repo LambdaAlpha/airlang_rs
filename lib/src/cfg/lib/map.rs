@@ -102,11 +102,15 @@ pub fn get_length() -> ConstPrimFuncVal {
     DynPrimFn { raw_input: false, f: const_impl(fn_get_length) }.const_()
 }
 
-fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     let len: Int = map.len().into();
     Val::Int(len.into())
 }
@@ -115,11 +119,15 @@ pub fn get_items() -> ConstPrimFuncVal {
     DynPrimFn { raw_input: false, f: const_impl(fn_get_items) }.const_()
 }
 
-fn fn_get_items(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_items(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     let items: List<Val> = map
         .iter()
         .map(|(k, v)| Val::Pair(Pair::new(Val::Key(k.clone()), v.clone()).into()))
@@ -131,11 +139,15 @@ pub fn into_items() -> MutPrimFuncVal {
     DynPrimFn { raw_input: false, f: mut_impl(fn_into_items) }.mut_()
 }
 
-fn fn_into_items(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
+fn fn_into_items(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
         error!("ctx {ctx:?} should be a map");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     let mut origin = Map::default();
     swap(&mut **map, &mut origin);
     let items: List<Val> =
@@ -147,11 +159,15 @@ pub fn get_keys() -> ConstPrimFuncVal {
     DynPrimFn { raw_input: false, f: const_impl(fn_get_keys) }.const_()
 }
 
-fn fn_get_keys(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_keys(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     let keys: List<Val> = map.keys().map(|k| Val::Key(k.clone())).collect();
     Val::List(keys.into())
 }
@@ -160,11 +176,15 @@ pub fn into_keys() -> MutPrimFuncVal {
     DynPrimFn { raw_input: false, f: mut_impl(fn_into_keys) }.mut_()
 }
 
-fn fn_into_keys(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
+fn fn_into_keys(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
         error!("ctx {ctx:?} should be a map");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     let mut origin = Map::default();
     swap(&mut **map, &mut origin);
     let keys: List<Val> = origin.into_keys().map(Val::Key).collect();
@@ -175,11 +195,15 @@ pub fn get_values() -> ConstPrimFuncVal {
     DynPrimFn { raw_input: false, f: const_impl(fn_get_values) }.const_()
 }
 
-fn fn_get_values(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_values(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
         error!("ctx {ctx:?} should be a map");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     let values: List<Val> = map.values().cloned().collect();
     Val::List(values.into())
 }
@@ -188,11 +212,15 @@ pub fn into_values() -> MutPrimFuncVal {
     DynPrimFn { raw_input: false, f: mut_impl(fn_into_values) }.mut_()
 }
 
-fn fn_into_values(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
+fn fn_into_values(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
         error!("ctx {ctx:?} should be a map");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     let mut origin = Map::default();
     swap(&mut **map, &mut origin);
     let values: List<Val> = origin.into_values().collect();
@@ -398,11 +426,15 @@ pub fn clear() -> MutPrimFuncVal {
     DynPrimFn { raw_input: false, f: mut_impl(fn_clear) }.mut_()
 }
 
-fn fn_clear(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
+fn fn_clear(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
         error!("ctx {ctx:?} should be a map");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     map.clear();
     Val::default()
 }

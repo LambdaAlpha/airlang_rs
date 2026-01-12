@@ -68,11 +68,15 @@ pub fn get_function() -> ConstPrimFuncVal {
     DynPrimFn { raw_input: false, f: const_impl(fn_get_function) }.const_()
 }
 
-fn fn_get_function(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_function(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Call(call) = &*ctx else {
         error!("ctx {ctx:?} should be a call");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     call.func.clone()
 }
 
@@ -93,11 +97,15 @@ pub fn get_input() -> ConstPrimFuncVal {
     DynPrimFn { raw_input: false, f: const_impl(fn_get_input) }.const_()
 }
 
-fn fn_get_input(cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_get_input(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Call(call) = &*ctx else {
         error!("ctx {ctx:?} should be a call");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     call.input.clone()
 }
 

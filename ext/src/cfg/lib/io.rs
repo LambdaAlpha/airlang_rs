@@ -58,11 +58,15 @@ pub fn read_line() -> MutPrimFuncVal {
     DynPrimFn { raw_input: false, f: mut_impl(fn_read_line) }.mut_()
 }
 
-fn fn_read_line(cfg: &mut Cfg, ctx: &mut Val, _input: Val) -> Val {
+fn fn_read_line(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Text(t) = ctx else {
         error!("ctx {ctx:?} should be a text");
         return illegal_ctx(cfg);
     };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     let _ = stdin().read_line(t);
     Val::default()
 }
@@ -97,7 +101,11 @@ pub fn flush() -> FreePrimFuncVal {
     FreePrimFn { raw_input: false, f: free_impl(fn_flush) }.free()
 }
 
-fn fn_flush(_cfg: &mut Cfg, _input: Val) -> Val {
+fn fn_flush(cfg: &mut Cfg, input: Val) -> Val {
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     let _ = stdout().flush();
     Val::default()
 }
@@ -132,7 +140,11 @@ pub fn error_flush() -> FreePrimFuncVal {
     FreePrimFn { raw_input: false, f: free_impl(fn_error_flush) }.free()
 }
 
-fn fn_error_flush(_cfg: &mut Cfg, _input: Val) -> Val {
+fn fn_error_flush(cfg: &mut Cfg, input: Val) -> Val {
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     let _ = stderr().flush();
     Val::default()
 }

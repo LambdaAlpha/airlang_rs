@@ -115,11 +115,19 @@ pub fn is_constant() -> MutPrimFuncVal {
     DynPrimFn { raw_input: false, f: MutImpl::new(FreeImpl::default, fn_const, fn_mut) }.mut_()
 }
 
-fn fn_const(_cfg: &mut Cfg, _ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_const(cfg: &mut Cfg, _ctx: ConstRef<Val>, input: Val) -> Val {
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     Val::Bit(Bit::true_())
 }
 
-fn fn_mut(_cfg: &mut Cfg, _ctx: &mut Val, _input: Val) -> Val {
+fn fn_mut(cfg: &mut Cfg, _ctx: &mut Val, input: Val) -> Val {
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     Val::Bit(Bit::false_())
 }
 
@@ -127,7 +135,11 @@ pub fn self_() -> ConstPrimFuncVal {
     DynPrimFn { raw_input: false, f: const_impl(fn_self) }.const_()
 }
 
-fn fn_self(_cfg: &mut Cfg, ctx: ConstRef<Val>, _input: Val) -> Val {
+fn fn_self(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
     ctx.unwrap().clone()
 }
 
