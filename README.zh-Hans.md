@@ -194,12 +194,13 @@ _ do [
 
 ### 资源
 
-资源是执行过程中必需且消耗的稀缺实体，其中最核心的是执行时间与存储空间。可通过 `available_steps` 读取可用执行步数，或通过 `measure_steps` 测量实际执行步数，亦可通过 `limit_steps` 限制可用执行步数。我们将围绕这些基础能力逐步构建起资源管理框架，为人工智能等资源敏感型应用的开发提供必要的基础能力。
+资源是执行过程中必需且消耗的稀缺实体，其中最核心的是执行时间与存储空间。可通过 `get_steps` 读取可用执行步数，或通过 `measure_steps` 测量实际执行步数，亦可通过 `set_steps` 限制可用执行步数。我们将围绕这些基础能力逐步构建起资源管理框架，为人工智能等资源敏感型应用的开发提供必要的基础能力。
 
 ```air
 _ do [
-    .limit_steps set _ import _resource.limit_steps,
-    100 limit_steps _ data true loop []
+    .set_steps set _ import _resource.set_steps,
+    _ set_steps 100,
+    true loop []
 ]
 ```
 

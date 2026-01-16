@@ -187,24 +187,6 @@ _ do [
 -----
 true
 =====
-ctx limit_steps safe
------
-_ do [
-    .limit_steps set _ import _resource.limit_steps,
-    .f set _ function {
-        context_access : _constant,
-        code : (_ctx : __) : _ form _ do [
-            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            11
-        ],
-    },
-    .p set 1 : 2,
-    10 limit_steps _ data p which _ f .,
-    p
-]
------
-1 : 2
-=====
 ctx explicit
 -----
 _ do [

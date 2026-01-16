@@ -1,24 +1,84 @@
 abort
 -----
 _ do [
-    _ abort _test,
+    _ abort .,
     1
 ]
 -----
 .
 =====
-abort is_aborted get_abort_reason
+abort is_aborted
 -----
 _ do [
     .cfg_new set _ import _config.new,
+    .link.new set _ import _link.new,
     .where set _ import _config.where,
     .is_aborted set _ import _error.is_aborted,
-    .get_abort_reason set _ import _error.get_abort_reason,
-    .cfg set _ cfg_new [{}],
-    (.cfg : __) = cfg where _ form _ abort _test,
-    .aborted set cfg which _ is_aborted .,
-    .reason set cfg which _ get_abort_reason .,
-    aborted and reason == _test
+    .cfg set _ cfg_new {
+        _prelude : _ link.new {
+            abort : abort,
+        },
+    },
+    cfg where _ abort .,
+    cfg which _ is_aborted .,
+]
+-----
+true
+=====
+assert false
+-----
+_ do [
+    .cfg_new set _ import _config.new,
+    .link.new set _ import _link.new,
+    .where set _ import _config.where,
+    .is_aborted set _ import _error.is_aborted,
+    .cfg set _ cfg_new {
+        _prelude : _ link.new {
+            assert : assert,
+        },
+    },
+    cfg where false assert "not a bug",
+    cfg which _ is_aborted .,
+]
+-----
+true
+=====
+assert true
+-----
+_ do [
+    .cfg_new set _ import _config.new,
+    .link.new set _ import _link.new,
+    .where set _ import _config.where,
+    .is_aborted set _ import _error.is_aborted,
+    .cfg set _ cfg_new {
+        _prelude : _ link.new {
+            assert : assert,
+        },
+    },
+    cfg where true assert "is a bug",
+    cfg which _ is_aborted .,
+]
+-----
+false
+=====
+recover
+-----
+_ do [
+    .cfg_new set _ import _config.new,
+    .link.new set _ import _link.new,
+    .where set _ import _config.where,
+    .is_aborted set _ import _error.is_aborted,
+    .recover set _ import _error.recover,
+    .cfg set _ cfg_new {
+        _prelude : _ link.new {
+            abort : abort,
+        },
+    },
+    cfg where _ abort .,
+    .a1 set cfg which _ is_aborted .,
+    cfg which _ recover .,
+    .a2 set cfg which _ is_aborted .,
+    a1 and _ not a2,
 ]
 -----
 true

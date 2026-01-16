@@ -8,30 +8,37 @@ use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::FreePrimFn;
 use crate::cfg::lib::const_impl;
 use crate::cfg::lib::free_impl;
+use crate::cfg::lib::mut_impl;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
+use crate::type_::Key;
+use crate::type_::Pair;
+use crate::type_::Text;
 
 #[derive(Clone)]
 pub struct ErrorLib {
     pub abort: FreePrimFuncVal,
+    pub assert: FreePrimFuncVal,
     pub is_aborted: ConstPrimFuncVal,
-    pub get_abort_reason: ConstPrimFuncVal,
+    pub recover: MutPrimFuncVal,
 }
 
 impl Default for ErrorLib {
     fn default() -> Self {
-        ErrorLib { abort: abort(), is_aborted: is_aborted(), get_abort_reason: get_abort_reason() }
+        ErrorLib { abort: abort(), assert: assert(), is_aborted: is_aborted(), recover: recover() }
     }
 }
 
 impl CfgMod for ErrorLib {
     fn extend(self, cfg: &Cfg) {
         extend_func(cfg, "_error.abort", self.abort);
+        extend_func(cfg, "_error.assert", self.assert);
         extend_func(cfg, "_error.is_aborted", self.is_aborted);
-        extend_func(cfg, "_error.get_abort_reason", self.get_abort_reason);
+        extend_func(cfg, "_error.recover", self.recover);
     }
 }
 
@@ -40,16 +47,47 @@ pub fn abort() -> FreePrimFuncVal {
 }
 
 fn fn_abort(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Key(reason) = input else {
-        error!("input {input:?} should be a key");
+    let Val::Unit(_) = input else {
+        error!("input {input:?} should be a unit");
         return illegal_input(cfg);
     };
-    cfg.abort(reason);
+    cfg.abort();
+    Val::default()
+}
+
+pub fn assert() -> FreePrimFuncVal {
+    FreePrimFn { raw_input: false, f: free_impl(fn_assert) }.free()
+}
+
+fn fn_assert(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Pair(pair) = input else {
+        error!("input {input:?} should be a pair");
+        return illegal_input(cfg);
+    };
+    let pair = Pair::from(pair);
+    let Val::Bit(bit) = pair.first else {
+        error!("input.first {:?} should be a bit", pair.first);
+        return illegal_input(cfg);
+    };
+    let Val::Text(message) = pair.second else {
+        error!("input.second {:?} should be a text", pair.second);
+        return illegal_input(cfg);
+    };
+    let message = Text::from(message);
+    if !*bit {
+        error!("assertion failed: {message}");
+        cfg.export(
+            Key::from_str_unchecked(Cfg::ABORT_TYPE),
+            Val::Key(Key::from_str_unchecked(Cfg::ABORT_TYPE_BUG)),
+        );
+        cfg.export(Key::from_str_unchecked(Cfg::ABORT_MSG), Val::Text(message.into()));
+        cfg.abort();
+    }
     Val::default()
 }
 
 pub fn is_aborted() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: true, f: const_impl(fn_is_aborted) }.const_()
+    DynPrimFn { raw_input: false, f: const_impl(fn_is_aborted) }.const_()
 }
 
 fn fn_is_aborted(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -65,12 +103,12 @@ fn fn_is_aborted(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     Val::Bit(aborted.into())
 }
 
-pub fn get_abort_reason() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: true, f: const_impl(fn_get_abort_reason) }.const_()
+pub fn recover() -> MutPrimFuncVal {
+    DynPrimFn { raw_input: false, f: mut_impl(fn_recover) }.mut_()
 }
 
-fn fn_get_abort_reason(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::Cfg(target_cfg) = &*ctx else {
+fn fn_recover(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+    let Val::Cfg(target_cfg) = ctx else {
         error!("ctx {ctx:?} should be a cfg");
         return illegal_ctx(cfg);
     };
@@ -78,6 +116,6 @@ fn fn_get_abort_reason(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
         error!("input {input:?} should be a unit");
         return illegal_input(cfg);
     }
-    let abort_reason = target_cfg.abort_reason();
-    Val::Key(abort_reason)
+    target_cfg.recover();
+    Val::default()
 }

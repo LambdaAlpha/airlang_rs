@@ -11,13 +11,14 @@ use stable_deref_trait::StableDeref;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::val::Val;
 use crate::type_::Key;
+use crate::type_::Map;
+use crate::type_::Text;
 
 // todo design invariant
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Cfg {
     steps: u128,
     aborted: bool,
-    abort_reason: Key,
     max_scope: usize,
     // box is required for StableDeref, which is required for insert
     map: OnceMap<Key, Box<OnceMap<usize /*scope*/, Box<Val>>>>,
@@ -27,7 +28,11 @@ pub struct Cfg {
 struct OnceMap<K, V>(once_map::unsync::OnceMap<K, V, FxBuildHasher>);
 
 impl Cfg {
-    pub const ABORT_REASON_STEPS_EXCEED: &str = concatcp!(PREFIX_ID, "steps_exceed");
+    pub const ABORT_TYPE: &str = "_error.abort.type";
+    pub const ABORT_MSG: &str = "_error.abort.message";
+
+    pub const ABORT_TYPE_STEPS: &str = concatcp!(PREFIX_ID, "steps");
+    pub const ABORT_TYPE_BUG: &str = concatcp!(PREFIX_ID, "bug");
 
     pub fn begin_scope(&mut self) {
         self.max_scope += 1;
@@ -86,21 +91,17 @@ impl Cfg {
         self.map.len()
     }
 
-    pub fn snapshot(&self) -> Self {
-        let map = self
-            .map
+    pub fn snapshot(&self) -> Map<Key, Val> {
+        self.map
             .read_only_view()
             .iter()
             .map(|(k, scopes)| {
                 let max_scope =
                     *scopes.read_only_view().keys().max().expect("scopes should not be empty");
                 let val = scopes.get(&max_scope).unwrap().clone();
-                let new_scopes = OnceMap(Default::default());
-                new_scopes.insert(0usize, |_| Box::new(val));
-                (k.clone(), Box::new(new_scopes))
+                (k.clone(), val)
             })
-            .collect();
-        Self { steps: u128::MAX, aborted: false, abort_reason: Key::default(), max_scope: 0, map }
+            .collect()
     }
 
     #[inline(always)]
@@ -109,63 +110,50 @@ impl Cfg {
             return false;
         }
         if self.steps == 0 {
+            self.export(
+                Key::from_str_unchecked(Self::ABORT_TYPE),
+                Val::Key(Key::from_str_unchecked(Self::ABORT_TYPE_STEPS)),
+            );
+            self.export(
+                Key::from_str_unchecked(Self::ABORT_MSG),
+                Val::Text(Text::from("out of steps").into()),
+            );
             self.aborted = true;
-            self.abort_reason = Key::from_str_unchecked(Self::ABORT_REASON_STEPS_EXCEED);
             return false;
         }
         self.steps -= 1;
         true
     }
 
-    pub(crate) fn set_steps_unchecked(&mut self, n: u128) {
+    pub fn set_steps(&mut self, n: u128) -> bool {
+        if n > self.steps {
+            return false;
+        }
         self.steps = n;
+        true
     }
 
     pub fn steps(&self) -> u128 {
         self.steps
     }
 
-    pub fn abort(&mut self, reason: Key) {
+    pub fn abort(&mut self) {
         self.aborted = true;
-        self.abort_reason = reason;
     }
 
-    pub(crate) fn resume(&mut self) {
+    pub fn recover(&mut self) {
+        self.steps = u128::MAX;
         self.aborted = false;
-        self.abort_reason = Key::default();
     }
 
     pub fn is_aborted(&self) -> bool {
         self.aborted
     }
-
-    pub fn abort_reason(&self) -> Key {
-        self.abort_reason.clone()
-    }
 }
 
 impl Default for Cfg {
     fn default() -> Self {
-        Self {
-            steps: u128::MAX,
-            aborted: false,
-            abort_reason: Key::default(),
-            max_scope: 0,
-            map: OnceMap::default(),
-        }
-    }
-}
-
-impl IntoIterator for Cfg {
-    type Item = (Key, Box<dyn Iterator<Item = (usize, Val)>>);
-    type IntoIter = Box<dyn Iterator<Item = Self::Item>>;
-    fn into_iter(self) -> Self::IntoIter {
-        let iter = self.map.0.into_iter().map(|(k, v)| {
-            let iter = (*v).0.into_iter().map(|(k, v)| (k, *v));
-            let v: Box<dyn Iterator<Item = (usize, Val)>> = Box::new(iter);
-            (k, v)
-        });
-        Box::new(iter)
+        Self { steps: u128::MAX, aborted: false, max_scope: 0, map: OnceMap::default() }
     }
 }
 

@@ -1,9 +1,9 @@
-available_steps
+get_steps
 -----
 _ do [
-    .steps set _ import _resource.get_available_steps,
-    .s1 set _ steps .,
-    .s2 set _ steps .,
+    .get_steps set _ import _resource.get_steps,
+    .s1 set _ get_steps .,
+    .s2 set _ get_steps .,
     s1 - s2
 ]
 -----
@@ -31,13 +31,39 @@ _ do [
 -----
 6
 =====
-limit_steps
+set_steps
 -----
 _ do [
-    .limit_steps set _ import _resource.limit_steps,
-    .a5 set 5 limit_steps _ data 1 + 1,
-    .a6 set 6 limit_steps _ data 1 + 1,
-    .a7 set 7 limit_steps _ data 1 + 1,
+    .new set _ import _config.new,
+    .link.new set _ import _link.new,
+    .set_steps set _ import _resource.set_steps,
+    .where set _ import _config.where,
+    .prelude set _ link.new {
+        do : do,
+        set_steps : set_steps,
+        + : +,
+    },
+    .c5 set _ new {
+        _prelude : prelude,
+    },
+    .a5 set c5 where _ do [
+        _ set_steps 5,
+        1 + 1
+    ],
+    .c6 set _ new {
+        _prelude : prelude,
+    },
+    .a6 set c6 where _ do [
+        _ set_steps 6,
+        1 + 1
+    ],
+    .c7 set _ new {
+        _prelude : prelude,
+    },
+    .a7 set c7 where _ do [
+        _ set_steps 7,
+        1 + 1
+    ],
     (a5 == .) and (a6 == 2) and (a7 == 2)
 ]
 -----

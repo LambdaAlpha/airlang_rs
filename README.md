@@ -195,12 +195,13 @@ _ do [
 
 ### Resources
 
-Resources are scarce, consumable entities required during execution, with the most critical being execution time and storage space. Available execution steps can be read via `available_steps`, measured via `measure_steps`, or limited via `limit_steps`. We will gradually build a resource management framework around these basic capabilities to provide essential foundational support for the development of resource-sensitive applications such as artificial intelligence.
+Resources are scarce, consumable entities required during execution, with the most critical being execution time and storage space. Available execution steps can be read via `get_steps`, measured via `measure_steps`, or limited via `set_steps`. We will gradually build a resource management framework around these basic capabilities to provide essential foundational support for the development of resource-sensitive applications such as artificial intelligence.
 
 ```air
 _ do [
-    .limit_steps set _ import _resource.limit_steps,
-    100 limit_steps _ data true loop []
+    .set_steps set _ import _resource.set_steps,
+    _ set_steps 100,
+    true loop []
 ]
 ```
 

@@ -64,6 +64,7 @@ pub struct CorePrelude {
     pub equal: FreePrimFuncVal,
 
     pub abort: FreePrimFuncVal,
+    pub assert: FreePrimFuncVal,
 
     pub data: FreePrimFuncVal,
     pub id: FreePrimFuncVal,
@@ -133,6 +134,7 @@ impl CorePrelude {
             equal: lib.value.equal.clone(),
 
             abort: lib.error.abort.clone(),
+            assert: lib.error.assert.clone(),
 
             data: lib.lang.data.clone(),
             id: lib.lang.id.clone(),
@@ -199,6 +201,7 @@ impl Prelude for CorePrelude {
         map_put_func(map, "==", &self.equal);
 
         map_put_func(map, "abort", &self.abort);
+        map_put_func(map, "assert", &self.assert);
 
         map_put_func(map, "data", &self.data);
         map_put_func(map, "id", &self.id);

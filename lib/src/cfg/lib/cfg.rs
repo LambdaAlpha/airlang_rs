@@ -1,24 +1,32 @@
-use std::collections::HashMap;
+use std::ops::Deref;
 
 use log::error;
 
 use crate::cfg::CfgMod;
+use crate::cfg::CoreCfg;
+use crate::cfg::error::fail;
+use crate::cfg::error::illegal_ctx;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::FreePrimFn;
+use crate::cfg::lib::const_impl;
 use crate::cfg::lib::dyn_impl;
 use crate::cfg::lib::free_impl;
+use crate::cfg::lib::mut_impl;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
+use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::MutFn;
+use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
+use crate::type_::ConstRef;
 use crate::type_::DynRef;
 use crate::type_::Int;
-use crate::type_::List;
+use crate::type_::Key;
 use crate::type_::Map;
 use crate::type_::Pair;
 
@@ -27,12 +35,12 @@ use crate::type_::Pair;
 pub struct CfgLib {
     pub new: FreePrimFuncVal,
     pub represent: FreePrimFuncVal,
-    pub get_length: FreePrimFuncVal,
-    pub snapshot: FreePrimFuncVal,
     pub exist: FreePrimFuncVal,
     pub import: FreePrimFuncVal,
     pub export: FreePrimFuncVal,
+    pub get_length: ConstPrimFuncVal,
     pub with: MutPrimFuncVal,
+    pub self_: FreePrimFuncVal,
     pub where_: MutPrimFuncVal,
 }
 
@@ -41,12 +49,12 @@ impl Default for CfgLib {
         CfgLib {
             new: new(),
             represent: represent(),
-            get_length: get_length(),
-            snapshot: snapshot(),
             exist: exist(),
             import: import(),
             export: export(),
+            get_length: get_length(),
             with: with(),
+            self_: self_(),
             where_: where_(),
         }
     }
@@ -56,12 +64,12 @@ impl CfgMod for CfgLib {
     fn extend(self, cfg: &Cfg) {
         extend_func(cfg, "_config.new", self.new);
         extend_func(cfg, "_config.represent", self.represent);
-        extend_func(cfg, "_config.get_length", self.get_length);
-        extend_func(cfg, "_config.snapshot", self.snapshot);
         extend_func(cfg, "_config.exist", self.exist);
         extend_func(cfg, "_config.import", self.import);
         extend_func(cfg, "_config.export", self.export);
+        extend_func(cfg, "_config.get_length", self.get_length);
         extend_func(cfg, "_config.with", self.with);
+        extend_func(cfg, "_config.self", self.self_);
         extend_func(cfg, "_config.where", self.where_);
     }
 }
@@ -71,28 +79,15 @@ pub fn new() -> FreePrimFuncVal {
 }
 
 fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::List(list) = input else {
-        error!("input {input:?} should be a list");
+    let Val::Map(map) = input else {
+        error!("input {input:?} should be a map");
         return illegal_input(cfg);
     };
-    if list.is_empty() {
-        error!("input {list:?} should be non-empty");
-        return illegal_input(cfg);
+    let new_cfg = Cfg::default();
+    let map = Map::from(map);
+    for (k, v) in map {
+        new_cfg.extend_scope(k, v);
     }
-    let mut new_cfg = Cfg::default();
-    let list = List::from(list);
-    for val in list {
-        let Val::Map(map) = val else {
-            error!("list.item {val:?} should be a map");
-            return illegal_input(cfg);
-        };
-        let map = Map::from(map);
-        for (k, v) in map {
-            new_cfg.extend_scope(k, v);
-        }
-        new_cfg.begin_scope();
-    }
-    new_cfg.end_scope();
     Val::Cfg(new_cfg.into())
 }
 
@@ -105,45 +100,7 @@ fn fn_represent(cfg: &mut Cfg, input: Val) -> Val {
         error!("input {input:?} should be a cfg");
         return illegal_input(cfg);
     };
-    let new_cfg = Cfg::from(new_cfg);
-    let scope_level = new_cfg.scope_level();
-    let mut map_scopes = HashMap::new();
-    for (name, scopes) in new_cfg {
-        for (scope, val) in scopes {
-            let map = map_scopes.entry(scope).or_insert_with(Map::default);
-            map.insert(name.clone(), val);
-        }
-    }
-    let mut list = List::default();
-    for i in 0 ..= scope_level {
-        let map = map_scopes.remove(&i).unwrap_or_default();
-        list.push(Val::Map(map.into()));
-    }
-    Val::List(list.into())
-}
-
-pub fn get_length() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_get_length) }.free()
-}
-
-fn fn_get_length(cfg: &mut Cfg, input: Val) -> Val {
-    if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
-    }
-    Val::Int(Int::from(cfg.len()).into())
-}
-
-pub fn snapshot() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_snapshot) }.free()
-}
-
-fn fn_snapshot(cfg: &mut Cfg, input: Val) -> Val {
-    if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
-    }
-    Val::Cfg(cfg.snapshot().into())
+    Val::Map(new_cfg.snapshot().into())
 }
 
 pub fn exist() -> FreePrimFuncVal {
@@ -189,21 +146,38 @@ fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
     Val::default()
 }
 
-pub fn with() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: false, f: dyn_impl(fn_with) }.mut_()
+pub fn get_length() -> ConstPrimFuncVal {
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_length) }.const_()
 }
 
-fn fn_with(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
-    cfg.begin_scope();
+fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
+    let Val::Cfg(new_cfg) = &*ctx else {
+        error!("ctx {ctx:?} should be a cfg");
+        return illegal_ctx(cfg);
+    };
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
+    Val::Int(Int::from(new_cfg.len()).into())
+}
+
+pub fn with() -> MutPrimFuncVal {
+    DynPrimFn { raw_input: true, f: dyn_impl(fn_with) }.mut_()
+}
+
+fn fn_with(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Map(map) = pair.first else {
-        error!("input.first {:?} should be a map", pair.first);
+    let map = Eval.dyn_call(cfg, ctx.reborrow(), pair.first);
+    let Val::Map(map) = map else {
+        error!("input.first {map:?} should be a map");
         return illegal_input(cfg);
     };
+    cfg.begin_scope();
     let map = Map::from(map);
     for (k, v) in map {
         cfg.extend_scope(k, v);
@@ -213,21 +187,49 @@ fn fn_with(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
     output
 }
 
-pub fn where_() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: false, f: dyn_impl(fn_where) }.mut_()
+pub fn self_() -> FreePrimFuncVal {
+    FreePrimFn { raw_input: false, f: free_impl(fn_self) }.free()
 }
 
-fn fn_where(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
+fn fn_self(cfg: &mut Cfg, input: Val) -> Val {
+    if !input.is_unit() {
+        error!("input {input:?} should be a unit");
+        return illegal_input(cfg);
+    }
+    Val::Cfg(cfg.clone().into())
+}
+
+pub fn where_() -> MutPrimFuncVal {
+    DynPrimFn { raw_input: true, f: mut_impl(fn_where) }.mut_()
+}
+
+fn fn_where(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Cfg(new_cfg) = pair.first else {
-        error!("input.first {:?} should be a cfg", pair.first);
-        return illegal_input(cfg);
+    let Some(ctx) = ctx.ref_mut(pair.first) else {
+        error!("input.first should be a valid reference");
+        return fail(cfg);
     };
-    let mut new_cfg = Cfg::from(new_cfg);
-    let output = Eval.dyn_call(&mut new_cfg, ctx, pair.second);
-    Val::Pair(Pair::new(Val::Cfg(new_cfg.into()), output).into())
+    let Val::Cfg(new_cfg) = ctx else {
+        error!("ctx reference {ctx:?} should be a cfg");
+        return illegal_ctx(cfg);
+    };
+    let prelude = new_cfg.import(Key::from_str_unchecked(CoreCfg::PRELUDE));
+    let Some(prelude) = prelude else {
+        error!("prelude should exist in cfg");
+        return illegal_ctx(cfg);
+    };
+    let Val::Link(prelude) = prelude else {
+        error!("prelude in cfg should be a link");
+        return illegal_ctx(cfg);
+    };
+    let Ok(prelude) = prelude.try_borrow() else {
+        error!("prelude should not be borrowed");
+        return illegal_ctx(cfg);
+    };
+    let mut new_ctx = prelude.deref().clone();
+    Eval.mut_call(&mut **new_cfg, &mut new_ctx, pair.second)
 }
