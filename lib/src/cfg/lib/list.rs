@@ -7,7 +7,7 @@ use super::DynPrimFn;
 use super::const_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
-use crate::cfg::error::fail;
+use crate::cfg::error::abort_bug_with_msg;
 use crate::cfg::error::illegal_ctx;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
@@ -118,7 +118,7 @@ fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let mut value = index_value.second;
     let Some(current) = list.get_mut(i) else {
         error!("index {i:?} should < list.len {}", list.len());
-        return fail(cfg);
+        return illegal_input(cfg);
     };
     swap(current, &mut value);
     value
@@ -151,7 +151,7 @@ fn fn_set_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let end = i + values.len();
     if end > list.len() {
         error!("end {end} should <= list.len {}", list.len());
-        return fail(cfg);
+        return illegal_input(cfg);
     }
     let ret: List<Val> = list.splice(i .. end, values).collect();
     Val::List(ret.into())
@@ -172,7 +172,7 @@ fn fn_get(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     };
     let Some(val) = list.get(i) else {
         error!("index {i} should < list.len {}", list.len());
-        return fail(cfg);
+        return illegal_input(cfg);
     };
     val.clone()
 }
@@ -199,7 +199,7 @@ fn fn_get_many(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let to = to.unwrap_or(list.len());
     let Some(slice) = list.get(from .. to) else {
         error!("range {from} : {to} should be in 0 : {}", list.len());
-        return fail(cfg);
+        return illegal_input(cfg);
     };
     Val::List(List::from(slice.to_owned()).into())
 }
@@ -226,7 +226,7 @@ fn fn_insert(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let value = index_value.second;
     if i > list.len() {
         error!("index {i} should <= list.len {}", list.len());
-        return fail(cfg);
+        return illegal_input(cfg);
     }
     list.insert(i, value);
     Val::default()
@@ -258,7 +258,7 @@ fn fn_insert_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let values = List::from(values);
     if i > list.len() {
         error!("index {i} should <= list.len {}", list.len());
-        return fail(cfg);
+        return illegal_input(cfg);
     }
     list.splice(i .. i, values);
     Val::default()
@@ -279,7 +279,7 @@ fn fn_remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     };
     if i >= list.len() {
         error!("index {i} should < list.len {}", list.len());
-        return fail(cfg);
+        return illegal_input(cfg);
     }
     list.remove(i)
 }
@@ -306,7 +306,7 @@ fn fn_remove_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let to = to.unwrap_or(list.len());
     if from > to || to > list.len() {
         error!("range {from} : {to} should be in 0 : {}", list.len());
-        return fail(cfg);
+        return illegal_input(cfg);
     }
     let ret: List<Val> = list.splice(from .. to, Vec::new()).collect();
     Val::List(ret.into())
@@ -355,7 +355,11 @@ fn fn_pop(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         error!("input {input:?} should be a unit");
         return illegal_input(cfg);
     };
-    list.pop().unwrap_or_default()
+    let Some(val) = list.pop() else {
+        error!("list should be non-empty");
+        return abort_bug_with_msg(cfg, "_list.pop list should be non-empty");
+    };
+    val
 }
 
 pub fn pop_many() -> MutPrimFuncVal {
@@ -373,12 +377,12 @@ fn fn_pop_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     };
     let Some(i) = i.to_usize() else {
         error!("index {i:?} should <= list.len {}", list.len());
-        return fail(cfg);
+        return illegal_input(cfg);
     };
     let list = &mut **list;
     if i > list.len() {
         error!("index {i} should <= list.len {}", list.len());
-        return fail(cfg);
+        return illegal_input(cfg);
     }
     let start = list.len() - i;
     let list = list.split_off(start);

@@ -28,7 +28,7 @@ use crate::type_::Pair;
 
 // todo rename
 const CODE: &str = "code";
-const CTX: &str = "context";
+const PRELUDE: &str = "prelude";
 const RAW_INPUT: &str = "raw_input";
 // todo rename
 const CTX_ACCESS: &str = "context_access";
@@ -46,24 +46,24 @@ pub(in crate::cfg) fn parse_func(input: Val) -> Option<FuncVal> {
     let raw_input = parse_raw_input(map_remove(&mut map, RAW_INPUT))?;
     // todo design
     let CompCode { ctx_name, input_name, body } = parse_code(map_remove(&mut map, CODE))?;
-    let ctx = map_remove(&mut map, CTX);
+    let prelude = map_remove(&mut map, PRELUDE);
     let ctx_access = map_remove(&mut map, CTX_ACCESS);
     let ctx_access = parse_ctx_access(&ctx_access)?;
     let func = match ctx_access {
         FREE => {
-            let comp = FreeComposite { ctx, body, input_name };
+            let comp = FreeComposite { prelude, body, input_name };
             let func = FreeCompFunc { raw_input, comp };
             FuncVal::FreeComp(FreeCompFuncVal::from(func))
         }
         CONST => {
             let ctx_name = ctx_name?;
-            let comp = DynComposite { ctx, body, input_name, ctx_name };
+            let comp = DynComposite { prelude, body, input_name, ctx_name };
             let func = ConstCompFunc { raw_input, comp };
             FuncVal::ConstComp(ConstCompFuncVal::from(func))
         }
         MUTABLE => {
             let ctx_name = ctx_name?;
-            let comp = DynComposite { ctx, body, input_name, ctx_name };
+            let comp = DynComposite { prelude, body, input_name, ctx_name };
             let func = MutCompFunc { raw_input, comp };
             FuncVal::MutComp(MutCompFuncVal::from(func))
         }
@@ -86,8 +86,8 @@ pub(in crate::cfg) fn generate_func(f: FuncVal) -> Val {
     }
 }
 
-fn parse_raw_input(id: Val) -> Option<bool> {
-    match id {
+fn parse_raw_input(val: Val) -> Option<bool> {
+    match val {
         Val::Unit(_) => Some(false),
         Val::Bit(bit) => Some(bit.into()),
         _ => None,
@@ -200,7 +200,7 @@ fn generate_free_prim(f: FreePrimFuncVal) -> Val {
 fn generate_free_comp(f: FreeCompFuncVal) -> Val {
     generate_comp(CompRepr {
         common: CommonRepr { access: FREE, raw_input: f.raw_input, code: free_code(&f.comp) },
-        ctx: f.comp.ctx.clone(),
+        prelude: f.comp.prelude.clone(),
     })
 }
 
@@ -213,7 +213,7 @@ fn generate_const_prim(f: ConstPrimFuncVal) -> Val {
 fn generate_const_comp(f: ConstCompFuncVal) -> Val {
     generate_comp(CompRepr {
         common: CommonRepr { access: CONST, raw_input: f.raw_input, code: dyn_code(&f.comp) },
-        ctx: f.comp.ctx.clone(),
+        prelude: f.comp.prelude.clone(),
     })
 }
 
@@ -226,7 +226,7 @@ fn generate_mut_prim(f: MutPrimFuncVal) -> Val {
 fn generate_mut_comp(f: MutCompFuncVal) -> Val {
     generate_comp(CompRepr {
         common: CommonRepr { access: MUTABLE, raw_input: f.raw_input, code: dyn_code(&f.comp) },
-        ctx: f.comp.ctx.clone(),
+        prelude: f.comp.prelude.clone(),
     })
 }
 
@@ -254,12 +254,12 @@ fn generate_prim(prim: PrimRepr) -> Val {
 
 struct CompRepr {
     common: CommonRepr,
-    ctx: Val,
+    prelude: Val,
 }
 
 fn generate_comp(comp: CompRepr) -> Val {
     let mut repr = Map::<Key, Val>::default();
     generate_common(&mut repr, comp.common);
-    repr.insert(Key::from_str_unchecked(CTX), comp.ctx);
+    repr.insert(Key::from_str_unchecked(PRELUDE), comp.prelude);
     Val::Map(repr.into())
 }

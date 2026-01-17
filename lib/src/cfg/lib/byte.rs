@@ -17,6 +17,7 @@ use crate::semantics::val::Val;
 use crate::type_::Byte;
 use crate::type_::ConstRef;
 use crate::type_::Int;
+use crate::type_::Pair;
 
 // todo design add more
 #[derive(Clone)]
@@ -84,15 +85,12 @@ fn fn_join(cfg: &mut Cfg, input: Val) -> Val {
         error!("input {input:?} should be a pair");
         return illegal_input(cfg);
     };
-    let separator: &[u8] = match &pair.first {
-        Val::Unit(_) => &[],
-        Val::Byte(b) => b,
-        s => {
-            error!("separator {s:?} should be a unit or a byte");
-            return illegal_input(cfg);
-        }
+    let pair = Pair::from(pair);
+    let Val::Byte(separator) = pair.first else {
+        error!("separator {:?} should be a byte", pair.first);
+        return illegal_input(cfg);
     };
-    let Val::List(bytes) = &pair.second else {
+    let Val::List(bytes) = pair.second else {
         error!("input.second {:?} should be a list", pair.second);
         return illegal_input(cfg);
     };
@@ -110,6 +108,6 @@ fn fn_join(cfg: &mut Cfg, input: Val) -> Val {
     let Some(bytes) = bytes else {
         return illegal_input(cfg);
     };
-    let byte = bytes.join(separator);
+    let byte = bytes.join(&**separator);
     Val::Byte(Byte::from(byte).into())
 }

@@ -76,13 +76,10 @@ impl Decimal {
         Decimal(output)
     }
 
-    pub fn divide(self, other: Decimal, cfg: DecimalConfig) -> Option<Decimal> {
-        if other.0.is_zero() {
-            return None;
-        }
+    pub fn divide(self, other: Decimal, cfg: DecimalConfig) -> Decimal {
         let output = self.0 / other.0;
         let output = cfg.into_inner().round_decimal(output);
-        Some(Decimal(output))
+        Decimal(output)
     }
 
     pub fn less_than(&self, other: &Decimal) -> Bit {

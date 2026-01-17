@@ -117,7 +117,7 @@ _ do [
     .k set _ any _key,
     .v set _ any .,
     a which _ map.set k : v,
-    .v1 set a which _ map.get k,
+    .(.v1) = a which _ map.get k,
     v1 == v
 ]
 -----
@@ -354,7 +354,7 @@ _ do [
     m which _ map.get .a
 ]
 -----
-2
+.(2)
 =====
 get 2
 -----
@@ -384,7 +384,7 @@ _ do [
     [m which _ remove .a, m]
 ]
 -----
-[1, {b : 2}]
+[.(1), {b : 2}]
 =====
 remove 2
 -----

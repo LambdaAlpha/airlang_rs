@@ -99,10 +99,10 @@ list ref
 -----
 _ do [
     .l set [0, 3, 6],
-    l which _ code [:0, :1, :2]
+    l which _ eval _ form [_ get _first, _ get _last]
 ]
 -----
-[0, 3, 6]
+[0, 6]
 =====
 map ref
 -----
@@ -188,7 +188,7 @@ _ do [
 -----
 input
 =====
-list ctx index int
+list ctx index
 -----
 _ do [
     .l set [0, 2, 4],
@@ -197,14 +197,23 @@ _ do [
 -----
 2
 =====
-list ctx index key
+list ctx first
 -----
 _ do [
     .l set [0, 2, 4],
-    l which _ get .1
+    l which _ get _first
 ]
 -----
-2
+0
+=====
+list ctx last
+-----
+_ do [
+    .l set [0, 2, 4],
+    l which _ get _last
+]
+-----
+4
 =====
 map ctx key
 -----

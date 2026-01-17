@@ -205,15 +205,17 @@ fn fn_divide(cfg: &mut Cfg, input: Val) -> Val {
         error!("input.second {:?} should be a decimal", pair.second);
         return illegal_input(cfg);
     };
+    if d2.is_zero() {
+        error!("input.second should not be zero");
+        return illegal_input(cfg);
+    }
     let Some(config) = DecimalLib::decimal_config(cfg) else {
         error!("decimal config should exist and be valid");
         return illegal_cfg(cfg);
     };
     let d1 = Decimal::from(d1);
     let d2 = Decimal::from(d2);
-    let Some(d) = d1.divide(d2, config) else {
-        return illegal_input(cfg);
-    };
+    let d = d1.divide(d2, config);
     Val::Decimal(d.into())
 }
 

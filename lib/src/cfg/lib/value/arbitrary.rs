@@ -292,7 +292,7 @@ impl Arbitrary for FreeComposite {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
         FreeComposite {
-            ctx: Arbitrary::any(rng, depth),
+            prelude: Arbitrary::any(rng, depth),
             body: Arbitrary::any(rng, depth),
             input_name: Arbitrary::any(rng, depth),
         }
@@ -303,7 +303,7 @@ impl Arbitrary for DynComposite {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
         DynComposite {
-            ctx: Arbitrary::any(rng, depth),
+            prelude: Arbitrary::any(rng, depth),
             body: Arbitrary::any(rng, depth),
             input_name: Arbitrary::any(rng, depth),
             ctx_name: Arbitrary::any(rng, depth),

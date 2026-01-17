@@ -279,12 +279,26 @@ set length
 -----
 _ do [
     .list.set set _ import _list.set,
-    .a set [],
-    a which _ list.set 1 : 1,
-    a
+    .config.new set _ import _config.new,
+    .link.new set _ import _link.new,
+    .where set _ import _config.where,
+    .is_aborted set _ import _error.is_aborted,
+    .c set _ config.new {
+        _prelude : _ link.new {
+            do : do,
+            set : set,
+            which : which,
+            list.set : list.set,
+        },
+    },
+    c where _ do [
+        .a set [],
+        a which _ list.set 1 : 1,
+    ],
+    c which _ is_aborted .,
 ]
 -----
-[]
+true
 =====
 set_many empty
 -----
@@ -332,12 +346,27 @@ _ do [
 get out of bound
 -----
 _ do [
-    .get set _ import _list.get,
-    .l set [],
-    l which _ get 0
+    .list.get set _ import _list.get,
+    .config.new set _ import _config.new,
+    .link.new set _ import _link.new,
+    .where set _ import _config.where,
+    .is_aborted set _ import _error.is_aborted,
+    .c set _ config.new {
+        _prelude : _ link.new {
+            do : do,
+            set : set,
+            which : which,
+            list.get : list.get,
+        },
+    },
+    c where _ do [
+        .l set [],
+        l which _ list.get 0
+    ],
+    c which _ is_aborted .,
 ]
 -----
-.
+true
 =====
 get 0
 -----
@@ -413,12 +442,26 @@ insert out of bound
 -----
 _ do [
     .insert set _ import _list.insert,
-    .l set [],
-    l which _ insert 1 : 1,
-    l
+    .config.new set _ import _config.new,
+    .link.new set _ import _link.new,
+    .where set _ import _config.where,
+    .is_aborted set _ import _error.is_aborted,
+    .c set _ config.new {
+        _prelude : _ link.new {
+            do : do,
+            set : set,
+            which : which,
+            insert : insert,
+        },
+    },
+    c where _ do [
+        .l set [],
+        l which _ insert 1 : 1,
+    ],
+    c which _ is_aborted .,
 ]
 -----
-[]
+true
 =====
 insert
 -----
@@ -521,11 +564,26 @@ pop empty
 -----
 _ do [
     .pop set _ import _list.pop,
-    .l set [],
-    [l which _ pop ., l]
+    .config.new set _ import _config.new,
+    .link.new set _ import _link.new,
+    .where set _ import _config.where,
+    .is_aborted set _ import _error.is_aborted,
+    .c set _ config.new {
+        _prelude : _ link.new {
+            do : do,
+            set : set,
+            which : which,
+            pop : pop,
+        },
+    },
+    c where _ do [
+        .l set [],
+        l which _ pop .,
+    ],
+    c which _ is_aborted .,
 ]
 -----
-[., []]
+true
 =====
 pop 1
 -----
@@ -581,12 +639,26 @@ pop_many out of bound
 -----
 _ do [
     .pop_many set _ import _list.pop_many,
-    .l set [1, 2],
-    l which _ pop_many 3,
-    l
+    .config.new set _ import _config.new,
+    .link.new set _ import _link.new,
+    .where set _ import _config.where,
+    .is_aborted set _ import _error.is_aborted,
+    .c set _ config.new {
+        _prelude : _ link.new {
+            do : do,
+            set : set,
+            which : which,
+            pop_many : pop_many,
+        },
+    },
+    c where _ do [
+        .l set [1, 2],
+        l which _ pop_many 3,
+    ],
+    c which _ is_aborted .,
 ]
 -----
-[1, 2]
+true
 =====
 clear
 -----

@@ -13,7 +13,6 @@ use super::FreePrimFn;
 use super::const_impl;
 use super::free_impl;
 use crate::cfg::CfgMod;
-use crate::cfg::error::fail;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
@@ -117,7 +116,7 @@ fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
             TYPE_LINK => Val::Link(LinkVal::any(rng, DEPTH)),
             TYPE_CFG => Val::Cfg(Cfg::any(rng, DEPTH).into()),
             TYPE_FUNC => Val::Func(FuncVal::any(rng, DEPTH)),
-            _ => fail(cfg),
+            _ => illegal_input(cfg),
         },
         v => {
             error!("input {v:?} should be a key or a unit");

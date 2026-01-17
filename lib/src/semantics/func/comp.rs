@@ -12,14 +12,14 @@ use crate::type_::Key;
 
 #[derive(Clone, PartialEq, Eq)]
 pub(crate) struct FreeComposite {
-    pub(crate) ctx: Val,
+    pub(crate) prelude: Val,
     pub(crate) body: Val,
     pub(crate) input_name: Key,
 }
 
 #[derive(Clone, PartialEq, Eq)]
 pub(crate) struct DynComposite {
-    pub(crate) ctx: Val,
+    pub(crate) prelude: Val,
     pub(crate) body: Val,
     pub(crate) input_name: Key,
     pub(crate) ctx_name: Key,
@@ -36,7 +36,7 @@ impl FreeComposite {
 
 impl DynComposite {
     pub(super) fn call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
-        let new_ctx = &mut self.ctx.clone();
+        let new_ctx = &mut self.prelude.clone();
         let _ = new_ctx.set(self.input_name.clone(), input);
         let const_ = ctx.is_const();
         let ctx = ctx.unwrap();

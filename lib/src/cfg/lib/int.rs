@@ -1,4 +1,5 @@
 use log::error;
+use num_traits::Zero;
 
 use super::FreePrimFn;
 use super::free_impl;
@@ -147,11 +148,13 @@ fn fn_divide(cfg: &mut Cfg, input: Val) -> Val {
         error!("input.second {:?} should be a int", pair.second);
         return illegal_input(cfg);
     };
+    if i2.is_zero() {
+        error!("input.second should not be zero");
+        return illegal_input(cfg);
+    }
     let i1 = Int::from(i1);
     let i2 = Int::from(i2);
-    let Some(i) = i1.divide(i2) else {
-        return illegal_input(cfg);
-    };
+    let i = i1.divide(i2);
     Val::Int(i.into())
 }
 
@@ -173,11 +176,13 @@ fn fn_remainder(cfg: &mut Cfg, input: Val) -> Val {
         error!("input.second {:?} should be a int", pair.second);
         return illegal_input(cfg);
     };
+    if i2.is_zero() {
+        error!("input.second should not be zero");
+        return illegal_input(cfg);
+    }
     let i1 = Int::from(i1);
     let i2 = Int::from(i2);
-    let Some(i) = i1.remainder(i2) else {
-        return illegal_input(cfg);
-    };
+    let i = i1.remainder(i2);
     Val::Int(i.into())
 }
 
@@ -199,11 +204,13 @@ fn fn_divide_remainder(cfg: &mut Cfg, input: Val) -> Val {
         error!("input.second {:?} should be a int", pair.second);
         return illegal_input(cfg);
     };
+    if i2.is_zero() {
+        error!("input.second should not be zero");
+        return illegal_input(cfg);
+    }
     let i1 = Int::from(i1);
     let i2 = Int::from(i2);
-    let Some((quotient, rem)) = i1.divide_remainder(i2) else {
-        return illegal_input(cfg);
-    };
+    let (quotient, rem) = i1.divide_remainder(i2);
     Val::Pair(Pair::new(Val::Int(quotient.into()), Val::Int(rem.into())).into())
 }
 

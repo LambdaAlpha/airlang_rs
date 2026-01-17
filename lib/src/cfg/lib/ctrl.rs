@@ -8,7 +8,7 @@ use num_traits::ToPrimitive;
 use super::DynPrimFn;
 use super::dyn_impl;
 use crate::cfg::CfgMod;
-use crate::cfg::error::fail;
+use crate::cfg::error::abort_bug_with_msg;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::cfg::lib::ctx::pattern::PatternAssign;
@@ -98,12 +98,12 @@ impl Block {
         Some(Block { statements: items })
     }
 
-    fn flow(self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> (Val, Result<CtrlFlow, ()>) {
+    fn flow(self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> (Val, CtrlFlow) {
         let mut output = Val::default();
         for statement in self.statements {
             if cfg.is_aborted() {
                 error!("aborted");
-                return (Val::default(), Err(()));
+                return (Val::default(), CtrlFlow::Return);
             }
             match statement {
                 Statement::Normal(val) => {
@@ -113,17 +113,18 @@ impl Block {
                     let condition = Eval.dyn_call(cfg, ctx.reborrow(), condition);
                     let Val::Bit(condition) = condition else {
                         error!("condition {condition:?} should be a bit");
-                        return (Val::default(), Err(()));
+                        abort_bug_with_msg(cfg, "block condition should be a bit");
+                        return (Val::default(), CtrlFlow::Return);
                     };
                     if *condition {
                         let output = Eval.dyn_call(cfg, ctx, body);
-                        return (output, Ok(ctrl_flow));
+                        return (output, ctrl_flow);
                     }
                     output = Val::default();
                 }
             }
         }
-        (output, Ok(CtrlFlow::Continue))
+        (output, CtrlFlow::Continue)
     }
 
     fn eval(self, cfg: &mut Cfg, ctx: DynRef<Val>) -> Val {
@@ -344,9 +345,10 @@ impl Match {
             let pattern = Eval.dyn_call(cfg, ctx.reborrow(), pattern);
             let Some(pattern) = pattern.parse() else {
                 error!("parse pattern failed");
-                return fail(cfg);
+                return abort_bug_with_msg(cfg, "match parsing pattern failed");
             };
             if pattern.match_(&val) {
+                // todo design
                 if !ctx.is_const() {
                     pattern.assign(ctx.reborrow().unwrap(), val);
                 }
@@ -390,16 +392,15 @@ impl Loop {
             let cond = Eval.dyn_call(cfg, ctx.reborrow(), self.condition.clone());
             let Val::Bit(bit) = cond else {
                 error!("condition {cond:?} should be a bit");
-                return fail(cfg);
+                return abort_bug_with_msg(cfg, "loop condition should be a bit");
             };
             if !*bit {
                 break;
             }
             let (output, ctrl_flow) = self.body.clone().flow(cfg, ctx.reborrow());
             match ctrl_flow {
-                Ok(CtrlFlow::Continue) => {}
-                Ok(CtrlFlow::Return) => return output,
-                Err(()) => return Val::default(),
+                CtrlFlow::Continue => {}
+                CtrlFlow::Return => return output,
             }
         }
         Val::default()
@@ -450,8 +451,8 @@ impl Iterate {
             Val::Int(i) => {
                 let i = Int::from(i);
                 if i.is_negative() {
-                    error!("{i:?} should be positive");
-                    return fail(cfg);
+                    error!("{i:?} should be non-negative");
+                    return abort_bug_with_msg(cfg, "iterate int should be non-negative");
                 }
                 let Some(i) = i.to_u128() else { panic!("iterate on super big int {i:?}!!!") };
                 let iter = (0 .. i).map(|i| {
@@ -494,7 +495,7 @@ impl Iterate {
                 });
                 iterate_val(cfg, ctx, self.body, self.name, iter)
             }
-            _ => fail(cfg),
+            _ => abort_bug_with_msg(cfg, "iterate on unsupported type"),
         }
     }
 }
@@ -513,9 +514,8 @@ where ValIter: Iterator<Item = Val> {
         }
         let (output, ctrl_flow) = body.clone().flow(cfg, ctx.reborrow());
         match ctrl_flow {
-            Ok(CtrlFlow::Continue) => {}
-            Ok(CtrlFlow::Return) => return output,
-            Err(()) => return Val::default(),
+            CtrlFlow::Continue => {}
+            CtrlFlow::Return => return output,
         }
     }
     Val::default()

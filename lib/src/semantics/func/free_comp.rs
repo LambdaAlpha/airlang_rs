@@ -17,7 +17,7 @@ impl FreeFn<Cfg, Val, Val> for FreeCompFunc {
         FreeComposite::call(
             cfg,
             input,
-            &mut self.comp.ctx.clone(),
+            &mut self.comp.prelude.clone(),
             self.comp.input_name.clone(),
             self.comp.body.clone(),
         )
@@ -28,7 +28,7 @@ impl Debug for FreeCompFunc {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("FreeCompFunc")
             .field("raw_input", &self.raw_input)
-            .field("ctx", &self.comp.ctx)
+            .field("prelude", &self.comp.prelude)
             .field("input_name", &self.comp.input_name)
             .field("body", &self.comp.body)
             .finish()

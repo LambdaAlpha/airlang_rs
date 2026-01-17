@@ -1,5 +1,5 @@
 _ do [
     .load set _ import _build.load,
-    .b set _ load "b/b.air",
+    .(.b) = _ load "b/b.air",
     b + 1
 ]

@@ -83,22 +83,23 @@ fn fn_parse(cfg: &mut Cfg, input: Val) -> Val {
     };
     let Ok(val) = crate::syntax::parse(&input) else {
         error!("parse {input:?} failed");
-        return illegal_input(cfg);
+        return Val::default();
     };
-    val
+    Val::Cell(Cell::new(val).into())
 }
 
 pub fn generate() -> FreePrimFuncVal {
     FreePrimFn { raw_input: false, f: free_impl(fn_generate) }.free()
 }
 
-fn fn_generate(cfg: &mut Cfg, input: Val) -> Val {
+fn fn_generate(_cfg: &mut Cfg, input: Val) -> Val {
     let Ok(repr) = (&input).try_into() else {
         error!("generate {input:?} failed");
-        return illegal_input(cfg);
+        return Val::default();
     };
     let str = generate_pretty(repr);
-    Val::Text(Text::from(str).into())
+    let text = Val::Text(Text::from(str).into());
+    Val::Cell(Cell::new(text).into())
 }
 
 impl ParseRepr for Val {}

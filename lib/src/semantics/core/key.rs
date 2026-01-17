@@ -1,6 +1,7 @@
 use log::error;
 
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::abort_bug_with_msg;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
@@ -34,28 +35,28 @@ impl KeyEval {
 }
 
 impl FreeFn<Cfg, Key, Val> for KeyEval {
-    fn free_call(&self, _cfg: &mut Cfg, key: Key) -> Val {
+    fn free_call(&self, cfg: &mut Cfg, key: Key) -> Val {
         let (mode, s) = self.recognize(key.clone());
         match mode {
             KeyMode::Id => Val::Key(s),
             KeyMode::Shift => Val::Key(s),
             KeyMode::Ctx => {
                 error!("key {key:?} should be evaluated in a ctx");
-                Val::default()
+                abort_bug_with_msg(cfg, "key should exist in a context")
             }
         }
     }
 }
 
 impl ConstFn<Cfg, Val, Key, Val> for KeyEval {
-    fn const_call(&self, _cfg: &mut Cfg, ctx: ConstRef<Val>, key: Key) -> Val {
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, key: Key) -> Val {
         let (mode, s) = self.recognize(key);
         match mode {
             KeyMode::Id => Val::Key(s),
             KeyMode::Shift => Val::Key(s),
             KeyMode::Ctx => {
                 let Some(val) = ctx.unwrap().ref_(s) else {
-                    return Val::default();
+                    return abort_bug_with_msg(cfg, "key should exist in the context");
                 };
                 val.clone()
             }

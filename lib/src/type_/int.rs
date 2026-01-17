@@ -10,7 +10,6 @@ use derive_more::DerefMut;
 use derive_more::From;
 use num_bigint::BigInt;
 use num_integer::Integer;
-use num_traits::Zero;
 
 use crate::type_::bit::Bit;
 
@@ -40,21 +39,17 @@ impl Int {
         Int(self.0.mul(other.0))
     }
 
-    pub(crate) fn divide(self, other: Int) -> Option<Int> {
-        if other.0 == Zero::zero() { None } else { Some(Int(self.0.div(other.0))) }
+    pub(crate) fn divide(self, other: Int) -> Int {
+        Int(self.0.div(other.0))
     }
 
-    pub(crate) fn remainder(self, other: Int) -> Option<Int> {
-        if other.0 == Zero::zero() { None } else { Some(Int(self.0.rem(other.0))) }
+    pub(crate) fn remainder(self, other: Int) -> Int {
+        Int(self.0.rem(other.0))
     }
 
-    pub(crate) fn divide_remainder(self, other: Int) -> Option<(Int, Int)> {
-        if other.0 == Zero::zero() {
-            None
-        } else {
-            let (quotient, rem) = self.0.div_rem(&other.0);
-            Some((Int(quotient), Int(rem)))
-        }
+    pub(crate) fn divide_remainder(self, other: Int) -> (Int, Int) {
+        let (quotient, rem) = self.0.div_rem(&other.0);
+        (Int(quotient), Int(rem))
     }
 
     pub(crate) fn less_than(&self, other: &Int) -> Bit {

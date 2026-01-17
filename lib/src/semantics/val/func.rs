@@ -124,14 +124,14 @@ impl FuncVal {
         match_func_val!(self, f => f.raw_input)
     }
 
-    pub fn ctx(&self) -> Option<&Val> {
+    pub fn prelude(&self) -> Option<&Val> {
         match self {
             FuncVal::FreePrim(_) => None,
-            FuncVal::FreeComp(f) => Some(&f.comp.ctx),
+            FuncVal::FreeComp(f) => Some(&f.comp.prelude),
             FuncVal::ConstPrim(_) => None,
-            FuncVal::ConstComp(f) => Some(&f.comp.ctx),
+            FuncVal::ConstComp(f) => Some(&f.comp.prelude),
             FuncVal::MutPrim(_) => None,
-            FuncVal::MutComp(f) => Some(&f.comp.ctx),
+            FuncVal::MutComp(f) => Some(&f.comp.prelude),
         }
     }
 

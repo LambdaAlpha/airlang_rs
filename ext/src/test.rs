@@ -5,6 +5,7 @@ use airlang::semantics::val::Val;
 use airlang::syntax::escape_text;
 use airlang::syntax::parse;
 use airlang::type_::Bit;
+use airlang::type_::Cell;
 use airlang::type_::Int;
 use airlang_dev::init_logger;
 
@@ -13,14 +14,14 @@ use crate::cfg2::StdCfg2;
 #[test]
 fn test_build_load_nest() -> Result<(), Box<dyn Error>> {
     let path = "/src/test/build_load/case_nest/main.air";
-    let expect = Val::Int(Int::from(5).into());
+    let expect = Val::Cell(Cell::new(Val::Int(Int::from(5).into())).into());
     test_build_load(path, expect)
 }
 
 #[test]
 fn test_build_load_bom() -> Result<(), Box<dyn Error>> {
     let path = "/src/test/build_load/case_bom/test_bom.air";
-    let expect = Val::Bit(Bit::true_());
+    let expect = Val::Cell(Cell::new(Val::Bit(Bit::true_())).into());
     test_build_load(path, expect)
 }
 

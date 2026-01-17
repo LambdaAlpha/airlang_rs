@@ -107,7 +107,7 @@ impl CorePrelude {
 
             call: lib.call.new.clone(),
 
-            move_: lib.map.remove.clone(),
+            move_: lib.map.move_.clone(),
 
             exist: lib.cfg.exist.clone(),
             import: lib.cfg.import.clone(),

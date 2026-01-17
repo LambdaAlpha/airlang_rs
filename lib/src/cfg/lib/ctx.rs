@@ -10,7 +10,7 @@ use super::const_impl;
 use super::dyn_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
-use crate::cfg::error::fail;
+use crate::cfg::error::abort_bug_with_msg;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
@@ -68,11 +68,12 @@ pub fn get() -> ConstPrimFuncVal {
     DynPrimFn { raw_input: false, f: const_impl(fn_get) }.const_()
 }
 
-fn fn_get(_cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    match ctx.unwrap().ref_(input) {
-        Some(val) => val.clone(),
-        None => Val::default(),
-    }
+fn fn_get(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
+    let Some(val) = ctx.unwrap().ref_(input) else {
+        error!("get failed");
+        return abort_bug_with_msg(cfg, "_context.get failed");
+    };
+    val.clone()
 }
 
 pub fn set() -> MutPrimFuncVal {
@@ -85,8 +86,11 @@ fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let output = ctx.set(pair.first, pair.second);
-    output.unwrap_or_default()
+    if ctx.set(pair.first, pair.second).is_none() {
+        error!("set failed");
+        return abort_bug_with_msg(cfg, "_context.set failed");
+    }
+    Val::default()
 }
 
 pub fn form() -> ConstPrimFuncVal {
@@ -104,15 +108,23 @@ fn fn_represent(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     };
     let pair = Pair::from(pair);
     let Some(pattern) = pair.first.parse() else {
-        error!("parse pattern failed");
+        error!("parse failed");
         return illegal_input(cfg);
     };
     let val = pair.second;
-    if pattern.match_(&val) { pattern.assign(ctx, val) } else { fail(cfg) }
+    if !pattern.match_(&val) {
+        error!("match failed");
+        return abort_bug_with_msg(cfg, "_context.represent not match");
+    }
+    if pattern.assign(ctx, val).is_none() {
+        error!("set failed");
+        return abort_bug_with_msg(cfg, "_context.represent assign failed");
+    }
+    Val::default()
 }
 
 pub fn is_constant() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: false, f: MutImpl::new(FreeImpl::default, fn_const, fn_mut) }.mut_()
+    DynPrimFn { raw_input: false, f: MutImpl::new(FreeImpl::abort, fn_const, fn_mut) }.mut_()
 }
 
 fn fn_const(cfg: &mut Cfg, _ctx: ConstRef<Val>, input: Val) -> Val {
@@ -160,14 +172,14 @@ fn fn_which(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {
     let call = Call::from(call);
     let Val::Func(func) = Eval.dyn_call(cfg, ctx.reborrow(), call.func) else {
         error!("input.second.func should be a func");
-        return fail(cfg);
+        return illegal_input(cfg);
     };
     let input =
         if func.raw_input() { call.input } else { Eval.dyn_call(cfg, ctx.reborrow(), call.input) };
     let const_ = ctx.is_const();
     let Some(ctx) = ctx.reborrow().unwrap().ref_mut(pair.first) else {
         error!("input.first should be a valid reference");
-        return fail(cfg);
+        return abort_bug_with_msg(cfg, "_context.which reference is not valid");
     };
     func.dyn_call(cfg, DynRef::new(ctx, const_), input)
 }

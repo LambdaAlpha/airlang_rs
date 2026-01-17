@@ -23,7 +23,7 @@ _ do [
     .la set a which _ get_length .,
     .b set _ any _byte,
     .lb set b which _ get_length .,
-    .ab set . join [a, b],
+    .ab set byte'' join [a, b],
     .lab set ab which _ get_length .,
     lab == la + lb
 ]
@@ -60,7 +60,7 @@ _ do [
     .b set _ any _byte,
     .ab set a,
     ab which _ push b,
-    .ab1 set . join [a, b],
+    .ab1 set byte'' join [a, b],
     ab == ab1
 ]
 -----
@@ -87,23 +87,23 @@ _ do [
 -----
 byte'123456'
 =====
-join unit
+join non empty
 -----
 _ do [
     .join set _ import _byte.join,
     .a set byte'1234',
     .b set byte'5678',
     .c set byte'9abc',
-    . join [a, b, c]
+    byte'0000' join [a, b, c]
 ]
 -----
-byte'123456789abc'
+byte'12340000567800009abc'
 =====
 join no byte
 -----
 _ do [
     .join set _ import _byte.join,
-    . join []
+    byte'' join []
 ]
 -----
 byte''

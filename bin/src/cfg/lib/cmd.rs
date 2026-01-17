@@ -1,7 +1,6 @@
 use std::process::Command;
 
 use airlang::cfg::CfgMod;
-use airlang::cfg::error::fail;
 use airlang::cfg::error::illegal_input;
 use airlang::cfg::extend_func;
 use airlang::cfg::lib::FreePrimFn;
@@ -73,10 +72,10 @@ fn fn_call(cfg: &mut Cfg, input: Val) -> Val {
     let child = Command::new(program).args(arguments).spawn();
     let Ok(mut child) = child else {
         eprintln!("failed to execute program");
-        return fail(cfg);
+        return Val::default();
     };
     let Ok(status) = child.wait() else {
-        return fail(cfg);
+        return Val::default();
     };
 
     if let Some(status) = status.code()

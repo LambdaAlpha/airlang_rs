@@ -22,6 +22,7 @@ use self::text::TextLib;
 use self::unit::UnitLib;
 use self::value::ValueLib;
 use crate::cfg::CfgMod;
+use crate::cfg::error::abort_bug_with_msg;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::ConstPrimFunc;
@@ -132,10 +133,11 @@ impl<Cfg, I, O> FreeImpl<Cfg, I, O> {
     pub fn new(free: fn(&mut Cfg, I) -> O) -> Self {
         Self { free }
     }
+}
 
-    pub fn default(_cfg: &mut Cfg, _input: I) -> O
-    where O: Default {
-        O::default()
+impl FreeImpl<Cfg, Val, Val> {
+    pub fn abort(cfg: &mut Cfg, _input: Val) -> Val {
+        abort_bug_with_msg(cfg, "should not be called in a free context")
     }
 }
 
@@ -160,10 +162,11 @@ impl<Cfg, Ctx, I, O> ConstImpl<Cfg, Ctx, I, O> {
     pub fn new(free: fn(&mut Cfg, I) -> O, const_: fn(&mut Cfg, ConstRef<Ctx>, I) -> O) -> Self {
         Self { free, const_ }
     }
+}
 
-    pub fn default(_cfg: &mut Cfg, _ctx: ConstRef<Ctx>, _input: I) -> O
-    where O: Default {
-        O::default()
+impl ConstImpl<Cfg, Val, Val, Val> {
+    pub fn abort(cfg: &mut Cfg, _ctx: ConstRef<Val>, _input: Val) -> Val {
+        abort_bug_with_msg(cfg, "should not be called in a constant context")
     }
 }
 
@@ -198,11 +201,6 @@ impl<Cfg, Ctx, I, O> MutImpl<Cfg, Ctx, I, O> {
     ) -> Self {
         Self { free, const_, mut_ }
     }
-
-    pub fn default(_cfg: &mut Cfg, _ctx: &mut Ctx, _input: I) -> O
-    where O: Default {
-        O::default()
-    }
 }
 
 pub struct DynImpl<Cfg, Ctx, I, O> {
@@ -236,11 +234,6 @@ impl<Cfg, Ctx, I, O> DynImpl<Cfg, Ctx, I, O> {
     pub fn new(free: fn(&mut Cfg, I) -> O, dyn_: fn(&mut Cfg, DynRef<Ctx>, I) -> O) -> Self {
         Self { free, dyn_ }
     }
-
-    pub fn default(_cfg: &mut Cfg, _ctx: DynRef<Ctx>, _input: I) -> O
-    where O: Default {
-        O::default()
-    }
 }
 
 pub fn free_impl(func: fn(&mut Cfg, Val) -> Val) -> FreeImpl<Cfg, Val, Val> {
@@ -248,15 +241,15 @@ pub fn free_impl(func: fn(&mut Cfg, Val) -> Val) -> FreeImpl<Cfg, Val, Val> {
 }
 
 pub fn const_impl(func: fn(&mut Cfg, ConstRef<Val>, Val) -> Val) -> ConstImpl<Cfg, Val, Val, Val> {
-    ConstImpl::new(FreeImpl::default, func)
+    ConstImpl::new(FreeImpl::abort, func)
 }
 
 pub fn mut_impl(func: fn(&mut Cfg, &mut Val, Val) -> Val) -> MutImpl<Cfg, Val, Val, Val> {
-    MutImpl::new(FreeImpl::default, ConstImpl::default, func)
+    MutImpl::new(FreeImpl::abort, ConstImpl::abort, func)
 }
 
 pub fn dyn_impl(func: fn(&mut Cfg, DynRef<Val>, Val) -> Val) -> DynImpl<Cfg, Val, Val, Val> {
-    DynImpl::new(FreeImpl::default, func)
+    DynImpl::new(FreeImpl::abort, func)
 }
 
 pub mod unit;

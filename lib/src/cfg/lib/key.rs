@@ -103,13 +103,9 @@ fn fn_join(cfg: &mut Cfg, input: Val) -> Val {
         error!("input {input:?} should be a pair");
         return illegal_input(cfg);
     };
-    let separator = match &pair.first {
-        Val::Unit(_) => "",
-        Val::Key(key) => key,
-        s => {
-            error!("separator {s:?} should be a unit or a key");
-            return illegal_input(cfg);
-        }
+    let Val::Key(separator) = &pair.first else {
+        error!("separator {:?} should be a key", pair.first);
+        return illegal_input(cfg);
     };
     let Val::List(keys) = &pair.second else {
         error!("input.second {:?} should be a list", pair.second);

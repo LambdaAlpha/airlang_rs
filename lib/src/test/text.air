@@ -23,7 +23,7 @@ _ do [
     .la set a which _ get_length .,
     .b set _ any _text,
     .lb set b which _ get_length .,
-    .ab set . join [a, b],
+    .ab set "" join [a, b],
     .lab set ab which _ get_length .,
     lab == la + lb
 ]
@@ -60,7 +60,7 @@ _ do [
     .b set _ any _text,
     .t set a,
     t which _ push b,
-    .t1 set . join [a, b],
+    .t1 set "" join [a, b],
     t == t1
 ]
 -----
@@ -88,23 +88,11 @@ _ do [
 -----
 "12"
 =====
-join unit
------
-_ do [
-    .join set _ import _text.join,
-    .a set "1",
-    .b set "2",
-    .c set "3",
-    . join [a, b, c]
-]
------
-"123"
-=====
 join no text
 -----
 _ do [
     .join set _ import _text.join,
-    . join []
+    "" join []
 ]
 -----
 ""

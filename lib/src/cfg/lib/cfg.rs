@@ -4,7 +4,7 @@ use log::error;
 
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
-use crate::cfg::error::fail;
+use crate::cfg::error::abort_bug_with_msg;
 use crate::cfg::error::illegal_ctx;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
@@ -125,7 +125,11 @@ fn fn_import(cfg: &mut Cfg, input: Val) -> Val {
         error!("input {input:?} should be a key");
         return illegal_input(cfg);
     };
-    cfg.import(name).unwrap_or_default()
+    let Some(value) = cfg.import(name) else {
+        error!("key should exist");
+        return illegal_input(cfg);
+    };
+    value
 }
 
 pub fn export() -> FreePrimFuncVal {
@@ -142,7 +146,10 @@ fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
         error!("input.first {:?} should be a key", pair.first);
         return illegal_input(cfg);
     };
-    cfg.export(name, pair.second);
+    if cfg.export(name, pair.second).is_none() {
+        error!("key should not exist");
+        return illegal_input(cfg);
+    }
     Val::default()
 }
 
@@ -211,7 +218,7 @@ fn fn_where(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let pair = Pair::from(pair);
     let Some(ctx) = ctx.ref_mut(pair.first) else {
         error!("input.first should be a valid reference");
-        return fail(cfg);
+        return abort_bug_with_msg(cfg, "_config.where reference is not valid");
     };
     let Val::Cfg(new_cfg) = ctx else {
         error!("ctx reference {ctx:?} should be a cfg");

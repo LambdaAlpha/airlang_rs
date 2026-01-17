@@ -8,6 +8,7 @@ use super::const_impl;
 use super::free_impl;
 use super::mut_impl;
 use crate::cfg::CfgMod;
+use crate::cfg::error::abort_bug_with_msg;
 use crate::cfg::error::illegal_ctx;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
@@ -17,6 +18,7 @@ use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
+use crate::type_::Cell;
 use crate::type_::ConstRef;
 use crate::type_::Int;
 use crate::type_::Key;
@@ -43,6 +45,7 @@ pub struct MapLib {
     pub get_many: ConstPrimFuncVal,
     pub remove: MutPrimFuncVal,
     pub remove_many: MutPrimFuncVal,
+    pub move_: MutPrimFuncVal,
     pub clear: MutPrimFuncVal,
     pub new: FreePrimFuncVal,
     pub new_set: FreePrimFuncVal,
@@ -67,6 +70,7 @@ impl Default for MapLib {
             get_many: get_many(),
             remove: remove(),
             remove_many: remove_many(),
+            move_: move_(),
             clear: clear(),
             new: new(),
             new_set: new_set(),
@@ -92,6 +96,7 @@ impl CfgMod for MapLib {
         extend_func(cfg, "_map.get_many", self.get_many);
         extend_func(cfg, "_map.remove", self.remove);
         extend_func(cfg, "_map.remove_many", self.remove_many);
+        extend_func(cfg, "_map.move", self.move_);
         extend_func(cfg, "_map.clear", self.clear);
         extend_func(cfg, "_map.new", self.new);
         extend_func(cfg, "_map.new_set", self.new_set);
@@ -349,7 +354,10 @@ fn fn_get(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
         error!("input {input:?} should be key");
         return illegal_input(cfg);
     };
-    map.get(&key).cloned().unwrap_or_default()
+    let Some(value) = map.get(&key) else {
+        return Val::default();
+    };
+    Val::Cell(Cell::new(value.clone()).into())
 }
 
 pub fn get_many() -> ConstPrimFuncVal {
@@ -392,7 +400,10 @@ fn fn_remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         error!("input {input:?} should be key");
         return illegal_input(cfg);
     };
-    map.remove(&key).unwrap_or_default()
+    let Some(value) = map.remove(&key) else {
+        return Val::default();
+    };
+    Val::Cell(Cell::new(value).into())
 }
 
 pub fn remove_many() -> MutPrimFuncVal {
@@ -420,6 +431,26 @@ fn fn_remove_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         }
     }
     Val::Map(new_map.into())
+}
+
+pub fn move_() -> MutPrimFuncVal {
+    DynPrimFn { raw_input: false, f: mut_impl(fn_move) }.mut_()
+}
+
+fn fn_move(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+    let Val::Map(map) = ctx else {
+        error!("ctx {ctx:?} should be a map");
+        return illegal_ctx(cfg);
+    };
+    let Val::Key(key) = input else {
+        error!("input {input:?} should be key");
+        return illegal_input(cfg);
+    };
+    let Some(value) = map.remove(&key) else {
+        error!("key not exist");
+        return abort_bug_with_msg(cfg, "key should exist in the map");
+    };
+    value
 }
 
 pub fn clear() -> MutPrimFuncVal {

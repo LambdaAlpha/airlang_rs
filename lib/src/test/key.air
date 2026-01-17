@@ -8,7 +8,7 @@ _ do [
     .la set a which _ get_length .,
     .b set _ any _key,
     .lb set b which _ get_length .,
-    .ab set . join [a, b],
+    .ab set empty join [a, b],
     .lab set ab which _ get_length .,
     lab == la + lb
 ]
@@ -43,23 +43,11 @@ _ do [
 -----
 ab
 =====
-join unit
------
-_ do [
-    .join set _ import _key.join,
-    .a set .a1,
-    .b set .b1,
-    .c set .c1,
-    . join [a, b, c]
-]
------
-a1b1c1
-=====
 join no key
 -----
 _ do [
     .join set _ import _key.join,
-    . join []
+    empty join []
 ]
 -----
 ''

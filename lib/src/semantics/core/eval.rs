@@ -1,6 +1,7 @@
 use log::error;
 
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::abort_bug_with_msg;
 use crate::semantics::core::form::CellForm;
 use crate::semantics::core::form::ListForm;
 use crate::semantics::core::form::MapForm;
@@ -32,7 +33,7 @@ where Func: FreeFn<Cfg, Val, Val>
         let func = self.func.free_call(cfg, call.func);
         let Val::Func(func) = func else {
             error!("func {func:?} should be a func");
-            return Val::default();
+            return abort_bug_with_msg(cfg, "call.function should be a function");
         };
         let input = if func.raw_input() { call.input } else { Eval.free_call(cfg, call.input) };
         if !cfg.step() {
@@ -51,7 +52,7 @@ where Func: ConstFn<Cfg, Val, Val, Val>
         let func = self.func.const_call(cfg, ctx.reborrow(), call.func);
         let Val::Func(func) = func else {
             error!("func {func:?} should be a func");
-            return Val::default();
+            return abort_bug_with_msg(cfg, "call.function should be a function");
         };
         let input = if func.raw_input() {
             call.input
@@ -74,7 +75,7 @@ where Func: MutFn<Cfg, Val, Val, Val>
         let func = self.func.mut_call(cfg, ctx, call.func);
         let Val::Func(func) = func else {
             error!("func {func:?} should be a func");
-            return Val::default();
+            return abort_bug_with_msg(cfg, "call.function should be a function");
         };
         let input = if func.raw_input() { call.input } else { Eval.mut_call(cfg, ctx, call.input) };
         if !cfg.step() {
@@ -89,7 +90,7 @@ where Func: MutFn<Cfg, Val, Val, Val>
         let func = self.func.dyn_call(cfg, ctx.reborrow(), call.func);
         let Val::Func(func) = func else {
             error!("func {func:?} should be a func");
-            return Val::default();
+            return abort_bug_with_msg(cfg, "call.function should be a function");
         };
         let input = if func.raw_input() {
             call.input

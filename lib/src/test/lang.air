@@ -27,7 +27,8 @@ _ do [
             ]
         ]
     ],
-    .a1 set _ parse _ generate a,
+    .(.repr) = _ generate a,
+    .(.a1) = _ parse repr,
     a == a1
 ]
 -----
@@ -40,7 +41,7 @@ _ do [
     _ parse "[1, 2]"
 ]
 -----
-[1, 2]
+.([1, 2])
 =====
 parse no eval
 -----
@@ -50,7 +51,7 @@ _ do [
     _ parse "a"
 ]
 -----
-a
+.(a)
 =====
 parse text
 -----
@@ -59,7 +60,7 @@ _ do [
     _ parse "^'1^'"
 ]
 -----
-"1"
+.("1")
 =====
 generate text
 -----
@@ -68,4 +69,4 @@ _ do [
     _ generate "1"
 ]
 -----
-"^'1^'"
+.("^'1^'")

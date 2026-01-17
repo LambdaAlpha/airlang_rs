@@ -3,7 +3,7 @@ recursive call
 _ do [
     .f set _ function {
         code : (__ : .i) : .i,
-        context : {},
+        prelude : {},
     },
     _ f _ not true
 ]
@@ -15,7 +15,7 @@ call external func
 _ do [
     .f set _ function {
         code : (__ : .i) : _ form _ not .i,
-        context : {},
+        prelude : {},
     },
     _ f _ not true
 ]
@@ -27,7 +27,7 @@ call internal func
 _ do [
     .f set _ function {
         code : (__ : .i) : _ form _ .not .i,
-        context : {
+        prelude : {
             not : not
         },
     },
@@ -41,7 +41,7 @@ call rename
 _ do [
     .f set _ function {
         code : (__ : .a) : _ form _ .n .a,
-        context : {
+        prelude : {
             n : not
         },
     },
@@ -62,7 +62,7 @@ _ do [
             .a link_which _i set .i + 1,
             .i
         ],
-        context : {
+        prelude : {
             a : _ new_link {_i : 0}
         },
     },
@@ -83,7 +83,7 @@ _ do [
             .a link_which _value set .i + 1,
             .i
         ],
-        context : {
+        prelude : {
             a : _ new_link .(0)
         },
     },
@@ -102,7 +102,7 @@ _ do [
     .f set _ function {
         code : (.c : __) : _ form .c link_which _ get _a,
         context_access : _constant,
-        context : {},
+        prelude : {},
     },
     _ f .
 ]
@@ -117,7 +117,7 @@ _ do [
     .f set _ function {
         code : (.c : __) : _ form .c link_which _ get _a,
         context_access : _mutable,
-        context : {},
+        prelude : {},
     },
     _ f .
 ]
@@ -131,7 +131,7 @@ _ do [
     .f set _ function {
         code : (.c : .i) : _ form .c link_which .i set 2,
         context_access : _mutable,
-        context : {},
+        prelude : {},
     },
     .a set 1,
     _ f .a,
@@ -144,17 +144,26 @@ const mutate fail
 -----
 _ do [
     .link_which set _ import _link.which,
+    .config.new set _ import _config.new,
+    .link.new set _ import _link.new,
+    .where set _ import _config.where,
+    .is_aborted set _ import _error.is_aborted,
     .f set _ function {
         code : (.c : .i) : _ form .c link_which .i set 2,
         context_access : _constant,
-        context : {},
+        prelude : {},
     },
-    .a set 1,
-    _ f .a,
-    a
+    .c set _ config.new {
+        _prelude : _ link.new {
+            f : f,
+            a : 1,
+        },
+    },
+    c where _ f .a,
+    c which _ is_aborted .,
 ]
 -----
-1
+true
 =====
 const free
 -----
@@ -163,7 +172,7 @@ _ do [
     .f set _ function {
         code : (__c : __) : 1,
         context_access : _constant,
-        context : {},
+        prelude : {},
     },
     a which _ f .
 ]
@@ -177,7 +186,7 @@ _ do [
     .f set _ function {
         code : (_ctx : __) : 2,
         context_access : _constant,
-        context : {
+        prelude : {
             ctx : 3
         },
     },
@@ -195,7 +204,7 @@ _ do [
     .a set 1 : 2,
     .f set _ function {
         code : (.p : .i) : _ form .p link_which _ set_first .i,
-        context : {},
+        prelude : {},
     },
     a which _ f 3,
     a
@@ -209,7 +218,7 @@ _ do [
     .represent set _ import _function.represent,
     _ represent _ function {
         code : (.c : .i) : .i,
-        context : {},
+        prelude : {},
     }
 ]
 
@@ -218,7 +227,7 @@ _ do [
     context_access : _mutable,
     raw_input : false,
     code : (c : i) : i,
-    context : {}
+    prelude : {}
 }
 =====
 repr primitive free
@@ -251,7 +260,7 @@ _ do [
     context_access : _constant,
     raw_input : false,
     code : (_c : i) : i,
-    context : .,
+    prelude : .,
 }
 =====
 repr primitive const
@@ -278,7 +287,7 @@ _ do [
         context_access : _constant,
         raw_input : false,
         code : (_ctx : .in) : .in,
-        context : {},
+        prelude : {},
     },
     .new_repr set _ represent _ function repr,
     repr == new_repr
@@ -323,20 +332,20 @@ _ do [
 -----
 _mutable
 =====
-get_raw_input true
+is_raw_input true
 -----
 _ do [
-    .get_raw_input set _ import _function.get_raw_input,
-    data which _ get_raw_input .
+    .is_raw_input set _ import _function.is_raw_input,
+    data which _ is_raw_input .
 ]
 -----
 true
 =====
-get_raw_input false
+is_raw_input false
 -----
 _ do [
-    .get_raw_input set _ import _function.get_raw_input,
-    id which _ get_raw_input .
+    .is_raw_input set _ import _function.is_raw_input,
+    id which _ is_raw_input .
 ]
 -----
 false
@@ -372,16 +381,16 @@ _ do [
 -----
 (_ctx : i) : i
 =====
-ctx
+prelude
 -----
 _ do [
-    .function.get_context set _ import _function.get_context,
+    .function.get_prelude set _ import _function.get_prelude,
     .any set _ import _value.any,
-    .ctx set _ any .,
+    .prelude set _ any .,
     .f set _ function {
-        context : ctx
+        prelude : prelude
     },
-    (f which _ function.get_context .) == ctx
+    (f which _ function.get_prelude .) == prelude
 ]
 -----
 true
@@ -434,7 +443,7 @@ _ do [
             ]
         ],
         context_access : _free,
-        context : {},
+        prelude : {},
     },
     g g 10
 ]

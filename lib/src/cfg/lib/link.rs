@@ -7,7 +7,7 @@ use super::FreePrimFn;
 use super::dyn_impl;
 use super::free_impl;
 use crate::cfg::CfgMod;
-use crate::cfg::error::fail;
+use crate::cfg::error::abort_bug_with_msg;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
@@ -83,13 +83,13 @@ fn fn_which(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {
     let call = Call::from(call);
     let Val::Func(func) = Eval.dyn_call(cfg, ctx.reborrow(), call.func) else {
         error!("input.second.func should be a func");
-        return fail(cfg);
+        return illegal_input(cfg);
     };
     let input =
         if func.raw_input() { call.input } else { Eval.dyn_call(cfg, ctx.reborrow(), call.input) };
     let Ok(mut ctx) = link.try_borrow_mut() else {
         error!("link is already borrowed");
-        return Val::default();
+        return abort_bug_with_msg(cfg, "link is in use");
     };
     if link.is_const() {
         func.const_call(cfg, ConstRef::new(ctx.deref_mut()), input)

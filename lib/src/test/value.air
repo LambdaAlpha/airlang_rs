@@ -424,12 +424,6 @@ _ do [
 -----
 true
 =====
-== null null
------
-non_exist1 == non_exist2
------
-true
-=====
 == special ref
 -----
 _ do [

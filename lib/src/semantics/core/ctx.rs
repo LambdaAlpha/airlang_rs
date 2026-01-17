@@ -1,5 +1,3 @@
-use std::mem::swap;
-
 use const_format::concatcp;
 use log::error;
 use num_traits::ToPrimitive;
@@ -36,10 +34,10 @@ impl DynCtx<Key, Val> for CellVal {
         }
     }
 
-    fn set(&mut self, key: Key, mut value: Val) -> Option<Val> {
+    fn set(&mut self, key: Key, value: Val) -> Option<()> {
         if &*key == VALUE {
-            swap(&mut self.value, &mut value);
-            Some(value)
+            self.value = value;
+            Some(())
         } else {
             error!("key {key:?} should be value");
             None
@@ -73,15 +71,15 @@ impl DynCtx<Key, Val> for PairVal {
         }
     }
 
-    fn set(&mut self, key: Key, mut value: Val) -> Option<Val> {
+    fn set(&mut self, key: Key, value: Val) -> Option<()> {
         match &*key {
             FIRST => {
-                swap(&mut self.first, &mut value);
-                Some(value)
+                self.first = value;
+                Some(())
             }
             SECOND => {
-                swap(&mut self.second, &mut value);
-                Some(value)
+                self.second = value;
+                Some(())
             }
             _ => {
                 error!("key {key:?} should be first or second");
@@ -117,15 +115,15 @@ impl DynCtx<Key, Val> for CallVal {
         }
     }
 
-    fn set(&mut self, key: Key, mut value: Val) -> Option<Val> {
+    fn set(&mut self, key: Key, value: Val) -> Option<()> {
         match &*key {
             FUNCTION => {
-                swap(&mut self.func, &mut value);
-                Some(value)
+                self.func = value;
+                Some(())
             }
             INPUT => {
-                swap(&mut self.input, &mut value);
-                Some(value)
+                self.input = value;
+                Some(())
             }
             _ => {
                 error!("key {key:?} should be function or input");
@@ -135,45 +133,47 @@ impl DynCtx<Key, Val> for CallVal {
     }
 }
 
+const LIST_FIRST: &str = concatcp!(PREFIX_ID, "first");
+const LIST_LAST: &str = concatcp!(PREFIX_ID, "last");
+
 impl DynCtx<Key, Val> for ListVal {
     fn ref_(&self, key: Key) -> Option<&Val> {
-        let len = self.len();
-        let Ok(index) = key.parse::<usize>() else {
-            error!("key {key:?} should be a int and >= 0 and < list.len {len}");
-            return None;
-        };
-        let Some(val) = self.get(index) else {
-            error!("key {index} should < list.len {len}");
-            return None;
-        };
-        Some(val)
+        match &*key {
+            LIST_FIRST => self.first(),
+            LIST_LAST => self.last(),
+            _ => {
+                error!("key {key:?} should be first or last");
+                None
+            }
+        }
     }
 
     fn ref_mut(&mut self, key: Key) -> Option<&mut Val> {
-        let len = self.len();
-        let Ok(index) = key.parse::<usize>() else {
-            error!("key {key:?} should be a int and >= 0 and < list.len {len}");
-            return None;
-        };
-        let Some(val) = self.get_mut(index) else {
-            error!("key {index} should < list.len {len}");
-            return None;
-        };
-        Some(val)
+        match &*key {
+            LIST_FIRST => self.first_mut(),
+            LIST_LAST => self.last_mut(),
+            _ => {
+                error!("key {key:?} should be first or last");
+                None
+            }
+        }
     }
 
-    fn set(&mut self, key: Key, mut value: Val) -> Option<Val> {
-        let len = self.len();
-        let Ok(index) = key.parse::<usize>() else {
-            error!("key {key:?} should be a int and >= 0 and < list.len {len}");
-            return None;
-        };
-        let Some(val) = self.get_mut(index) else {
-            error!("key {index} should < list.len {len}");
-            return None;
-        };
-        swap(val, &mut value);
-        Some(value)
+    fn set(&mut self, key: Key, value: Val) -> Option<()> {
+        match &*key {
+            LIST_FIRST => {
+                *self.first_mut()? = value;
+                Some(())
+            }
+            LIST_LAST => {
+                *self.last_mut()? = value;
+                Some(())
+            }
+            _ => {
+                error!("key {key:?} should be function or input");
+                None
+            }
+        }
     }
 }
 
@@ -194,8 +194,9 @@ impl DynCtx<Key, Val> for MapVal {
         Some(val)
     }
 
-    fn set(&mut self, key: Key, value: Val) -> Option<Val> {
-        self.insert(key, value)
+    fn set(&mut self, key: Key, value: Val) -> Option<()> {
+        self.insert(key, value);
+        Some(())
     }
 }
 
@@ -230,7 +231,7 @@ impl DynCtx<Key, Val> for Val {
         }
     }
 
-    fn set(&mut self, key: Key, value: Val) -> Option<Val> {
+    fn set(&mut self, key: Key, value: Val) -> Option<()> {
         match self {
             Val::Cell(cell) => cell.set(key, value),
             Val::Pair(pair) => pair.set(key, value),
@@ -273,7 +274,7 @@ impl DynCtx<IntVal, Val> for ListVal {
         Some(val)
     }
 
-    fn set(&mut self, key: IntVal, mut value: Val) -> Option<Val> {
+    fn set(&mut self, key: IntVal, value: Val) -> Option<()> {
         let len = self.len();
         let Some(index) = key.to_usize() else {
             error!("key {key:?} should >= 0 and < list.len {len}");
@@ -283,8 +284,8 @@ impl DynCtx<IntVal, Val> for ListVal {
             error!("key {index} should < list.len {len}");
             return None;
         };
-        swap(val, &mut value);
-        Some(value)
+        *val = value;
+        Some(())
     }
 }
 
@@ -329,7 +330,7 @@ impl DynCtx<Val, Val> for Val {
         }
     }
 
-    fn set(&mut self, key: Val, value: Val) -> Option<Val> {
+    fn set(&mut self, key: Val, value: Val) -> Option<()> {
         if let Val::Key(name) = &key {
             return self.set(name.clone(), value);
         }

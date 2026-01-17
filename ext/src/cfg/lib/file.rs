@@ -1,5 +1,4 @@
 use airlang::cfg::CfgMod;
-use airlang::cfg::error::fail;
 use airlang::cfg::error::illegal_input;
 use airlang::cfg::extend_func;
 use airlang::cfg::lib::FreePrimFn;
@@ -43,7 +42,7 @@ fn fn_read_to_text(cfg: &mut Cfg, input: Val) -> Val {
         Ok(content) => Val::Text(Text::from(content).into()),
         Err(err) => {
             eprintln!("{err}");
-            fail(cfg)
+            Val::default()
         }
     }
 }

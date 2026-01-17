@@ -1,6 +1,7 @@
 use log::error;
 
 use crate::cfg::CfgMod;
+use crate::cfg::error::abort_bug_with_msg;
 use crate::cfg::error::illegal_ctx;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
@@ -15,7 +16,6 @@ use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
-use crate::type_::Key;
 use crate::type_::Pair;
 use crate::type_::Text;
 
@@ -76,12 +76,7 @@ fn fn_assert(cfg: &mut Cfg, input: Val) -> Val {
     let message = Text::from(message);
     if !*bit {
         error!("assertion failed: {message}");
-        cfg.export(
-            Key::from_str_unchecked(Cfg::ABORT_TYPE),
-            Val::Key(Key::from_str_unchecked(Cfg::ABORT_TYPE_BUG)),
-        );
-        cfg.export(Key::from_str_unchecked(Cfg::ABORT_MSG), Val::Text(message.into()));
-        cfg.abort();
+        return abort_bug_with_msg(cfg, &message);
     }
     Val::default()
 }

@@ -1,7 +1,6 @@
 use std::process::Command;
 
 use airlang::cfg::CfgMod;
-use airlang::cfg::error::fail;
 use airlang::cfg::error::illegal_input;
 use airlang::cfg::extend_func;
 use airlang::cfg::lib::FreePrimFn;
@@ -10,6 +9,7 @@ use airlang::semantics::cfg::Cfg;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Byte;
+use airlang::type_::Cell;
 use airlang::type_::Int;
 use airlang::type_::Key;
 use airlang::type_::List;
@@ -85,7 +85,7 @@ fn fn_call(cfg: &mut Cfg, input: Val) -> Val {
         Ok(output) => output,
         Err(e) => {
             error!("call program failed: {e}");
-            return fail(cfg);
+            return Val::default();
         }
     };
 
@@ -101,5 +101,5 @@ fn fn_call(cfg: &mut Cfg, input: Val) -> Val {
     map.insert(Key::from_str_unchecked("output"), stdout);
     map.insert(Key::from_str_unchecked("error"), stderr);
     map.insert(Key::from_str_unchecked("status"), status);
-    Val::Map(map.into())
+    Val::Cell(Cell::new(Val::Map(map.into())).into())
 }

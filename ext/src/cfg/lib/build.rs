@@ -5,7 +5,7 @@ use std::path::Path;
 
 use airlang::Air;
 use airlang::cfg::CfgMod;
-use airlang::cfg::error::fail;
+use airlang::cfg::error::illegal_cfg;
 use airlang::cfg::error::illegal_input;
 use airlang::cfg::extend_func;
 use airlang::cfg::lib::FreeImpl;
@@ -14,6 +14,7 @@ use airlang::semantics::cfg::Cfg;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::syntax::parse;
+use airlang::type_::Cell;
 use airlang::type_::Key;
 use airlang::type_::Text;
 use log::error;
@@ -63,22 +64,23 @@ fn load_from_url(cfg: &mut Cfg, url: String) -> Val {
         Ok(content) => content,
         Err(err) => {
             eprintln!("failed to read {url}: {err}");
-            return fail(cfg);
+            return Val::Key(Key::from_str_unchecked("_read_error"));
         }
     };
     let Ok(val) = parse(content) else {
         error!("{content} should be a valid air source code");
-        return fail(cfg);
+        return Val::Key(Key::from_str_unchecked("_parse_error"));
     };
 
     let Some(mut mod_air) = Air::new(cfg.clone()) else {
         error!("prelude should exist in cfg");
-        return fail(cfg);
+        return illegal_cfg(cfg);
     };
     let cur_url_key = Key::from_str_unchecked(CUR_URL_KEY);
     mod_air.cfg_mut().begin_scope();
     mod_air.cfg_mut().extend_scope(cur_url_key, Val::Text(Text::from(url).into()));
-    mod_air.interpret(val)
+    let output = mod_air.interpret(val);
+    Val::Cell(Cell::new(output).into())
 }
 
 fn read_to_string<'a>(url: &str, buffer: &'a mut String) -> std::io::Result<&'a str> {

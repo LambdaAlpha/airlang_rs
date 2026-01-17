@@ -193,11 +193,11 @@ impl PatternMatch<Val> for Map<Key, Pattern> {
 }
 
 pub(in crate::cfg) trait PatternAssign<Ctx, Val> {
-    fn assign(self, ctx: &mut Ctx, val: Val) -> Val;
+    fn assign(self, ctx: &mut Ctx, val: Val) -> Option<()>;
 }
 
 impl PatternAssign<Val, Val> for Pattern {
-    fn assign(self, ctx: &mut Val, val: Val) -> Val {
+    fn assign(self, ctx: &mut Val, val: Val) -> Option<()> {
         match self {
             Pattern::Any(name) => name.assign(ctx, val),
             Pattern::Val(expected) => expected.assign(ctx, val),
@@ -211,86 +211,78 @@ impl PatternAssign<Val, Val> for Pattern {
 }
 
 impl PatternAssign<Val, Val> for Key {
-    fn assign(self, ctx: &mut Val, val: Val) -> Val {
-        ctx.set(self, val).unwrap_or_default()
+    fn assign(self, ctx: &mut Val, val: Val) -> Option<()> {
+        ctx.set(self, val)
     }
 }
 
 impl PatternAssign<Val, Val> for Val {
-    fn assign(self, _ctx: &mut Val, _val: Val) -> Val {
-        Val::default()
+    fn assign(self, _ctx: &mut Val, _val: Val) -> Option<()> {
+        Some(())
     }
 }
 
 impl PatternAssign<Val, Val> for Cell<Pattern> {
-    fn assign(self, ctx: &mut Val, val: Val) -> Val {
+    fn assign(self, ctx: &mut Val, val: Val) -> Option<()> {
         let Val::Cell(val) = val else {
             error!("{val:?} should be a cell");
-            return Val::default();
+            return None;
         };
         let val = Cell::from(val);
-        let value = self.value.assign(ctx, val.value);
-        Val::Cell(Cell::new(value).into())
+        self.value.assign(ctx, val.value)?;
+        Some(())
     }
 }
 
 impl PatternAssign<Val, Val> for Pair<Pattern, Pattern> {
-    fn assign(self, ctx: &mut Val, val: Val) -> Val {
+    fn assign(self, ctx: &mut Val, val: Val) -> Option<()> {
         let Val::Pair(val) = val else {
             error!("{val:?} should be a pair");
-            return Val::default();
+            return None;
         };
         let val = Pair::from(val);
-        let first = self.first.assign(ctx, val.first);
-        let second = self.second.assign(ctx, val.second);
-        Val::Pair(Pair::new(first, second).into())
+        self.first.assign(ctx, val.first)?;
+        self.second.assign(ctx, val.second)?;
+        Some(())
     }
 }
 
 impl PatternAssign<Val, Val> for Call<Pattern, Pattern> {
-    fn assign(self, c: &mut Val, val: Val) -> Val {
+    fn assign(self, c: &mut Val, val: Val) -> Option<()> {
         let Val::Call(val) = val else {
             error!("{val:?} should be a call");
-            return Val::default();
+            return None;
         };
         let val = Call::from(val);
-        let func = self.func.assign(c, val.func);
-        let input = self.input.assign(c, val.input);
-        Val::Call(Call { func, input }.into())
+        self.func.assign(c, val.func)?;
+        self.input.assign(c, val.input)?;
+        Some(())
     }
 }
 
 impl PatternAssign<Val, Val> for List<Pattern> {
-    fn assign(self, ctx: &mut Val, val: Val) -> Val {
+    fn assign(self, ctx: &mut Val, val: Val) -> Option<()> {
         let Val::List(val) = val else {
             error!("{val:?} should be a list");
-            return Val::default();
+            return None;
         };
-        let mut list = List::from(Vec::with_capacity(self.len()));
         let mut val_iter = List::from(val).into_iter();
         for p in self {
-            let val = val_iter.next().unwrap_or_default();
-            let last_val = p.assign(ctx, val);
-            list.push(last_val);
+            p.assign(ctx, val_iter.next()?)?;
         }
-        Val::List(list.into())
+        Some(())
     }
 }
 
 impl PatternAssign<Val, Val> for Map<Key, Pattern> {
-    fn assign(self, ctx: &mut Val, val: Val) -> Val {
+    fn assign(self, ctx: &mut Val, val: Val) -> Option<()> {
         let Val::Map(mut val) = val else {
             error!("{val:?} should be a map");
-            return Val::default();
+            return None;
         };
-        let map: Map<Key, Val> = self
-            .into_iter()
-            .map(|(k, pattern)| {
-                let val = val.remove(&k).unwrap_or_default();
-                let last_val = pattern.assign(ctx, val);
-                (k, last_val)
-            })
-            .collect();
-        Val::Map(map.into())
+        for (k, pattern) in self {
+            pattern.assign(ctx, val.remove(&k)?)?;
+        }
+        Some(())
     }
 }

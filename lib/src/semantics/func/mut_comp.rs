@@ -22,7 +22,7 @@ impl FreeFn<Cfg, Val, Val> for MutCompFunc {
         FreeComposite::call(
             cfg,
             input,
-            &mut self.comp.ctx.clone(),
+            &mut self.comp.prelude.clone(),
             self.comp.input_name.clone(),
             self.comp.body.clone(),
         )
@@ -49,7 +49,7 @@ impl Debug for MutCompFunc {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("MutCompFunc")
             .field("raw_input", &self.raw_input)
-            .field("ctx", &self.comp.ctx)
+            .field("prelude", &self.comp.prelude)
             .field("ctx_name", &self.comp.ctx_name)
             .field("input_name", &self.comp.input_name)
             .field("body", &self.comp.body)
