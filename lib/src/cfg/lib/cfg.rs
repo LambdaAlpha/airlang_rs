@@ -1,4 +1,6 @@
 use std::ops::Deref;
+use std::panic::AssertUnwindSafe;
+use std::panic::catch_unwind;
 
 use log::error;
 
@@ -238,5 +240,24 @@ fn fn_where(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return illegal_ctx(cfg);
     };
     let mut new_ctx = prelude.deref().clone();
-    Eval.mut_call(&mut **new_cfg, &mut new_ctx, pair.right)
+    // unwind safety:
+    // new_ctx is local variable
+    // new_cfg is aborted
+    let result =
+        catch_unwind(AssertUnwindSafe(|| Eval.mut_call(&mut **new_cfg, &mut new_ctx, pair.right)));
+    match result {
+        Ok(output) => output,
+        Err(err) => {
+            if let Some(err) = err.downcast_ref::<String>() {
+                error!("panic by {err}");
+                abort_bug_with_msg(new_cfg, &format!("panic by {err}"))
+            } else if let Some(err) = err.downcast_ref::<&str>() {
+                error!("panic by {err}");
+                abort_bug_with_msg(new_cfg, &format!("panic by {err}"))
+            } else {
+                error!("panic");
+                abort_bug_with_msg(new_cfg, "panic")
+            }
+        }
+    }
 }
