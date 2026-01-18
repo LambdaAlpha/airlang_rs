@@ -319,7 +319,10 @@ fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let value = key_value.second;
-    map.insert(key, value).unwrap_or_default()
+    let Some(value) = map.insert(key, value) else {
+        return Val::default();
+    };
+    Val::Cell(Cell::new(value).into())
 }
 
 pub fn set_many() -> MutPrimFuncVal {

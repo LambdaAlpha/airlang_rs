@@ -79,7 +79,7 @@ _ do [
     .which set _ import _link.which,
     .l set _ new {},
     l which _a set l,
-    .l1 = l which _ move _a,
+    .l1 set l which _ move _a,
     l == l1
 ]
 -----
