@@ -224,23 +224,23 @@ impl MutFn<Cfg, Val, CellVal, Val> for Eval {
 
 impl FreeFn<Cfg, PairVal, Val> for Eval {
     fn free_call(&self, cfg: &mut Cfg, pair: PairVal) -> Val {
-        Val::Pair(PairForm { first: self, second: self }.free_call(cfg, pair))
+        Val::Pair(PairForm { left: self, right: self }.free_call(cfg, pair))
     }
 }
 
 impl ConstFn<Cfg, Val, PairVal, Val> for Eval {
     fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, pair: PairVal) -> Val {
-        Val::Pair(PairForm { first: self, second: self }.const_call(cfg, ctx, pair))
+        Val::Pair(PairForm { left: self, right: self }.const_call(cfg, ctx, pair))
     }
 }
 
 impl MutFn<Cfg, Val, PairVal, Val> for Eval {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, pair: PairVal) -> Val {
-        Val::Pair(PairForm { first: self, second: self }.mut_call(cfg, ctx, pair))
+        Val::Pair(PairForm { left: self, right: self }.mut_call(cfg, ctx, pair))
     }
 
     fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, pair: PairVal) -> Val {
-        Val::Pair(PairForm { first: self, second: self }.dyn_call(cfg, ctx, pair))
+        Val::Pair(PairForm { left: self, right: self }.dyn_call(cfg, ctx, pair))
     }
 }
 

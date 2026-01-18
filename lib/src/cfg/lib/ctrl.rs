@@ -149,8 +149,8 @@ impl Statement {
             return None;
         };
         let pair = Pair::from(pair);
-        let condition = pair.first;
-        let body = pair.second;
+        let condition = pair.left;
+        let body = pair.right;
         let statement = Statement::Condition { ctrl_flow, condition, body };
         Some(statement)
     }
@@ -202,14 +202,14 @@ impl Test {
             return None;
         };
         let pair = Pair::from(pair);
-        let condition = pair.first;
-        let Val::Pair(branches) = pair.second else {
-            error!("input.second {:?} should be a pair", pair.second);
+        let condition = pair.left;
+        let Val::Pair(branches) = pair.right else {
+            error!("input.right {:?} should be a pair", pair.right);
             return None;
         };
         let branches = Pair::from(branches);
-        let branch_then = Block::parse(branches.first)?;
-        let branch_else = Block::parse(branches.second)?;
+        let branch_then = Block::parse(branches.left)?;
+        let branch_else = Block::parse(branches.right)?;
         Some(Test { condition, branch_then, branch_else })
     }
 
@@ -248,24 +248,24 @@ impl Switch {
             return None;
         };
         let pair = Pair::from(pair);
-        let val = pair.first;
-        match pair.second {
+        let val = pair.left;
+        match pair.right {
             Val::Map(map) => {
                 let map = Self::parse_block_map(map)?;
                 Some(Self { val, map, default: None })
             }
             Val::Pair(pair) => {
                 let pair = Pair::from(pair);
-                let Val::Map(map) = pair.first else {
-                    error!("input.second.first {:?} should be a map", pair.first);
+                let Val::Map(map) = pair.left else {
+                    error!("input.right.left {:?} should be a map", pair.left);
                     return None;
                 };
                 let map = Self::parse_block_map(map)?;
-                let default = Some(Block::parse(pair.second)?);
+                let default = Some(Block::parse(pair.right)?);
                 Some(Self { val, map, default })
             }
             v => {
-                error!("input.second {v:?} should be a map or a pair");
+                error!("input.right {v:?} should be a map or a pair");
                 None
             }
         }
@@ -278,7 +278,7 @@ impl Switch {
     fn eval(mut self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> Val {
         let val = Eval.dyn_call(cfg, ctx.reborrow(), self.val);
         let Val::Key(key) = val else {
-            error!("input.first {val:?} should be a key");
+            error!("input.left {val:?} should be a key");
             return illegal_input(cfg);
         };
         let Some(body) = self.map.remove(&key).or(self.default) else {
@@ -311,9 +311,9 @@ impl Match {
             return None;
         };
         let pair = Pair::from(pair);
-        let val = pair.first;
-        let Val::List(list) = pair.second else {
-            error!("input.second {:?} should be a list", pair.second);
+        let val = pair.left;
+        let Val::List(list) = pair.right else {
+            error!("input.right {:?} should be a list", pair.right);
             return None;
         };
         let arms = Self::parse_arms(list)?;
@@ -329,8 +329,8 @@ impl Match {
                     return None;
                 };
                 let pair = Pair::from(pair);
-                let block = Block::parse(pair.second)?;
-                Some((pair.first, block))
+                let block = Block::parse(pair.right)?;
+                Some((pair.left, block))
             })
             .collect()
     }
@@ -382,8 +382,8 @@ impl Loop {
             return None;
         };
         let pair = Pair::from(pair);
-        let condition = pair.first;
-        let body = Block::parse(pair.second)?;
+        let condition = pair.left;
+        let body = Block::parse(pair.right)?;
         Some(Self { condition, body })
     }
 
@@ -431,17 +431,17 @@ impl Iterate {
             return None;
         };
         let pair = Pair::from(pair);
-        let val = pair.first;
-        let Val::Pair(name_body) = pair.second else {
-            error!("input.second {:?} should be a pair", pair.second);
+        let val = pair.left;
+        let Val::Pair(name_body) = pair.right else {
+            error!("input.right {:?} should be a pair", pair.right);
             return None;
         };
         let name_body = Pair::from(name_body);
-        let Val::Key(name) = name_body.first else {
-            error!("input.first {:?} should be a key", name_body.first);
+        let Val::Key(name) = name_body.left else {
+            error!("input.left {:?} should be a key", name_body.left);
             return None;
         };
-        let body = Block::parse(name_body.second)?;
+        let body = Block::parse(name_body.right)?;
         Some(Self { val, name, body })
     }
 

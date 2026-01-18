@@ -126,11 +126,11 @@ fn func_input(cfg: &mut Cfg, input: Val) -> Result<(FuncVal, Val), Val> {
         return Err(illegal_input(cfg));
     };
     let pair = Pair::from(pair);
-    let Val::Func(func) = pair.first else {
-        error!("input.first {:?} should be a func", pair.first);
+    let Val::Func(func) = pair.left else {
+        error!("input.left {:?} should be a func", pair.left);
         return Err(illegal_input(cfg));
     };
-    Ok((func, pair.second))
+    Ok((func, pair.right))
 }
 
 pub fn get_context_access() -> ConstPrimFuncVal {

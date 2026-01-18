@@ -165,7 +165,7 @@ fn fn_equal(cfg: &mut Cfg, input: Val) -> Val {
         error!("input {input:?} should be a pair");
         return illegal_input(cfg);
     };
-    Val::Bit(Bit::from(pair.first == pair.second))
+    Val::Bit(Bit::from(pair.left == pair.right))
 }
 
 mod arbitrary;

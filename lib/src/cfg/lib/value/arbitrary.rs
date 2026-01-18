@@ -162,14 +162,14 @@ where Value: Arbitrary
     }
 }
 
-impl<First, Second> Arbitrary for Pair<First, Second>
+impl<Left, Right> Arbitrary for Pair<Left, Right>
 where
-    First: Arbitrary,
-    Second: Arbitrary,
+    Left: Arbitrary,
+    Right: Arbitrary,
 {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
-        Pair::new(First::any(rng, depth), Second::any(rng, depth))
+        Pair::new(Left::any(rng, depth), Right::any(rng, depth))
     }
 }
 

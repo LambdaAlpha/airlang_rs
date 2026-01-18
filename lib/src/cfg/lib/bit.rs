@@ -55,12 +55,12 @@ fn fn_and(cfg: &mut Cfg, input: Val) -> Val {
         error!("input {input:?} should be a pair");
         return illegal_input(cfg);
     };
-    let Val::Bit(left) = pair.first else {
-        error!("input.first {:?} should be a bit", pair.first);
+    let Val::Bit(left) = pair.left else {
+        error!("input.left {:?} should be a bit", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Bit(right) = pair.second else {
-        error!("input.second {:?} should be a bit", pair.second);
+    let Val::Bit(right) = pair.right else {
+        error!("input.right {:?} should be a bit", pair.right);
         return illegal_input(cfg);
     };
     Val::Bit(left.and(right))
@@ -75,12 +75,12 @@ fn fn_or(cfg: &mut Cfg, input: Val) -> Val {
         error!("input {input:?} should be a pair");
         return illegal_input(cfg);
     };
-    let Val::Bit(left) = pair.first else {
-        error!("input.first {:?} should be a bit", pair.first);
+    let Val::Bit(left) = pair.left else {
+        error!("input.left {:?} should be a bit", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Bit(right) = pair.second else {
-        error!("input.second {:?} should be a bit", pair.second);
+    let Val::Bit(right) = pair.right else {
+        error!("input.right {:?} should be a bit", pair.right);
         return illegal_input(cfg);
     };
     Val::Bit(left.or(right))
@@ -95,12 +95,12 @@ fn fn_xor(cfg: &mut Cfg, input: Val) -> Val {
         error!("input {input:?} should be a pair");
         return illegal_input(cfg);
     };
-    let Val::Bit(left) = pair.first else {
-        error!("input.first {:?} should be a bit", pair.first);
+    let Val::Bit(left) = pair.left else {
+        error!("input.left {:?} should be a bit", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Bit(right) = pair.second else {
-        error!("input.second {:?} should be a bit", pair.second);
+    let Val::Bit(right) = pair.right else {
+        error!("input.right {:?} should be a bit", pair.right);
         return illegal_input(cfg);
     };
     Val::Bit(left.xor(right))
@@ -115,12 +115,12 @@ fn fn_imply(cfg: &mut Cfg, input: Val) -> Val {
         error!("input {input:?} should be a pair");
         return illegal_input(cfg);
     };
-    let Val::Bit(left) = pair.first else {
-        error!("input.first {:?} should be a bit", pair.first);
+    let Val::Bit(left) = pair.left else {
+        error!("input.left {:?} should be a bit", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Bit(right) = pair.second else {
-        error!("input.second {:?} should be a bit", pair.second);
+    let Val::Bit(right) = pair.right else {
+        error!("input.right {:?} should be a bit", pair.right);
         return illegal_input(cfg);
     };
     Val::Bit(left.imply(right))

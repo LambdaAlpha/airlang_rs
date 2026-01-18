@@ -104,7 +104,7 @@ byte'X00ffff'
 
 **pair**
 
-`first : second`
+`left : right`
 
 ```air
 a : 1
@@ -134,7 +134,7 @@ a : b : c
 
 - `_ function input`
 - `input function _`
-- `first function second`
+- `left function right`
 
 ```air
 _ not true

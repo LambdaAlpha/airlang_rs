@@ -39,7 +39,7 @@ fn fn_call(cfg: &mut Cfg, input: Val) -> Val {
         error!("input {input:?} should be a pair");
         return illegal_input(cfg);
     };
-    let program: &str = match &pair.first {
+    let program: &str = match &pair.left {
         Val::Text(program) => program,
         Val::Key(key) => key,
         v => {
@@ -47,8 +47,8 @@ fn fn_call(cfg: &mut Cfg, input: Val) -> Val {
             return illegal_input(cfg);
         }
     };
-    let Val::List(arguments) = &pair.second else {
-        error!("arguments {:?} should be a list", pair.second);
+    let Val::List(arguments) = &pair.right else {
+        error!("arguments {:?} should be a list", pair.right);
         return illegal_input(cfg);
     };
     let arguments = arguments

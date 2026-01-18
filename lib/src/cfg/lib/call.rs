@@ -61,7 +61,7 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    Val::Call(Call::new(pair.first, pair.second).into())
+    Val::Call(Call::new(pair.left, pair.right).into())
 }
 
 pub fn get_function() -> ConstPrimFuncVal {

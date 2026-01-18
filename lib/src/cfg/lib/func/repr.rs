@@ -109,24 +109,24 @@ fn parse_code(code: Val) -> Option<CompCode> {
         },
         Val::Pair(names_body) => {
             let names_body = Pair::from(names_body);
-            match names_body.first {
+            match names_body.left {
                 Val::Pair(ctx_input) => {
-                    let Val::Key(ctx) = &ctx_input.first else {
-                        error!("ctx {:?} should be a key", ctx_input.first);
+                    let Val::Key(ctx) = &ctx_input.left else {
+                        error!("ctx {:?} should be a key", ctx_input.left);
                         return None;
                     };
-                    let Val::Key(input) = &ctx_input.second else {
-                        error!("input {:?} should be a key", ctx_input.second);
+                    let Val::Key(input) = &ctx_input.right else {
+                        error!("input {:?} should be a key", ctx_input.right);
                         return None;
                     };
                     CompCode {
                         ctx_name: Some(ctx.clone()),
                         input_name: input.clone(),
-                        body: names_body.second,
+                        body: names_body.right,
                     }
                 }
                 Val::Key(input) => {
-                    CompCode { ctx_name: None, input_name: input, body: names_body.second }
+                    CompCode { ctx_name: None, input_name: input, body: names_body.right }
                 }
                 v => {
                     error!("name {v:?} should be a key or a pair of key");

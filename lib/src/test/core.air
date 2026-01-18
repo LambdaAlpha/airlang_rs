@@ -81,7 +81,7 @@ pair ref
 -----
 _ do [
     .p set 1 : 2,
-    p which _ eval _ form [_ get _first, _ get _second]
+    p which _ eval _ form [_ get _left, _ get _right]
 ]
 -----
 [1, 2]
@@ -152,20 +152,20 @@ _ do [
 -----
 1
 =====
-pair ctx first
+pair ctx left
 -----
 _ do [
     .p set 1 : 2,
-    p which _ get _first
+    p which _ get _left
 ]
 -----
 1
 =====
-pair ctx second
+pair ctx right
 -----
 _ do [
     .p set 1 : 2,
-    p which _ get _second
+    p which _ get _right
 ]
 -----
 2

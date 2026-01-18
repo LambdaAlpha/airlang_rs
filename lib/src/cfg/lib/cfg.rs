@@ -142,11 +142,11 @@ fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Key(name) = pair.first else {
-        error!("input.first {:?} should be a key", pair.first);
+    let Val::Key(name) = pair.left else {
+        error!("input.left {:?} should be a key", pair.left);
         return illegal_input(cfg);
     };
-    if cfg.export(name, pair.second).is_none() {
+    if cfg.export(name, pair.right).is_none() {
         error!("key should not exist");
         return illegal_input(cfg);
     }
@@ -179,9 +179,9 @@ fn fn_with(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let map = Eval.dyn_call(cfg, ctx.reborrow(), pair.first);
+    let map = Eval.dyn_call(cfg, ctx.reborrow(), pair.left);
     let Val::Map(map) = map else {
-        error!("input.first {map:?} should be a map");
+        error!("input.left {map:?} should be a map");
         return illegal_input(cfg);
     };
     cfg.begin_scope();
@@ -189,7 +189,7 @@ fn fn_with(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {
     for (k, v) in map {
         cfg.extend_scope(k, v);
     }
-    let output = Eval.dyn_call(cfg, ctx, pair.second);
+    let output = Eval.dyn_call(cfg, ctx, pair.right);
     cfg.end_scope();
     output
 }
@@ -216,8 +216,8 @@ fn fn_where(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Some(ctx) = ctx.ref_mut(pair.first) else {
-        error!("input.first should be a valid reference");
+    let Some(ctx) = ctx.ref_mut(pair.left) else {
+        error!("input.left should be a valid reference");
         return abort_bug_with_msg(cfg, "_config.where reference is not valid");
     };
     let Val::Cfg(new_cfg) = ctx else {
@@ -238,5 +238,5 @@ fn fn_where(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return illegal_ctx(cfg);
     };
     let mut new_ctx = prelude.deref().clone();
-    Eval.mut_call(&mut **new_cfg, &mut new_ctx, pair.second)
+    Eval.mut_call(&mut **new_cfg, &mut new_ctx, pair.right)
 }

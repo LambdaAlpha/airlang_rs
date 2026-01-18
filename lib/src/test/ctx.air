@@ -71,9 +71,9 @@ _ do [
 set special key 2
 -----
 _ do [
-    .get_first set _ import _pair.get_first,
+    .get_left set _ import _pair.get_left,
     .:p set 1 : 2,
-    :p which _ get_first .
+    :p which _ get_left .
 ]
 -----
 1
@@ -190,8 +190,8 @@ _ do [
 -----
 _ do [
     .p set 1 : 2,
-    p which _first set 3,
-    p which _ get _first
+    p which _left set 3,
+    p which _ get _left
 ]
 -----
 3
@@ -273,9 +273,9 @@ false
 which 1
 -----
 _ do [
-    .set_first set _ import _pair.set_first,
+    .set_left set _ import _pair.set_left,
     _a set {_p : 1 : 2},
-    _a which _ eval _ form _p which _ set_first 3,
+    _a which _ eval _ form _p which _ set_left 3,
     _a which _ move _p,
 ]
 -----
@@ -284,12 +284,12 @@ _ do [
 which 2
 -----
 _ do [
-    .set_first set _ import _pair.set_first,
+    .set_left set _ import _pair.set_left,
     _a set {
         _p : 1 : 2,
         _b : 3,
     },
-    _a which _ eval _ form _p which _ set_first _ get _b,
+    _a which _ eval _ form _p which _ set_left _ get _b,
     _a which _ move _p,
 ]
 -----
@@ -298,13 +298,13 @@ _ do [
 which 3
 -----
 _ do [
-    .set_first set _ import _pair.set_first,
+    .set_left set _ import _pair.set_left,
     _a set {
-        set_first : set_first,
+        set_left : set_left,
         _p : 1 : 2,
         b : 3,
     },
-    _a which _ eval _ form _p which _ .set_first .b,
+    _a which _ eval _ form _p which _ .set_left .b,
     _a which _ move _p,
 ]
 -----

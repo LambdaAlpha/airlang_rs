@@ -103,12 +103,12 @@ fn fn_join(cfg: &mut Cfg, input: Val) -> Val {
         error!("input {input:?} should be a pair");
         return illegal_input(cfg);
     };
-    let Val::Key(separator) = &pair.first else {
-        error!("separator {:?} should be a key", pair.first);
+    let Val::Key(separator) = &pair.left else {
+        error!("separator {:?} should be a key", pair.left);
         return illegal_input(cfg);
     };
-    let Val::List(keys) = &pair.second else {
-        error!("input.second {:?} should be a list", pair.second);
+    let Val::List(keys) = &pair.right else {
+        error!("input.right {:?} should be a list", pair.right);
         return illegal_input(cfg);
     };
     let keys: Option<Vec<&str>> = keys

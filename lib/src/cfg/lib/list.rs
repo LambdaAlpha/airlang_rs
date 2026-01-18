@@ -110,12 +110,12 @@ fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let index_value = Pair::from(index_value);
-    let index = index_value.first;
+    let index = index_value.left;
     let Some(i) = to_index(index) else {
-        error!("input.first should be a valid index");
+        error!("input.left should be a valid index");
         return illegal_input(cfg);
     };
-    let mut value = index_value.second;
+    let mut value = index_value.right;
     let Some(current) = list.get_mut(i) else {
         error!("index {i:?} should < list.len {}", list.len());
         return illegal_input(cfg);
@@ -138,13 +138,13 @@ fn fn_set_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let index_value = Pair::from(index_value);
-    let index = index_value.first;
+    let index = index_value.left;
     let Some(i) = to_index(index) else {
-        error!("input.first should be a valid index");
+        error!("input.left should be a valid index");
         return illegal_input(cfg);
     };
-    let Val::List(values) = index_value.second else {
-        error!("input.second {:?} should be a list", index_value.second);
+    let Val::List(values) = index_value.right else {
+        error!("input.right {:?} should be a list", index_value.right);
         return illegal_input(cfg);
     };
     let values = List::from(values);
@@ -218,12 +218,12 @@ fn fn_insert(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let index_value = Pair::from(index_value);
-    let index = index_value.first;
+    let index = index_value.left;
     let Some(i) = to_index(index) else {
-        error!("input.first should be a valid index");
+        error!("input.left should be a valid index");
         return illegal_input(cfg);
     };
-    let value = index_value.second;
+    let value = index_value.right;
     if i > list.len() {
         error!("index {i} should <= list.len {}", list.len());
         return illegal_input(cfg);
@@ -246,13 +246,13 @@ fn fn_insert_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let index_value = Pair::from(index_value);
-    let index = index_value.first;
+    let index = index_value.left;
     let Some(i) = to_index(index) else {
-        error!("input.first should be a valid index");
+        error!("input.left should be a valid index");
         return illegal_input(cfg);
     };
-    let Val::List(values) = index_value.second else {
-        error!("input.second {:?} should be a list", index_value.second);
+    let Val::List(values) = index_value.right else {
+        error!("input.right {:?} should be a list", index_value.right);
         return illegal_input(cfg);
     };
     let values = List::from(values);
@@ -416,7 +416,7 @@ fn to_index(val: Val) -> Option<usize> {
 }
 
 fn to_range(pair: Pair<Val, Val>) -> Option<(Option<usize>, Option<usize>)> {
-    let from = match pair.first {
+    let from = match pair.left {
         Val::Int(i) => Some(i.to_usize()?),
         Val::Unit(_) => None,
         v => {
@@ -424,7 +424,7 @@ fn to_range(pair: Pair<Val, Val>) -> Option<(Option<usize>, Option<usize>)> {
             return None;
         }
     };
-    let to = match pair.second {
+    let to = match pair.right {
         Val::Int(i) => Some(i.to_usize()?),
         Val::Unit(_) => None,
         v => {

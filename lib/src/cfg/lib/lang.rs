@@ -121,9 +121,9 @@ impl<'a> TryInto<GenRepr<'a>> for &'a Val {
                 GenRepr::Cell(Box::new(Cell::new(value)))
             }
             Val::Pair(pair) => {
-                let first = (&pair.first).try_into()?;
-                let second = (&pair.second).try_into()?;
-                GenRepr::Pair(Box::new(Pair::new(first, second)))
+                let left = (&pair.left).try_into()?;
+                let right = (&pair.right).try_into()?;
+                GenRepr::Pair(Box::new(Pair::new(left, right)))
             }
             Val::Call(call) => {
                 let func = (&call.func).try_into()?;

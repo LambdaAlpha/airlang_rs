@@ -2,12 +2,12 @@ get
 -----
 _ do [
     .any set _ import _value.any,
-    .get_first set _ import _pair.get_first,
-    .get_second set _ import _pair.get_second,
-    .f set _ any .,
-    .s set _ any .,
-    .p set f : s,
-    (f == p which _ get_first .) and (s == p which _ get_second .)
+    .get_left set _ import _pair.get_left,
+    .get_right set _ import _pair.get_right,
+    .l set _ any .,
+    .r set _ any .,
+    .p set l : r,
+    (l == p which _ get_left .) and (r == p which _ get_right .)
 ]
 -----
 true
@@ -16,18 +16,18 @@ set get
 -----
 _ do [
     .any set _ import _value.any,
-    .get_first set _ import _pair.get_first,
-    .get_second set _ import _pair.get_second,
-    .set_first set _ import _pair.set_first,
-    .set_second set _ import _pair.set_second,
+    .get_left set _ import _pair.get_left,
+    .get_right set _ import _pair.get_right,
+    .set_left set _ import _pair.set_left,
+    .set_right set _ import _pair.set_right,
     .p set _ any _pair,
-    .f set _ any .,
-    .s set _ any .,
-    p which _ set_first f,
-    p which _ set_second s,
-    .f1 set p which _ get_first .,
-    .s1 set p which _ get_second .,
-    (f == f1) and (s == s1)
+    .l set _ any .,
+    .r set _ any .,
+    p which _ set_left l,
+    p which _ set_right r,
+    .l1 set p which _ get_left .,
+    .r1 set p which _ get_right .,
+    (l == l1) and (r == r1)
 ]
 -----
 true
@@ -36,14 +36,14 @@ set return
 -----
 _ do [
     .any set _ import _value.any,
-    .set_first set _ import _pair.set_first,
-    .set_second set _ import _pair.set_second,
-    .f1 set _ any .,
-    .s1 set _ any .,
-    .p set f1 : s1,
-    .f2 set p which _ set_first _ any .,
-    .s2 set p which _ set_second _ any .,
-    (f1 == f2) and s1 == s2
+    .set_left set _ import _pair.set_left,
+    .set_right set _ import _pair.set_right,
+    .l1 set _ any .,
+    .r1 set _ any .,
+    .p set l1 : r1,
+    .l2 set p which _ set_left _ any .,
+    .r2 set p which _ set_right _ any .,
+    (l1 == l2) and r1 == r2
 ]
 -----
 true

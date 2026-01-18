@@ -60,8 +60,8 @@ fn cell(value: Repr) -> Repr {
     Repr::Cell(Box::new(CellRepr::new(value)))
 }
 
-fn pair(first: Repr, second: Repr) -> Repr {
-    Repr::Pair(Box::new(PairRepr::new(first, second)))
+fn pair(left: Repr, right: Repr) -> Repr {
+    Repr::Pair(Box::new(PairRepr::new(left, right)))
 }
 
 fn call(func: Repr, input: Repr) -> Repr {

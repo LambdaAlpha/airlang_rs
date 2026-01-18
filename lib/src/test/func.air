@@ -200,10 +200,10 @@ ctx explicit
 -----
 _ do [
     .link_which set _ import _link.which,
-    .set_first set _ import _pair.set_first,
+    .set_left set _ import _pair.set_left,
     .a set 1 : 2,
     .f set _ function {
-        code : (.p : .i) : _ form .p link_which _ set_first .i,
+        code : (.p : .i) : _ form .p link_which _ set_left .i,
         prelude : {},
     },
     a which _ f 3,

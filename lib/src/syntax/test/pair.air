@@ -22,11 +22,11 @@ infix pair
 -----
 a b c : d
 =====
-non-atomic first
+non-atomic left
 -----
 (a : b) : c
 =====
-non-atomic second
+non-atomic right
 -----
 a : (b : c)
 =====

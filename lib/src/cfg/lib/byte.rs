@@ -86,12 +86,12 @@ fn fn_join(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Byte(separator) = pair.first else {
-        error!("separator {:?} should be a byte", pair.first);
+    let Val::Byte(separator) = pair.left else {
+        error!("separator {:?} should be a byte", pair.left);
         return illegal_input(cfg);
     };
-    let Val::List(bytes) = pair.second else {
-        error!("input.second {:?} should be a list", pair.second);
+    let Val::List(bytes) = pair.right else {
+        error!("input.right {:?} should be a list", pair.right);
         return illegal_input(cfg);
     };
     let bytes: Option<Vec<&[u8]>> = bytes

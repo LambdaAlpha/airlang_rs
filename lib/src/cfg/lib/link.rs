@@ -71,18 +71,18 @@ fn fn_which(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let link = Eval.dyn_call(cfg, ctx.reborrow(), pair.first);
+    let link = Eval.dyn_call(cfg, ctx.reborrow(), pair.left);
     let Val::Link(link) = link else {
-        error!("input.first {link:?} should be a link");
+        error!("input.left {link:?} should be a link");
         return illegal_input(cfg);
     };
-    let Val::Call(call) = pair.second else {
-        error!("input.second {:?} should be a call", pair.second);
+    let Val::Call(call) = pair.right else {
+        error!("input.right {:?} should be a call", pair.right);
         return illegal_input(cfg);
     };
     let call = Call::from(call);
     let Val::Func(func) = Eval.dyn_call(cfg, ctx.reborrow(), call.func) else {
-        error!("input.second.func should be a func");
+        error!("input.right.func should be a func");
         return illegal_input(cfg);
     };
     let input =

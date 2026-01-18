@@ -308,7 +308,7 @@ impl<'a> Gen for Pair<GenRepr<'a>, GenRepr<'a>> {
     fn gen_(self, mut ctx: GenCtx, s: &mut String) {
         match ctx.direction {
             Direction::Left => {
-                if is_open(&self.first) || !is_open(&self.second) {
+                if is_open(&self.left) || !is_open(&self.right) {
                     return gen_pair_left(ctx, s, self);
                 }
                 ctx.direction = Direction::Right;
@@ -317,7 +317,7 @@ impl<'a> Gen for Pair<GenRepr<'a>, GenRepr<'a>> {
                 });
             }
             Direction::Right => {
-                if !is_open(&self.first) || is_open(&self.second) {
+                if !is_open(&self.left) || is_open(&self.right) {
                     return gen_pair_right(ctx, s, self);
                 }
                 ctx.direction = Direction::Left;
@@ -330,19 +330,19 @@ impl<'a> Gen for Pair<GenRepr<'a>, GenRepr<'a>> {
 }
 
 fn gen_pair_left(ctx: GenCtx, s: &mut String, pair: Pair<GenRepr, GenRepr>) {
-    pair.first.gen_(ctx, s);
+    pair.left.gen_(ctx, s);
     s.push(' ');
     s.push_str(PAIR);
     s.push(' ');
-    gen_scope_if_need(ctx, s, pair.second);
+    gen_scope_if_need(ctx, s, pair.right);
 }
 
 fn gen_pair_right(ctx: GenCtx, s: &mut String, pair: Pair<GenRepr, GenRepr>) {
-    gen_scope_if_need(ctx, s, pair.first);
+    gen_scope_if_need(ctx, s, pair.left);
     s.push(' ');
     s.push_str(PAIR);
     s.push(' ');
-    pair.second.gen_(ctx, s);
+    pair.right.gen_(ctx, s);
 }
 
 impl<'a> Gen for Call<GenRepr<'a>, GenRepr<'a>> {
@@ -358,7 +358,7 @@ impl<'a> Gen for Call<GenRepr<'a>, GenRepr<'a>> {
 fn gen_call_infix(mut ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<GenRepr, GenRepr>) {
     match ctx.direction {
         Direction::Left => {
-            if is_open(&pair.first) || !is_open(&pair.second) {
+            if is_open(&pair.left) || !is_open(&pair.right) {
                 return gen_call_infix_left(ctx, s, func, pair);
             }
             ctx.direction = Direction::Right;
@@ -367,7 +367,7 @@ fn gen_call_infix(mut ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<Gen
             });
         }
         Direction::Right => {
-            if !is_open(&pair.first) || is_open(&pair.second) {
+            if !is_open(&pair.left) || is_open(&pair.right) {
                 return gen_call_infix_right(ctx, s, func, pair);
             }
             ctx.direction = Direction::Left;
@@ -379,19 +379,19 @@ fn gen_call_infix(mut ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<Gen
 }
 
 fn gen_call_infix_left(ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<GenRepr, GenRepr>) {
-    pair.first.gen_(ctx, s);
+    pair.left.gen_(ctx, s);
     s.push(' ');
     gen_scope_if_need(ctx, s, func);
     s.push(' ');
-    gen_scope_if_need(ctx, s, pair.second);
+    gen_scope_if_need(ctx, s, pair.right);
 }
 
 fn gen_call_infix_right(ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<GenRepr, GenRepr>) {
-    gen_scope_if_need(ctx, s, pair.first);
+    gen_scope_if_need(ctx, s, pair.left);
     s.push(' ');
     gen_scope_if_need(ctx, s, func);
     s.push(' ');
-    pair.second.gen_(ctx, s);
+    pair.right.gen_(ctx, s);
 }
 
 fn gen_call(ctx: GenCtx, s: &mut String, func: GenRepr, input: GenRepr) {

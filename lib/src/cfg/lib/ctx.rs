@@ -86,7 +86,7 @@ fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    if ctx.set(pair.first, pair.second).is_none() {
+    if ctx.set(pair.left, pair.right).is_none() {
         error!("set failed");
         return abort_bug_with_msg(cfg, "_context.set failed");
     }
@@ -107,11 +107,11 @@ fn fn_represent(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Some(pattern) = pair.first.parse() else {
+    let Some(pattern) = pair.left.parse() else {
         error!("parse failed");
         return illegal_input(cfg);
     };
-    let val = pair.second;
+    let val = pair.right;
     if !pattern.match_(&val) {
         error!("match failed");
         return abort_bug_with_msg(cfg, "_context.represent not match");
@@ -165,20 +165,20 @@ fn fn_which(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Call(call) = pair.second else {
-        error!("input.second {:?} should be a call", pair.second);
+    let Val::Call(call) = pair.right else {
+        error!("input.right {:?} should be a call", pair.right);
         return illegal_input(cfg);
     };
     let call = Call::from(call);
     let Val::Func(func) = Eval.dyn_call(cfg, ctx.reborrow(), call.func) else {
-        error!("input.second.func should be a func");
+        error!("input.right.func should be a func");
         return illegal_input(cfg);
     };
     let input =
         if func.raw_input() { call.input } else { Eval.dyn_call(cfg, ctx.reborrow(), call.input) };
     let const_ = ctx.is_const();
-    let Some(ctx) = ctx.reborrow().unwrap().ref_mut(pair.first) else {
-        error!("input.first should be a valid reference");
+    let Some(ctx) = ctx.reborrow().unwrap().ref_mut(pair.left) else {
+        error!("input.left should be a valid reference");
         return abort_bug_with_msg(cfg, "_context.which reference is not valid");
     };
     func.dyn_call(cfg, DynRef::new(ctx, const_), input)

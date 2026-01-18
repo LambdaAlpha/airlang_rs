@@ -71,12 +71,12 @@ fn fn_add(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Int(i1) = pair.first else {
-        error!("input.first {:?} should be a int", pair.first);
+    let Val::Int(i1) = pair.left else {
+        error!("input.left {:?} should be a int", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Int(i2) = pair.second else {
-        error!("input.second {:?} should be a int", pair.second);
+    let Val::Int(i2) = pair.right else {
+        error!("input.right {:?} should be a int", pair.right);
         return illegal_input(cfg);
     };
     let i1 = Int::from(i1);
@@ -94,12 +94,12 @@ fn fn_subtract(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Int(i1) = pair.first else {
-        error!("input.first {:?} should be a int", pair.first);
+    let Val::Int(i1) = pair.left else {
+        error!("input.left {:?} should be a int", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Int(i2) = pair.second else {
-        error!("input.second {:?} should be a int", pair.second);
+    let Val::Int(i2) = pair.right else {
+        error!("input.right {:?} should be a int", pair.right);
         return illegal_input(cfg);
     };
     let i1 = Int::from(i1);
@@ -117,12 +117,12 @@ fn fn_multiply(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Int(i1) = pair.first else {
-        error!("input.first {:?} should be a int", pair.first);
+    let Val::Int(i1) = pair.left else {
+        error!("input.left {:?} should be a int", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Int(i2) = pair.second else {
-        error!("input.second {:?} should be a int", pair.second);
+    let Val::Int(i2) = pair.right else {
+        error!("input.right {:?} should be a int", pair.right);
         return illegal_input(cfg);
     };
     let i1 = Int::from(i1);
@@ -140,16 +140,16 @@ fn fn_divide(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Int(i1) = pair.first else {
-        error!("input.first {:?} should be a int", pair.first);
+    let Val::Int(i1) = pair.left else {
+        error!("input.left {:?} should be a int", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Int(i2) = pair.second else {
-        error!("input.second {:?} should be a int", pair.second);
+    let Val::Int(i2) = pair.right else {
+        error!("input.right {:?} should be a int", pair.right);
         return illegal_input(cfg);
     };
     if i2.is_zero() {
-        error!("input.second should not be zero");
+        error!("input.right should not be zero");
         return illegal_input(cfg);
     }
     let i1 = Int::from(i1);
@@ -168,16 +168,16 @@ fn fn_remainder(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Int(i1) = pair.first else {
-        error!("input.first {:?} should be a int", pair.first);
+    let Val::Int(i1) = pair.left else {
+        error!("input.left {:?} should be a int", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Int(i2) = pair.second else {
-        error!("input.second {:?} should be a int", pair.second);
+    let Val::Int(i2) = pair.right else {
+        error!("input.right {:?} should be a int", pair.right);
         return illegal_input(cfg);
     };
     if i2.is_zero() {
-        error!("input.second should not be zero");
+        error!("input.right should not be zero");
         return illegal_input(cfg);
     }
     let i1 = Int::from(i1);
@@ -196,16 +196,16 @@ fn fn_divide_remainder(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Int(i1) = pair.first else {
-        error!("input.first {:?} should be a int", pair.first);
+    let Val::Int(i1) = pair.left else {
+        error!("input.left {:?} should be a int", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Int(i2) = pair.second else {
-        error!("input.second {:?} should be a int", pair.second);
+    let Val::Int(i2) = pair.right else {
+        error!("input.right {:?} should be a int", pair.right);
         return illegal_input(cfg);
     };
     if i2.is_zero() {
-        error!("input.second should not be zero");
+        error!("input.right should not be zero");
         return illegal_input(cfg);
     }
     let i1 = Int::from(i1);
@@ -224,12 +224,12 @@ fn fn_less(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Int(i1) = pair.first else {
-        error!("input.first {:?} should be a int", pair.first);
+    let Val::Int(i1) = pair.left else {
+        error!("input.left {:?} should be a int", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Int(i2) = pair.second else {
-        error!("input.second {:?} should be a int", pair.second);
+    let Val::Int(i2) = pair.right else {
+        error!("input.right {:?} should be a int", pair.right);
         return illegal_input(cfg);
     };
     Val::Bit(i1.less_than(&i2))
@@ -245,12 +245,12 @@ fn fn_less_equal(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Int(i1) = pair.first else {
-        error!("input.first {:?} should be a int", pair.first);
+    let Val::Int(i1) = pair.left else {
+        error!("input.left {:?} should be a int", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Int(i2) = pair.second else {
-        error!("input.second {:?} should be a int", pair.second);
+    let Val::Int(i2) = pair.right else {
+        error!("input.right {:?} should be a int", pair.right);
         return illegal_input(cfg);
     };
     Val::Bit(i1.less_equal(&i2))
@@ -266,12 +266,12 @@ fn fn_greater(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Int(i1) = pair.first else {
-        error!("input.first {:?} should be a int", pair.first);
+    let Val::Int(i1) = pair.left else {
+        error!("input.left {:?} should be a int", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Int(i2) = pair.second else {
-        error!("input.second {:?} should be a int", pair.second);
+    let Val::Int(i2) = pair.right else {
+        error!("input.right {:?} should be a int", pair.right);
         return illegal_input(cfg);
     };
     Val::Bit(i1.greater_than(&i2))
@@ -287,12 +287,12 @@ fn fn_greater_equal(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Int(i1) = pair.first else {
-        error!("input.first {:?} should be a int", pair.first);
+    let Val::Int(i1) = pair.left else {
+        error!("input.left {:?} should be a int", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Int(i2) = pair.second else {
-        error!("input.second {:?} should be a int", pair.second);
+    let Val::Int(i2) = pair.right else {
+        error!("input.right {:?} should be a int", pair.right);
         return illegal_input(cfg);
     };
     Val::Bit(i1.greater_equal(&i2))
@@ -308,12 +308,12 @@ fn fn_less_greater(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Int(i1) = pair.first else {
-        error!("input.first {:?} should be a int", pair.first);
+    let Val::Int(i1) = pair.left else {
+        error!("input.left {:?} should be a int", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Int(i2) = pair.second else {
-        error!("input.second {:?} should be a int", pair.second);
+    let Val::Int(i2) = pair.right else {
+        error!("input.right {:?} should be a int", pair.right);
         return illegal_input(cfg);
     };
     Val::Bit(i1.less_greater(&i2))

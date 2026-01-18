@@ -53,49 +53,49 @@ where Value: MutFn<Cfg, Ctx, Val, Val>
     }
 }
 
-pub(crate) struct PairForm<'a, First, Second> {
-    pub(crate) first: &'a First,
-    pub(crate) second: &'a Second,
+pub(crate) struct PairForm<'a, Left, Right> {
+    pub(crate) left: &'a Left,
+    pub(crate) right: &'a Right,
 }
 
-impl<'a, First, Second> FreeFn<Cfg, PairVal, PairVal> for PairForm<'a, First, Second>
+impl<'a, Left, Right> FreeFn<Cfg, PairVal, PairVal> for PairForm<'a, Left, Right>
 where
-    First: FreeFn<Cfg, Val, Val>,
-    Second: FreeFn<Cfg, Val, Val>,
+    Left: FreeFn<Cfg, Val, Val>,
+    Right: FreeFn<Cfg, Val, Val>,
 {
     fn free_call(&self, cfg: &mut Cfg, mut pair: PairVal) -> PairVal {
-        pair.first = self.first.free_call(cfg, take(&mut pair.first));
-        pair.second = self.second.free_call(cfg, take(&mut pair.second));
+        pair.left = self.left.free_call(cfg, take(&mut pair.left));
+        pair.right = self.right.free_call(cfg, take(&mut pair.right));
         pair
     }
 }
 
-impl<'a, First, Second, Ctx> ConstFn<Cfg, Ctx, PairVal, PairVal> for PairForm<'a, First, Second>
+impl<'a, Left, Right, Ctx> ConstFn<Cfg, Ctx, PairVal, PairVal> for PairForm<'a, Left, Right>
 where
-    First: ConstFn<Cfg, Ctx, Val, Val>,
-    Second: ConstFn<Cfg, Ctx, Val, Val>,
+    Left: ConstFn<Cfg, Ctx, Val, Val>,
+    Right: ConstFn<Cfg, Ctx, Val, Val>,
 {
     fn const_call(&self, cfg: &mut Cfg, mut ctx: ConstRef<Ctx>, mut pair: PairVal) -> PairVal {
-        pair.first = self.first.const_call(cfg, ctx.reborrow(), take(&mut pair.first));
-        pair.second = self.second.const_call(cfg, ctx, take(&mut pair.second));
+        pair.left = self.left.const_call(cfg, ctx.reborrow(), take(&mut pair.left));
+        pair.right = self.right.const_call(cfg, ctx, take(&mut pair.right));
         pair
     }
 }
 
-impl<'a, First, Second, Ctx> MutFn<Cfg, Ctx, PairVal, PairVal> for PairForm<'a, First, Second>
+impl<'a, Left, Right, Ctx> MutFn<Cfg, Ctx, PairVal, PairVal> for PairForm<'a, Left, Right>
 where
-    First: MutFn<Cfg, Ctx, Val, Val>,
-    Second: MutFn<Cfg, Ctx, Val, Val>,
+    Left: MutFn<Cfg, Ctx, Val, Val>,
+    Right: MutFn<Cfg, Ctx, Val, Val>,
 {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Ctx, mut pair: PairVal) -> PairVal {
-        pair.first = self.first.mut_call(cfg, ctx, take(&mut pair.first));
-        pair.second = self.second.mut_call(cfg, ctx, take(&mut pair.second));
+        pair.left = self.left.mut_call(cfg, ctx, take(&mut pair.left));
+        pair.right = self.right.mut_call(cfg, ctx, take(&mut pair.right));
         pair
     }
 
     fn dyn_call(&self, cfg: &mut Cfg, mut ctx: DynRef<Ctx>, mut pair: PairVal) -> PairVal {
-        pair.first = self.first.dyn_call(cfg, ctx.reborrow(), take(&mut pair.first));
-        pair.second = self.second.dyn_call(cfg, ctx, take(&mut pair.second));
+        pair.left = self.left.dyn_call(cfg, ctx.reborrow(), take(&mut pair.left));
+        pair.right = self.right.dyn_call(cfg, ctx, take(&mut pair.right));
         pair
     }
 }
@@ -354,23 +354,23 @@ impl MutFn<Cfg, Val, CellVal, CellVal> for Form {
 
 impl FreeFn<Cfg, PairVal, PairVal> for Form {
     fn free_call(&self, cfg: &mut Cfg, pair: PairVal) -> PairVal {
-        PairForm { first: self, second: self }.free_call(cfg, pair)
+        PairForm { left: self, right: self }.free_call(cfg, pair)
     }
 }
 
 impl ConstFn<Cfg, Val, PairVal, PairVal> for Form {
     fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, pair: PairVal) -> PairVal {
-        PairForm { first: self, second: self }.const_call(cfg, ctx, pair)
+        PairForm { left: self, right: self }.const_call(cfg, ctx, pair)
     }
 }
 
 impl MutFn<Cfg, Val, PairVal, PairVal> for Form {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, pair: PairVal) -> PairVal {
-        PairForm { first: self, second: self }.mut_call(cfg, ctx, pair)
+        PairForm { left: self, right: self }.mut_call(cfg, ctx, pair)
     }
 
     fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, pair: PairVal) -> PairVal {
-        PairForm { first: self, second: self }.dyn_call(cfg, ctx, pair)
+        PairForm { left: self, right: self }.dyn_call(cfg, ctx, pair)
     }
 }
 

@@ -314,11 +314,11 @@ fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let key_value = Pair::from(key_value);
-    let Val::Key(key) = key_value.first else {
-        error!("input.first {:?} should be a key", key_value.first);
+    let Val::Key(key) = key_value.left else {
+        error!("input.left {:?} should be a key", key_value.left);
         return illegal_input(cfg);
     };
-    let value = key_value.second;
+    let value = key_value.right;
     let Some(value) = map.insert(key, value) else {
         return Val::default();
     };
@@ -490,11 +490,11 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
             return illegal_input(cfg);
         };
         let pair = Pair::from(pair);
-        let Val::Key(key) = pair.first else {
-            error!("input.item.first {:?} should be a key", pair.first);
+        let Val::Key(key) = pair.left else {
+            error!("input.item.left {:?} should be a key", pair.left);
             return illegal_input(cfg);
         };
-        map.insert(key, pair.second);
+        map.insert(key, pair.right);
     }
     Val::Map(map.into())
 }

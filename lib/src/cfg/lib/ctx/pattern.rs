@@ -69,9 +69,9 @@ impl PatternParse for CellVal {
 impl PatternParse for PairVal {
     fn parse(self) -> Option<Pattern> {
         let pair = Pair::from(self);
-        let first = pair.first.parse()?;
-        let second = pair.second.parse()?;
-        Some(Pattern::Pair(Box::new(Pair::new(first, second))))
+        let left = pair.left.parse()?;
+        let right = pair.right.parse()?;
+        Some(Pattern::Pair(Box::new(Pair::new(left, right))))
     }
 }
 
@@ -147,9 +147,9 @@ impl PatternMatch<Val> for Pair<Pattern, Pattern> {
             error!("{val:?} should be a pair");
             return false;
         };
-        let first = self.first.match_(&val.first);
-        let second = self.second.match_(&val.second);
-        first && second
+        let left = self.left.match_(&val.left);
+        let right = self.right.match_(&val.right);
+        left && right
     }
 }
 
@@ -241,8 +241,8 @@ impl PatternAssign<Val, Val> for Pair<Pattern, Pattern> {
             return None;
         };
         let val = Pair::from(val);
-        self.first.assign(ctx, val.first)?;
-        self.second.assign(ctx, val.second)?;
+        self.left.assign(ctx, val.left)?;
+        self.right.assign(ctx, val.right)?;
         Some(())
     }
 }

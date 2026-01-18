@@ -20,7 +20,7 @@ impl DynCtx<Key, Val> for CellVal {
         if &*key == VALUE {
             Some(&self.value)
         } else {
-            error!("key {key:?} should be value");
+            error!("key {key:?} should be {VALUE}");
             None
         }
     }
@@ -29,7 +29,7 @@ impl DynCtx<Key, Val> for CellVal {
         if &*key == VALUE {
             Some(&mut self.value)
         } else {
-            error!("key {key:?} should be value");
+            error!("key {key:?} should be {VALUE}");
             None
         }
     }
@@ -39,22 +39,22 @@ impl DynCtx<Key, Val> for CellVal {
             self.value = value;
             Some(())
         } else {
-            error!("key {key:?} should be value");
+            error!("key {key:?} should be {VALUE}");
             None
         }
     }
 }
 
-const FIRST: &str = concatcp!(PREFIX_ID, "first");
-const SECOND: &str = concatcp!(PREFIX_ID, "second");
+const LEFT: &str = concatcp!(PREFIX_ID, "left");
+const RIGHT: &str = concatcp!(PREFIX_ID, "right");
 
 impl DynCtx<Key, Val> for PairVal {
     fn ref_(&self, key: Key) -> Option<&Val> {
         match &*key {
-            FIRST => Some(&self.first),
-            SECOND => Some(&self.second),
+            LEFT => Some(&self.left),
+            RIGHT => Some(&self.right),
             _ => {
-                error!("key {key:?} should be first or second");
+                error!("key {key:?} should be {LEFT} or {RIGHT}");
                 None
             }
         }
@@ -62,10 +62,10 @@ impl DynCtx<Key, Val> for PairVal {
 
     fn ref_mut(&mut self, key: Key) -> Option<&mut Val> {
         match &*key {
-            FIRST => Some(&mut self.first),
-            SECOND => Some(&mut self.second),
+            LEFT => Some(&mut self.left),
+            RIGHT => Some(&mut self.right),
             _ => {
-                error!("key {key:?} should be first or second");
+                error!("key {key:?} should be {LEFT} or {RIGHT}");
                 None
             }
         }
@@ -73,16 +73,16 @@ impl DynCtx<Key, Val> for PairVal {
 
     fn set(&mut self, key: Key, value: Val) -> Option<()> {
         match &*key {
-            FIRST => {
-                self.first = value;
+            LEFT => {
+                self.left = value;
                 Some(())
             }
-            SECOND => {
-                self.second = value;
+            RIGHT => {
+                self.right = value;
                 Some(())
             }
             _ => {
-                error!("key {key:?} should be first or second");
+                error!("key {key:?} should be {LEFT} or {RIGHT}");
                 None
             }
         }
@@ -98,7 +98,7 @@ impl DynCtx<Key, Val> for CallVal {
             FUNCTION => Some(&self.func),
             INPUT => Some(&self.input),
             _ => {
-                error!("key {key:?} should be function or input");
+                error!("key {key:?} should be {FUNCTION} or {INPUT}");
                 None
             }
         }
@@ -109,7 +109,7 @@ impl DynCtx<Key, Val> for CallVal {
             FUNCTION => Some(&mut self.func),
             INPUT => Some(&mut self.input),
             _ => {
-                error!("key {key:?} should be function or input");
+                error!("key {key:?} should be {FUNCTION} or {INPUT}");
                 None
             }
         }
@@ -126,23 +126,23 @@ impl DynCtx<Key, Val> for CallVal {
                 Some(())
             }
             _ => {
-                error!("key {key:?} should be function or input");
+                error!("key {key:?} should be {FUNCTION} or {INPUT}");
                 None
             }
         }
     }
 }
 
-const LIST_FIRST: &str = concatcp!(PREFIX_ID, "first");
-const LIST_LAST: &str = concatcp!(PREFIX_ID, "last");
+const FIRST: &str = concatcp!(PREFIX_ID, "first");
+const LAST: &str = concatcp!(PREFIX_ID, "last");
 
 impl DynCtx<Key, Val> for ListVal {
     fn ref_(&self, key: Key) -> Option<&Val> {
         match &*key {
-            LIST_FIRST => self.first(),
-            LIST_LAST => self.last(),
+            FIRST => self.first(),
+            LAST => self.last(),
             _ => {
-                error!("key {key:?} should be first or last");
+                error!("key {key:?} should be {FIRST} or {LAST}");
                 None
             }
         }
@@ -150,10 +150,10 @@ impl DynCtx<Key, Val> for ListVal {
 
     fn ref_mut(&mut self, key: Key) -> Option<&mut Val> {
         match &*key {
-            LIST_FIRST => self.first_mut(),
-            LIST_LAST => self.last_mut(),
+            FIRST => self.first_mut(),
+            LAST => self.last_mut(),
             _ => {
-                error!("key {key:?} should be first or last");
+                error!("key {key:?} should be {FIRST} or {LAST}");
                 None
             }
         }
@@ -161,16 +161,16 @@ impl DynCtx<Key, Val> for ListVal {
 
     fn set(&mut self, key: Key, value: Val) -> Option<()> {
         match &*key {
-            LIST_FIRST => {
+            FIRST => {
                 *self.first_mut()? = value;
                 Some(())
             }
-            LIST_LAST => {
+            LAST => {
                 *self.last_mut()? = value;
                 Some(())
             }
             _ => {
-                error!("key {key:?} should be function or input");
+                error!("key {key:?} should be {FIRST} or {LAST}");
                 None
             }
         }

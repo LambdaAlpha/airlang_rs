@@ -17,37 +17,37 @@ use crate::type_::ConstRef;
 
 #[derive(Clone)]
 pub struct PairLib {
-    pub get_first: ConstPrimFuncVal,
-    pub set_first: MutPrimFuncVal,
-    pub get_second: ConstPrimFuncVal,
-    pub set_second: MutPrimFuncVal,
+    pub get_left: ConstPrimFuncVal,
+    pub set_left: MutPrimFuncVal,
+    pub get_right: ConstPrimFuncVal,
+    pub set_right: MutPrimFuncVal,
 }
 
 impl Default for PairLib {
     fn default() -> Self {
         PairLib {
-            get_first: get_first(),
-            set_first: set_first(),
-            get_second: get_second(),
-            set_second: set_second(),
+            get_left: get_left(),
+            set_left: set_left(),
+            get_right: get_right(),
+            set_right: set_right(),
         }
     }
 }
 
 impl CfgMod for PairLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_pair.get_first", self.get_first);
-        extend_func(cfg, "_pair.set_first", self.set_first);
-        extend_func(cfg, "_pair.get_second", self.get_second);
-        extend_func(cfg, "_pair.set_second", self.set_second);
+        extend_func(cfg, "_pair.get_left", self.get_left);
+        extend_func(cfg, "_pair.set_left", self.set_left);
+        extend_func(cfg, "_pair.get_right", self.get_right);
+        extend_func(cfg, "_pair.set_right", self.set_right);
     }
 }
 
-pub fn get_first() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_get_first) }.const_()
+pub fn get_left() -> ConstPrimFuncVal {
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_left) }.const_()
 }
 
-fn fn_get_first(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_get_left(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Pair(pair) = &*ctx else {
         error!("ctx {ctx:?} should be a pair");
         return illegal_ctx(cfg);
@@ -56,27 +56,27 @@ fn fn_get_first(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
         error!("input {input:?} should be a unit");
         return illegal_input(cfg);
     }
-    pair.first.clone()
+    pair.left.clone()
 }
 
-pub fn set_first() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: false, f: mut_impl(fn_set_first) }.mut_()
+pub fn set_left() -> MutPrimFuncVal {
+    DynPrimFn { raw_input: false, f: mut_impl(fn_set_left) }.mut_()
 }
 
-fn fn_set_first(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
+fn fn_set_left(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Pair(pair) = ctx else {
         error!("ctx {ctx:?} should be a pair");
         return illegal_ctx(cfg);
     };
-    swap(&mut pair.first, &mut input);
+    swap(&mut pair.left, &mut input);
     input
 }
 
-pub fn get_second() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_get_second) }.const_()
+pub fn get_right() -> ConstPrimFuncVal {
+    DynPrimFn { raw_input: false, f: const_impl(fn_get_right) }.const_()
 }
 
-fn fn_get_second(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_get_right(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Pair(pair) = &*ctx else {
         error!("ctx {ctx:?} should be a pair");
         return illegal_ctx(cfg);
@@ -85,18 +85,18 @@ fn fn_get_second(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
         error!("input {input:?} should be a unit");
         return illegal_input(cfg);
     }
-    pair.second.clone()
+    pair.right.clone()
 }
 
-pub fn set_second() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: false, f: mut_impl(fn_set_second) }.mut_()
+pub fn set_right() -> MutPrimFuncVal {
+    DynPrimFn { raw_input: false, f: mut_impl(fn_set_right) }.mut_()
 }
 
-fn fn_set_second(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
+fn fn_set_right(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Pair(pair) = ctx else {
         error!("ctx {ctx:?} should be a pair");
         return illegal_ctx(cfg);
     };
-    swap(&mut pair.second, &mut input);
+    swap(&mut pair.right, &mut input);
     input
 }

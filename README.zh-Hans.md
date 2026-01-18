@@ -103,7 +103,7 @@ byte'X00ffff'
 
 **配对**
 
-`first : second`
+`left : right`
 
 ```air
 a : 1
@@ -133,7 +133,7 @@ a : b : c
 
 - `_ function input`
 - `input function _`
-- `first function second`
+- `left function right`
 
 ```air
 _ not true

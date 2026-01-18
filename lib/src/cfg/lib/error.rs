@@ -65,12 +65,12 @@ fn fn_assert(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Bit(bit) = pair.first else {
-        error!("input.first {:?} should be a bit", pair.first);
+    let Val::Bit(bit) = pair.left else {
+        error!("input.left {:?} should be a bit", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Text(message) = pair.second else {
-        error!("input.second {:?} should be a text", pair.second);
+    let Val::Text(message) = pair.right else {
+        error!("input.right {:?} should be a text", pair.right);
         return illegal_input(cfg);
     };
     let message = Text::from(message);

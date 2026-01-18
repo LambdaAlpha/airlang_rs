@@ -116,12 +116,12 @@ fn fn_add(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Decimal(d1) = pair.first else {
-        error!("input.first {:?} should be a decimal", pair.first);
+    let Val::Decimal(d1) = pair.left else {
+        error!("input.left {:?} should be a decimal", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Decimal(d2) = pair.second else {
-        error!("input.second {:?} should be a decimal", pair.second);
+    let Val::Decimal(d2) = pair.right else {
+        error!("input.right {:?} should be a decimal", pair.right);
         return illegal_input(cfg);
     };
     let Some(config) = DecimalLib::decimal_config(cfg) else {
@@ -143,12 +143,12 @@ fn fn_subtract(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Decimal(d1) = pair.first else {
-        error!("input.first {:?} should be a decimal", pair.first);
+    let Val::Decimal(d1) = pair.left else {
+        error!("input.left {:?} should be a decimal", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Decimal(d2) = pair.second else {
-        error!("input.second {:?} should be a decimal", pair.second);
+    let Val::Decimal(d2) = pair.right else {
+        error!("input.right {:?} should be a decimal", pair.right);
         return illegal_input(cfg);
     };
     let Some(config) = DecimalLib::decimal_config(cfg) else {
@@ -170,12 +170,12 @@ fn fn_multiply(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Decimal(d1) = pair.first else {
-        error!("input.first {:?} should be a decimal", pair.first);
+    let Val::Decimal(d1) = pair.left else {
+        error!("input.left {:?} should be a decimal", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Decimal(d2) = pair.second else {
-        error!("input.second {:?} should be a decimal", pair.second);
+    let Val::Decimal(d2) = pair.right else {
+        error!("input.right {:?} should be a decimal", pair.right);
         return illegal_input(cfg);
     };
     let Some(config) = DecimalLib::decimal_config(cfg) else {
@@ -197,16 +197,16 @@ fn fn_divide(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Decimal(d1) = pair.first else {
-        error!("input.first {:?} should be a decimal", pair.first);
+    let Val::Decimal(d1) = pair.left else {
+        error!("input.left {:?} should be a decimal", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Decimal(d2) = pair.second else {
-        error!("input.second {:?} should be a decimal", pair.second);
+    let Val::Decimal(d2) = pair.right else {
+        error!("input.right {:?} should be a decimal", pair.right);
         return illegal_input(cfg);
     };
     if d2.is_zero() {
-        error!("input.second should not be zero");
+        error!("input.right should not be zero");
         return illegal_input(cfg);
     }
     let Some(config) = DecimalLib::decimal_config(cfg) else {
@@ -229,12 +229,12 @@ fn fn_less(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Decimal(d1) = pair.first else {
-        error!("input.first {:?} should be a decimal", pair.first);
+    let Val::Decimal(d1) = pair.left else {
+        error!("input.left {:?} should be a decimal", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Decimal(d2) = pair.second else {
-        error!("input.second {:?} should be a decimal", pair.second);
+    let Val::Decimal(d2) = pair.right else {
+        error!("input.right {:?} should be a decimal", pair.right);
         return illegal_input(cfg);
     };
     Val::Bit(d1.less_than(&d2))
@@ -250,12 +250,12 @@ fn fn_less_equal(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Decimal(d1) = pair.first else {
-        error!("input.first {:?} should be a decimal", pair.first);
+    let Val::Decimal(d1) = pair.left else {
+        error!("input.left {:?} should be a decimal", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Decimal(d2) = pair.second else {
-        error!("input.second {:?} should be a decimal", pair.second);
+    let Val::Decimal(d2) = pair.right else {
+        error!("input.right {:?} should be a decimal", pair.right);
         return illegal_input(cfg);
     };
     Val::Bit(d1.less_equal(&d2))
@@ -271,12 +271,12 @@ fn fn_greater(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Decimal(d1) = pair.first else {
-        error!("input.first {:?} should be a decimal", pair.first);
+    let Val::Decimal(d1) = pair.left else {
+        error!("input.left {:?} should be a decimal", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Decimal(d2) = pair.second else {
-        error!("input.second {:?} should be a decimal", pair.second);
+    let Val::Decimal(d2) = pair.right else {
+        error!("input.right {:?} should be a decimal", pair.right);
         return illegal_input(cfg);
     };
     Val::Bit(d1.greater_than(&d2))
@@ -292,12 +292,12 @@ fn fn_greater_equal(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Decimal(d1) = pair.first else {
-        error!("input.first {:?} should be a decimal", pair.first);
+    let Val::Decimal(d1) = pair.left else {
+        error!("input.left {:?} should be a decimal", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Decimal(d2) = pair.second else {
-        error!("input.second {:?} should be a decimal", pair.second);
+    let Val::Decimal(d2) = pair.right else {
+        error!("input.right {:?} should be a decimal", pair.right);
         return illegal_input(cfg);
     };
     Val::Bit(d1.greater_equal(&d2))
@@ -313,12 +313,12 @@ fn fn_less_greater(cfg: &mut Cfg, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Decimal(d1) = pair.first else {
-        error!("input.first {:?} should be a decimal", pair.first);
+    let Val::Decimal(d1) = pair.left else {
+        error!("input.left {:?} should be a decimal", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Decimal(d2) = pair.second else {
-        error!("input.second {:?} should be a decimal", pair.second);
+    let Val::Decimal(d2) = pair.right else {
+        error!("input.right {:?} should be a decimal", pair.right);
         return illegal_input(cfg);
     };
     Val::Bit(d1.less_greater(&d2))
