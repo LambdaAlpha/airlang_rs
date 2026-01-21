@@ -14,7 +14,6 @@ use crate::cfg::error::abort_bug_with_msg;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::Eval;
 use crate::semantics::core::Form;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::MutFn;
@@ -22,7 +21,6 @@ use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
-use crate::type_::Call;
 use crate::type_::ConstRef;
 use crate::type_::DynRef;
 use crate::type_::Pair;
@@ -156,7 +154,7 @@ fn fn_self(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn which() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: true, f: dyn_impl(fn_which) }.mut_()
+    DynPrimFn { raw_input: false, f: dyn_impl(fn_which) }.mut_()
 }
 
 fn fn_which(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {
@@ -165,23 +163,21 @@ fn fn_which(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let Val::Call(call) = pair.right else {
-        error!("input.right {:?} should be a call", pair.right);
+    let Val::Pair(func_input) = pair.right else {
+        error!("input.right {:?} should be a pair", pair.right);
         return illegal_input(cfg);
     };
-    let call = Call::from(call);
-    let Val::Func(func) = Eval.dyn_call(cfg, ctx.reborrow(), call.func) else {
-        error!("input.right.func should be a func");
+    let func_input = Pair::from(func_input);
+    let Val::Func(func) = func_input.left else {
+        error!("input.right.left should be a func");
         return illegal_input(cfg);
     };
-    let input =
-        if func.raw_input() { call.input } else { Eval.dyn_call(cfg, ctx.reborrow(), call.input) };
     let const_ = ctx.is_const();
     let Some(ctx) = ctx.reborrow().unwrap().ref_mut(pair.left) else {
         error!("input.left should be a valid reference");
         return abort_bug_with_msg(cfg, "_context.which reference is not valid");
     };
-    func.dyn_call(cfg, DynRef::new(ctx, const_), input)
+    func.dyn_call(cfg, DynRef::new(ctx, const_), func_input.right)
 }
 
 pub(in crate::cfg) mod pattern;

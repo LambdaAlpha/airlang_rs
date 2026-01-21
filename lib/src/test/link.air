@@ -7,7 +7,7 @@ _ do [
     .self set _ import _context.self,
     .a set _ any .,
     .l set _ new a,
-    .a1 set l which _ self .,
+    .a1 set l which self : .,
     a == a1
 ]
 -----
@@ -22,7 +22,7 @@ _ do [
     .self set _ import _context.self,
     .a set _ any .,
     .l set _ new a,
-    .a1 set l which _ self .,
+    .a1 set l which self : .,
     a == a1
 ]
 -----
@@ -36,7 +36,7 @@ _ do [
     .which set _ import _link.which,
     .is_constant set _ import _context.is_constant,
     .l set _ new_constant {},
-    l which _ is_constant .,
+    l which is_constant : .,
 ]
 -----
 true
@@ -50,8 +50,8 @@ _ do [
     .l set _ new {},
     .l1 set l,
     .a set _ any .,
-    l which set apply _a : a,
-    .a1 set l1 which _ get _a,
+    l which set : _a : a,
+    .a1 set l1 which get : _a,
     a == a1
 ]
 -----
@@ -64,7 +64,7 @@ _ do [
     .new set _ import _link.new,
     .which set _ import _link.which,
     .l set _ new {},
-    l which _a set l,
+    l which set : _a : l,
     .l move _,
     .
 ]
@@ -78,8 +78,8 @@ _ do [
     .new set _ import _link.new,
     .which set _ import _link.which,
     .l set _ new {},
-    l which _a set l,
-    .l1 set l which _ move _a,
+    l which set : _a : l,
+    .l1 set l which move : _a,
     l == l1
 ]
 -----

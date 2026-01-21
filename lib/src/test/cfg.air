@@ -18,7 +18,7 @@ _ do [
     .get_length set _ import _config.get_length,
     .any set _ import _value.any,
     .c set _ new {a : _ any ., b : _ any ., c : _ any .,},
-    c which _ get_length .,
+    .c which get_length : .,
 ]
 -----
 3
@@ -32,8 +32,8 @@ _ do [
     .any set _ import _value.any,
     .c set _ any _config,
     .m set _ represent c,
-    .lc set c which _ config.get_length .,
-    .lm set m which _ map.get_length .,
+    .lc set .c which config.get_length : .,
+    .lm set .m which map.get_length : .,
     lc == lm
 ]
 -----
@@ -135,7 +135,7 @@ _ do [
     c where _ do [
         {_a : 1} with _ abort .,
     ],
-    c which _ recover .,
+    .c which recover : .,
     _ not c where _ exist _a,
 ]
 -----

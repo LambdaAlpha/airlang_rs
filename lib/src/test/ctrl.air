@@ -514,7 +514,7 @@ _ do [
     .push set _ import _list.push,
     .a set [],
     [1, 2, 3, 4, 5] iterate i : [
-        a which _ push i + 1
+        .a which push : i + 1
     ],
     a
 ]
@@ -557,7 +557,7 @@ _ do [
     .push set _ import _list.push,
     .b set [],
     byte'1122334455' iterate i : [
-        b which _ push i
+        .b which push : i
     ],
     b
 ]
@@ -570,7 +570,7 @@ _ do [
     .push set _ import _list.push,
     .s set [],
     .abc iterate i : [
-        s which _ push i
+        .s which push : i
     ],
     s
 ]
@@ -583,7 +583,7 @@ _ do [
     .push set _ import _list.push,
     .t set [],
     "hello" iterate i : [
-        t which _ push i
+        .t which push : i
     ],
     t
 ]
@@ -597,7 +597,7 @@ _ do [
     .new_map set _ import _map.new,
     .kv set [],
     {1 : 2, 3 : 4} iterate i : [
-        kv which _ push i
+        .kv which push : i
     ],
     _ new_map kv
 ]

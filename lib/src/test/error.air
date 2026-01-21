@@ -20,7 +20,7 @@ _ do [
         },
     },
     cfg where _ abort .,
-    cfg which _ is_aborted .,
+    .cfg which is_aborted : .,
 ]
 -----
 true
@@ -38,7 +38,7 @@ _ do [
         },
     },
     cfg where false assert "not a bug",
-    cfg which _ is_aborted .,
+    .cfg which is_aborted : .,
 ]
 -----
 true
@@ -56,7 +56,7 @@ _ do [
         },
     },
     cfg where true assert "is a bug",
-    cfg which _ is_aborted .,
+    .cfg which is_aborted : .,
 ]
 -----
 false
@@ -75,9 +75,9 @@ _ do [
         },
     },
     cfg where _ abort .,
-    .a1 set cfg which _ is_aborted .,
-    cfg which _ recover .,
-    .a2 set cfg which _ is_aborted .,
+    .a1 set .cfg which is_aborted : .,
+    .cfg which recover : .,
+    .a2 set .cfg which is_aborted : .,
     a1 and _ not a2,
 ]
 -----

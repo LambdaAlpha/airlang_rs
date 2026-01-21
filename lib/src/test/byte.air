@@ -5,9 +5,9 @@ _ do [
     .get_length set _ import _byte.get_length,
     .push set _ import _byte.push,
     .b set _ any _byte,
-    .l set b which _ get_length .,
-    b which _ push byte'00',
-    .l1 set b which _ get_length .,
+    .l set .b which get_length : .,
+    .b which push : byte'00',
+    .l1 set .b which get_length : .,
     l1 == l + 1
 ]
 -----
@@ -20,11 +20,11 @@ _ do [
     .get_length set _ import _byte.get_length,
     .join set _ import _byte.join,
     .a set _ any _byte,
-    .la set a which _ get_length .,
+    .la set .a which get_length : .,
     .b set _ any _byte,
-    .lb set b which _ get_length .,
+    .lb set .b which get_length : .,
     .ab set byte'' join [a, b],
-    .lab set ab which _ get_length .,
+    .lab set .ab which get_length : .,
     lab == la + lb
 ]
 -----
@@ -35,7 +35,7 @@ get_length empty
 _ do [
     .get_length set _ import _byte.get_length,
     .b set byte'',
-    b which _ get_length .
+    .b which get_length : .
 ]
 -----
 0
@@ -45,7 +45,7 @@ get_length else
 _ do [
     .get_length set _ import _byte.get_length,
     .b set byte'ff',
-    b which _ get_length .
+    .b which get_length : .
 ]
 -----
 1
@@ -59,7 +59,7 @@ _ do [
     .a set _ any _byte,
     .b set _ any _byte,
     .ab set a,
-    ab which _ push b,
+    .ab which push : b,
     .ab1 set byte'' join [a, b],
     ab == ab1
 ]
@@ -72,7 +72,7 @@ _ do [
     .push set _ import _byte.push,
     .a set byte'00',
     .b set byte'1122',
-    a which _ push b,
+    .a which push : b,
     a
 ]
 -----

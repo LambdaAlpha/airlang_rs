@@ -2,5 +2,5 @@ _ do [
     .prelude set _ import _prelude,
     .link_which set _ import _link.which,
     
-    prelude link_which set apply .empty : empty,
+    prelude link_which set : .empty : empty,
 ]

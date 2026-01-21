@@ -7,7 +7,7 @@ _ do [
     .l set _ any .,
     .r set _ any .,
     .p set l : r,
-    (l == p which _ get_left .) and (r == p which _ get_right .)
+    (l == .p which get_left : .) and (r == .p which get_right : .)
 ]
 -----
 true
@@ -23,10 +23,10 @@ _ do [
     .p set _ any _pair,
     .l set _ any .,
     .r set _ any .,
-    p which _ set_left l,
-    p which _ set_right r,
-    .l1 set p which _ get_left .,
-    .r1 set p which _ get_right .,
+    .p which set_left : l,
+    .p which set_right : r,
+    .l1 set .p which get_left : .,
+    .r1 set .p which get_right : .,
     (l == l1) and (r == r1)
 ]
 -----
@@ -41,8 +41,8 @@ _ do [
     .l1 set _ any .,
     .r1 set _ any .,
     .p set l1 : r1,
-    .l2 set p which _ set_left _ any .,
-    .r2 set p which _ set_right _ any .,
+    .l2 set .p which set_left : _ any .,
+    .r2 set .p which set_right : _ any .,
     (l1 == l2) and r1 == r2
 ]
 -----

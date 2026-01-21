@@ -8,21 +8,21 @@ _ do [
     .% set _ import _integer.remainder,
     .atom set [_unit, _bit, _key, _text, _integer, _decimal, _byte],
     .i set 3 + (_ any _integer) % 4,
-    .a set _ any atom which _ get i,
+    .a set _ any .atom which get : i,
     (_ any _bit) loop [
         (_ any _bit) test [
             .i set 3 + (_ any _integer) % 4,
-            .b set _ any atom which _ get i,
+            .b set _ any .atom which get : i,
             .i set (4 + (_ any _integer) % 4) % 4,
             .a set (_ any _bit) test [a : b] : [_ form _ a b],
         ] : [
             (_ any _bit) test [
                 .i set 3 + (_ any _integer) % 4,
-                .b set _ any atom which _ get i,
+                .b set _ any .atom which get : i,
                 .a set [a, b],
             ] : [
                 .i set 3 + (_ any _integer) % 4,
-                .b set _ any atom which _ get i,
+                .b set _ any .atom which get : i,
                 .a set {a : b},
             ]
         ]

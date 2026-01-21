@@ -20,7 +20,7 @@ _ do [
     .f set _ any .,
     .i set _ any .,
     .c set _ form _ f i,
-    (f == c which _ get_function .) and (i == c which _ get_input .)
+    (f == .c which get_function : .) and (i == .c which get_input : .)
 ]
 -----
 true
@@ -36,9 +36,9 @@ _ do [
     .c set _ any _call,
     .f set _ any .,
     .i set _ any .,
-    c which _ set_function f,
-    c which _ set_input i,
-    (f == c which _ get_function .) and (i == c which _ get_input .)
+    .c which set_function : f,
+    .c which set_input : i,
+    (f == .c which get_function : .) and (i == .c which get_input : .)
 ]
 -----
 true
@@ -52,8 +52,8 @@ _ do [
     .f1 set _ any .,
     .i1 set _ any .,
     .c set _ form _ f1 i1,
-    .f2 set c which _ set_function _ any .,
-    .i2 set c which _ set_input _ any .,
+    .f2 set .c which set_function : _ any .,
+    .i2 set .c which set_input : _ any .,
     (f1 == f2) and (i1 == i2)
 ]
 -----

@@ -5,9 +5,9 @@ _ do [
     .get_length set _ import _text.get_length,
     .push set _ import _text.push,
     .t set _ any _text,
-    .l set t which _ get_length .,
-    t which _ push "a",
-    .l1 set t which _ get_length .,
+    .l set .t which get_length : .,
+    .t which push : "a",
+    .l1 set .t which get_length : .,
     l1 == l + 1
 ]
 -----
@@ -20,11 +20,11 @@ _ do [
     .get_length set _ import _text.get_length,
     .join set _ import _text.join,
     .a set _ any _text,
-    .la set a which _ get_length .,
+    .la set .a which get_length : .,
     .b set _ any _text,
-    .lb set b which _ get_length .,
+    .lb set .b which get_length : .,
     .ab set "" join [a, b],
-    .lab set ab which _ get_length .,
+    .lab set .ab which get_length : .,
     lab == la + lb
 ]
 -----
@@ -35,7 +35,7 @@ get_length empty
 _ do [
     .get_length set _ import _text.get_length,
     .t set "",
-    t which _ get_length .
+    .t which get_length : .
 ]
 -----
 0
@@ -45,7 +45,7 @@ get_length else
 _ do [
     .get_length set _ import _text.get_length,
     .t set "1",
-    t which _ get_length .
+    .t which get_length : .
 ]
 -----
 1
@@ -59,7 +59,7 @@ _ do [
     .a set _ any _text,
     .b set _ any _text,
     .t set a,
-    t which _ push b,
+    .t which push : b,
     .t1 set "" join [a, b],
     t == t1
 ]
@@ -72,8 +72,8 @@ _ do [
     .push set _ import _text.push,
     .a set "hello",
     .b set "world",
-    a which _ push " ",
-    a which _ push b,
+    .a which push : " ",
+    .a which push : b,
     a
 ]
 -----

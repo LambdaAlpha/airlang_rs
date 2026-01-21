@@ -73,7 +73,7 @@ set special key 2
 _ do [
     .get_left set _ import _pair.get_left,
     .:p set 1 : 2,
-    :p which _ get_left .
+    .:p which get_left : .
 ]
 -----
 1
@@ -154,7 +154,7 @@ _ do [
         },
     },
     c where [.a, .b] = [3],
-    c which _ is_aborted .,
+    .c which is_aborted : .,
 ]
 -----
 true
@@ -190,8 +190,8 @@ _ do [
 -----
 _ do [
     .p set 1 : 2,
-    p which _left set 3,
-    p which _ get _left
+    .p which set : _left : 3,
+    .p which get : _left
 ]
 -----
 3
@@ -200,8 +200,8 @@ _ do [
 -----
 _ do [
     .c set _ data _ func input,
-    c which _function set _f,
-    c which _ get _function
+    .c which set : _function : _f,
+    .c which get : _function
 ]
 -----
 _f
@@ -211,8 +211,8 @@ _f
 _ do [
     .list.get set _ import _list.get,
     .l set [1, 2, 3],
-    l which _first set 4,
-    l which _ list.get 0
+    .l which set : _first : 4,
+    .l which list.get : 0
 ]
 -----
 4
@@ -222,8 +222,8 @@ _ do [
 _ do [
     .map.get set _ import _map.get,
     .m set {a : 1, b : 2},
-    m which _a set 3,
-    m which _ map.get _a
+    .m which set : _a : 3,
+    .m which map.get : _a
 ]
 -----
 .(3)
@@ -233,8 +233,8 @@ _ do [
 _ do [
     .map.get set _ import _map.get,
     .m set {},
-    m which _a set 3,
-    m which _ map.get _a
+    .m which set : _a : 3,
+    .m which map.get : _a
 ]
 -----
 .(3)
@@ -255,7 +255,7 @@ _ do [
     .const_link set _ import _link.new_constant,
     .link_which set _ import _link.which,
     .a set _ const_link .,
-    a link_which _ is_constant .
+    a link_which is_constant : .
 ]
 -----
 true
@@ -264,8 +264,8 @@ is_constant false
 -----
 _ do [
     .is_constant set _ import _context.is_constant,
-    .a set {},
-    a which _ is_constant .
+    _a set {},
+    _a which is_constant : .
 ]
 -----
 false
@@ -275,8 +275,8 @@ which 1
 _ do [
     .set_left set _ import _pair.set_left,
     _a set {_p : 1 : 2},
-    _a which _ eval _ form _p which _ set_left 3,
-    _a which _ move _p,
+    _a which eval : _ form _p which set_left : 3,
+    _a which move : _p,
 ]
 -----
 3 : 2
@@ -289,8 +289,8 @@ _ do [
         _p : 1 : 2,
         _b : 3,
     },
-    _a which _ eval _ form _p which _ set_left _ get _b,
-    _a which _ move _p,
+    _a which eval : _ form _p which set_left : _ get _b,
+    _a which move : _p,
 ]
 -----
 3 : 2
@@ -304,8 +304,8 @@ _ do [
         _p : 1 : 2,
         b : 3,
     },
-    _a which _ eval _ form _p which _ .set_left .b,
-    _a which _ move _p,
+    _a which eval : _ form _p which .set_left : .b,
+    _a which move : _p,
 ]
 -----
 3 : 2
@@ -314,7 +314,7 @@ which recursive
 -----
 _ do [
     _a set {_b : {_c : 1}},
-    _a which _ eval _ form _b which _ get _c
+    _a which eval : _ form _b which get : _c
 ]
 -----
 1
@@ -324,7 +324,7 @@ which self
 _ do [
     .self set _ import _context.self,
     .u set 1,
-    u which _ self .
+    .u which self : .
 ]
 -----
 1
@@ -335,7 +335,7 @@ _ do [
     .self set _ import _context.self,
     _a set 1,
     .b set _ self .,
-    b which _ get _a
+    .b which get : _a
 ]
 -----
 1
@@ -348,7 +348,7 @@ _ do [
     .contain set _ import _map.contain,
     .a set _ self .,
     _b set _ any .,
-    a which _ contain _b
+    .a which contain : _b
 ]
 -----
 false

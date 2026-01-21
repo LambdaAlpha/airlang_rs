@@ -58,8 +58,8 @@ _ do [
     .f set _ function {
         context_access : _free,
         code : __ : _ form _ do [
-            ..i set .a link_which _ get _i,
-            .a link_which _i set .i + 1,
+            ..i set .a link_which get : _i,
+            .a link_which set : _i : .i + 1,
             .i
         ],
         prelude : {
@@ -79,8 +79,8 @@ _ do [
     .f set _ data _ function {
         context_access : _free,
         code : __ : _ form _ do [
-            ..i set .a link_which _ get _value,
-            .a link_which _value set .i + 1,
+            ..i set .a link_which get : _value,
+            .a link_which set : _value : .i + 1,
             .i
         ],
         prelude : {
@@ -100,7 +100,7 @@ _ do [
     .link_which set _ import _link.which,
     _a set 1,
     .f set _ function {
-        code : (.c : __) : _ form .c link_which _ get _a,
+        code : (.c : __) : _ form .c link_which get : _a,
         context_access : _constant,
         prelude : {},
     },
@@ -115,7 +115,7 @@ _ do [
     .link_which set _ import _link.which,
     _a set 1,
     .f set _ function {
-        code : (.c : __) : _ form .c link_which _ get _a,
+        code : (.c : __) : _ form .c link_which get : _a,
         context_access : _mutable,
         prelude : {},
     },
@@ -129,7 +129,7 @@ mutable mutate
 _ do [
     .link_which set _ import _link.which,
     .f set _ function {
-        code : (.c : .i) : _ form .c link_which .i set 2,
+        code : (.c : .i) : _ form .c link_which set : .i : 2,
         context_access : _mutable,
         prelude : {},
     },
@@ -149,7 +149,7 @@ _ do [
     .where set _ import _config.where,
     .is_aborted set _ import _error.is_aborted,
     .f set _ function {
-        code : (.c : .i) : _ form .c link_which .i set 2,
+        code : (.c : .i) : _ form .c link_which set : .i : 2,
         context_access : _constant,
         prelude : {},
     },
@@ -160,7 +160,7 @@ _ do [
         },
     },
     c where _ f .a,
-    c which _ is_aborted .,
+    .c which is_aborted : .,
 ]
 -----
 true
@@ -174,7 +174,7 @@ _ do [
         context_access : _constant,
         prelude : {},
     },
-    a which _ f .
+    .a which f : .
 ]
 -----
 1
@@ -203,10 +203,10 @@ _ do [
     .set_left set _ import _pair.set_left,
     .a set 1 : 2,
     .f set _ function {
-        code : (.p : .i) : _ form .p link_which _ set_left .i,
+        code : (.p : .i) : _ form .p link_which set_left : .i,
         prelude : {},
     },
-    a which _ f 3,
+    .a which f : 3,
     a
 ]
 -----
@@ -235,7 +235,7 @@ repr primitive free
 _ do [
     .represent set _ import _function.represent,
     .function.get_code set _ import _function.get_code,
-    .not_code set not which _ function.get_code .,
+    .not_code set .not which function.get_code : .,
     .repr set {
         context_access : _free,
         raw_input : false,
@@ -268,7 +268,7 @@ repr primitive const
 _ do [
     .represent set _ import _function.represent,
     .function.get_code set _ import _function.get_code,
-    .type_code set get_type which _ function.get_code .,
+    .type_code set .get_type which function.get_code : .,
     .repr set {
         context_access : _constant,
         raw_input : false,
@@ -299,7 +299,7 @@ access free
 -----
 _ do [
     .get_context_access set _ import _function.get_context_access,
-    function which _ get_context_access .
+    .function which get_context_access : .
 ]
 -----
 _free
@@ -308,7 +308,7 @@ access const
 -----
 _ do [
     .get_context_access set _ import _function.get_context_access,
-    get which _ get_context_access .
+    .get which get_context_access : .
 ]
 -----
 _constant
@@ -317,7 +317,7 @@ access mutable
 -----
 _ do [
     .get_context_access set _ import _function.get_context_access,
-    code which _ get_context_access .
+    .code which get_context_access : .
 ]
 -----
 _mutable
@@ -327,7 +327,7 @@ access default
 _ do [
     .get_context_access set _ import _function.get_context_access,
     .f set _ function {},
-    f which _ get_context_access .
+    .f which get_context_access : .
 ]
 -----
 _mutable
@@ -336,7 +336,7 @@ is_raw_input true
 -----
 _ do [
     .is_raw_input set _ import _function.is_raw_input,
-    data which _ is_raw_input .
+    .data which is_raw_input : .
 ]
 -----
 true
@@ -345,7 +345,7 @@ is_raw_input false
 -----
 _ do [
     .is_raw_input set _ import _function.is_raw_input,
-    id which _ is_raw_input .
+    .id which is_raw_input : .
 ]
 -----
 false
@@ -354,7 +354,7 @@ is_primitive primitive
 -----
 _ do [
     .is_primitive set _ import _function.is_primitive,
-    not which _ is_primitive .
+    .not which is_primitive : .
 ]
 -----
 true
@@ -364,7 +364,7 @@ is_primitive composite
 _ do [
     .is_primitive set _ import _function.is_primitive,
     .f set _ function {},
-    f which _ is_primitive .
+    .f which is_primitive : .
 ]
 -----
 false
@@ -376,7 +376,7 @@ _ do [
     .f set _ function {
         code : (_ctx : .i) : .i
     },
-    f which _ function.get_code .
+    .f which function.get_code : .
 ]
 -----
 (_ctx : i) : i
@@ -390,7 +390,7 @@ _ do [
     .f set _ function {
         prelude : prelude
     },
-    (f which _ function.get_prelude .) == prelude
+    (.f which function.get_prelude : .) == prelude
 ]
 -----
 true

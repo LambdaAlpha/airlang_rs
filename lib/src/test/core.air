@@ -72,7 +72,7 @@ cell ref
 -----
 _ do [
     .c set .(1),
-    c which _ get _value
+    .c which get : _value
 ]
 -----
 1
@@ -81,7 +81,7 @@ pair ref
 -----
 _ do [
     .p set 1 : 2,
-    p which _ eval _ form [_ get _left, _ get _right]
+    .p which eval : _ form [_ get _left, _ get _right]
 ]
 -----
 [1, 2]
@@ -90,7 +90,7 @@ call ref
 -----
 _ do [
     .c set _ data _ func input,
-    c which _ eval _ form [_ get _function, _ get _input]
+    .c which eval : _ form [_ get _function, _ get _input]
 ]
 -----
 [func, input]
@@ -99,7 +99,7 @@ list ref
 -----
 _ do [
     .l set [0, 3, 6],
-    l which _ eval _ form [_ get _first, _ get _last]
+    .l which eval : _ form [_ get _first, _ get _last]
 ]
 -----
 [0, 6]
@@ -108,7 +108,7 @@ map ref
 -----
 _ do [
     .m set {a : 1, b : 2},
-    m which _ code [a, b]
+    .m which eval : [.a, .b]
 ]
 -----
 [1, 2]
@@ -133,7 +133,7 @@ list eval
 =====
 map eval
 -----
-{a : (_ not true)}
+{a : _ not true}
 -----
 {a : false}
 =====
@@ -147,7 +147,7 @@ cell ctx value
 -----
 _ do [
     .c set .(1),
-    c which _ get _value
+    .c which get : _value
 ]
 -----
 1
@@ -156,7 +156,7 @@ pair ctx left
 -----
 _ do [
     .p set 1 : 2,
-    p which _ get _left
+    .p which get : _left
 ]
 -----
 1
@@ -165,7 +165,7 @@ pair ctx right
 -----
 _ do [
     .p set 1 : 2,
-    p which _ get _right
+    .p which get : _right
 ]
 -----
 2
@@ -174,7 +174,7 @@ call ctx func
 -----
 _ do [
     .c set _ data _ func input,
-    c which _ get _function
+    .c which get : _function
 ]
 -----
 func
@@ -183,7 +183,7 @@ call ctx input
 -----
 _ do [
     .c set _ data _ func input,
-    c which _ get _input
+    .c which get : _input
 ]
 -----
 input
@@ -192,7 +192,7 @@ list ctx index
 -----
 _ do [
     .l set [0, 2, 4],
-    l which _ get 1
+    .l which get : 1
 ]
 -----
 2
@@ -201,7 +201,7 @@ list ctx first
 -----
 _ do [
     .l set [0, 2, 4],
-    l which _ get _first
+    .l which get : _first
 ]
 -----
 0
@@ -210,7 +210,7 @@ list ctx last
 -----
 _ do [
     .l set [0, 2, 4],
-    l which _ get _last
+    .l which get : _last
 ]
 -----
 4
@@ -219,7 +219,7 @@ map ctx key
 -----
 _ do [
     .m set {a : 1, b : 2},
-    m which _ get .a
+    .m which get : .a
 ]
 -----
 1

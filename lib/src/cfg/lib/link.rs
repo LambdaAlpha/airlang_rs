@@ -2,24 +2,17 @@ use std::ops::DerefMut;
 
 use log::error;
 
-use super::DynPrimFn;
 use super::FreePrimFn;
-use super::dyn_impl;
 use super::free_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::error::abort_bug_with_msg;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::Eval;
-use crate::semantics::func::ConstFn;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::LinkVal;
-use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
-use crate::type_::Call;
-use crate::type_::ConstRef;
 use crate::type_::DynRef;
 use crate::type_::Pair;
 
@@ -28,7 +21,7 @@ use crate::type_::Pair;
 pub struct LinkLib {
     pub new: FreePrimFuncVal,
     pub new_constant: FreePrimFuncVal,
-    pub which: MutPrimFuncVal,
+    pub which: FreePrimFuncVal,
 }
 
 impl Default for LinkLib {
@@ -61,39 +54,33 @@ fn fn_new_constant(_cfg: &mut Cfg, input: Val) -> Val {
     Val::Link(LinkVal::new(input, true))
 }
 
-pub fn which() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: true, f: dyn_impl(fn_which) }.mut_()
+pub fn which() -> FreePrimFuncVal {
+    FreePrimFn { raw_input: false, f: free_impl(fn_which) }.free()
 }
 
-fn fn_which(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {
+fn fn_which(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         error!("input {input:?} should be a pair");
         return illegal_input(cfg);
     };
     let pair = Pair::from(pair);
-    let link = Eval.dyn_call(cfg, ctx.reborrow(), pair.left);
-    let Val::Link(link) = link else {
-        error!("input.left {link:?} should be a link");
+    let Val::Link(link) = pair.left else {
+        error!("input.left {:?} should be a link", pair.left);
         return illegal_input(cfg);
     };
-    let Val::Call(call) = pair.right else {
-        error!("input.right {:?} should be a call", pair.right);
+    let Val::Pair(func_input) = pair.right else {
+        error!("input.right {:?} should be a pair", pair.right);
         return illegal_input(cfg);
     };
-    let call = Call::from(call);
-    let Val::Func(func) = Eval.dyn_call(cfg, ctx.reborrow(), call.func) else {
-        error!("input.right.func should be a func");
+    let func_input = Pair::from(func_input);
+    let Val::Func(func) = func_input.left else {
+        error!("input.right.left should be a func");
         return illegal_input(cfg);
     };
-    let input =
-        if func.raw_input() { call.input } else { Eval.dyn_call(cfg, ctx.reborrow(), call.input) };
     let Ok(mut ctx) = link.try_borrow_mut() else {
         error!("link is already borrowed");
         return abort_bug_with_msg(cfg, "link is in use");
     };
-    if link.is_const() {
-        func.const_call(cfg, ConstRef::new(ctx.deref_mut()), input)
-    } else {
-        func.mut_call(cfg, ctx.deref_mut(), input)
-    }
+    let const_ = link.is_const();
+    func.dyn_call(cfg, DynRef::new(ctx.deref_mut(), const_), func_input.right)
 }

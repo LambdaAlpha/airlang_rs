@@ -14,7 +14,7 @@ any unit
 _ do [
     .any set _ import _value.any,
     .u set _ any _unit,
-    u which _ get_type .
+    .u which get_type : .
 ]
 -----
 _unit
@@ -24,7 +24,7 @@ any bit
 _ do [
     .any set _ import _value.any,
     .b set _ any _bit,
-    b which _ get_type .
+    .b which get_type : .
 ]
 -----
 _bit
@@ -34,7 +34,7 @@ any key
 _ do [
     .any set _ import _value.any,
     .s set _ any _key,
-    s which _ get_type .
+    .s which get_type : .
 ]
 -----
 _key
@@ -44,7 +44,7 @@ any text
 _ do [
     .any set _ import _value.any,
     .t set _ any _text,
-    t which _ get_type .
+    .t which get_type : .
 ]
 -----
 _text
@@ -54,7 +54,7 @@ any integer
 _ do [
     .any set _ import _value.any,
     .i set _ any _integer,
-    i which _ get_type .
+    .i which get_type : .
 ]
 -----
 _integer
@@ -64,7 +64,7 @@ any decimal
 _ do [
     .any set _ import _value.any,
     .n set _ any _decimal,
-    n which _ get_type .
+    .n which get_type : .
 ]
 -----
 _decimal
@@ -74,7 +74,7 @@ any byte
 _ do [
     .any set _ import _value.any,
     .b set _ any _byte,
-    b which _ get_type .
+    .b which get_type : .
 ]
 -----
 _byte
@@ -84,7 +84,7 @@ any cell
 _ do [
     .any set _ import _value.any,
     .c set _ any _cell,
-    c which _ get_type .
+    .c which get_type : .
 ]
 -----
 _cell
@@ -94,7 +94,7 @@ any pair
 _ do [
     .any set _ import _value.any,
     .p set _ any _pair,
-    p which _ get_type .
+    .p which get_type : .
 ]
 -----
 _pair
@@ -104,7 +104,7 @@ any call
 _ do [
     .any set _ import _value.any,
     .c set _ any _call,
-    c which _ get_type .
+    .c which get_type : .
 ]
 -----
 _call
@@ -114,7 +114,7 @@ any list
 _ do [
     .any set _ import _value.any,
     .l set _ any _list,
-    l which _ get_type .
+    .l which get_type : .
 ]
 -----
 _list
@@ -124,7 +124,7 @@ any map
 _ do [
     .any set _ import _value.any,
     .m set _ any _map,
-    m which _ get_type .
+    .m which get_type : .
 ]
 -----
 _map
@@ -134,7 +134,7 @@ any link
 _ do [
     .any set _ import _value.any,
     .l set _ any _link,
-    l which _ get_type .
+    .l which get_type : .
 ]
 -----
 _link
@@ -144,7 +144,7 @@ any function
 _ do [
     .any set _ import _value.any,
     .f set _ any _function,
-    f which _ get_type .
+    .f which get_type : .
 ]
 -----
 _function
@@ -153,7 +153,7 @@ get_type unit
 -----
 _ do [
     .a set .,
-    a which _ get_type .
+    .a which get_type : .
 ]
 -----
 _unit
@@ -162,7 +162,7 @@ get_type bit
 -----
 _ do [
     .a set true,
-    a which _ get_type .
+    .a which get_type : .
 ]
 -----
 _bit
@@ -171,7 +171,7 @@ get_type key
 -----
 _ do [
     .a set _a,
-    a which _ get_type .
+    .a which get_type : .
 ]
 -----
 _key
@@ -180,7 +180,7 @@ get_type text
 -----
 _ do [
     .a set "",
-    a which _ get_type .
+    .a which get_type : .
 ]
 -----
 _text
@@ -189,7 +189,7 @@ get_type integer
 -----
 _ do [
     .a set 1,
-    a which _ get_type .
+    .a which get_type : .
 ]
 -----
 _integer
@@ -198,7 +198,7 @@ get_type decimal
 -----
 _ do [
     .a set 1.0,
-    a which _ get_type .
+    .a which get_type : .
 ]
 -----
 _decimal
@@ -207,7 +207,7 @@ get_type byte
 -----
 _ do [
     .a set byte'ff',
-    a which _ get_type .
+    .a which get_type : .
 ]
 -----
 _byte
@@ -216,7 +216,7 @@ get_type cell
 -----
 _ do [
     .a set .(1),
-    a which _ get_type .
+    .a which get_type : .
 ]
 -----
 _cell
@@ -225,7 +225,7 @@ get_type pair
 -----
 _ do [
     .a set 1 : 2,
-    a which _ get_type .
+    .a which get_type : .
 ]
 -----
 _pair
@@ -234,7 +234,7 @@ get_type call
 -----
 _ do [
     .a set _ data _ f a,
-    a which _ get_type .
+    .a which get_type : .
 ]
 -----
 _call
@@ -243,7 +243,7 @@ get_type list
 -----
 _ do [
     .a set [],
-    a which _ get_type .
+    .a which get_type : .
 ]
 -----
 _list
@@ -252,7 +252,7 @@ get_type map
 -----
 _ do [
     .a set {},
-    a which _ get_type .
+    .a which get_type : .
 ]
 -----
 _map
@@ -262,7 +262,7 @@ get_type link
 _ do [
     .new_link set _ import _link.new,
     .a set _ new_link .,
-    a which _ get_type .
+    .a which get_type : .
 ]
 -----
 _link
@@ -271,7 +271,7 @@ get_type function
 -----
 _ do [
     .a set _ function {},
-    a which _ get_type .
+    .a which get_type : .
 ]
 -----
 _function
