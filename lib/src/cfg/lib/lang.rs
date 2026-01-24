@@ -1,16 +1,18 @@
+use std::rc::Rc;
+
 use const_format::concatcp;
 use log::error;
 
+use super::FreeImpl;
 use crate::cfg::CfgMod;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
-use crate::cfg::lib::DynPrimFn;
-use crate::cfg::lib::FreePrimFn;
-use crate::cfg::lib::free_impl;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::Id;
 use crate::semantics::core::PREFIX_ID;
+use crate::semantics::func::FreePrimFunc;
+use crate::semantics::func::MutPrimFunc;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
@@ -68,23 +70,23 @@ impl CfgMod for LangLib {
 }
 
 pub fn data() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: true, f: Id }.free()
+    FreePrimFunc { raw_input: true, fn_: Rc::new(Id) }.into()
 }
 
 pub fn id() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: Id }.free()
+    FreePrimFunc { raw_input: false, fn_: Rc::new(Id) }.into()
 }
 
 pub fn code() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: true, f: Eval }.mut_()
+    MutPrimFunc { raw_input: true, fn_: Rc::new(Eval) }.into()
 }
 
 pub fn eval() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: false, f: Eval }.mut_()
+    MutPrimFunc { raw_input: false, fn_: Rc::new(Eval) }.into()
 }
 
 pub fn parse() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_parse) }.free()
+    FreeImpl { free: fn_parse }.build()
 }
 
 fn fn_parse(cfg: &mut Cfg, input: Val) -> Val {
@@ -100,7 +102,7 @@ fn fn_parse(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn generate() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_generate) }.free()
+    FreeImpl { free: fn_generate }.build()
 }
 
 fn fn_generate(_cfg: &mut Cfg, input: Val) -> Val {

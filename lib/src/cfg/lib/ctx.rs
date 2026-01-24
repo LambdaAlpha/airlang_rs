@@ -1,15 +1,16 @@
+use std::rc::Rc;
+
 use const_format::concatcp;
 use log::error;
 
 use self::pattern::PatternAssign;
 use self::pattern::PatternMatch;
 use self::pattern::PatternParse;
-use super::DynPrimFn;
-use super::FreeImpl;
+use super::ConstImpl;
+use super::DynImpl;
 use super::MutImpl;
-use super::const_impl;
-use super::dyn_impl;
-use super::mut_impl;
+use super::abort_const;
+use super::abort_free;
 use crate::cfg::CfgMod;
 use crate::cfg::error::abort_bug_with_msg;
 use crate::cfg::error::illegal_input;
@@ -18,6 +19,7 @@ use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Form;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::ctx::DynCtx;
+use crate::semantics::func::ConstPrimFunc;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
@@ -75,7 +77,7 @@ impl CfgMod for CtxLib {
 }
 
 pub fn get() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_get) }.const_()
+    ConstImpl { free: abort_free(GET), const_: fn_get }.build()
 }
 
 fn fn_get(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -87,7 +89,7 @@ fn fn_get(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn set() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: false, f: mut_impl(fn_set) }.mut_()
+    MutImpl { free: abort_free(SET), const_: abort_const(SET), mut_: fn_set }.build()
 }
 
 fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -104,11 +106,12 @@ fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn form() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: true, f: Form }.const_()
+    ConstPrimFunc { raw_input: true, fn_: Rc::new(Form) }.into()
 }
 
 pub fn represent() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: false, f: mut_impl(fn_represent) }.mut_()
+    MutImpl { free: abort_free(REPRESENT), const_: abort_const(REPRESENT), mut_: fn_represent }
+        .build()
 }
 
 fn fn_represent(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -134,27 +137,19 @@ fn fn_represent(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn is_constant() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: false, f: MutImpl::new(FreeImpl::abort, fn_const, fn_mut) }.mut_()
+    DynImpl { free: abort_free(IS_CONSTANT), dyn_: fn_is_constant }.build()
 }
 
-fn fn_const(cfg: &mut Cfg, _ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_is_constant(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
     if !input.is_unit() {
         error!("input {input:?} should be a unit");
         return illegal_input(cfg);
     }
-    Val::Bit(Bit::true_())
-}
-
-fn fn_mut(cfg: &mut Cfg, _ctx: &mut Val, input: Val) -> Val {
-    if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
-    }
-    Val::Bit(Bit::false_())
+    Val::Bit(Bit::from(ctx.is_const()))
 }
 
 pub fn self_() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_self) }.const_()
+    ConstImpl { free: abort_free(SELF), const_: fn_self }.build()
 }
 
 fn fn_self(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -166,7 +161,7 @@ fn fn_self(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn which() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: false, f: dyn_impl(fn_which) }.mut_()
+    DynImpl { free: abort_free(WHICH), dyn_: fn_which }.build()
 }
 
 fn fn_which(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {

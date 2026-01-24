@@ -3,9 +3,10 @@ use std::mem::swap;
 use const_format::concatcp;
 use log::error;
 
-use super::DynPrimFn;
-use super::const_impl;
-use super::mut_impl;
+use super::ConstImpl;
+use super::MutImpl;
+use super::abort_const;
+use super::abort_free;
 use crate::cfg::CfgMod;
 use crate::cfg::error::illegal_ctx;
 use crate::cfg::error::illegal_input;
@@ -52,7 +53,7 @@ impl CfgMod for PairLib {
 }
 
 pub fn get_left() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_get_left) }.const_()
+    ConstImpl { free: abort_free(GET_LEFT), const_: fn_get_left }.build()
 }
 
 fn fn_get_left(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -68,7 +69,7 @@ fn fn_get_left(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn set_left() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: false, f: mut_impl(fn_set_left) }.mut_()
+    MutImpl { free: abort_free(SET_LEFT), const_: abort_const(SET_LEFT), mut_: fn_set_left }.build()
 }
 
 fn fn_set_left(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
@@ -81,7 +82,7 @@ fn fn_set_left(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
 }
 
 pub fn get_right() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_get_right) }.const_()
+    ConstImpl { free: abort_free(GET_RIGHT), const_: fn_get_right }.build()
 }
 
 fn fn_get_right(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -97,7 +98,8 @@ fn fn_get_right(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn set_right() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: false, f: mut_impl(fn_set_right) }.mut_()
+    MutImpl { free: abort_free(SET_RIGHT), const_: abort_const(SET_RIGHT), mut_: fn_set_right }
+        .build()
 }
 
 fn fn_set_right(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {

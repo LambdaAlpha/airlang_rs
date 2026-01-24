@@ -9,7 +9,6 @@ use airlang::cfg::error::illegal_cfg;
 use airlang::cfg::error::illegal_input;
 use airlang::cfg::extend_func;
 use airlang::cfg::lib::FreeImpl;
-use airlang::cfg::lib::FreePrimFn;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_ID;
 use airlang::semantics::val::FreePrimFuncVal;
@@ -45,7 +44,7 @@ impl CfgMod for BuildLib {
 // todo rename
 // todo design
 pub fn load() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: FreeImpl::new(fn_load) }.free()
+    FreeImpl { free: fn_load }.build()
 }
 
 // todo rename

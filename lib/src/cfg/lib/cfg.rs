@@ -5,18 +5,18 @@ use std::panic::catch_unwind;
 use const_format::concatcp;
 use log::error;
 
+use super::ConstImpl;
+use super::DynImpl;
+use super::FreeImpl;
+use super::MutImpl;
+use super::abort_const;
+use super::abort_free;
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
 use crate::cfg::error::abort_bug_with_msg;
 use crate::cfg::error::illegal_ctx;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
-use crate::cfg::lib::DynPrimFn;
-use crate::cfg::lib::FreePrimFn;
-use crate::cfg::lib::const_impl;
-use crate::cfg::lib::dyn_impl;
-use crate::cfg::lib::free_impl;
-use crate::cfg::lib::mut_impl;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::PREFIX_ID;
@@ -90,7 +90,7 @@ impl CfgMod for CfgLib {
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_new) }.free()
+    FreeImpl { free: fn_new }.build()
 }
 
 fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
@@ -107,7 +107,7 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn represent() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_represent) }.free()
+    FreeImpl { free: fn_represent }.build()
 }
 
 fn fn_represent(cfg: &mut Cfg, input: Val) -> Val {
@@ -119,7 +119,7 @@ fn fn_represent(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn exist() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_exist) }.free()
+    FreeImpl { free: fn_exist }.build()
 }
 
 fn fn_exist(cfg: &mut Cfg, input: Val) -> Val {
@@ -132,7 +132,7 @@ fn fn_exist(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn import() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_import) }.free()
+    FreeImpl { free: fn_import }.build()
 }
 
 fn fn_import(cfg: &mut Cfg, input: Val) -> Val {
@@ -148,7 +148,7 @@ fn fn_import(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn export() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_export) }.free()
+    FreeImpl { free: fn_export }.build()
 }
 
 fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
@@ -169,7 +169,7 @@ fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn get_length() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_get_length) }.const_()
+    ConstImpl { free: abort_free(GET_LENGTH), const_: fn_get_length }.build()
 }
 
 fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -185,7 +185,7 @@ fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn with() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: true, f: dyn_impl(fn_with) }.mut_()
+    DynImpl { free: abort_free(WITH), dyn_: fn_with }.build_with(true)
 }
 
 fn fn_with(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {
@@ -210,7 +210,7 @@ fn fn_with(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {
 }
 
 pub fn self_() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_self) }.free()
+    FreeImpl { free: fn_self }.build()
 }
 
 fn fn_self(cfg: &mut Cfg, input: Val) -> Val {
@@ -222,7 +222,7 @@ fn fn_self(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn where_() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: true, f: mut_impl(fn_where) }.mut_()
+    MutImpl { free: abort_free(WHERE), const_: abort_const(WHERE), mut_: fn_where }.build_with(true)
 }
 
 fn fn_where(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {

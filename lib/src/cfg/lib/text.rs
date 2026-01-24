@@ -1,11 +1,11 @@
 use const_format::concatcp;
 use log::error;
 
-use super::DynPrimFn;
-use super::FreePrimFn;
-use super::const_impl;
-use super::free_impl;
-use super::mut_impl;
+use super::ConstImpl;
+use super::FreeImpl;
+use super::MutImpl;
+use super::abort_const;
+use super::abort_free;
 use crate::cfg::CfgMod;
 use crate::cfg::error::illegal_ctx;
 use crate::cfg::error::illegal_input;
@@ -61,7 +61,7 @@ impl CfgMod for TextLib {
 }
 
 pub fn from_utf8() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_from_utf8) }.free()
+    FreeImpl { free: fn_from_utf8 }.build()
 }
 
 fn fn_from_utf8(cfg: &mut Cfg, input: Val) -> Val {
@@ -78,7 +78,7 @@ fn fn_from_utf8(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn into_utf8() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_into_utf8) }.free()
+    FreeImpl { free: fn_into_utf8 }.build()
 }
 
 fn fn_into_utf8(cfg: &mut Cfg, input: Val) -> Val {
@@ -92,7 +92,7 @@ fn fn_into_utf8(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn get_length() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_get_length) }.const_()
+    ConstImpl { free: abort_free(GET_LENGTH), const_: fn_get_length }.build()
 }
 
 fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -109,7 +109,7 @@ fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn push() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: false, f: mut_impl(fn_push) }.mut_()
+    MutImpl { free: abort_free(PUSH), const_: abort_const(PUSH), mut_: fn_push }.build()
 }
 
 fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -127,7 +127,7 @@ fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 
 // todo design
 pub fn join() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_join) }.free()
+    FreeImpl { free: fn_join }.build()
 }
 
 fn fn_join(cfg: &mut Cfg, input: Val) -> Val {

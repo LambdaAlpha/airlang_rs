@@ -3,13 +3,14 @@ use std::mem::swap;
 use const_format::concatcp;
 use log::error;
 
+use super::ConstImpl;
+use super::MutImpl;
+use super::abort_const;
+use super::abort_free;
 use crate::cfg::CfgMod;
 use crate::cfg::error::illegal_ctx;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
-use crate::cfg::lib::DynPrimFn;
-use crate::cfg::lib::const_impl;
-use crate::cfg::lib::mut_impl;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::val::CELL;
@@ -41,7 +42,7 @@ impl CfgMod for CellLib {
 }
 
 pub fn get_value() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_get_value) }.const_()
+    ConstImpl { free: abort_free(GET_VALUE), const_: fn_get_value }.build()
 }
 
 fn fn_get_value(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -57,7 +58,8 @@ fn fn_get_value(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn set_value() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: false, f: mut_impl(fn_set_value) }.mut_()
+    MutImpl { free: abort_free(SET_VALUE), const_: abort_const(SET_VALUE), mut_: fn_set_value }
+        .build()
 }
 
 fn fn_set_value(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {

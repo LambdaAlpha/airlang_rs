@@ -5,8 +5,8 @@ use log::error;
 use num_traits::Signed;
 use num_traits::ToPrimitive;
 
-use super::DynPrimFn;
-use super::dyn_impl;
+use super::DynImpl;
+use super::abort_free;
 use crate::cfg::CfgMod;
 use crate::cfg::error::abort_bug_with_msg;
 use crate::cfg::error::illegal_input;
@@ -177,7 +177,7 @@ impl CtrlFlow {
 }
 
 pub fn do_() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: true, f: dyn_impl(fn_do) }.mut_()
+    DynImpl { free: abort_free(DO), dyn_: fn_do }.build_with(true)
 }
 
 fn fn_do(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
@@ -188,7 +188,7 @@ fn fn_do(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
 }
 
 pub fn test() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: true, f: dyn_impl(fn_test) }.mut_()
+    DynImpl { free: abort_free(TEST), dyn_: fn_test }.build_with(true)
 }
 
 fn fn_test(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
@@ -234,7 +234,7 @@ impl Test {
 }
 
 pub fn switch() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: true, f: dyn_impl(fn_switch) }.mut_()
+    DynImpl { free: abort_free(SWITCH), dyn_: fn_switch }.build_with(true)
 }
 
 fn fn_switch(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
@@ -298,7 +298,7 @@ impl Switch {
 }
 
 pub fn match_() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: true, f: dyn_impl(fn_match) }.mut_()
+    DynImpl { free: abort_free(MATCH), dyn_: fn_match }.build_with(true)
 }
 
 fn fn_match(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
@@ -369,7 +369,7 @@ impl Match {
 }
 
 pub fn loop_() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: true, f: dyn_impl(fn_loop) }.mut_()
+    DynImpl { free: abort_free(LOOP), dyn_: fn_loop }.build_with(true)
 }
 
 fn fn_loop(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
@@ -417,7 +417,7 @@ impl Loop {
 }
 
 pub fn iterate() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: true, f: dyn_impl(fn_iterate) }.mut_()
+    DynImpl { free: abort_free(ITERATE), dyn_: fn_iterate }.build_with(true)
 }
 
 fn fn_iterate(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {

@@ -3,8 +3,7 @@ use std::ops::DerefMut;
 use const_format::concatcp;
 use log::error;
 
-use super::FreePrimFn;
-use super::free_impl;
+use super::FreeImpl;
 use crate::cfg::CfgMod;
 use crate::cfg::error::abort_bug_with_msg;
 use crate::cfg::error::illegal_input;
@@ -46,7 +45,7 @@ impl CfgMod for LinkLib {
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_new) }.free()
+    FreeImpl { free: fn_new }.build()
 }
 
 fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
@@ -54,7 +53,7 @@ fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn new_constant() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_new_constant) }.free()
+    FreeImpl { free: fn_new_constant }.build()
 }
 
 fn fn_new_constant(_cfg: &mut Cfg, input: Val) -> Val {
@@ -62,7 +61,7 @@ fn fn_new_constant(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn which() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_which) }.free()
+    FreeImpl { free: fn_which }.build()
 }
 
 fn fn_which(cfg: &mut Cfg, input: Val) -> Val {

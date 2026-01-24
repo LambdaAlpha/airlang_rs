@@ -1,7 +1,6 @@
 use const_format::concatcp;
 
-use super::FreePrimFn;
-use super::free_impl;
+use super::FreeImpl;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
@@ -31,7 +30,7 @@ impl CfgMod for UnitLib {
 }
 
 pub fn from_any() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_from_any) }.free()
+    FreeImpl { free: fn_from_any }.build()
 }
 
 fn fn_from_any(_cfg: &mut Cfg, _input: Val) -> Val {

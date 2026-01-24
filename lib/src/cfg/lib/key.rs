@@ -1,10 +1,9 @@
 use const_format::concatcp;
 use log::error;
 
-use super::DynPrimFn;
-use super::FreePrimFn;
-use super::const_impl;
-use super::free_impl;
+use super::ConstImpl;
+use super::FreeImpl;
+use super::abort_free;
 use crate::cfg::CfgMod;
 use crate::cfg::error::illegal_ctx;
 use crate::cfg::error::illegal_input;
@@ -55,7 +54,7 @@ impl CfgMod for KeyLib {
 }
 
 pub fn from_text() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_from_text) }.free()
+    FreeImpl { free: fn_from_text }.build()
 }
 
 fn fn_from_text(cfg: &mut Cfg, input: Val) -> Val {
@@ -73,7 +72,7 @@ fn fn_from_text(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn into_text() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_into_text) }.free()
+    FreeImpl { free: fn_into_text }.build()
 }
 
 fn fn_into_text(cfg: &mut Cfg, input: Val) -> Val {
@@ -85,7 +84,7 @@ fn fn_into_text(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn get_length() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_get_length) }.const_()
+    ConstImpl { free: abort_free(GET_LENGTH), const_: fn_get_length }.build()
 }
 
 fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -103,7 +102,7 @@ fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 
 // todo design
 pub fn join() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_join) }.free()
+    FreeImpl { free: fn_join }.build()
 }
 
 fn fn_join(cfg: &mut Cfg, input: Val) -> Val {

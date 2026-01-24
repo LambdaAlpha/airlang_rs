@@ -3,8 +3,7 @@ use std::process::Command;
 use airlang::cfg::CfgMod;
 use airlang::cfg::error::illegal_input;
 use airlang::cfg::extend_func;
-use airlang::cfg::lib::FreePrimFn;
-use airlang::cfg::lib::free_impl;
+use airlang::cfg::lib::FreeImpl;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_ID;
 use airlang::semantics::val::FreePrimFuncVal;
@@ -46,7 +45,7 @@ const ARGUMENTS: &str = "arguments";
 // todo design
 // todo impl
 pub fn call() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_call) }.free()
+    FreeImpl { free: fn_call }.build()
 }
 
 fn fn_call(cfg: &mut Cfg, input: Val) -> Val {

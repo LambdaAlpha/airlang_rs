@@ -1,16 +1,16 @@
 use const_format::concatcp;
 use log::error;
 
+use super::ConstImpl;
+use super::FreeImpl;
+use super::MutImpl;
+use super::abort_const;
+use super::abort_free;
 use crate::cfg::CfgMod;
 use crate::cfg::error::abort_bug_with_msg;
 use crate::cfg::error::illegal_ctx;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
-use crate::cfg::lib::DynPrimFn;
-use crate::cfg::lib::FreePrimFn;
-use crate::cfg::lib::const_impl;
-use crate::cfg::lib::free_impl;
-use crate::cfg::lib::mut_impl;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::val::ConstPrimFuncVal;
@@ -52,7 +52,7 @@ impl CfgMod for ErrorLib {
 }
 
 pub fn abort() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_abort) }.free()
+    FreeImpl { free: fn_abort }.build()
 }
 
 fn fn_abort(cfg: &mut Cfg, input: Val) -> Val {
@@ -65,7 +65,7 @@ fn fn_abort(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn assert() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_assert) }.free()
+    FreeImpl { free: fn_assert }.build()
 }
 
 fn fn_assert(cfg: &mut Cfg, input: Val) -> Val {
@@ -91,7 +91,7 @@ fn fn_assert(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn is_aborted() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_is_aborted) }.const_()
+    ConstImpl { free: abort_free(IS_ABORTED), const_: fn_is_aborted }.build()
 }
 
 fn fn_is_aborted(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -108,7 +108,7 @@ fn fn_is_aborted(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn recover() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: false, f: mut_impl(fn_recover) }.mut_()
+    MutImpl { free: abort_free(RECOVER), const_: abort_const(RECOVER), mut_: fn_recover }.build()
 }
 
 fn fn_recover(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {

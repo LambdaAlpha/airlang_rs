@@ -3,13 +3,12 @@ use log::error;
 use num_traits::Signed;
 use num_traits::ToPrimitive;
 
+use super::DynImpl;
+use super::FreeImpl;
+use super::abort_free;
 use crate::cfg::CfgMod;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
-use crate::cfg::lib::DynPrimFn;
-use crate::cfg::lib::FreePrimFn;
-use crate::cfg::lib::dyn_impl;
-use crate::cfg::lib::free_impl;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::PREFIX_ID;
@@ -53,7 +52,7 @@ impl CfgMod for ResourceLib {
 }
 
 pub fn get_steps() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_get_steps) }.free()
+    FreeImpl { free: fn_get_steps }.build()
 }
 
 fn fn_get_steps(cfg: &mut Cfg, input: Val) -> Val {
@@ -66,7 +65,7 @@ fn fn_get_steps(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn set_steps() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_set_steps) }.free()
+    FreeImpl { free: fn_set_steps }.build()
 }
 
 fn fn_set_steps(cfg: &mut Cfg, input: Val) -> Val {
@@ -84,7 +83,7 @@ fn fn_set_steps(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn measure_steps() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: true, f: dyn_impl(fn_measure_steps) }.mut_()
+    DynImpl { free: abort_free(MEASURE_STEPS), dyn_: fn_measure_steps }.build_with(true)
 }
 
 fn fn_measure_steps(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {

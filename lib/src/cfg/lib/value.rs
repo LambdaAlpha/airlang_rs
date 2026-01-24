@@ -8,10 +8,9 @@ use log::error;
 use rand::SeedableRng;
 use rand::prelude::SmallRng;
 
-use super::DynPrimFn;
-use super::FreePrimFn;
-use super::const_impl;
-use super::free_impl;
+use super::ConstImpl;
+use super::FreeImpl;
+use super::abort_free;
 use crate::cfg::CfgMod;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
@@ -97,7 +96,7 @@ const TYPE_FUNC: &str = concatcp!(PREFIX_ID, FUNC);
 
 // todo design pick value from cfg or ctx
 pub fn any() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_any) }.free()
+    FreeImpl { free: fn_any }.build()
 }
 
 fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
@@ -132,7 +131,7 @@ fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn get_type() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_get_type) }.const_()
+    ConstImpl { free: abort_free(GET_TYPE), const_: fn_get_type }.build()
 }
 
 fn fn_get_type(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -163,7 +162,7 @@ fn fn_get_type(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 
 // todo design
 pub fn equal() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_equal) }.free()
+    FreeImpl { free: fn_equal }.build()
 }
 
 fn fn_equal(cfg: &mut Cfg, input: Val) -> Val {

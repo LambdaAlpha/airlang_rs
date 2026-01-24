@@ -1,13 +1,13 @@
+use std::rc::Rc;
+
 use const_format::concatcp;
 use log::error;
 
 use self::repr::generate_func;
 use self::repr::parse_func;
-use super::DynPrimFn;
-use super::FreePrimFn;
-use super::MutImpl;
-use super::const_impl;
-use super::free_impl;
+use super::ConstImpl;
+use super::FreeImpl;
+use super::abort_free;
 use super::func::repr::generate_code;
 use super::func::repr::generate_ctx_access;
 use crate::cfg::CfgMod;
@@ -19,6 +19,7 @@ use crate::semantics::core::PREFIX_ID;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
 use crate::semantics::func::MutFn;
+use crate::semantics::func::MutPrimFunc;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FUNC;
 use crate::semantics::val::FreePrimFuncVal;
@@ -80,7 +81,7 @@ impl CfgMod for FuncLib {
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_new) }.free()
+    FreeImpl { free: fn_new }.build()
 }
 
 fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
@@ -92,7 +93,7 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn represent() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_represent) }.free()
+    FreeImpl { free: fn_represent }.build()
 }
 
 fn fn_represent(cfg: &mut Cfg, input: Val) -> Val {
@@ -104,32 +105,39 @@ fn fn_represent(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn apply() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: false, f: MutImpl::new(fn_apply_free, fn_apply_const, fn_apply_mut) }
-        .mut_()
+    MutPrimFunc { raw_input: false, fn_: Rc::new(Apply) }.into()
 }
 
-fn fn_apply_free(cfg: &mut Cfg, input: Val) -> Val {
-    let (func, input) = match func_input(cfg, input) {
-        Ok(pair) => pair,
-        Err(err) => return err,
-    };
-    func.free_call(cfg, input)
+struct Apply;
+
+impl FreeFn<Cfg, Val, Val> for Apply {
+    fn free_call(&self, cfg: &mut Cfg, input: Val) -> Val {
+        let (func, input) = match func_input(cfg, input) {
+            Ok(pair) => pair,
+            Err(err) => return err,
+        };
+        func.free_call(cfg, input)
+    }
 }
 
-fn fn_apply_const(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let (func, input) = match func_input(cfg, input) {
-        Ok(pair) => pair,
-        Err(err) => return err,
-    };
-    func.const_call(cfg, ctx, input)
+impl ConstFn<Cfg, Val, Val, Val> for Apply {
+    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
+        let (func, input) = match func_input(cfg, input) {
+            Ok(pair) => pair,
+            Err(err) => return err,
+        };
+        func.const_call(cfg, ctx, input)
+    }
 }
 
-fn fn_apply_mut(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
-    let (func, input) = match func_input(cfg, input) {
-        Ok(pair) => pair,
-        Err(err) => return err,
-    };
-    func.mut_call(cfg, ctx, input)
+impl MutFn<Cfg, Val, Val, Val> for Apply {
+    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+        let (func, input) = match func_input(cfg, input) {
+            Ok(pair) => pair,
+            Err(err) => return err,
+        };
+        func.mut_call(cfg, ctx, input)
+    }
 }
 
 fn func_input(cfg: &mut Cfg, input: Val) -> Result<(FuncVal, Val), Val> {
@@ -146,7 +154,7 @@ fn func_input(cfg: &mut Cfg, input: Val) -> Result<(FuncVal, Val), Val> {
 }
 
 pub fn get_context_access() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_get_context_access) }.const_()
+    ConstImpl { free: abort_free(GET_CONTEXT_ACCESS), const_: fn_get_context_access }.build()
 }
 
 fn fn_get_context_access(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -163,7 +171,7 @@ fn fn_get_context_access(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn is_raw_input() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_is_raw_input) }.const_()
+    ConstImpl { free: abort_free(IS_RAW_INPUT), const_: fn_is_raw_input }.build()
 }
 
 fn fn_is_raw_input(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -179,7 +187,7 @@ fn fn_is_raw_input(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn is_primitive() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_is_primitive) }.const_()
+    ConstImpl { free: abort_free(IS_PRIMITIVE), const_: fn_is_primitive }.build()
 }
 
 fn fn_is_primitive(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -196,7 +204,7 @@ fn fn_is_primitive(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn get_code() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_get_code) }.const_()
+    ConstImpl { free: abort_free(GET_CODE), const_: fn_get_code }.build()
 }
 
 fn fn_get_code(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -212,7 +220,7 @@ fn fn_get_code(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn get_prelude() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_get_prelude) }.const_()
+    ConstImpl { free: abort_free(GET_PRELUDE), const_: fn_get_prelude }.build()
 }
 
 fn fn_get_prelude(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {

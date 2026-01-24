@@ -3,11 +3,11 @@ use std::mem::swap;
 use const_format::concatcp;
 use log::error;
 
-use super::DynPrimFn;
-use super::FreePrimFn;
-use super::const_impl;
-use super::free_impl;
-use super::mut_impl;
+use super::ConstImpl;
+use super::FreeImpl;
+use super::MutImpl;
+use super::abort_const;
+use super::abort_free;
 use crate::cfg::CfgMod;
 use crate::cfg::error::illegal_ctx;
 use crate::cfg::error::illegal_input;
@@ -61,7 +61,7 @@ impl CfgMod for CallLib {
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_new) }.free()
+    FreeImpl { free: fn_new }.build()
 }
 
 fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
@@ -74,7 +74,7 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn get_function() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_get_function) }.const_()
+    ConstImpl { free: abort_free(GET_FUNCTION), const_: fn_get_function }.build()
 }
 
 fn fn_get_function(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -90,7 +90,12 @@ fn fn_get_function(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn set_function() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: false, f: mut_impl(fn_set_function) }.mut_()
+    MutImpl {
+        free: abort_free(SET_FUNCTION),
+        const_: abort_const(SET_FUNCTION),
+        mut_: fn_set_function,
+    }
+    .build()
 }
 
 fn fn_set_function(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
@@ -103,7 +108,7 @@ fn fn_set_function(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
 }
 
 pub fn get_input() -> ConstPrimFuncVal {
-    DynPrimFn { raw_input: false, f: const_impl(fn_get_input) }.const_()
+    ConstImpl { free: abort_free(GET_INPUT), const_: fn_get_input }.build()
 }
 
 fn fn_get_input(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
@@ -119,7 +124,8 @@ fn fn_get_input(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 }
 
 pub fn set_input() -> MutPrimFuncVal {
-    DynPrimFn { raw_input: false, f: mut_impl(fn_set_input) }.mut_()
+    MutImpl { free: abort_free(SET_INPUT), const_: abort_const(SET_INPUT), mut_: fn_set_input }
+        .build()
 }
 
 fn fn_set_input(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
