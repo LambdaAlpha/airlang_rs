@@ -6,6 +6,7 @@ use airlang::cfg::extend_func;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::free_impl;
 use airlang::semantics::cfg::Cfg;
+use airlang::semantics::core::PREFIX_ID;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Byte;
@@ -15,12 +16,17 @@ use airlang::type_::Key;
 use airlang::type_::List;
 use airlang::type_::Map;
 use airlang::type_::Text;
+use const_format::concatcp;
 use log::error;
 
 #[derive(Clone)]
 pub struct ProcessLib {
     pub call: FreePrimFuncVal,
 }
+
+const PROCESS: &str = "process";
+
+pub const CALL: &str = concatcp!(PREFIX_ID, PROCESS, ".call");
 
 impl Default for ProcessLib {
     fn default() -> Self {
@@ -30,7 +36,7 @@ impl Default for ProcessLib {
 
 impl CfgMod for ProcessLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_process.call", self.call);
+        extend_func(cfg, CALL, self.call);
     }
 }
 

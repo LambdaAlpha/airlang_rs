@@ -1,3 +1,4 @@
+use const_format::concatcp;
 use log::error;
 
 use self::repr::generate_func;
@@ -14,10 +15,12 @@ use crate::cfg::error::illegal_ctx;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::PREFIX_ID;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::FreeFn;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::ConstPrimFuncVal;
+use crate::semantics::val::FUNC;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::MutPrimFuncVal;
@@ -39,6 +42,15 @@ pub struct FuncLib {
     pub get_prelude: ConstPrimFuncVal,
 }
 
+pub const NEW: &str = concatcp!(PREFIX_ID, FUNC, ".new");
+pub const REPRESENT: &str = concatcp!(PREFIX_ID, FUNC, ".represent");
+pub const APPLY: &str = concatcp!(PREFIX_ID, FUNC, ".apply");
+pub const GET_CONTEXT_ACCESS: &str = concatcp!(PREFIX_ID, FUNC, ".get_context_access");
+pub const IS_RAW_INPUT: &str = concatcp!(PREFIX_ID, FUNC, ".is_raw_input");
+pub const IS_PRIMITIVE: &str = concatcp!(PREFIX_ID, FUNC, ".is_primitive");
+pub const GET_CODE: &str = concatcp!(PREFIX_ID, FUNC, ".get_code");
+pub const GET_PRELUDE: &str = concatcp!(PREFIX_ID, FUNC, ".get_prelude");
+
 impl Default for FuncLib {
     fn default() -> Self {
         FuncLib {
@@ -56,14 +68,14 @@ impl Default for FuncLib {
 
 impl CfgMod for FuncLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_function.new", self.new);
-        extend_func(cfg, "_function.represent", self.represent);
-        extend_func(cfg, "_function.apply", self.apply);
-        extend_func(cfg, "_function.get_context_access", self.get_context_access);
-        extend_func(cfg, "_function.is_raw_input", self.is_raw_input);
-        extend_func(cfg, "_function.is_primitive", self.is_primitive);
-        extend_func(cfg, "_function.get_code", self.get_code);
-        extend_func(cfg, "_function.get_prelude", self.get_prelude);
+        extend_func(cfg, NEW, self.new);
+        extend_func(cfg, REPRESENT, self.represent);
+        extend_func(cfg, APPLY, self.apply);
+        extend_func(cfg, GET_CONTEXT_ACCESS, self.get_context_access);
+        extend_func(cfg, IS_RAW_INPUT, self.is_raw_input);
+        extend_func(cfg, IS_PRIMITIVE, self.is_primitive);
+        extend_func(cfg, GET_CODE, self.get_code);
+        extend_func(cfg, GET_PRELUDE, self.get_prelude);
     }
 }
 

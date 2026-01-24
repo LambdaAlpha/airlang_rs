@@ -1,3 +1,4 @@
+use const_format::concatcp;
 use log::error;
 
 use super::DynPrimFn;
@@ -10,6 +11,8 @@ use crate::cfg::error::illegal_ctx;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::PREFIX_ID;
+use crate::semantics::val::BYTE;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
@@ -27,6 +30,10 @@ pub struct ByteLib {
     pub join: FreePrimFuncVal,
 }
 
+pub const GET_LENGTH: &str = concatcp!(PREFIX_ID, BYTE, ".get_length");
+pub const PUSH: &str = concatcp!(PREFIX_ID, BYTE, ".push");
+pub const JOIN: &str = concatcp!(PREFIX_ID, BYTE, ".join");
+
 impl Default for ByteLib {
     fn default() -> Self {
         ByteLib { get_length: get_length(), push: push(), join: join() }
@@ -35,9 +42,9 @@ impl Default for ByteLib {
 
 impl CfgMod for ByteLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_byte.get_length", self.get_length);
-        extend_func(cfg, "_byte.push", self.push);
-        extend_func(cfg, "_byte.join", self.join);
+        extend_func(cfg, GET_LENGTH, self.get_length);
+        extend_func(cfg, PUSH, self.push);
+        extend_func(cfg, JOIN, self.join);
     }
 }
 

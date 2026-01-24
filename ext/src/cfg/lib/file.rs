@@ -4,15 +4,21 @@ use airlang::cfg::extend_func;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::free_impl;
 use airlang::semantics::cfg::Cfg;
+use airlang::semantics::core::PREFIX_ID;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Text;
+use const_format::concatcp;
 use log::error;
 
 #[derive(Clone)]
 pub struct FileLib {
     pub read_to_text: FreePrimFuncVal,
 }
+
+const FILE: &str = "file";
+
+pub const READ_TO_TEXT: &str = concatcp!(PREFIX_ID, FILE, ".read_to_text");
 
 impl Default for FileLib {
     fn default() -> Self {
@@ -22,7 +28,7 @@ impl Default for FileLib {
 
 impl CfgMod for FileLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_file.read_to_text", self.read_to_text);
+        extend_func(cfg, READ_TO_TEXT, self.read_to_text);
     }
 }
 

@@ -12,11 +12,14 @@ use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::free_impl;
 use airlang::cfg::lib::mut_impl;
 use airlang::semantics::cfg::Cfg;
+use airlang::semantics::core::PREFIX_ID;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::MutPrimFuncVal;
 use airlang::semantics::val::Val;
+use const_format::concatcp;
 use log::error;
 
+// todo design
 #[derive(Clone)]
 pub struct IoLib {
     pub read_line: MutPrimFuncVal,
@@ -27,6 +30,16 @@ pub struct IoLib {
     pub error_print_line: FreePrimFuncVal,
     pub error_flush: FreePrimFuncVal,
 }
+
+const IO: &str = "io";
+
+pub const READ_LINE: &str = concatcp!(PREFIX_ID, IO, ".read_line");
+pub const PRINT: &str = concatcp!(PREFIX_ID, IO, ".print");
+pub const PRINT_LINE: &str = concatcp!(PREFIX_ID, IO, ".print_line");
+pub const FLUSH: &str = concatcp!(PREFIX_ID, IO, ".flush");
+pub const ERROR_PRINT: &str = concatcp!(PREFIX_ID, IO, ".error_print");
+pub const ERROR_PRINT_LINE: &str = concatcp!(PREFIX_ID, IO, ".error_print_line");
+pub const ERROR_FLUSH: &str = concatcp!(PREFIX_ID, IO, ".error_flush");
 
 impl Default for IoLib {
     fn default() -> Self {
@@ -44,13 +57,13 @@ impl Default for IoLib {
 
 impl CfgMod for IoLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_io.read_line", self.read_line);
-        extend_func(cfg, "_io.print", self.print);
-        extend_func(cfg, "_io.print_line", self.print_line);
-        extend_func(cfg, "_io.flush", self.flush);
-        extend_func(cfg, "_io.error_print", self.error_print);
-        extend_func(cfg, "_io.error_print_line", self.error_print_line);
-        extend_func(cfg, "_io.error_flush", self.error_flush);
+        extend_func(cfg, READ_LINE, self.read_line);
+        extend_func(cfg, PRINT, self.print);
+        extend_func(cfg, PRINT_LINE, self.print_line);
+        extend_func(cfg, FLUSH, self.flush);
+        extend_func(cfg, ERROR_PRINT, self.error_print);
+        extend_func(cfg, ERROR_PRINT_LINE, self.error_print_line);
+        extend_func(cfg, ERROR_FLUSH, self.error_flush);
     }
 }
 

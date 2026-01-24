@@ -59,6 +59,12 @@ pub struct ValueLib {
     pub equal: FreePrimFuncVal,
 }
 
+const VALUE: &str = "value";
+
+pub const ANY: &str = concatcp!(PREFIX_ID, VALUE, ".any");
+pub const GET_TYPE: &str = concatcp!(PREFIX_ID, VALUE, ".get_type");
+pub const EQUAL: &str = concatcp!(PREFIX_ID, VALUE, ".equal");
+
 impl Default for ValueLib {
     fn default() -> Self {
         ValueLib { any: any(), get_type: get_type(), equal: equal() }
@@ -67,9 +73,9 @@ impl Default for ValueLib {
 
 impl CfgMod for ValueLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_value.any", self.any);
-        extend_func(cfg, "_value.get_type", self.get_type);
-        extend_func(cfg, "_value.equal", self.equal);
+        extend_func(cfg, ANY, self.any);
+        extend_func(cfg, GET_TYPE, self.get_type);
+        extend_func(cfg, EQUAL, self.equal);
     }
 }
 

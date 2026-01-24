@@ -1,5 +1,6 @@
 use std::mem::swap;
 
+use const_format::concatcp;
 use log::error;
 
 use super::DynPrimFn;
@@ -13,8 +14,10 @@ use crate::cfg::error::illegal_ctx;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::PREFIX_ID;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::MAP;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
@@ -29,6 +32,8 @@ use crate::type_::Pair;
 // todo design
 #[derive(Clone)]
 pub struct MapLib {
+    pub new: FreePrimFuncVal,
+    pub new_set: FreePrimFuncVal,
     pub get_length: ConstPrimFuncVal,
     pub get_items: ConstPrimFuncVal,
     pub into_items: MutPrimFuncVal,
@@ -47,13 +52,34 @@ pub struct MapLib {
     pub remove_many: MutPrimFuncVal,
     pub move_: MutPrimFuncVal,
     pub clear: MutPrimFuncVal,
-    pub new: FreePrimFuncVal,
-    pub new_set: FreePrimFuncVal,
 }
+
+pub const NEW: &str = concatcp!(PREFIX_ID, MAP, ".new");
+pub const NEW_SET: &str = concatcp!(PREFIX_ID, MAP, ".new_set");
+pub const GET_LENGTH: &str = concatcp!(PREFIX_ID, MAP, ".get_length");
+pub const GET_ITEMS: &str = concatcp!(PREFIX_ID, MAP, ".get_items");
+pub const INTO_ITEMS: &str = concatcp!(PREFIX_ID, MAP, ".into_items");
+pub const GET_KEYS: &str = concatcp!(PREFIX_ID, MAP, ".get_keys");
+pub const INTO_KEYS: &str = concatcp!(PREFIX_ID, MAP, ".into_keys");
+pub const GET_VALUES: &str = concatcp!(PREFIX_ID, MAP, ".get_values");
+pub const INTO_VALUES: &str = concatcp!(PREFIX_ID, MAP, ".into_values");
+pub const CONTAIN: &str = concatcp!(PREFIX_ID, MAP, ".contain");
+pub const CONTAIN_ALL: &str = concatcp!(PREFIX_ID, MAP, ".contain_all");
+pub const CONTAIN_ANY: &str = concatcp!(PREFIX_ID, MAP, ".contain_any");
+pub const SET: &str = concatcp!(PREFIX_ID, MAP, ".set");
+pub const SET_MANY: &str = concatcp!(PREFIX_ID, MAP, ".set_many");
+pub const GET: &str = concatcp!(PREFIX_ID, MAP, ".get");
+pub const GET_MANY: &str = concatcp!(PREFIX_ID, MAP, ".get_many");
+pub const REMOVE: &str = concatcp!(PREFIX_ID, MAP, ".remove");
+pub const REMOVE_MANY: &str = concatcp!(PREFIX_ID, MAP, ".remove_many");
+pub const MOVE: &str = concatcp!(PREFIX_ID, MAP, ".move");
+pub const CLEAR: &str = concatcp!(PREFIX_ID, MAP, ".clear");
 
 impl Default for MapLib {
     fn default() -> Self {
         MapLib {
+            new: new(),
+            new_set: new_set(),
             get_length: get_length(),
             get_items: get_items(),
             into_items: into_items(),
@@ -72,35 +98,80 @@ impl Default for MapLib {
             remove_many: remove_many(),
             move_: move_(),
             clear: clear(),
-            new: new(),
-            new_set: new_set(),
         }
     }
 }
 
 impl CfgMod for MapLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_map.get_length", self.get_length);
-        extend_func(cfg, "_map.get_items", self.get_items);
-        extend_func(cfg, "_map.into_items", self.into_items);
-        extend_func(cfg, "_map.get_keys", self.get_keys);
-        extend_func(cfg, "_map.into_keys", self.into_keys);
-        extend_func(cfg, "_map.get_values", self.get_values);
-        extend_func(cfg, "_map.into_values", self.into_values);
-        extend_func(cfg, "_map.contain", self.contain);
-        extend_func(cfg, "_map.contain_all", self.contain_all);
-        extend_func(cfg, "_map.contain_any", self.contain_any);
-        extend_func(cfg, "_map.set", self.set);
-        extend_func(cfg, "_map.set_many", self.set_many);
-        extend_func(cfg, "_map.get", self.get);
-        extend_func(cfg, "_map.get_many", self.get_many);
-        extend_func(cfg, "_map.remove", self.remove);
-        extend_func(cfg, "_map.remove_many", self.remove_many);
-        extend_func(cfg, "_map.move", self.move_);
-        extend_func(cfg, "_map.clear", self.clear);
-        extend_func(cfg, "_map.new", self.new);
-        extend_func(cfg, "_map.new_set", self.new_set);
+        extend_func(cfg, NEW, self.new);
+        extend_func(cfg, NEW_SET, self.new_set);
+        extend_func(cfg, GET_LENGTH, self.get_length);
+        extend_func(cfg, GET_ITEMS, self.get_items);
+        extend_func(cfg, INTO_ITEMS, self.into_items);
+        extend_func(cfg, GET_KEYS, self.get_keys);
+        extend_func(cfg, INTO_KEYS, self.into_keys);
+        extend_func(cfg, GET_VALUES, self.get_values);
+        extend_func(cfg, INTO_VALUES, self.into_values);
+        extend_func(cfg, CONTAIN, self.contain);
+        extend_func(cfg, CONTAIN_ALL, self.contain_all);
+        extend_func(cfg, CONTAIN_ANY, self.contain_any);
+        extend_func(cfg, SET, self.set);
+        extend_func(cfg, SET_MANY, self.set_many);
+        extend_func(cfg, GET, self.get);
+        extend_func(cfg, GET_MANY, self.get_many);
+        extend_func(cfg, REMOVE, self.remove);
+        extend_func(cfg, REMOVE_MANY, self.remove_many);
+        extend_func(cfg, MOVE, self.move_);
+        extend_func(cfg, CLEAR, self.clear);
     }
+}
+
+pub fn new() -> FreePrimFuncVal {
+    FreePrimFn { raw_input: false, f: free_impl(fn_new) }.free()
+}
+
+fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::List(list) = input else {
+        error!("input {input:?} should be a list");
+        return illegal_input(cfg);
+    };
+    let list = List::from(list);
+    let mut map: Map<Key, Val> = Map::with_capacity(list.len());
+    for item in list {
+        let Val::Pair(pair) = item else {
+            error!("input.item {item:?} should be a pair");
+            return illegal_input(cfg);
+        };
+        let pair = Pair::from(pair);
+        let Val::Key(key) = pair.left else {
+            error!("input.item.left {:?} should be a key", pair.left);
+            return illegal_input(cfg);
+        };
+        map.insert(key, pair.right);
+    }
+    Val::Map(map.into())
+}
+
+pub fn new_set() -> FreePrimFuncVal {
+    FreePrimFn { raw_input: false, f: free_impl(fn_new_set) }.free()
+}
+
+fn fn_new_set(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::List(list) = input else {
+        error!("input {input:?} should be a list");
+        return illegal_input(cfg);
+    };
+    let list = List::from(list);
+    let mut map: Map<Key, Val> = Map::with_capacity(list.len());
+    for item in list {
+        let Val::Key(key) = item else {
+            error!("input.item {item:?} should be a key");
+            return illegal_input(cfg);
+        };
+        map.insert(key, Val::default());
+    }
+    Val::Map(map.into())
 }
 
 pub fn get_length() -> ConstPrimFuncVal {
@@ -471,51 +542,4 @@ fn fn_clear(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     }
     map.clear();
     Val::default()
-}
-
-pub fn new() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_new) }.free()
-}
-
-fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::List(list) = input else {
-        error!("input {input:?} should be a list");
-        return illegal_input(cfg);
-    };
-    let list = List::from(list);
-    let mut map: Map<Key, Val> = Map::with_capacity(list.len());
-    for item in list {
-        let Val::Pair(pair) = item else {
-            error!("input.item {item:?} should be a pair");
-            return illegal_input(cfg);
-        };
-        let pair = Pair::from(pair);
-        let Val::Key(key) = pair.left else {
-            error!("input.item.left {:?} should be a key", pair.left);
-            return illegal_input(cfg);
-        };
-        map.insert(key, pair.right);
-    }
-    Val::Map(map.into())
-}
-
-pub fn new_set() -> FreePrimFuncVal {
-    FreePrimFn { raw_input: false, f: free_impl(fn_new_set) }.free()
-}
-
-fn fn_new_set(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::List(list) = input else {
-        error!("input {input:?} should be a list");
-        return illegal_input(cfg);
-    };
-    let list = List::from(list);
-    let mut map: Map<Key, Val> = Map::with_capacity(list.len());
-    for item in list {
-        let Val::Key(key) = item else {
-            error!("input.item {item:?} should be a key");
-            return illegal_input(cfg);
-        };
-        map.insert(key, Val::default());
-    }
-    Val::Map(map.into())
 }

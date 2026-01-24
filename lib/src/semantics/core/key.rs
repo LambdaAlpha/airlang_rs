@@ -13,9 +13,9 @@ use crate::type_::Key;
 
 pub(crate) struct KeyEval;
 
-pub(crate) const PREFIX_ID: char = '_';
-pub(crate) const PREFIX_SHIFT: char = '.';
-pub(crate) const PREFIX_CTX: char = ':';
+pub const PREFIX_ID: char = '_';
+pub const PREFIX_SHIFT: char = '.';
+pub const PREFIX_CTX: char = ':';
 
 enum KeyMode {
     Id,

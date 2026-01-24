@@ -11,18 +11,24 @@ use airlang::cfg::extend_func;
 use airlang::cfg::lib::FreeImpl;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::semantics::cfg::Cfg;
+use airlang::semantics::core::PREFIX_ID;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::syntax::parse;
 use airlang::type_::Cell;
 use airlang::type_::Key;
 use airlang::type_::Text;
+use const_format::concatcp;
 use log::error;
 
 #[derive(Clone)]
 pub struct BuildLib {
     pub load: FreePrimFuncVal,
 }
+
+const BUILD: &str = "build";
+
+pub const LOAD: &str = concatcp!(PREFIX_ID, BUILD, ".load");
 
 impl Default for BuildLib {
     fn default() -> Self {
@@ -32,7 +38,7 @@ impl Default for BuildLib {
 
 impl CfgMod for BuildLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_build.load", self.load);
+        extend_func(cfg, LOAD, self.load);
     }
 }
 

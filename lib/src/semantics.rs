@@ -1,4 +1,4 @@
-pub(crate) mod core;
+pub mod core;
 
 pub mod val;
 

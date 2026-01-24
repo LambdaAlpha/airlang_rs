@@ -1,3 +1,4 @@
+use const_format::concatcp;
 use log::error;
 
 use crate::cfg::CfgMod;
@@ -11,6 +12,7 @@ use crate::cfg::lib::const_impl;
 use crate::cfg::lib::free_impl;
 use crate::cfg::lib::mut_impl;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::PREFIX_ID;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
@@ -27,6 +29,13 @@ pub struct ErrorLib {
     pub recover: MutPrimFuncVal,
 }
 
+const ERROR: &str = "error";
+
+pub const ABORT: &str = concatcp!(PREFIX_ID, ERROR, ".abort");
+pub const ASSERT: &str = concatcp!(PREFIX_ID, ERROR, ".assert");
+pub const IS_ABORTED: &str = concatcp!(PREFIX_ID, ERROR, ".is_aborted");
+pub const RECOVER: &str = concatcp!(PREFIX_ID, ERROR, ".recover");
+
 impl Default for ErrorLib {
     fn default() -> Self {
         ErrorLib { abort: abort(), assert: assert(), is_aborted: is_aborted(), recover: recover() }
@@ -35,10 +44,10 @@ impl Default for ErrorLib {
 
 impl CfgMod for ErrorLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_error.abort", self.abort);
-        extend_func(cfg, "_error.assert", self.assert);
-        extend_func(cfg, "_error.is_aborted", self.is_aborted);
-        extend_func(cfg, "_error.recover", self.recover);
+        extend_func(cfg, ABORT, self.abort);
+        extend_func(cfg, ASSERT, self.assert);
+        extend_func(cfg, IS_ABORTED, self.is_aborted);
+        extend_func(cfg, RECOVER, self.recover);
     }
 }
 

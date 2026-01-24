@@ -1,3 +1,4 @@
+use const_format::concatcp;
 use log::error;
 
 use super::FreePrimFn;
@@ -6,6 +7,8 @@ use crate::cfg::CfgMod;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::PREFIX_ID;
+use crate::semantics::val::BIT;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
 
@@ -18,6 +21,12 @@ pub struct BitLib {
     pub imply: FreePrimFuncVal,
 }
 
+pub const NOT: &str = concatcp!(PREFIX_ID, BIT, ".not");
+pub const AND: &str = concatcp!(PREFIX_ID, BIT, ".and");
+pub const OR: &str = concatcp!(PREFIX_ID, BIT, ".or");
+pub const XOR: &str = concatcp!(PREFIX_ID, BIT, ".xor");
+pub const IMPLY: &str = concatcp!(PREFIX_ID, BIT, ".imply");
+
 impl Default for BitLib {
     fn default() -> Self {
         BitLib { not: not(), and: and(), or: or(), xor: xor(), imply: imply() }
@@ -26,11 +35,11 @@ impl Default for BitLib {
 
 impl CfgMod for BitLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_bit.not", self.not);
-        extend_func(cfg, "_bit.and", self.and);
-        extend_func(cfg, "_bit.or", self.or);
-        extend_func(cfg, "_bit.xor", self.xor);
-        extend_func(cfg, "_bit.imply", self.imply);
+        extend_func(cfg, NOT, self.not);
+        extend_func(cfg, AND, self.and);
+        extend_func(cfg, OR, self.or);
+        extend_func(cfg, XOR, self.xor);
+        extend_func(cfg, IMPLY, self.imply);
     }
 }
 

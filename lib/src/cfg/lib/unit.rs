@@ -1,9 +1,13 @@
+use const_format::concatcp;
+
 use super::FreePrimFn;
 use super::free_impl;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::PREFIX_ID;
 use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::UNIT;
 use crate::semantics::val::Val;
 use crate::type_::Unit;
 
@@ -11,6 +15,8 @@ use crate::type_::Unit;
 pub struct UnitLib {
     pub from_any: FreePrimFuncVal,
 }
+
+pub const FROM_ANY: &str = concatcp!(PREFIX_ID, UNIT, ".from_any");
 
 impl Default for UnitLib {
     fn default() -> Self {
@@ -20,7 +26,7 @@ impl Default for UnitLib {
 
 impl CfgMod for UnitLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_unit.from_any", self.from_any);
+        extend_func(cfg, FROM_ANY, self.from_any);
     }
 }
 

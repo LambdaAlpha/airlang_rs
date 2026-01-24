@@ -43,6 +43,15 @@ pub struct CtrlLib {
     pub iterate: MutPrimFuncVal,
 }
 
+const CTRL: &str = "control";
+
+pub const DO: &str = concatcp!(PREFIX_ID, CTRL, ".do");
+pub const TEST: &str = concatcp!(PREFIX_ID, CTRL, ".test");
+pub const SWITCH: &str = concatcp!(PREFIX_ID, CTRL, ".switch");
+pub const MATCH: &str = concatcp!(PREFIX_ID, CTRL, ".match");
+pub const LOOP: &str = concatcp!(PREFIX_ID, CTRL, ".loop");
+pub const ITERATE: &str = concatcp!(PREFIX_ID, CTRL, ".iterate");
+
 impl Default for CtrlLib {
     fn default() -> Self {
         CtrlLib {
@@ -58,12 +67,12 @@ impl Default for CtrlLib {
 
 impl CfgMod for CtrlLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_control.do", self.do_);
-        extend_func(cfg, "_control.test", self.test);
-        extend_func(cfg, "_control.switch", self.switch);
-        extend_func(cfg, "_control.match", self.match_);
-        extend_func(cfg, "_control.loop", self.loop_);
-        extend_func(cfg, "_control.iterate", self.iterate);
+        extend_func(cfg, DO, self.do_);
+        extend_func(cfg, TEST, self.test);
+        extend_func(cfg, SWITCH, self.switch);
+        extend_func(cfg, MATCH, self.match_);
+        extend_func(cfg, LOOP, self.loop_);
+        extend_func(cfg, ITERATE, self.iterate);
     }
 }
 

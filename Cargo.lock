@@ -52,6 +52,7 @@ dependencies = [
  "airlang",
  "airlang_dev",
  "airlang_ext",
+ "const_format",
  "crossterm",
  "log",
 ]
@@ -70,6 +71,7 @@ version = "0.22.0"
 dependencies = [
  "airlang",
  "airlang_dev",
+ "const_format",
  "log",
 ]
 

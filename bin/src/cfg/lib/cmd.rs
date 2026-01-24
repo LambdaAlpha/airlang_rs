@@ -6,14 +6,20 @@ use airlang::cfg::extend_func;
 use airlang::cfg::lib::FreePrimFn;
 use airlang::cfg::lib::free_impl;
 use airlang::semantics::cfg::Cfg;
+use airlang::semantics::core::PREFIX_ID;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
+use const_format::concatcp;
 use log::error;
 
 #[derive(Clone)]
 pub struct CmdLib {
     pub call: FreePrimFuncVal,
 }
+
+const COMMAND: &str = "command";
+
+pub const CALL: &str = concatcp!(PREFIX_ID, COMMAND, ".call");
 
 impl Default for CmdLib {
     fn default() -> Self {
@@ -23,7 +29,7 @@ impl Default for CmdLib {
 
 impl CfgMod for CmdLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_command.call", self.call);
+        extend_func(cfg, CALL, self.call);
     }
 }
 

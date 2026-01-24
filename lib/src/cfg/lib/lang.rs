@@ -1,3 +1,4 @@
+use const_format::concatcp;
 use log::error;
 
 use crate::cfg::CfgMod;
@@ -9,6 +10,7 @@ use crate::cfg::lib::free_impl;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::Id;
+use crate::semantics::core::PREFIX_ID;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
@@ -32,6 +34,15 @@ pub struct LangLib {
     pub generate: FreePrimFuncVal,
 }
 
+const LANGUAGE: &str = "language";
+
+pub const DATA: &str = concatcp!(PREFIX_ID, LANGUAGE, ".semantics.data");
+pub const ID: &str = concatcp!(PREFIX_ID, LANGUAGE, ".semantics.id");
+pub const CODE: &str = concatcp!(PREFIX_ID, LANGUAGE, ".semantics.code");
+pub const EVAL: &str = concatcp!(PREFIX_ID, LANGUAGE, ".semantics.eval");
+pub const PARSE: &str = concatcp!(PREFIX_ID, LANGUAGE, ".syntax.parse");
+pub const GENERATE: &str = concatcp!(PREFIX_ID, LANGUAGE, ".syntax.generate");
+
 impl Default for LangLib {
     fn default() -> Self {
         LangLib {
@@ -47,12 +58,12 @@ impl Default for LangLib {
 
 impl CfgMod for LangLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_language.semantics.data", self.data);
-        extend_func(cfg, "_language.semantics.id", self.id);
-        extend_func(cfg, "_language.semantics.code", self.code);
-        extend_func(cfg, "_language.semantics.eval", self.eval);
-        extend_func(cfg, "_language.syntax.parse", self.parse);
-        extend_func(cfg, "_language.syntax.generate", self.generate);
+        extend_func(cfg, DATA, self.data);
+        extend_func(cfg, ID, self.id);
+        extend_func(cfg, CODE, self.code);
+        extend_func(cfg, EVAL, self.eval);
+        extend_func(cfg, PARSE, self.parse);
+        extend_func(cfg, GENERATE, self.generate);
     }
 }
 

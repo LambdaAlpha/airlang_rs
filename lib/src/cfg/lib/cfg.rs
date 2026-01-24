@@ -2,6 +2,7 @@ use std::ops::Deref;
 use std::panic::AssertUnwindSafe;
 use std::panic::catch_unwind;
 
+use const_format::concatcp;
 use log::error;
 
 use crate::cfg::CfgMod;
@@ -18,8 +19,10 @@ use crate::cfg::lib::free_impl;
 use crate::cfg::lib::mut_impl;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
+use crate::semantics::core::PREFIX_ID;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::MutFn;
+use crate::semantics::val::CFG;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
@@ -46,6 +49,16 @@ pub struct CfgLib {
     pub where_: MutPrimFuncVal,
 }
 
+pub const NEW: &str = concatcp!(PREFIX_ID, CFG, ".new");
+pub const REPRESENT: &str = concatcp!(PREFIX_ID, CFG, ".represent");
+pub const EXIST: &str = concatcp!(PREFIX_ID, CFG, ".exist");
+pub const IMPORT: &str = concatcp!(PREFIX_ID, CFG, ".import");
+pub const EXPORT: &str = concatcp!(PREFIX_ID, CFG, ".export");
+pub const GET_LENGTH: &str = concatcp!(PREFIX_ID, CFG, ".get_length");
+pub const WITH: &str = concatcp!(PREFIX_ID, CFG, ".with");
+pub const SELF: &str = concatcp!(PREFIX_ID, CFG, ".self");
+pub const WHERE: &str = concatcp!(PREFIX_ID, CFG, ".where");
+
 impl Default for CfgLib {
     fn default() -> Self {
         CfgLib {
@@ -64,15 +77,15 @@ impl Default for CfgLib {
 
 impl CfgMod for CfgLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_config.new", self.new);
-        extend_func(cfg, "_config.represent", self.represent);
-        extend_func(cfg, "_config.exist", self.exist);
-        extend_func(cfg, "_config.import", self.import);
-        extend_func(cfg, "_config.export", self.export);
-        extend_func(cfg, "_config.get_length", self.get_length);
-        extend_func(cfg, "_config.with", self.with);
-        extend_func(cfg, "_config.self", self.self_);
-        extend_func(cfg, "_config.where", self.where_);
+        extend_func(cfg, NEW, self.new);
+        extend_func(cfg, REPRESENT, self.represent);
+        extend_func(cfg, EXIST, self.exist);
+        extend_func(cfg, IMPORT, self.import);
+        extend_func(cfg, EXPORT, self.export);
+        extend_func(cfg, GET_LENGTH, self.get_length);
+        extend_func(cfg, WITH, self.with);
+        extend_func(cfg, SELF, self.self_);
+        extend_func(cfg, WHERE, self.where_);
     }
 }
 

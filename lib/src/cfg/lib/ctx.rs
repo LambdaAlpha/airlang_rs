@@ -1,3 +1,4 @@
+use const_format::concatcp;
 use log::error;
 
 use self::pattern::PatternAssign;
@@ -15,6 +16,7 @@ use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Form;
+use crate::semantics::core::PREFIX_ID;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::ConstPrimFuncVal;
@@ -36,6 +38,16 @@ pub struct CtxLib {
     pub which: MutPrimFuncVal,
 }
 
+const CTX: &str = "context";
+
+pub const GET: &str = concatcp!(PREFIX_ID, CTX, ".get");
+pub const SET: &str = concatcp!(PREFIX_ID, CTX, ".set");
+pub const FORM: &str = concatcp!(PREFIX_ID, CTX, ".form");
+pub const REPRESENT: &str = concatcp!(PREFIX_ID, CTX, ".represent");
+pub const IS_CONSTANT: &str = concatcp!(PREFIX_ID, CTX, ".is_constant");
+pub const SELF: &str = concatcp!(PREFIX_ID, CTX, ".self");
+pub const WHICH: &str = concatcp!(PREFIX_ID, CTX, ".which");
+
 impl Default for CtxLib {
     fn default() -> Self {
         CtxLib {
@@ -52,13 +64,13 @@ impl Default for CtxLib {
 
 impl CfgMod for CtxLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_context.get", self.get);
-        extend_func(cfg, "_context.set", self.set);
-        extend_func(cfg, "_context.form", self.form);
-        extend_func(cfg, "_context.represent", self.represent);
-        extend_func(cfg, "_context.is_constant", self.is_constant);
-        extend_func(cfg, "_context.self", self.self_);
-        extend_func(cfg, "_context.which", self.which);
+        extend_func(cfg, GET, self.get);
+        extend_func(cfg, SET, self.set);
+        extend_func(cfg, FORM, self.form);
+        extend_func(cfg, REPRESENT, self.represent);
+        extend_func(cfg, IS_CONSTANT, self.is_constant);
+        extend_func(cfg, SELF, self.self_);
+        extend_func(cfg, WHICH, self.which);
     }
 }
 

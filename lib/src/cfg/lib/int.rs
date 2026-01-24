@@ -1,3 +1,4 @@
+use const_format::concatcp;
 use log::error;
 use num_traits::Zero;
 
@@ -7,7 +8,9 @@ use crate::cfg::CfgMod;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::PREFIX_ID;
 use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::INT;
 use crate::semantics::val::Val;
 use crate::type_::Int;
 use crate::type_::Pair;
@@ -26,6 +29,18 @@ pub struct IntLib {
     pub greater_equal: FreePrimFuncVal,
     pub less_greater: FreePrimFuncVal,
 }
+
+pub const ADD: &str = concatcp!(PREFIX_ID, INT, ".add");
+pub const SUBTRACT: &str = concatcp!(PREFIX_ID, INT, ".subtract");
+pub const MULTIPLY: &str = concatcp!(PREFIX_ID, INT, ".multiply");
+pub const DIVIDE: &str = concatcp!(PREFIX_ID, INT, ".divide");
+pub const REMAINDER: &str = concatcp!(PREFIX_ID, INT, ".remainder");
+pub const DIVIDE_REMAINDER: &str = concatcp!(PREFIX_ID, INT, ".divide_remainder");
+pub const LESS: &str = concatcp!(PREFIX_ID, INT, ".less");
+pub const LESS_EQUAL: &str = concatcp!(PREFIX_ID, INT, ".less_equal");
+pub const GREATER: &str = concatcp!(PREFIX_ID, INT, ".greater");
+pub const GREATER_EQUAL: &str = concatcp!(PREFIX_ID, INT, ".greater_equal");
+pub const LESS_GREATER: &str = concatcp!(PREFIX_ID, INT, ".less_greater");
 
 impl Default for IntLib {
     fn default() -> Self {
@@ -47,17 +62,17 @@ impl Default for IntLib {
 
 impl CfgMod for IntLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_integer.add", self.add);
-        extend_func(cfg, "_integer.subtract", self.subtract);
-        extend_func(cfg, "_integer.multiply", self.multiply);
-        extend_func(cfg, "_integer.divide", self.divide);
-        extend_func(cfg, "_integer.remainder", self.remainder);
-        extend_func(cfg, "_integer.divide_remainder", self.divide_remainder);
-        extend_func(cfg, "_integer.less", self.less);
-        extend_func(cfg, "_integer.less_equal", self.less_equal);
-        extend_func(cfg, "_integer.greater", self.greater);
-        extend_func(cfg, "_integer.greater_equal", self.greater_equal);
-        extend_func(cfg, "_integer.less_greater", self.less_greater);
+        extend_func(cfg, ADD, self.add);
+        extend_func(cfg, SUBTRACT, self.subtract);
+        extend_func(cfg, MULTIPLY, self.multiply);
+        extend_func(cfg, DIVIDE, self.divide);
+        extend_func(cfg, REMAINDER, self.remainder);
+        extend_func(cfg, DIVIDE_REMAINDER, self.divide_remainder);
+        extend_func(cfg, LESS, self.less);
+        extend_func(cfg, LESS_EQUAL, self.less_equal);
+        extend_func(cfg, GREATER, self.greater);
+        extend_func(cfg, GREATER_EQUAL, self.greater_equal);
+        extend_func(cfg, LESS_GREATER, self.less_greater);
     }
 }
 

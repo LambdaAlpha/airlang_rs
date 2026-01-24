@@ -1,3 +1,4 @@
+use const_format::concatcp;
 use log::error;
 
 use super::DynPrimFn;
@@ -9,8 +10,10 @@ use crate::cfg::error::illegal_ctx;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::PREFIX_ID;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::KEY;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::Int;
@@ -26,6 +29,11 @@ pub struct KeyLib {
     pub join: FreePrimFuncVal,
 }
 
+pub const FROM_TEXT: &str = concatcp!(PREFIX_ID, KEY, ".from_text");
+pub const INTO_TEXT: &str = concatcp!(PREFIX_ID, KEY, ".into_text");
+pub const GET_LENGTH: &str = concatcp!(PREFIX_ID, KEY, ".get_length");
+pub const JOIN: &str = concatcp!(PREFIX_ID, KEY, ".join");
+
 impl Default for KeyLib {
     fn default() -> Self {
         KeyLib {
@@ -39,10 +47,10 @@ impl Default for KeyLib {
 
 impl CfgMod for KeyLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_key.from_text", self.from_text);
-        extend_func(cfg, "_key.into_text", self.into_text);
-        extend_func(cfg, "_key.get_length", self.get_length);
-        extend_func(cfg, "_key.join", self.join);
+        extend_func(cfg, FROM_TEXT, self.from_text);
+        extend_func(cfg, INTO_TEXT, self.into_text);
+        extend_func(cfg, GET_LENGTH, self.get_length);
+        extend_func(cfg, JOIN, self.join);
     }
 }
 

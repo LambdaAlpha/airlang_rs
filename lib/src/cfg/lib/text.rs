@@ -1,3 +1,4 @@
+use const_format::concatcp;
 use log::error;
 
 use super::DynPrimFn;
@@ -10,9 +11,11 @@ use crate::cfg::error::illegal_ctx;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::PREFIX_ID;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
+use crate::semantics::val::TEXT;
 use crate::semantics::val::Val;
 use crate::type_::Byte;
 use crate::type_::ConstRef;
@@ -29,6 +32,12 @@ pub struct TextLib {
     pub join: FreePrimFuncVal,
 }
 
+pub const FROM_UTF8: &str = concatcp!(PREFIX_ID, TEXT, ".from_utf8");
+pub const INTO_UTF8: &str = concatcp!(PREFIX_ID, TEXT, ".into_utf8");
+pub const GET_LENGTH: &str = concatcp!(PREFIX_ID, TEXT, ".get_length");
+pub const PUSH: &str = concatcp!(PREFIX_ID, TEXT, ".push");
+pub const JOIN: &str = concatcp!(PREFIX_ID, TEXT, ".join");
+
 impl Default for TextLib {
     fn default() -> Self {
         TextLib {
@@ -43,11 +52,11 @@ impl Default for TextLib {
 
 impl CfgMod for TextLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_text.from_utf8", self.from_utf8);
-        extend_func(cfg, "_text.into_utf8", self.into_utf8);
-        extend_func(cfg, "_text.get_length", self.get_length);
-        extend_func(cfg, "_text.push", self.push);
-        extend_func(cfg, "_text.join", self.join);
+        extend_func(cfg, FROM_UTF8, self.from_utf8);
+        extend_func(cfg, INTO_UTF8, self.into_utf8);
+        extend_func(cfg, GET_LENGTH, self.get_length);
+        extend_func(cfg, PUSH, self.push);
+        extend_func(cfg, JOIN, self.join);
     }
 }
 

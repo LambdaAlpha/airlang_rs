@@ -1,5 +1,6 @@
 use std::mem::swap;
 
+use const_format::concatcp;
 use log::error;
 
 use crate::cfg::CfgMod;
@@ -10,6 +11,8 @@ use crate::cfg::lib::DynPrimFn;
 use crate::cfg::lib::const_impl;
 use crate::cfg::lib::mut_impl;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::PREFIX_ID;
+use crate::semantics::val::CELL;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
@@ -21,6 +24,9 @@ pub struct CellLib {
     pub set_value: MutPrimFuncVal,
 }
 
+pub const GET_VALUE: &str = concatcp!(PREFIX_ID, CELL, ".get_value");
+pub const SET_VALUE: &str = concatcp!(PREFIX_ID, CELL, ".set_value");
+
 impl Default for CellLib {
     fn default() -> Self {
         CellLib { get_value: get_value(), set_value: set_value() }
@@ -29,8 +35,8 @@ impl Default for CellLib {
 
 impl CfgMod for CellLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_cell.get_value", self.get_value);
-        extend_func(cfg, "_cell.set_value", self.set_value);
+        extend_func(cfg, GET_VALUE, self.get_value);
+        extend_func(cfg, SET_VALUE, self.set_value);
     }
 }
 

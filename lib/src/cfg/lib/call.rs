@@ -1,5 +1,6 @@
 use std::mem::swap;
 
+use const_format::concatcp;
 use log::error;
 
 use super::DynPrimFn;
@@ -12,6 +13,8 @@ use crate::cfg::error::illegal_ctx;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::PREFIX_ID;
+use crate::semantics::val::CALL;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
@@ -29,6 +32,12 @@ pub struct CallLib {
     pub set_input: MutPrimFuncVal,
 }
 
+pub const NEW: &str = concatcp!(PREFIX_ID, CALL, ".new");
+pub const GET_FUNCTION: &str = concatcp!(PREFIX_ID, CALL, ".get_function");
+pub const SET_FUNCTION: &str = concatcp!(PREFIX_ID, CALL, ".set_function");
+pub const GET_INPUT: &str = concatcp!(PREFIX_ID, CALL, ".get_input");
+pub const SET_INPUT: &str = concatcp!(PREFIX_ID, CALL, ".set_input");
+
 impl Default for CallLib {
     fn default() -> Self {
         CallLib {
@@ -43,11 +52,11 @@ impl Default for CallLib {
 
 impl CfgMod for CallLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_call.new", self.new);
-        extend_func(cfg, "_call.get_function", self.get_function);
-        extend_func(cfg, "_call.set_function", self.set_function);
-        extend_func(cfg, "_call.get_input", self.get_input);
-        extend_func(cfg, "_call.set_input", self.set_input);
+        extend_func(cfg, NEW, self.new);
+        extend_func(cfg, GET_FUNCTION, self.get_function);
+        extend_func(cfg, SET_FUNCTION, self.set_function);
+        extend_func(cfg, GET_INPUT, self.get_input);
+        extend_func(cfg, SET_INPUT, self.set_input);
     }
 }
 

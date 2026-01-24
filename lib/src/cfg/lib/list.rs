@@ -1,5 +1,6 @@
 use std::mem::swap;
 
+use const_format::concatcp;
 use log::error;
 use num_traits::ToPrimitive;
 
@@ -12,7 +13,9 @@ use crate::cfg::error::illegal_ctx;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::PREFIX_ID;
 use crate::semantics::val::ConstPrimFuncVal;
+use crate::semantics::val::LIST;
 use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
@@ -39,6 +42,21 @@ pub struct ListLib {
     pub clear: MutPrimFuncVal,
 }
 
+pub const GET_LENGTH: &str = concatcp!(PREFIX_ID, LIST, ".get_length");
+pub const SET: &str = concatcp!(PREFIX_ID, LIST, ".set");
+pub const SET_MANY: &str = concatcp!(PREFIX_ID, LIST, ".set_many");
+pub const GET: &str = concatcp!(PREFIX_ID, LIST, ".get");
+pub const GET_MANY: &str = concatcp!(PREFIX_ID, LIST, ".get_many");
+pub const INSERT: &str = concatcp!(PREFIX_ID, LIST, ".insert");
+pub const INSERT_MANY: &str = concatcp!(PREFIX_ID, LIST, ".insert_many");
+pub const REMOVE: &str = concatcp!(PREFIX_ID, LIST, ".remove");
+pub const REMOVE_MANY: &str = concatcp!(PREFIX_ID, LIST, ".remove_many");
+pub const PUSH: &str = concatcp!(PREFIX_ID, LIST, ".push");
+pub const PUSH_MANY: &str = concatcp!(PREFIX_ID, LIST, ".push_many");
+pub const POP: &str = concatcp!(PREFIX_ID, LIST, ".pop");
+pub const POP_MANY: &str = concatcp!(PREFIX_ID, LIST, ".pop_many");
+pub const CLEAR: &str = concatcp!(PREFIX_ID, LIST, ".clear");
+
 impl Default for ListLib {
     fn default() -> Self {
         ListLib {
@@ -62,20 +80,20 @@ impl Default for ListLib {
 
 impl CfgMod for ListLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_list.get_length", self.get_length);
-        extend_func(cfg, "_list.set", self.set);
-        extend_func(cfg, "_list.set_many", self.set_many);
-        extend_func(cfg, "_list.get", self.get);
-        extend_func(cfg, "_list.get_many", self.get_many);
-        extend_func(cfg, "_list.insert", self.insert);
-        extend_func(cfg, "_list.insert_many", self.insert_many);
-        extend_func(cfg, "_list.remove", self.remove);
-        extend_func(cfg, "_list.remove_many", self.remove_many);
-        extend_func(cfg, "_list.push", self.push);
-        extend_func(cfg, "_list.push_many", self.push_many);
-        extend_func(cfg, "_list.pop", self.pop);
-        extend_func(cfg, "_list.pop_many", self.pop_many);
-        extend_func(cfg, "_list.clear", self.clear);
+        extend_func(cfg, GET_LENGTH, self.get_length);
+        extend_func(cfg, SET, self.set);
+        extend_func(cfg, SET_MANY, self.set_many);
+        extend_func(cfg, GET, self.get);
+        extend_func(cfg, GET_MANY, self.get_many);
+        extend_func(cfg, INSERT, self.insert);
+        extend_func(cfg, INSERT_MANY, self.insert_many);
+        extend_func(cfg, REMOVE, self.remove);
+        extend_func(cfg, REMOVE_MANY, self.remove_many);
+        extend_func(cfg, PUSH, self.push);
+        extend_func(cfg, PUSH_MANY, self.push_many);
+        extend_func(cfg, POP, self.pop);
+        extend_func(cfg, POP_MANY, self.pop_many);
+        extend_func(cfg, CLEAR, self.clear);
     }
 }
 

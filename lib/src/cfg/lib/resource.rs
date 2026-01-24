@@ -1,3 +1,4 @@
+use const_format::concatcp;
 use log::error;
 use num_traits::Signed;
 use num_traits::ToPrimitive;
@@ -11,6 +12,7 @@ use crate::cfg::lib::dyn_impl;
 use crate::cfg::lib::free_impl;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
+use crate::semantics::core::PREFIX_ID;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
@@ -26,6 +28,12 @@ pub struct ResourceLib {
     pub measure_steps: MutPrimFuncVal,
 }
 
+const RESOURCE: &str = "resource";
+
+pub const GET_STEPS: &str = concatcp!(PREFIX_ID, RESOURCE, ".get_steps");
+pub const SET_STEPS: &str = concatcp!(PREFIX_ID, RESOURCE, ".set_steps");
+pub const MEASURE_STEPS: &str = concatcp!(PREFIX_ID, RESOURCE, ".measure_steps");
+
 impl Default for ResourceLib {
     fn default() -> Self {
         ResourceLib {
@@ -38,9 +46,9 @@ impl Default for ResourceLib {
 
 impl CfgMod for ResourceLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_resource.get_steps", self.get_steps);
-        extend_func(cfg, "_resource.set_steps", self.set_steps);
-        extend_func(cfg, "_resource.measure_steps", self.measure_steps);
+        extend_func(cfg, GET_STEPS, self.get_steps);
+        extend_func(cfg, SET_STEPS, self.set_steps);
+        extend_func(cfg, MEASURE_STEPS, self.measure_steps);
     }
 }
 

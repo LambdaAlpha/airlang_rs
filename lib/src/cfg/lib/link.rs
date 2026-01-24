@@ -1,5 +1,6 @@
 use std::ops::DerefMut;
 
+use const_format::concatcp;
 use log::error;
 
 use super::FreePrimFn;
@@ -9,8 +10,10 @@ use crate::cfg::error::abort_bug_with_msg;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::PREFIX_ID;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::LINK;
 use crate::semantics::val::LinkVal;
 use crate::semantics::val::Val;
 use crate::type_::DynRef;
@@ -24,6 +27,10 @@ pub struct LinkLib {
     pub which: FreePrimFuncVal,
 }
 
+pub const NEW: &str = concatcp!(PREFIX_ID, LINK, ".new");
+pub const NEW_CONSTANT: &str = concatcp!(PREFIX_ID, LINK, ".new_constant");
+pub const WHICH: &str = concatcp!(PREFIX_ID, LINK, ".which");
+
 impl Default for LinkLib {
     fn default() -> Self {
         LinkLib { new: new(), new_constant: new_constant(), which: which() }
@@ -32,9 +39,9 @@ impl Default for LinkLib {
 
 impl CfgMod for LinkLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_link.new", self.new);
-        extend_func(cfg, "_link.new_constant", self.new_constant);
-        extend_func(cfg, "_link.which", self.which);
+        extend_func(cfg, NEW, self.new);
+        extend_func(cfg, NEW_CONSTANT, self.new_constant);
+        extend_func(cfg, WHICH, self.which);
     }
 }
 

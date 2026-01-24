@@ -11,6 +11,7 @@ use crate::cfg::lib::FreePrimFn;
 use crate::cfg::lib::free_impl;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
+use crate::semantics::val::DECIMAL;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Decimal;
@@ -33,6 +34,16 @@ pub struct DecimalLib {
     pub less_greater: FreePrimFuncVal,
 }
 
+pub const ADD: &str = concatcp!(PREFIX_ID, DECIMAL, ".add");
+pub const SUBTRACT: &str = concatcp!(PREFIX_ID, DECIMAL, ".subtract");
+pub const MULTIPLY: &str = concatcp!(PREFIX_ID, DECIMAL, ".multiply");
+pub const DIVIDE: &str = concatcp!(PREFIX_ID, DECIMAL, ".divide");
+pub const LESS: &str = concatcp!(PREFIX_ID, DECIMAL, ".less");
+pub const LESS_EQUAL: &str = concatcp!(PREFIX_ID, DECIMAL, ".less_equal");
+pub const GREATER: &str = concatcp!(PREFIX_ID, DECIMAL, ".greater");
+pub const GREATER_EQUAL: &str = concatcp!(PREFIX_ID, DECIMAL, ".greater_equal");
+pub const LESS_GREATER: &str = concatcp!(PREFIX_ID, DECIMAL, ".less_greater");
+
 impl Default for DecimalLib {
     fn default() -> Self {
         DecimalLib {
@@ -51,15 +62,15 @@ impl Default for DecimalLib {
 
 impl CfgMod for DecimalLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_decimal.add", self.add);
-        extend_func(cfg, "_decimal.subtract", self.subtract);
-        extend_func(cfg, "_decimal.multiply", self.multiply);
-        extend_func(cfg, "_decimal.divide", self.divide);
-        extend_func(cfg, "_decimal.less", self.less);
-        extend_func(cfg, "_decimal.less_equal", self.less_equal);
-        extend_func(cfg, "_decimal.greater", self.greater);
-        extend_func(cfg, "_decimal.greater_equal", self.greater_equal);
-        extend_func(cfg, "_decimal.less_greater", self.less_greater);
+        extend_func(cfg, ADD, self.add);
+        extend_func(cfg, SUBTRACT, self.subtract);
+        extend_func(cfg, MULTIPLY, self.multiply);
+        extend_func(cfg, DIVIDE, self.divide);
+        extend_func(cfg, LESS, self.less);
+        extend_func(cfg, LESS_EQUAL, self.less_equal);
+        extend_func(cfg, GREATER, self.greater);
+        extend_func(cfg, GREATER_EQUAL, self.greater_equal);
+        extend_func(cfg, LESS_GREATER, self.less_greater);
     }
 }
 

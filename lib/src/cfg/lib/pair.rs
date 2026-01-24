@@ -1,5 +1,6 @@
 use std::mem::swap;
 
+use const_format::concatcp;
 use log::error;
 
 use super::DynPrimFn;
@@ -10,8 +11,10 @@ use crate::cfg::error::illegal_ctx;
 use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::PREFIX_ID;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
+use crate::semantics::val::PAIR;
 use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 
@@ -22,6 +25,11 @@ pub struct PairLib {
     pub get_right: ConstPrimFuncVal,
     pub set_right: MutPrimFuncVal,
 }
+
+pub const GET_LEFT: &str = concatcp!(PREFIX_ID, PAIR, ".get_left");
+pub const SET_LEFT: &str = concatcp!(PREFIX_ID, PAIR, ".set_left");
+pub const GET_RIGHT: &str = concatcp!(PREFIX_ID, PAIR, ".get_right");
+pub const SET_RIGHT: &str = concatcp!(PREFIX_ID, PAIR, ".set_right");
 
 impl Default for PairLib {
     fn default() -> Self {
@@ -36,10 +44,10 @@ impl Default for PairLib {
 
 impl CfgMod for PairLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, "_pair.get_left", self.get_left);
-        extend_func(cfg, "_pair.set_left", self.set_left);
-        extend_func(cfg, "_pair.get_right", self.get_right);
-        extend_func(cfg, "_pair.set_right", self.set_right);
+        extend_func(cfg, GET_LEFT, self.get_left);
+        extend_func(cfg, SET_LEFT, self.set_left);
+        extend_func(cfg, GET_RIGHT, self.get_right);
+        extend_func(cfg, SET_RIGHT, self.set_right);
     }
 }
 
