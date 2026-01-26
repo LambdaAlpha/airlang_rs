@@ -1,7 +1,7 @@
 use std::process::Command;
 
+use airlang::bug;
 use airlang::cfg::CfgMod;
-use airlang::cfg::error::illegal_input;
 use airlang::cfg::extend_func;
 use airlang::cfg::lib::FreeImpl;
 use airlang::semantics::cfg::Cfg;
@@ -16,7 +16,6 @@ use airlang::type_::List;
 use airlang::type_::Map;
 use airlang::type_::Text;
 use const_format::concatcp;
-use log::error;
 
 #[derive(Clone)]
 pub struct ProcessLib {
@@ -50,48 +49,33 @@ pub fn call() -> FreePrimFuncVal {
 
 fn fn_call(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Map(mut map) = input else {
-        error!("input {input:?} should be a map");
-        return illegal_input(cfg);
+        return bug!(cfg, "{CALL}: expected input to be a map, but got {input:?}");
     };
     let Some(program) = map.remove(&Key::from_str_unchecked(PROGRAM)) else {
-        error!("program name should be provided");
-        return illegal_input(cfg);
+        return bug!(cfg, "{CALL}: {PROGRAM} not found");
     };
     let Val::Text(program) = program else {
-        error!("program {program:?} should be a text");
-        return illegal_input(cfg);
+        return bug!(cfg, "{CALL}: expected {PROGRAM} to be a text, but got {program:?}");
     };
     let Some(arguments) = map.remove(&Key::from_str_unchecked(ARGUMENTS)) else {
-        error!("arguments should be provided");
-        return illegal_input(cfg);
+        return bug!(cfg, "{CALL}: {ARGUMENTS} not found");
     };
     let Val::List(arguments) = arguments else {
-        error!("arguments {arguments:?} should be a list");
-        return illegal_input(cfg);
+        return bug!(cfg, "{CALL}: expected {ARGUMENTS} to be a list, but got {arguments:?}");
     };
-    let arguments = List::from(arguments);
-    let arguments = arguments
-        .into_iter()
-        .map(|val| {
-            let Val::Text(arg) = val else {
-                error!("argument {val:?} should be a text");
-                return None;
-            };
-            let arg = Text::from(arg);
-            Some(String::from(arg))
-        })
-        .collect::<Option<Vec<String>>>();
-    let Some(arguments) = arguments else {
-        return illegal_input(cfg);
-    };
+    let mut args = Vec::with_capacity(arguments.len());
+    for arg in List::from(arguments) {
+        let Val::Text(arg) = arg else {
+            return bug!(cfg, "{CALL}: expected argument to be a text, but got {arg:?}");
+        };
+        let arg = Text::from(arg);
+        args.push(String::from(arg));
+    }
 
-    let output = Command::new(&**program).args(arguments).output();
+    let output = Command::new(&**program).args(args).output();
     let output = match output {
         Ok(output) => output,
-        Err(e) => {
-            error!("call program failed: {e}");
-            return Val::default();
-        }
+        Err(_e) => return Val::default(),
     };
 
     let stdout = Val::Byte(Byte::from(output.stdout).into());

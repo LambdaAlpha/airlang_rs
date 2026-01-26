@@ -4,9 +4,8 @@ use std::io::Read;
 use std::path::Path;
 
 use airlang::Air;
+use airlang::bug;
 use airlang::cfg::CfgMod;
-use airlang::cfg::error::illegal_cfg;
-use airlang::cfg::error::illegal_input;
 use airlang::cfg::extend_func;
 use airlang::cfg::lib::FreeImpl;
 use airlang::semantics::cfg::Cfg;
@@ -18,7 +17,6 @@ use airlang::type_::Cell;
 use airlang::type_::Key;
 use airlang::type_::Text;
 use const_format::concatcp;
-use log::error;
 
 #[derive(Clone)]
 pub struct BuildLib {
@@ -52,8 +50,7 @@ const CUR_URL_KEY: &str = "build.this_url";
 
 fn fn_load(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(url) = input else {
-        error!("input {input:?} should be a text");
-        return illegal_input(cfg);
+        return bug!(cfg, "{LOAD}: expected input to be a text, but got {input:?}");
     };
     let url = Text::from(url);
     let cur_url_key = Key::from_str_unchecked(CUR_URL_KEY);
@@ -67,19 +64,16 @@ fn load_from_url(cfg: &mut Cfg, url: String) -> Val {
     let mut buffer = String::new();
     let content = match read_to_string(&url, &mut buffer) {
         Ok(content) => content,
-        Err(err) => {
-            eprintln!("failed to read {url}: {err}");
+        Err(_err) => {
             return Val::Key(Key::from_str_unchecked("_read_error"));
         }
     };
     let Ok(val) = parse(content) else {
-        error!("{content} should be a valid air source code");
         return Val::Key(Key::from_str_unchecked("_parse_error"));
     };
 
     let Some(mut mod_air) = Air::new(cfg.clone()) else {
-        error!("prelude should exist in cfg");
-        return illegal_cfg(cfg);
+        return Val::default();
     };
     let cur_url_key = Key::from_str_unchecked(CUR_URL_KEY);
     mod_air.cfg_mut().begin_scope();

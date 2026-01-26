@@ -15,22 +15,22 @@ use crate::semantics::val::Val;
 use crate::type_::Key;
 use crate::type_::Text;
 
-pub(crate) fn abort_bug_with_msg(cfg: &mut Cfg, msg: &str) -> Val {
-    abort_bug(cfg);
+pub(crate) fn abort_by_bug_with_msg(cfg: &mut Cfg, msg: Text) -> Val {
+    abort_by_bug(cfg);
     abort_msg(cfg, msg);
     cfg.abort();
     Val::default()
 }
 
-pub(crate) fn abort_bug(cfg: &mut Cfg) {
+pub(crate) fn abort_by_bug(cfg: &mut Cfg) {
     cfg.export(
         Key::from_str_unchecked(Cfg::ABORT_TYPE),
         Val::Key(Key::from_str_unchecked(Cfg::ABORT_TYPE_BUG)),
     );
 }
 
-pub(crate) fn abort_msg(cfg: &mut Cfg, msg: &str) {
-    cfg.export(Key::from_str_unchecked(Cfg::ABORT_MSG), Val::Text(Text::from(msg).into()));
+pub(crate) fn abort_msg(cfg: &mut Cfg, msg: Text) {
+    cfg.export(Key::from_str_unchecked(Cfg::ABORT_MSG), Val::Text(msg.into()));
 }
 
 mod eval;

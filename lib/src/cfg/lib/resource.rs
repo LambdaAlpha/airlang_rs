@@ -1,13 +1,12 @@
 use const_format::concatcp;
-use log::error;
 use num_traits::Signed;
 use num_traits::ToPrimitive;
 
 use super::DynImpl;
 use super::FreeImpl;
 use super::abort_free;
+use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
@@ -57,8 +56,7 @@ pub fn get_steps() -> FreePrimFuncVal {
 
 fn fn_get_steps(cfg: &mut Cfg, input: Val) -> Val {
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{GET_STEPS}: expected input to be a unit, but got {input:?}");
     }
     let steps = cfg.steps();
     Val::Int(Int::from(steps).into())
@@ -70,12 +68,10 @@ pub fn set_steps() -> FreePrimFuncVal {
 
 fn fn_set_steps(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Int(steps) = input else {
-        error!("input {input:?} should be an integer");
-        return illegal_input(cfg);
+        return bug!(cfg, "{SET_STEPS}: expected input to be an integer, but got {input:?}");
     };
     if steps.is_negative() {
-        error!("input {steps:?} should be a natural integer");
-        return illegal_input(cfg);
+        return bug!(cfg, "{SET_STEPS}: expected input to be non-negative, but got {steps:?}");
     }
     let steps = steps.to_u128().unwrap_or(u128::MAX);
     cfg.set_steps(steps);

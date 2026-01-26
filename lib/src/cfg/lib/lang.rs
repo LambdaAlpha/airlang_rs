@@ -1,11 +1,10 @@
 use std::rc::Rc;
 
 use const_format::concatcp;
-use log::error;
 
 use super::FreeImpl;
+use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
@@ -91,11 +90,9 @@ pub fn parse() -> FreePrimFuncVal {
 
 fn fn_parse(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(input) = input else {
-        error!("input {input:?} should be a text");
-        return illegal_input(cfg);
+        return bug!(cfg, "{PARSE}: expected input to be a text, but got {input:?}");
     };
     let Ok(val) = crate::syntax::parse(&input) else {
-        error!("parse {input:?} failed");
         return Val::default();
     };
     Val::Cell(Cell::new(val).into())
@@ -107,7 +104,6 @@ pub fn generate() -> FreePrimFuncVal {
 
 fn fn_generate(_cfg: &mut Cfg, input: Val) -> Val {
     let Ok(repr) = (&input).try_into() else {
-        error!("generate {input:?} failed");
         return Val::default();
     };
     let str = generate_pretty(repr);

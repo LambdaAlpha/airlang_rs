@@ -1,17 +1,15 @@
 use std::mem::swap;
+use std::ops::Deref;
 
 use const_format::concatcp;
-use log::error;
 
 use super::ConstImpl;
 use super::FreeImpl;
 use super::MutImpl;
 use super::abort_const;
 use super::abort_free;
+use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::error::abort_bug_with_msg;
-use crate::cfg::error::illegal_ctx;
-use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
@@ -133,20 +131,21 @@ pub fn new() -> FreePrimFuncVal {
 
 fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
     let Val::List(list) = input else {
-        error!("input {input:?} should be a list");
-        return illegal_input(cfg);
+        return bug!(cfg, "{NEW}: expected input to be a list, but got {input:?}");
     };
     let list = List::from(list);
     let mut map: Map<Key, Val> = Map::with_capacity(list.len());
     for item in list {
         let Val::Pair(pair) = item else {
-            error!("input.item {item:?} should be a pair");
-            return illegal_input(cfg);
+            return bug!(cfg, "{NEW}: expected input.item to be a pair, but got {item:?}");
         };
         let pair = Pair::from(pair);
         let Val::Key(key) = pair.left else {
-            error!("input.item.left {:?} should be a key", pair.left);
-            return illegal_input(cfg);
+            return bug!(
+                cfg,
+                "{NEW}: expected input.item.left to be a key, but got {:?}",
+                pair.left
+            );
         };
         map.insert(key, pair.right);
     }
@@ -159,15 +158,13 @@ pub fn new_set() -> FreePrimFuncVal {
 
 fn fn_new_set(cfg: &mut Cfg, input: Val) -> Val {
     let Val::List(list) = input else {
-        error!("input {input:?} should be a list");
-        return illegal_input(cfg);
+        return bug!(cfg, "{NEW_SET}: expected input to be a list, but got {input:?}");
     };
     let list = List::from(list);
     let mut map: Map<Key, Val> = Map::with_capacity(list.len());
     for item in list {
         let Val::Key(key) = item else {
-            error!("input.item {item:?} should be a key");
-            return illegal_input(cfg);
+            return bug!(cfg, "{NEW_SET}: expected input.item to be a key, but got {item:?}");
         };
         map.insert(key, Val::default());
     }
@@ -180,12 +177,10 @@ pub fn get_length() -> ConstPrimFuncVal {
 
 fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
-        error!("ctx {ctx:?} should be a map");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{GET_LENGTH}: expected context to be a map, but got {:?}", ctx.deref());
     };
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input:?}");
     }
     let len: Int = map.len().into();
     Val::Int(len.into())
@@ -197,12 +192,10 @@ pub fn get_items() -> ConstPrimFuncVal {
 
 fn fn_get_items(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
-        error!("ctx {ctx:?} should be a map");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{GET_ITEMS}: expected context to be a map, but got {:?}", ctx.deref());
     };
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{GET_ITEMS}: expected input to be a unit, but got {input:?}");
     }
     let items: List<Val> = map
         .iter()
@@ -218,12 +211,10 @@ pub fn into_items() -> MutPrimFuncVal {
 
 fn fn_into_items(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
-        error!("ctx {ctx:?} should be a map");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{INTO_ITEMS}: expected context to be a map, but got {ctx:?}");
     };
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{INTO_ITEMS}: expected input to be a unit, but got {input:?}");
     }
     let mut origin = Map::default();
     swap(&mut **map, &mut origin);
@@ -238,12 +229,10 @@ pub fn get_keys() -> ConstPrimFuncVal {
 
 fn fn_get_keys(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
-        error!("ctx {ctx:?} should be a map");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{GET_KEYS}: expected context to be a map, but got {:?}", ctx.deref());
     };
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{GET_KEYS}: expected input to be a unit, but got {input:?}");
     }
     let keys: List<Val> = map.keys().map(|k| Val::Key(k.clone())).collect();
     Val::List(keys.into())
@@ -256,12 +245,10 @@ pub fn into_keys() -> MutPrimFuncVal {
 
 fn fn_into_keys(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
-        error!("ctx {ctx:?} should be a map");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{INTO_KEYS}: expected context to be a map, but got {ctx:?}");
     };
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{INTO_KEYS}: expected input to be a unit, but got {input:?}");
     }
     let mut origin = Map::default();
     swap(&mut **map, &mut origin);
@@ -275,12 +262,10 @@ pub fn get_values() -> ConstPrimFuncVal {
 
 fn fn_get_values(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
-        error!("ctx {ctx:?} should be a map");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{GET_VALUES}: expected context to be a map, but got {:?}", ctx.deref());
     };
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{GET_VALUES}: expected input to be a unit, but got {input:?}");
     }
     let values: List<Val> = map.values().cloned().collect();
     Val::List(values.into())
@@ -297,12 +282,10 @@ pub fn into_values() -> MutPrimFuncVal {
 
 fn fn_into_values(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
-        error!("ctx {ctx:?} should be a map");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{INTO_VALUES}: expected context to be a map, but got {ctx:?}");
     };
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{INTO_VALUES}: expected input to be a unit, but got {input:?}");
     }
     let mut origin = Map::default();
     swap(&mut **map, &mut origin);
@@ -316,12 +299,10 @@ pub fn contain() -> ConstPrimFuncVal {
 
 fn fn_contain(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
-        error!("ctx {ctx:?} should be a map");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{CONTAIN}: expected context to be a map, but got {:?}", ctx.deref());
     };
     let Val::Key(key) = input else {
-        error!("input {input:?} should be a key");
-        return illegal_input(cfg);
+        return bug!(cfg, "{CONTAIN}: expected input to be a key, but got {input:?}");
     };
     Val::Bit(Bit::from(map.contains_key(&key)))
 }
@@ -332,18 +313,15 @@ pub fn contain_all() -> ConstPrimFuncVal {
 
 fn fn_contain_all(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
-        error!("ctx {ctx:?} should be a map");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{CONTAIN_ALL}: expected context to be a map, but got {:?}", ctx.deref());
     };
     let Val::List(keys) = input else {
-        error!("input {input:?} should be a list");
-        return illegal_input(cfg);
+        return bug!(cfg, "{CONTAIN_ALL}: expected input to be a list, but got {input:?}");
     };
     let keys = List::from(keys);
     for key in keys {
         let Val::Key(key) = key else {
-            error!("input.item {key:?} should be a key");
-            return illegal_input(cfg);
+            return bug!(cfg, "{CONTAIN_ALL}: expected input.item to be a key, but got {key:?}");
         };
         if !map.contains_key(&key) {
             return Val::Bit(Bit::from(false));
@@ -358,18 +336,15 @@ pub fn contain_any() -> ConstPrimFuncVal {
 
 fn fn_contain_any(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
-        error!("ctx {ctx:?} should be a map");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{CONTAIN_ANY}: expected context to be a map, but got {:?}", ctx.deref());
     };
     let Val::List(keys) = input else {
-        error!("input {input:?} should be a list");
-        return illegal_input(cfg);
+        return bug!(cfg, "{CONTAIN_ANY}: expected input to be a list, but got {input:?}");
     };
     let keys = List::from(keys);
     for key in keys {
         let Val::Key(key) = key else {
-            error!("input.item {key:?} should be a key");
-            return illegal_input(cfg);
+            return bug!(cfg, "{CONTAIN_ANY}: expected input.item to be a key, but got {key:?}");
         };
         if map.contains_key(&key) {
             return Val::Bit(Bit::from(true));
@@ -384,17 +359,14 @@ pub fn set() -> MutPrimFuncVal {
 
 fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
-        error!("ctx {ctx:?} should be a map");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{SET}: expected context to be a map, but got {ctx:?}");
     };
     let Val::Pair(key_value) = input else {
-        error!("input {input:?} should be a pair");
-        return illegal_input(cfg);
+        return bug!(cfg, "{SET}: expected input to be a pair, but got {input:?}");
     };
     let key_value = Pair::from(key_value);
     let Val::Key(key) = key_value.left else {
-        error!("input.left {:?} should be a key", key_value.left);
-        return illegal_input(cfg);
+        return bug!(cfg, "{SET}: expected input.left to be a key, but got {:?}", key_value.left);
     };
     let value = key_value.right;
     let Some(value) = map.insert(key, value) else {
@@ -409,12 +381,10 @@ pub fn set_many() -> MutPrimFuncVal {
 
 fn fn_set_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
-        error!("ctx {ctx:?} should be a map");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{SET_MANY}: expected context to be a map, but got {ctx:?}");
     };
     let Val::Map(update) = input else {
-        error!("input {input:?} should be a map");
-        return illegal_input(cfg);
+        return bug!(cfg, "{SET_MANY}: expected input to be a map, but got {input:?}");
     };
     let update = Map::from(update);
     let map: Map<Key, Val> =
@@ -428,12 +398,10 @@ pub fn get() -> ConstPrimFuncVal {
 
 fn fn_get(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
-        error!("ctx {ctx:?} should be a map");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{GET}: expected context to be a map, but got {:?}", ctx.deref());
     };
     let Val::Key(key) = input else {
-        error!("input {input:?} should be key");
-        return illegal_input(cfg);
+        return bug!(cfg, "{GET}: expected input to be a key, but got {input:?}");
     };
     let Some(value) = map.get(&key) else {
         return Val::default();
@@ -447,19 +415,16 @@ pub fn get_many() -> ConstPrimFuncVal {
 
 fn fn_get_many(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Map(map) = &*ctx else {
-        error!("ctx {ctx:?} should be a map");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{GET_MANY}: expected context to be a map, but got {:?}", ctx.deref());
     };
     let Val::List(keys) = input else {
-        error!("input {input:?} should be a list");
-        return illegal_input(cfg);
+        return bug!(cfg, "{GET_MANY}: expected input to be a list, but got {input:?}");
     };
     let keys = List::from(keys);
     let mut new_map: Map<Key, Val> = Map::with_capacity(keys.len());
     for key in keys {
         let Val::Key(key) = key else {
-            error!("input.item {key:?} should be a key");
-            return illegal_input(cfg);
+            return bug!(cfg, "{GET_MANY}: expected input.item to be a key, but got {key:?}");
         };
         if let Some(val) = map.get(&key) {
             new_map.insert(key, val.clone());
@@ -474,12 +439,10 @@ pub fn remove() -> MutPrimFuncVal {
 
 fn fn_remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
-        error!("ctx {ctx:?} should be a map");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{REMOVE}: expected context to be a map, but got {ctx:?}");
     };
     let Val::Key(key) = input else {
-        error!("input {input:?} should be key");
-        return illegal_input(cfg);
+        return bug!(cfg, "{REMOVE}: expected input to be a key, but got {input:?}");
     };
     let Some(value) = map.remove(&key) else {
         return Val::default();
@@ -498,19 +461,16 @@ pub fn remove_many() -> MutPrimFuncVal {
 
 fn fn_remove_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
-        error!("ctx {ctx:?} should be a map");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{REMOVE_MANY}: expected context to be a map, but got {ctx:?}");
     };
     let Val::List(keys) = input else {
-        error!("input {input:?} should be a list");
-        return illegal_input(cfg);
+        return bug!(cfg, "{REMOVE_MANY}: expected input to be a list, but got {input:?}");
     };
     let keys = List::from(keys);
     let mut new_map: Map<Key, Val> = Map::with_capacity(keys.len());
     for key in keys {
         let Val::Key(key) = key else {
-            error!("input.item {key:?} should be a key");
-            return illegal_input(cfg);
+            return bug!(cfg, "{REMOVE_MANY}: expected input.item to be a key, but got {key:?}");
         };
         if let Some(val) = map.remove(&key) {
             new_map.insert(key, val);
@@ -525,16 +485,13 @@ pub fn move_() -> MutPrimFuncVal {
 
 fn fn_move(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
-        error!("ctx {ctx:?} should be a map");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{MOVE}: expected context to be a map, but got {ctx:?}");
     };
     let Val::Key(key) = input else {
-        error!("input {input:?} should be key");
-        return illegal_input(cfg);
+        return bug!(cfg, "{MOVE}: expected input to be a key, but got {input:?}");
     };
     let Some(value) = map.remove(&key) else {
-        error!("key not exist");
-        return abort_bug_with_msg(cfg, "key should exist in the map");
+        return bug!(cfg, "{MOVE}: value not found for key {key:?} in the map {map:?}");
     };
     value
 }
@@ -545,12 +502,10 @@ pub fn clear() -> MutPrimFuncVal {
 
 fn fn_clear(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = ctx else {
-        error!("ctx {ctx:?} should be a map");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{CLEAR}: expected context to be a map, but got {ctx:?}");
     };
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{CLEAR}: expected input to be a unit, but got {input:?}");
     }
     map.clear();
     Val::default()

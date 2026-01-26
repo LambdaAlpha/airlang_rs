@@ -1,12 +1,12 @@
+use std::ops::Deref;
+
 use const_format::concatcp;
-use log::error;
 
 use super::ConstImpl;
 use super::FreeImpl;
 use super::abort_free;
+use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::error::illegal_ctx;
-use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
@@ -59,13 +59,14 @@ pub fn from_text() -> FreePrimFuncVal {
 
 fn fn_from_text(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
-        error!("input {input:?} should be a text");
-        return illegal_input(cfg);
+        return bug!(cfg, "{FROM_TEXT}: expected input to be a text, but got {input:?}");
     };
     let is_key = t.chars().all(Key::is_key);
     if !is_key {
-        error!("every character of input {t:?} text should be a key");
-        return illegal_input(cfg);
+        return bug!(
+            cfg,
+            "{FROM_TEXT}: expected every character of input text should be a key, but got {t:?}"
+        );
     }
     let key = Key::from_string_unchecked(t.to_string());
     Val::Key(key)
@@ -77,8 +78,7 @@ pub fn into_text() -> FreePrimFuncVal {
 
 fn fn_into_text(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Key(key) = input else {
-        error!("input {input:?} should be a key");
-        return illegal_input(cfg);
+        return bug!(cfg, "{INTO_TEXT}: expected input to be a key, but got {input:?}");
     };
     Val::Text(Text::from(String::from(key)).into())
 }
@@ -89,12 +89,10 @@ pub fn get_length() -> ConstPrimFuncVal {
 
 fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Key(key) = &*ctx else {
-        error!("ctx {ctx:?} should be a key");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{GET_LENGTH}: expected context to be a key, but got {:?}", ctx.deref());
     };
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input:?}");
     }
     let len: Int = key.len().into();
     Val::Int(len.into())
@@ -107,31 +105,21 @@ pub fn join() -> FreePrimFuncVal {
 
 fn fn_join(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        error!("input {input:?} should be a pair");
-        return illegal_input(cfg);
+        return bug!(cfg, "{JOIN}: expected input to be a pair, but got {input:?}");
     };
     let Val::Key(separator) = &pair.left else {
-        error!("separator {:?} should be a key", pair.left);
-        return illegal_input(cfg);
+        return bug!(cfg, "{JOIN}: expected input.left to be a key, but got {:?}", pair.left);
     };
     let Val::List(keys) = &pair.right else {
-        error!("input.right {:?} should be a list", pair.right);
-        return illegal_input(cfg);
+        return bug!(cfg, "{JOIN}: expected input.right to be a list, but got {:?}", pair.right);
     };
-    let keys: Option<Vec<&str>> = keys
-        .iter()
-        .map(|v| {
-            let Val::Key(s) = v else {
-                error!("item {v:?} should be a key");
-                return None;
-            };
-            let key: &str = s;
-            Some(key)
-        })
-        .collect();
-    let Some(keys) = keys else {
-        return illegal_input(cfg);
-    };
-    let key = keys.join(separator);
+    let mut to_join: Vec<&str> = Vec::with_capacity(keys.len());
+    for key in keys.iter() {
+        let Val::Key(s) = key else {
+            return bug!(cfg, "{JOIN}: expected input.right.item to be a key, but got {key:?}");
+        };
+        to_join.push(s);
+    }
+    let key = to_join.join(separator);
     Val::Key(Key::from_string_unchecked(key))
 }

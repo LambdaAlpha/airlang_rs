@@ -1,11 +1,25 @@
 abort
 -----
 _ do [
-    _ abort .,
-    1
+    .config.new set _ import _config.new,
+    .link.new set _ import _link.new,
+    .where set _ import _config.where,
+    .is_aborted set _ import _error.is_aborted,
+    .cfg set _ config.new {
+        _prelude : _ link.new {
+            do : do,
+            abort : abort,
+        },
+    },
+    .a set cfg where _ do [
+        _ abort .,
+        1
+    ],
+    .b set .cfg which is_aborted : .,
+    b and a == .
 ]
 -----
-.
+true
 =====
 abort is_aborted
 -----

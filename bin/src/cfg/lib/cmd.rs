@@ -1,15 +1,15 @@
 use std::process::Command;
 
+use airlang::bug;
 use airlang::cfg::CfgMod;
-use airlang::cfg::error::illegal_input;
 use airlang::cfg::extend_func;
 use airlang::cfg::lib::FreeImpl;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_ID;
 use airlang::semantics::val::FreePrimFuncVal;
 use airlang::semantics::val::Val;
+use airlang::type_::Text;
 use const_format::concatcp;
-use log::error;
 
 #[derive(Clone)]
 pub struct CmdLib {
@@ -41,40 +41,28 @@ pub fn call() -> FreePrimFuncVal {
 
 fn fn_call(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        error!("input {input:?} should be a pair");
-        return illegal_input(cfg);
+        return bug!(cfg, "{CALL}: expected input to be a pair, but got {input:?}");
     };
     let program: &str = match &pair.left {
         Val::Text(program) => program,
         Val::Key(key) => key,
         v => {
-            error!("program {v:?} should be a text or a key");
-            return illegal_input(cfg);
+            return bug!(cfg, "{CALL}: expected input.left to be a text or a key, but got {v:?}");
         }
     };
     let Val::List(arguments) = &pair.right else {
-        error!("arguments {:?} should be a list", pair.right);
-        return illegal_input(cfg);
+        return bug!(cfg, "{CALL}: expected input.right to be a list, but got {:?}", pair.right);
     };
-    let arguments = arguments
-        .iter()
-        .map(|val| {
-            let arg: &str = match val {
-                Val::Text(text) => text,
-                Val::Key(key) => key,
-                v => {
-                    error!("argument {v:?} should be a text or a key");
-                    return None;
-                }
-            };
-            Some(arg)
-        })
-        .collect::<Option<Vec<&str>>>();
-    let Some(arguments) = arguments else {
-        return illegal_input(cfg);
-    };
+    let mut args = Vec::with_capacity(arguments.len());
+    for arg in arguments.iter() {
+        let Val::Text(arg) = arg else {
+            return bug!(cfg, "{CALL}: expected argument to be a text, but got {arg:?}");
+        };
+        let arg = Text::from(arg);
+        args.push(String::from(arg));
+    }
 
-    let child = Command::new(program).args(arguments).spawn();
+    let child = Command::new(program).args(args).spawn();
     let Ok(mut child) = child else {
         eprintln!("failed to execute program");
         return Val::default();

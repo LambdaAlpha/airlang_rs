@@ -2,12 +2,15 @@ use std::env;
 use std::error::Error;
 
 use airlang_dev::init_logger;
+use log::error;
 use log::trace;
 
 use crate::Air;
 use crate::cfg2::CoreCfg2;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::val::Val;
 use crate::syntax::parse;
+use crate::type_::Key;
 
 const MAIN_DELIMITER: &str = "\n=====\n";
 const SUB_DELIMITER: &str = "\n-----\n";
@@ -45,6 +48,7 @@ fn test_interpret(air: Air, input: &str, file_name: &str) -> Result<(), Box<dyn 
         })?;
         trace!("file {file_name} case ({title})");
         let ret = air.interpret(src);
+        log_abort(air.cfg_mut());
         let ret_expected = parse(o).map_err(|e| {
             eprintln!("file {file_name} case ({title}): output ({o}) parse failed\n{e}");
             e
@@ -68,6 +72,20 @@ fn test_interpret(air: Air, input: &str, file_name: &str) -> Result<(), Box<dyn 
         }
     }
     Ok(())
+}
+
+fn log_abort(cfg: &mut Cfg) {
+    if !cfg.is_aborted() {
+        return;
+    }
+    let type_ = cfg.import(Key::from_str_unchecked(Cfg::ABORT_TYPE));
+    let msg = cfg.import(Key::from_str_unchecked(Cfg::ABORT_MSG));
+    match (type_, msg) {
+        (Some(type_), Some(msg)) => error!("aborted by {type_:?}: {msg:?}"),
+        (None, Some(msg)) => error!("aborted: {msg:?}"),
+        (Some(type_), None) => error!("aborted by {type_:?}"),
+        (None, None) => error!("aborted"),
+    }
 }
 
 #[test]

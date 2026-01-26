@@ -5,7 +5,6 @@ use airlang::semantics::cfg::Cfg;
 use airlang::semantics::val::LinkVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Key;
-use log::info;
 
 use self::lib::StdLib;
 use crate::cfg::prelude::StdPrelude;
@@ -28,7 +27,6 @@ impl CfgMod for StdCfg {
     fn extend(self, cfg: &Cfg) {
         self.lib.extend(cfg);
         let prelude = prelude_repr(self.prelude);
-        info!("std prelude len {}", prelude.len());
         let prelude = Val::Link(LinkVal::new(Val::Map(prelude.into()), false));
         cfg.extend_scope(Key::from_str_unchecked(CoreCfg::PRELUDE), prelude);
     }

@@ -1,15 +1,13 @@
 use std::collections::HashMap;
 
 use const_format::concatcp;
-use log::error;
 use num_traits::Signed;
 use num_traits::ToPrimitive;
 
 use super::DynImpl;
 use super::abort_free;
+use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::error::abort_bug_with_msg;
-use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::cfg::lib::ctx::pattern::PatternAssign;
 use crate::cfg::lib::ctx::pattern::PatternMatch;
@@ -96,23 +94,29 @@ enum CtrlFlow {
     Return,
 }
 
+struct OutputCtrlFlow {
+    output: Val,
+    ctrl_flow: CtrlFlow,
+}
+
 impl Block {
-    fn parse(val: Val) -> Option<Self> {
+    fn parse(tag: &str, cfg: &mut Cfg, val: Val) -> Result<Self, Val> {
         let Val::List(list) = val else {
-            error!("input {val:?} should be a list");
-            return None;
+            return Err(bug!(cfg, "{tag}: expected block to be a list, but got {val:?}"));
         };
         let list = List::from(list);
-        let items = list.into_iter().map(Statement::parse).collect::<Option<_>>()?;
-        Some(Block { statements: items })
+        let mut statements = Vec::with_capacity(list.len());
+        for statement in list {
+            statements.push(Statement::parse(tag, cfg, statement)?);
+        }
+        Ok(Block { statements })
     }
 
-    fn flow(self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> (Val, CtrlFlow) {
+    fn flow(self, tag: &str, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> OutputCtrlFlow {
         let mut output = Val::default();
         for statement in self.statements {
             if cfg.is_aborted() {
-                error!("aborted");
-                return (Val::default(), CtrlFlow::Return);
+                return OutputCtrlFlow { output: Val::default(), ctrl_flow: CtrlFlow::Return };
             }
             match statement {
                 Statement::Normal(val) => {
@@ -121,47 +125,55 @@ impl Block {
                 Statement::Condition { ctrl_flow, condition, body } => {
                     let condition = Eval.dyn_call(cfg, ctx.reborrow(), condition);
                     let Val::Bit(condition) = condition else {
-                        error!("condition {condition:?} should be a bit");
-                        abort_bug_with_msg(cfg, "block condition should be a bit");
-                        return (Val::default(), CtrlFlow::Return);
+                        bug!(
+                            cfg,
+                            "{tag}: expected block condition to be a bit, but got {condition:?}"
+                        );
+                        return OutputCtrlFlow {
+                            output: Val::default(),
+                            ctrl_flow: CtrlFlow::Return,
+                        };
                     };
                     if *condition {
                         let output = Eval.dyn_call(cfg, ctx, body);
-                        return (output, ctrl_flow);
+                        return OutputCtrlFlow { output, ctrl_flow };
                     }
                     output = Val::default();
                 }
             }
         }
-        (output, CtrlFlow::Continue)
+        OutputCtrlFlow { output, ctrl_flow: CtrlFlow::Continue }
     }
 
-    fn eval(self, cfg: &mut Cfg, ctx: DynRef<Val>) -> Val {
-        self.flow(cfg, ctx).0
+    fn eval(self, tag: &str, cfg: &mut Cfg, ctx: DynRef<Val>) -> Val {
+        self.flow(tag, cfg, ctx).output
     }
 }
 
 impl Statement {
-    fn parse(val: Val) -> Option<Self> {
+    fn parse(tag: &str, cfg: &mut Cfg, val: Val) -> Result<Self, Val> {
         let Val::Call(call) = val else {
-            return Some(Statement::Normal(val));
+            return Ok(Statement::Normal(val));
         };
         let Val::Key(s) = &call.func else {
-            return Some(Statement::Normal(Val::Call(call)));
+            return Ok(Statement::Normal(Val::Call(call)));
         };
         let Some(ctrl_flow) = CtrlFlow::parse(s) else {
-            return Some(Statement::Normal(Val::Call(call)));
+            return Ok(Statement::Normal(Val::Call(call)));
         };
         let call = Call::from(call);
         let Val::Pair(pair) = call.input else {
-            error!("call.input {:?} should be a pair", call.input);
-            return None;
+            return Err(bug!(
+                cfg,
+                "{tag}: expect statement condition input to be a pair, but got {:?}",
+                call.input
+            ));
         };
         let pair = Pair::from(pair);
         let condition = pair.left;
         let body = pair.right;
         let statement = Statement::Condition { ctrl_flow, condition, body };
-        Some(statement)
+        Ok(statement)
     }
 }
 
@@ -181,10 +193,10 @@ pub fn do_() -> MutPrimFuncVal {
 }
 
 fn fn_do(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
-    let Some(block) = Block::parse(input) else {
-        return illegal_input(cfg);
+    let Ok(block) = Block::parse(DO, cfg, input) else {
+        return Val::default();
     };
-    block.eval(cfg, ctx)
+    block.eval(DO, cfg, ctx)
 }
 
 pub fn test() -> MutPrimFuncVal {
@@ -192,8 +204,8 @@ pub fn test() -> MutPrimFuncVal {
 }
 
 fn fn_test(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
-    let Some(test) = Test::parse(input) else {
-        return illegal_input(cfg);
+    let Ok(test) = Test::parse(cfg, input) else {
+        return Val::default();
     };
     test.eval(cfg, ctx)
 }
@@ -205,31 +217,32 @@ struct Test {
 }
 
 impl Test {
-    fn parse(input: Val) -> Option<Self> {
+    fn parse(cfg: &mut Cfg, input: Val) -> Result<Self, Val> {
         let Val::Pair(pair) = input else {
-            error!("input {input:?} should be a pair");
-            return None;
+            return Err(bug!(cfg, "{TEST}: expect input to be a pair, but got {input:?}"));
         };
         let pair = Pair::from(pair);
         let condition = pair.left;
         let Val::Pair(branches) = pair.right else {
-            error!("input.right {:?} should be a pair", pair.right);
-            return None;
+            return Err(bug!(
+                cfg,
+                "{TEST}: expect input.right to be a pair, but got {:?}",
+                pair.right
+            ));
         };
         let branches = Pair::from(branches);
-        let branch_then = Block::parse(branches.left)?;
-        let branch_else = Block::parse(branches.right)?;
-        Some(Test { condition, branch_then, branch_else })
+        let branch_then = Block::parse(TEST, cfg, branches.left)?;
+        let branch_else = Block::parse(TEST, cfg, branches.right)?;
+        Ok(Test { condition, branch_then, branch_else })
     }
 
     fn eval(self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> Val {
         let condition = Eval.dyn_call(cfg, ctx.reborrow(), self.condition);
         let Val::Bit(b) = condition else {
-            error!("condition {condition:?} should be a bit");
-            return illegal_input(cfg);
+            return bug!(cfg, "{TEST}: expected condition to be a bit, but got {condition:?}");
         };
         let branch = if *b { self.branch_then } else { self.branch_else };
-        branch.eval(cfg, ctx)
+        branch.eval(TEST, cfg, ctx)
     }
 }
 
@@ -238,8 +251,8 @@ pub fn switch() -> MutPrimFuncVal {
 }
 
 fn fn_switch(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
-    let Some(switch) = Switch::parse(input) else {
-        return illegal_input(cfg);
+    let Ok(switch) = Switch::parse(cfg, input) else {
+        return Val::default();
     };
     switch.eval(cfg, ctx)
 }
@@ -251,49 +264,54 @@ struct Switch {
 }
 
 impl Switch {
-    fn parse(input: Val) -> Option<Self> {
+    fn parse(cfg: &mut Cfg, input: Val) -> Result<Self, Val> {
         let Val::Pair(pair) = input else {
-            error!("input {input:?} should be a pair");
-            return None;
+            return Err(bug!(cfg, "{SWITCH}: expected input to be a pair, but got {input:?}"));
         };
         let pair = Pair::from(pair);
         let val = pair.left;
         match pair.right {
             Val::Map(map) => {
-                let map = Self::parse_block_map(map)?;
-                Some(Self { val, map, default: None })
+                let map = Self::parse_block_map(cfg, map)?;
+                Ok(Self { val, map, default: None })
             }
             Val::Pair(pair) => {
                 let pair = Pair::from(pair);
                 let Val::Map(map) = pair.left else {
-                    error!("input.right.left {:?} should be a map", pair.left);
-                    return None;
+                    return Err(bug!(
+                        cfg,
+                        "{SWITCH}: expected input.right.left to be a map, but got {:?}",
+                        pair.left
+                    ));
                 };
-                let map = Self::parse_block_map(map)?;
-                let default = Some(Block::parse(pair.right)?);
-                Some(Self { val, map, default })
+                let map = Self::parse_block_map(cfg, map)?;
+                let default = Some(Block::parse(SWITCH, cfg, pair.right)?);
+                Ok(Self { val, map, default })
             }
-            v => {
-                error!("input.right {v:?} should be a map or a pair");
-                None
-            }
+            v => Err(bug!(
+                cfg,
+                "{SWITCH}: expected input.right to be a map or a pair, but got {v:?}"
+            )),
         }
     }
 
-    fn parse_block_map(map: MapVal) -> Option<HashMap<Key, Block>> {
-        Map::from(map).into_iter().map(|(k, v)| Some((k, Block::parse(v)?))).collect()
+    fn parse_block_map(cfg: &mut Cfg, map: MapVal) -> Result<HashMap<Key, Block>, Val> {
+        let mut block_map = HashMap::<Key, Block>::new();
+        for (k, v) in Map::from(map) {
+            block_map.insert(k, Block::parse(SWITCH, cfg, v)?);
+        }
+        Ok(block_map)
     }
 
     fn eval(mut self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> Val {
         let val = Eval.dyn_call(cfg, ctx.reborrow(), self.val);
         let Val::Key(key) = val else {
-            error!("input.left {val:?} should be a key");
-            return illegal_input(cfg);
+            return bug!(cfg, "{SWITCH}: expected input.left to be a key, but got {val:?}");
         };
         let Some(body) = self.map.remove(&key).or(self.default) else {
             return Val::default();
         };
-        body.eval(cfg, ctx)
+        body.eval(SWITCH, cfg, ctx)
     }
 }
 
@@ -302,8 +320,8 @@ pub fn match_() -> MutPrimFuncVal {
 }
 
 fn fn_match(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
-    let Some(match_) = Match::parse(input) else {
-        return illegal_input(cfg);
+    let Ok(match_) = Match::parse(cfg, input) else {
+        return Val::default();
     };
     match_.eval(cfg, ctx)
 }
@@ -314,55 +332,57 @@ struct Match {
 }
 
 impl Match {
-    fn parse(input: Val) -> Option<Self> {
+    fn parse(cfg: &mut Cfg, input: Val) -> Result<Self, Val> {
         let Val::Pair(pair) = input else {
-            error!("input {input:?} should be a pair");
-            return None;
+            return Err(bug!(cfg, "{MATCH}: expected input to be a pair, but got {input:?}"));
         };
         let pair = Pair::from(pair);
         let val = pair.left;
         let Val::List(list) = pair.right else {
-            error!("input.right {:?} should be a list", pair.right);
-            return None;
+            return Err(bug!(
+                cfg,
+                "{MATCH}: expected input.right to be a list, but got {:?}",
+                pair.right
+            ));
         };
-        let arms = Self::parse_arms(list)?;
-        Some(Self { val, arms })
+        let arms = Self::parse_arms(cfg, list)?;
+        Ok(Self { val, arms })
     }
 
-    fn parse_arms(list: ListVal) -> Option<Vec<(Val, Block)>> {
-        List::from(list)
-            .into_iter()
-            .map(|arm| {
-                let Val::Pair(pair) = arm else {
-                    error!("match arm {arm:?} should be a pair");
-                    return None;
-                };
-                let pair = Pair::from(pair);
-                let block = Block::parse(pair.right)?;
-                Some((pair.left, block))
-            })
-            .collect()
+    fn parse_arms(cfg: &mut Cfg, list: ListVal) -> Result<Vec<(Val, Block)>, Val> {
+        let mut arms = Vec::with_capacity(list.len());
+        for arm in List::from(list) {
+            let Val::Pair(pair) = arm else {
+                return Err(bug!(cfg, "{MATCH}: expected arm to be a pair, but got {arm:?}"));
+            };
+            let pair = Pair::from(pair);
+            let block = Block::parse(MATCH, cfg, pair.right)?;
+            arms.push((pair.left, block));
+        }
+        Ok(arms)
     }
 
     fn eval(self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> Val {
         let val = Eval.dyn_call(cfg, ctx.reborrow(), self.val);
         for (pattern, block) in self.arms {
             if cfg.is_aborted() {
-                error!("aborted");
                 return Val::default();
             }
             let pattern = Eval.dyn_call(cfg, ctx.reborrow(), pattern);
-            let Some(pattern) = pattern.parse() else {
-                error!("parse pattern failed");
-                return abort_bug_with_msg(cfg, "match parsing pattern failed");
+            let Some(pattern) = pattern.parse(cfg, MATCH) else {
+                return Val::default();
             };
-            if pattern.match_(&val) {
-                // todo design
-                if !ctx.is_const() {
-                    pattern.assign(ctx.reborrow().unwrap(), val);
-                }
-                return block.eval(cfg, ctx);
+            if !pattern.match_(cfg, false, MATCH, &val) {
+                continue;
             }
+            // todo design
+            if !ctx.is_const() {
+                let result = pattern.assign(cfg, MATCH, ctx.reborrow().unwrap(), val);
+                if result.is_none() {
+                    return Val::default();
+                }
+            }
+            return block.eval(MATCH, cfg, ctx);
         }
         Val::default()
     }
@@ -373,8 +393,8 @@ pub fn loop_() -> MutPrimFuncVal {
 }
 
 fn fn_loop(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
-    let Some(loop_) = Loop::parse(input) else {
-        return illegal_input(cfg);
+    let Ok(loop_) = Loop::parse(cfg, input) else {
+        return Val::default();
     };
     loop_.eval(cfg, ctx)
 }
@@ -385,31 +405,29 @@ struct Loop {
 }
 
 impl Loop {
-    fn parse(input: Val) -> Option<Self> {
+    fn parse(cfg: &mut Cfg, input: Val) -> Result<Self, Val> {
         let Val::Pair(pair) = input else {
-            error!("input {input:?} should be a pair");
-            return None;
+            return Err(bug!(cfg, "{LOOP}: expected input to be a pair, but got {input:?}"));
         };
         let pair = Pair::from(pair);
         let condition = pair.left;
-        let body = Block::parse(pair.right)?;
-        Some(Self { condition, body })
+        let body = Block::parse(LOOP, cfg, pair.right)?;
+        Ok(Self { condition, body })
     }
 
     fn eval(self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> Val {
         loop {
             let cond = Eval.dyn_call(cfg, ctx.reborrow(), self.condition.clone());
             let Val::Bit(bit) = cond else {
-                error!("condition {cond:?} should be a bit");
-                return abort_bug_with_msg(cfg, "loop condition should be a bit");
+                return bug!(cfg, "{LOOP}: expected condition to be a bit, but got {cond:?}");
             };
             if !*bit {
                 break;
             }
-            let (output, ctrl_flow) = self.body.clone().flow(cfg, ctx.reborrow());
-            match ctrl_flow {
+            let v = self.body.clone().flow(LOOP, cfg, ctx.reborrow());
+            match v.ctrl_flow {
                 CtrlFlow::Continue => {}
-                CtrlFlow::Return => return output,
+                CtrlFlow::Return => return v.output,
             }
         }
         Val::default()
@@ -421,8 +439,8 @@ pub fn iterate() -> MutPrimFuncVal {
 }
 
 fn fn_iterate(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
-    let Some(iterate) = Iterate::parse(input) else {
-        return illegal_input(cfg);
+    let Ok(iterate) = Iterate::parse(cfg, input) else {
+        return Val::default();
     };
     iterate.eval(cfg, ctx)
 }
@@ -434,24 +452,29 @@ struct Iterate {
 }
 
 impl Iterate {
-    fn parse(input: Val) -> Option<Self> {
+    fn parse(cfg: &mut Cfg, input: Val) -> Result<Self, Val> {
         let Val::Pair(pair) = input else {
-            error!("input {input:?} should be a pair");
-            return None;
+            return Err(bug!(cfg, "{ITERATE}: expected input to be a pair, but got {input:?}"));
         };
         let pair = Pair::from(pair);
         let val = pair.left;
         let Val::Pair(name_body) = pair.right else {
-            error!("input.right {:?} should be a pair", pair.right);
-            return None;
+            return Err(bug!(
+                cfg,
+                "{ITERATE}: expected input.right to be a pair, but got {:?}",
+                pair.right
+            ));
         };
         let name_body = Pair::from(name_body);
         let Val::Key(name) = name_body.left else {
-            error!("input.left {:?} should be a key", name_body.left);
-            return None;
+            return Err(bug!(
+                cfg,
+                "{ITERATE}: expected input.right.left to be a key, but got {:?}",
+                name_body.left
+            ));
         };
-        let body = Block::parse(name_body.right)?;
-        Some(Self { val, name, body })
+        let body = Block::parse(ITERATE, cfg, name_body.right)?;
+        Ok(Self { val, name, body })
     }
 
     fn eval(self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> Val {
@@ -460,10 +483,14 @@ impl Iterate {
             Val::Int(i) => {
                 let i = Int::from(i);
                 if i.is_negative() {
-                    error!("{i:?} should be non-negative");
-                    return abort_bug_with_msg(cfg, "iterate int should be non-negative");
+                    return bug!(
+                        cfg,
+                        "{ITERATE}: expected integer to be non-negative, but got {i:?}"
+                    );
                 }
-                let Some(i) = i.to_u128() else { panic!("iterate on super big int {i:?}!!!") };
+                let Some(i) = i.to_u128() else {
+                    return bug!(cfg, "{ITERATE}: unable to iterate {i:?}");
+                };
                 let iter = (0 .. i).map(|i| {
                     let i = Int::from(i);
                     Val::Int(i.into())
@@ -504,7 +531,7 @@ impl Iterate {
                 });
                 iterate_val(cfg, ctx, self.body, self.name, iter)
             }
-            _ => abort_bug_with_msg(cfg, "iterate on unsupported type"),
+            v => bug!(cfg, "{ITERATE}: expected input.left to be iterable, but got {v:?}"),
         }
     }
 }
@@ -515,16 +542,15 @@ fn iterate_val<ValIter>(
 where ValIter: Iterator<Item = Val> {
     for val in values {
         if cfg.is_aborted() {
-            error!("aborted");
             return Val::default();
         }
         if !ctx.is_const() {
-            let _ = ctx.reborrow().unwrap().set(name.clone(), val);
+            let _ = ctx.reborrow().unwrap().set(cfg, name.clone(), val);
         }
-        let (output, ctrl_flow) = body.clone().flow(cfg, ctx.reborrow());
-        match ctrl_flow {
+        let v = body.clone().flow(ITERATE, cfg, ctx.reborrow());
+        match v.ctrl_flow {
             CtrlFlow::Continue => {}
-            CtrlFlow::Return => return output,
+            CtrlFlow::Return => return v.output,
         }
     }
     Val::default()

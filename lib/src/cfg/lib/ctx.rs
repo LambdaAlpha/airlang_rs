@@ -1,7 +1,6 @@
 use std::rc::Rc;
 
 use const_format::concatcp;
-use log::error;
 
 use self::pattern::PatternAssign;
 use self::pattern::PatternMatch;
@@ -11,9 +10,8 @@ use super::DynImpl;
 use super::MutImpl;
 use super::abort_const;
 use super::abort_free;
+use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::error::abort_bug_with_msg;
-use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Form;
@@ -81,9 +79,8 @@ pub fn get() -> ConstPrimFuncVal {
 }
 
 fn fn_get(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Some(val) = ctx.unwrap().ref_(input) else {
-        error!("get failed");
-        return abort_bug_with_msg(cfg, "_context.get failed");
+    let Some(val) = ctx.ref_(cfg, input) else {
+        return Val::default();
     };
     val.clone()
 }
@@ -94,14 +91,10 @@ pub fn set() -> MutPrimFuncVal {
 
 fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        error!("input {input:?} should be a pair");
-        return illegal_input(cfg);
+        return bug!(cfg, "{SET}: expected input to be a pair, but got {input:?}");
     };
     let pair = Pair::from(pair);
-    if ctx.set(pair.left, pair.right).is_none() {
-        error!("set failed");
-        return abort_bug_with_msg(cfg, "_context.set failed");
-    }
+    ctx.set(cfg, pair.left, pair.right);
     Val::default()
 }
 
@@ -116,23 +109,17 @@ pub fn represent() -> MutPrimFuncVal {
 
 fn fn_represent(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        error!("input {input:?} should be a pair");
-        return illegal_input(cfg);
+        return bug!(cfg, "{REPRESENT}: expected input to be a pair, but got {input:?}");
     };
     let pair = Pair::from(pair);
-    let Some(pattern) = pair.left.parse() else {
-        error!("parse failed");
-        return illegal_input(cfg);
+    let Some(pattern) = pair.left.parse(cfg, REPRESENT) else {
+        return Val::default();
     };
     let val = pair.right;
-    if !pattern.match_(&val) {
-        error!("match failed");
-        return abort_bug_with_msg(cfg, "_context.represent not match");
+    if !pattern.match_(cfg, true, REPRESENT, &val) {
+        return Val::default();
     }
-    if pattern.assign(ctx, val).is_none() {
-        error!("set failed");
-        return abort_bug_with_msg(cfg, "_context.represent assign failed");
-    }
+    pattern.assign(cfg, REPRESENT, ctx, val);
     Val::default()
 }
 
@@ -142,8 +129,7 @@ pub fn is_constant() -> MutPrimFuncVal {
 
 fn fn_is_constant(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{IS_CONSTANT}: expected input to be a unit, but got {input:?}");
     }
     Val::Bit(Bit::from(ctx.is_const()))
 }
@@ -154,8 +140,7 @@ pub fn self_() -> ConstPrimFuncVal {
 
 fn fn_self(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{SELF}: expected input to be a unit, but got {input:?}");
     }
     ctx.unwrap().clone()
 }
@@ -166,23 +151,23 @@ pub fn which() -> MutPrimFuncVal {
 
 fn fn_which(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        error!("input: {:?} should be a pair", input);
-        return illegal_input(cfg);
+        return bug!(cfg, "{WHICH}: expected input to be a pair, but got {input:?}");
     };
     let pair = Pair::from(pair);
     let Val::Pair(func_input) = pair.right else {
-        error!("input.right {:?} should be a pair", pair.right);
-        return illegal_input(cfg);
+        return bug!(cfg, "{WHICH}: expected input.right to be a pair, but got {:?}", pair.right);
     };
     let func_input = Pair::from(func_input);
     let Val::Func(func) = func_input.left else {
-        error!("input.right.left should be a func");
-        return illegal_input(cfg);
+        return bug!(
+            cfg,
+            "{WHICH}: expected input.right.left to be a function, but got {:?}",
+            func_input.left
+        );
     };
     let const_ = ctx.is_const();
-    let Some(ctx) = ctx.reborrow().unwrap().ref_mut(pair.left) else {
-        error!("input.left should be a valid reference");
-        return abort_bug_with_msg(cfg, "_context.which reference is not valid");
+    let Some(ctx) = ctx.reborrow().unwrap().ref_mut(cfg, pair.left) else {
+        return Val::default();
     };
     func.dyn_call(cfg, DynRef::new(ctx, const_), func_input.right)
 }

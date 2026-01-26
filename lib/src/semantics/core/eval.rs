@@ -1,7 +1,5 @@
-use log::error;
-
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::abort_bug_with_msg;
+use crate::semantics::core::abort_by_bug_with_msg;
 use crate::semantics::core::form::CellForm;
 use crate::semantics::core::form::ListForm;
 use crate::semantics::core::form::MapForm;
@@ -32,12 +30,11 @@ where Func: FreeFn<Cfg, Val, Val>
         let call = Call::from(call);
         let func = self.func.free_call(cfg, call.func);
         let Val::Func(func) = func else {
-            error!("func {func:?} should be a func");
-            return abort_bug_with_msg(cfg, "call.function should be a function");
+            let msg = format!("eval: expected a function, but got {func:?}");
+            return abort_by_bug_with_msg(cfg, msg.into());
         };
         let input = if func.raw_input() { call.input } else { Eval.free_call(cfg, call.input) };
         if !cfg.step() {
-            error!("aborted");
             return Val::default();
         }
         func.free_call(cfg, input)
@@ -51,8 +48,8 @@ where Func: ConstFn<Cfg, Val, Val, Val>
         let call = Call::from(call);
         let func = self.func.const_call(cfg, ctx.reborrow(), call.func);
         let Val::Func(func) = func else {
-            error!("func {func:?} should be a func");
-            return abort_bug_with_msg(cfg, "call.function should be a function");
+            let msg = format!("eval: expected a function, but got {func:?}");
+            return abort_by_bug_with_msg(cfg, msg.into());
         };
         let input = if func.raw_input() {
             call.input
@@ -60,7 +57,6 @@ where Func: ConstFn<Cfg, Val, Val, Val>
             Eval.const_call(cfg, ctx.reborrow(), call.input)
         };
         if !cfg.step() {
-            error!("aborted");
             return Val::default();
         }
         func.const_call(cfg, ctx, input)
@@ -74,12 +70,11 @@ where Func: MutFn<Cfg, Val, Val, Val>
         let call = Call::from(call);
         let func = self.func.mut_call(cfg, ctx, call.func);
         let Val::Func(func) = func else {
-            error!("func {func:?} should be a func");
-            return abort_bug_with_msg(cfg, "call.function should be a function");
+            let msg = format!("eval: expected a function, but got {func:?}");
+            return abort_by_bug_with_msg(cfg, msg.into());
         };
         let input = if func.raw_input() { call.input } else { Eval.mut_call(cfg, ctx, call.input) };
         if !cfg.step() {
-            error!("aborted");
             return Val::default();
         }
         func.mut_call(cfg, ctx, input)
@@ -89,8 +84,8 @@ where Func: MutFn<Cfg, Val, Val, Val>
         let call = Call::from(call);
         let func = self.func.dyn_call(cfg, ctx.reborrow(), call.func);
         let Val::Func(func) = func else {
-            error!("func {func:?} should be a func");
-            return abort_bug_with_msg(cfg, "call.function should be a function");
+            let msg = format!("eval: expected a function, but got {func:?}");
+            return abort_by_bug_with_msg(cfg, msg.into());
         };
         let input = if func.raw_input() {
             call.input
@@ -98,7 +93,6 @@ where Func: MutFn<Cfg, Val, Val, Val>
             Eval.dyn_call(cfg, ctx.reborrow(), call.input)
         };
         if !cfg.step() {
-            error!("aborted");
             return Val::default();
         }
         func.dyn_call(cfg, ctx, input)
@@ -111,7 +105,6 @@ pub(crate) struct Eval;
 impl FreeFn<Cfg, Val, Val> for Eval {
     fn free_call(&self, cfg: &mut Cfg, val: Val) -> Val {
         if !cfg.step() {
-            error!("aborted");
             return Val::default();
         }
         match val {
@@ -129,7 +122,6 @@ impl FreeFn<Cfg, Val, Val> for Eval {
 impl ConstFn<Cfg, Val, Val, Val> for Eval {
     fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, val: Val) -> Val {
         if !cfg.step() {
-            error!("aborted");
             return Val::default();
         }
         match val {
@@ -147,7 +139,6 @@ impl ConstFn<Cfg, Val, Val, Val> for Eval {
 impl MutFn<Cfg, Val, Val, Val> for Eval {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, val: Val) -> Val {
         if !cfg.step() {
-            error!("aborted");
             return Val::default();
         }
         match val {
@@ -163,7 +154,6 @@ impl MutFn<Cfg, Val, Val, Val> for Eval {
 
     fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, val: Val) -> Val {
         if !cfg.step() {
-            error!("aborted");
             return Val::default();
         }
         match val {

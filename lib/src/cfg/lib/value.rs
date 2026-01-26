@@ -4,15 +4,14 @@ pub use self::arbitrary::Arbitrary;
 
 _____!();
 
-use log::error;
 use rand::SeedableRng;
 use rand::prelude::SmallRng;
 
 use super::ConstImpl;
 use super::FreeImpl;
 use super::abort_free;
+use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
@@ -121,12 +120,9 @@ fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
             TYPE_LINK => Val::Link(LinkVal::any(rng, DEPTH)),
             TYPE_CFG => Val::Cfg(Cfg::any(rng, DEPTH).into()),
             TYPE_FUNC => Val::Func(FuncVal::any(rng, DEPTH)),
-            _ => illegal_input(cfg),
+            s => bug!(cfg, "{ANY}: unknown type {s}"),
         },
-        v => {
-            error!("input {v:?} should be a key or a unit");
-            illegal_input(cfg)
-        }
+        v => bug!(cfg, "{ANY}: expected input to be a key or a unit, but got {v:?}"),
     }
 }
 
@@ -136,8 +132,7 @@ pub fn get_type() -> ConstPrimFuncVal {
 
 fn fn_get_type(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{GET_TYPE}: expected input to be a unit, but got {input:?}");
     }
     let s = match &*ctx {
         Val::Unit(_) => TYPE_UNIT,
@@ -167,8 +162,7 @@ pub fn equal() -> FreePrimFuncVal {
 
 fn fn_equal(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        error!("input {input:?} should be a pair");
-        return illegal_input(cfg);
+        return bug!(cfg, "{EQUAL}: expected input to be a pair, but got {input:?}");
     };
     Val::Bit(Bit::from(pair.left == pair.right))
 }

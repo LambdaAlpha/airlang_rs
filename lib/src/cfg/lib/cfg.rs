@@ -3,7 +3,6 @@ use std::panic::AssertUnwindSafe;
 use std::panic::catch_unwind;
 
 use const_format::concatcp;
-use log::error;
 
 use super::ConstImpl;
 use super::DynImpl;
@@ -11,11 +10,9 @@ use super::FreeImpl;
 use super::MutImpl;
 use super::abort_const;
 use super::abort_free;
+use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
-use crate::cfg::error::abort_bug_with_msg;
-use crate::cfg::error::illegal_ctx;
-use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
@@ -95,8 +92,7 @@ pub fn new() -> FreePrimFuncVal {
 
 fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Map(map) = input else {
-        error!("input {input:?} should be a map");
-        return illegal_input(cfg);
+        return bug!(cfg, "{NEW}: expected input to be a map, but got {input:?}");
     };
     let new_cfg = Cfg::default();
     let map = Map::from(map);
@@ -112,8 +108,7 @@ pub fn represent() -> FreePrimFuncVal {
 
 fn fn_represent(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Cfg(new_cfg) = input else {
-        error!("input {input:?} should be a cfg");
-        return illegal_input(cfg);
+        return bug!(cfg, "{REPRESENT}: expected input to be a config, but got {input:?}");
     };
     Val::Map(new_cfg.snapshot().into())
 }
@@ -124,8 +119,7 @@ pub fn exist() -> FreePrimFuncVal {
 
 fn fn_exist(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Key(name) = input else {
-        error!("input {input:?} should be a key");
-        return illegal_input(cfg);
+        return bug!(cfg, "{EXIST}: expected input to be a key, but got {input:?}");
     };
     let exist = cfg.exist(name);
     Val::Bit(Bit::from(exist))
@@ -137,12 +131,10 @@ pub fn import() -> FreePrimFuncVal {
 
 fn fn_import(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Key(name) = input else {
-        error!("input {input:?} should be a key");
-        return illegal_input(cfg);
+        return bug!(cfg, "{IMPORT}: expected input to be a key, but got {input:?}");
     };
-    let Some(value) = cfg.import(name) else {
-        error!("key should exist");
-        return illegal_input(cfg);
+    let Some(value) = cfg.import(name.clone()) else {
+        return bug!(cfg, "{IMPORT}: value not found for key {name:?} in config");
     };
     value
 }
@@ -153,17 +145,14 @@ pub fn export() -> FreePrimFuncVal {
 
 fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        error!("input {input:?} should be a pair");
-        return illegal_input(cfg);
+        return bug!(cfg, "{EXPORT}: expected input to be a pair, but got {input:?}");
     };
     let pair = Pair::from(pair);
     let Val::Key(name) = pair.left else {
-        error!("input.left {:?} should be a key", pair.left);
-        return illegal_input(cfg);
+        return bug!(cfg, "{EXPORT}: expected input.left to be a key, but got {:?}", pair.left);
     };
-    if cfg.export(name, pair.right).is_none() {
-        error!("key should not exist");
-        return illegal_input(cfg);
+    if cfg.export(name.clone(), pair.right).is_none() {
+        return bug!(cfg, "{EXPORT}: already bound to value for key {name:?} in config");
     }
     Val::default()
 }
@@ -174,12 +163,14 @@ pub fn get_length() -> ConstPrimFuncVal {
 
 fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Cfg(new_cfg) = &*ctx else {
-        error!("ctx {ctx:?} should be a cfg");
-        return illegal_ctx(cfg);
+        return bug!(
+            cfg,
+            "{GET_LENGTH}: expected context to be a config, but got {:?}",
+            ctx.deref()
+        );
     };
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input:?}");
     }
     Val::Int(Int::from(new_cfg.len()).into())
 }
@@ -190,14 +181,12 @@ pub fn with() -> MutPrimFuncVal {
 
 fn fn_with(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        error!("input {input:?} should be a pair");
-        return illegal_input(cfg);
+        return bug!(cfg, "{WITH}: expected input to be a pair, but got {input:?}");
     };
     let pair = Pair::from(pair);
     let map = Eval.dyn_call(cfg, ctx.reborrow(), pair.left);
     let Val::Map(map) = map else {
-        error!("input.left {map:?} should be a map");
-        return illegal_input(cfg);
+        return bug!(cfg, "{WITH}: expected input.left to be a map, but got {map:?}");
     };
     cfg.begin_scope();
     let map = Map::from(map);
@@ -215,8 +204,7 @@ pub fn self_() -> FreePrimFuncVal {
 
 fn fn_self(cfg: &mut Cfg, input: Val) -> Val {
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{SELF}: expected input to be a unit, but got {input:?}");
     }
     Val::Cfg(cfg.clone().into())
 }
@@ -227,30 +215,28 @@ pub fn where_() -> MutPrimFuncVal {
 
 fn fn_where(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        error!("input {input:?} should be a pair");
-        return illegal_input(cfg);
+        return bug!(cfg, "{WHERE}: expected input to be a pair, but got {input:?}");
     };
     let pair = Pair::from(pair);
-    let Some(ctx) = ctx.ref_mut(pair.left) else {
-        error!("input.left should be a valid reference");
-        return abort_bug_with_msg(cfg, "_config.where reference is not valid");
+    let Some(ctx) = ctx.ref_mut(cfg, pair.left.clone()) else {
+        return Val::default();
     };
     let Val::Cfg(new_cfg) = ctx else {
-        error!("ctx reference {ctx:?} should be a cfg");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{WHERE}: expected context to be a config, but got {ctx:?}");
     };
     let prelude = new_cfg.import(Key::from_str_unchecked(CoreCfg::PRELUDE));
     let Some(prelude) = prelude else {
-        error!("prelude should exist in cfg");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{WHERE}: value not found for key {} in config", CoreCfg::PRELUDE);
     };
     let Val::Link(prelude) = prelude else {
-        error!("prelude in cfg should be a link");
-        return illegal_ctx(cfg);
+        return bug!(
+            cfg,
+            "{WHERE}: expected {} to be a link, but got {prelude:?}",
+            CoreCfg::PRELUDE
+        );
     };
     let Ok(prelude) = prelude.try_borrow() else {
-        error!("prelude should not be borrowed");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{WHERE}: link is in use");
     };
     let mut new_ctx = prelude.deref().clone();
     // unwind safety:
@@ -262,14 +248,11 @@ fn fn_where(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         Ok(output) => output,
         Err(err) => {
             if let Some(err) = err.downcast_ref::<String>() {
-                error!("panic by {err}");
-                abort_bug_with_msg(new_cfg, &format!("panic by {err}"))
+                bug!(new_cfg, "{WHERE}: panic by {err}")
             } else if let Some(err) = err.downcast_ref::<&str>() {
-                error!("panic by {err}");
-                abort_bug_with_msg(new_cfg, &format!("panic by {err}"))
+                bug!(new_cfg, "{WHERE}: panic by {err}")
             } else {
-                error!("panic");
-                abort_bug_with_msg(new_cfg, "panic")
+                bug!(new_cfg, "{WHERE}: panic")
             }
         }
     }

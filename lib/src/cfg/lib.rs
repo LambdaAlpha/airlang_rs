@@ -21,8 +21,8 @@ use self::resource::ResourceLib;
 use self::text::TextLib;
 use self::unit::UnitLib;
 use self::value::ValueLib;
+use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::error::abort_bug_with_msg;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::func::ConstFn;
 use crate::semantics::func::ConstPrimFunc;
@@ -252,15 +252,13 @@ where
 
 pub fn abort_free(key: &'static str) -> impl Fn(&mut Cfg, Val) -> Val + 'static {
     move |cfg: &mut Cfg, _val: Val| {
-        let msg = format!("function {key} should not be called in a free context");
-        abort_bug_with_msg(cfg, &msg)
+        bug!(cfg, "function {key} should not be called in a free context")
     }
 }
 
 pub fn abort_const(key: &'static str) -> impl Fn(&mut Cfg, ConstRef<Val>, Val) -> Val + 'static {
     move |cfg: &mut Cfg, _ctx: ConstRef<Val>, _val: Val| {
-        let msg = format!("function {key} should not be called in a constant context");
-        abort_bug_with_msg(cfg, &msg)
+        bug!(cfg, "function {key} should not be called in a constant context")
     }
 }
 

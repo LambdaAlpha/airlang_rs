@@ -168,7 +168,8 @@ _ do [
     .a0 set _ any .,
     .f set _ function {
         context_access : _free,
-        code : __ : _ form _ import _a
+        code : __ : _ form _ import _a,
+        prelude : {},
     },
     .a1 set {_a : a0} with _ f .,
     a0 == a1

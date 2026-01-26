@@ -1,15 +1,14 @@
 use std::mem::swap;
+use std::ops::Deref;
 
 use const_format::concatcp;
-use log::error;
 
 use super::ConstImpl;
 use super::MutImpl;
 use super::abort_const;
 use super::abort_free;
+use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::error::illegal_ctx;
-use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
@@ -47,12 +46,10 @@ pub fn get_value() -> ConstPrimFuncVal {
 
 fn fn_get_value(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Cell(cell) = &*ctx else {
-        error!("ctx {ctx:?} should be a cell");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{GET_VALUE}: expected context to be a cell, but got {:?}", ctx.deref());
     };
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{GET_VALUE}: expected input to be a unit, but got {input:?}");
     }
     cell.value.clone()
 }
@@ -64,8 +61,7 @@ pub fn set_value() -> MutPrimFuncVal {
 
 fn fn_set_value(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Cell(cell) = ctx else {
-        error!("ctx {ctx:?} should be a cell");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{SET_VALUE}: expected context to be a cell, but got {ctx:?}");
     };
     swap(&mut cell.value, &mut input);
     input

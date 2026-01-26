@@ -1,10 +1,12 @@
 use std::rc::Rc;
 
 use const_format::concatcp;
-use log::error;
 
+use super::NEW;
+use crate::bug;
 use crate::cfg::utils::key;
 use crate::cfg::utils::map_remove;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::ctx::CtxAccess;
 use crate::semantics::func::ConstCompFunc;
@@ -38,38 +40,40 @@ const CONST: &str = concatcp!(PREFIX_ID, "constant");
 const MUTABLE: &str = concatcp!(PREFIX_ID, "mutable");
 
 // todo design defaults
-pub(in crate::cfg) fn parse_func(input: Val) -> Option<FuncVal> {
+pub(in crate::cfg) fn parse_func(cfg: &mut Cfg, input: Val) -> Option<FuncVal> {
     let Val::Map(mut map) = input else {
-        error!("{input:?} should be a map");
+        bug!(cfg, "{NEW}: expected input to be a map, but got {input:?}");
         return None;
     };
-    let raw_input = parse_raw_input(map_remove(&mut map, RAW_INPUT))?;
+    let raw_input = parse_raw_input(cfg, map_remove(&mut map, RAW_INPUT))?;
     // todo design
-    let CompCode { ctx_name, input_name, body } = parse_code(map_remove(&mut map, CODE))?;
+    let CompCode { ctx_name, input_name, body } = parse_code(cfg, map_remove(&mut map, CODE))?;
     let prelude = map_remove(&mut map, PRELUDE);
     let ctx_access = map_remove(&mut map, CTX_ACCESS);
-    let ctx_access = parse_ctx_access(&ctx_access)?;
+    let ctx_access = parse_ctx_access(cfg, &ctx_access)?;
     let func = match ctx_access {
-        FREE => {
+        CtxAccess::Free => {
             let comp = FreeComposite { prelude, body, input_name };
             let func = FreeCompFunc { raw_input, comp };
             FuncVal::FreeComp(FreeCompFuncVal::from(func))
         }
-        CONST => {
-            let ctx_name = ctx_name?;
+        CtxAccess::Const => {
+            let Some(ctx_name) = ctx_name else {
+                bug!(cfg, "{NEW}: constant context function need a context name");
+                return None;
+            };
             let comp = DynComposite { prelude, body, input_name, ctx_name };
             let func = ConstCompFunc { raw_input, comp };
             FuncVal::ConstComp(ConstCompFuncVal::from(func))
         }
-        MUTABLE => {
-            let ctx_name = ctx_name?;
+        CtxAccess::Mut => {
+            let Some(ctx_name) = ctx_name else {
+                bug!(cfg, "{NEW}: mutable context function need a context name");
+                return None;
+            };
             let comp = DynComposite { prelude, body, input_name, ctx_name };
             let func = MutCompFunc { raw_input, comp };
             FuncVal::MutComp(MutCompFuncVal::from(func))
-        }
-        s => {
-            error!("ctx access {s} should be one of {FREE}, {CONST}, or {MUTABLE}");
-            return None;
         }
     };
     Some(func)
@@ -86,11 +90,14 @@ pub(in crate::cfg) fn generate_func(f: FuncVal) -> Val {
     }
 }
 
-fn parse_raw_input(val: Val) -> Option<bool> {
+fn parse_raw_input(cfg: &mut Cfg, val: Val) -> Option<bool> {
     match val {
         Val::Unit(_) => Some(false),
         Val::Bit(bit) => Some(bit.into()),
-        _ => None,
+        v => {
+            bug!(cfg, "{NEW}: expected {RAW_INPUT} to be a unit or a bit, but got {v:?}");
+            None
+        }
     }
 }
 
@@ -100,7 +107,7 @@ struct CompCode {
     body: Val,
 }
 
-fn parse_code(code: Val) -> Option<CompCode> {
+fn parse_code(cfg: &mut Cfg, code: Val) -> Option<CompCode> {
     let code = match code {
         Val::Unit(_) => CompCode {
             ctx_name: Some(Key::default()),
@@ -112,11 +119,19 @@ fn parse_code(code: Val) -> Option<CompCode> {
             match names_body.left {
                 Val::Pair(ctx_input) => {
                     let Val::Key(ctx) = &ctx_input.left else {
-                        error!("ctx {:?} should be a key", ctx_input.left);
+                        bug!(
+                            cfg,
+                            "{NEW}: expected context name to be a key, but got {:?}",
+                            ctx_input.left
+                        );
                         return None;
                     };
                     let Val::Key(input) = &ctx_input.right else {
-                        error!("input {:?} should be a key", ctx_input.right);
+                        bug!(
+                            cfg,
+                            "{NEW}: expected input name to be a key, but got {:?}",
+                            ctx_input.right
+                        );
                         return None;
                     };
                     CompCode {
@@ -129,13 +144,13 @@ fn parse_code(code: Val) -> Option<CompCode> {
                     CompCode { ctx_name: None, input_name: input, body: names_body.right }
                 }
                 v => {
-                    error!("name {v:?} should be a key or a pair of key");
+                    bug!(cfg, "{NEW}: expected names to be a key or a pair of key, but got {v:?}");
                     return None;
                 }
             }
         }
         v => {
-            error!("code {v:?} should be a pair or a unit");
+            bug!(cfg, "{NEW}: expected {CODE} to be a pair or a unit, but got {v:?}");
             return None;
         }
     };
@@ -172,12 +187,23 @@ fn dyn_code(comp: &DynComposite) -> Val {
     Val::Pair(Pair::new(names, comp.body.clone()).into())
 }
 
-fn parse_ctx_access(access: &Val) -> Option<&str> {
+fn parse_ctx_access(cfg: &mut Cfg, access: &Val) -> Option<CtxAccess> {
     match &access {
-        Val::Key(s) => Some(&**s),
-        Val::Unit(_) => Some(MUTABLE),
+        Val::Key(s) => match &**s {
+            FREE => Some(CtxAccess::Free),
+            CONST => Some(CtxAccess::Const),
+            MUTABLE => Some(CtxAccess::Mut),
+            s => {
+                bug!(
+                    cfg,
+                    "{NEW}: expected {CTX_ACCESS} to be one of {FREE}, {CONST}, or {MUTABLE}, but got {s}"
+                );
+                None
+            }
+        },
+        Val::Unit(_) => Some(CtxAccess::Mut),
         v => {
-            error!("ctx access {v:?} should be a key or a unit");
+            bug!(cfg, "{NEW}: expected {CTX_ACCESS} to be a key or a unit, but got {v:?}");
             None
         }
     }

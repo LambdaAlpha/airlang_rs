@@ -1,7 +1,8 @@
 use const_format::concatcp;
-use log::error;
 use num_traits::ToPrimitive;
 
+use crate::bug;
+use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::val::CallVal;
@@ -13,234 +14,251 @@ use crate::semantics::val::PairVal;
 use crate::semantics::val::Val;
 use crate::type_::Key;
 
-const VALUE: &str = concatcp!(PREFIX_ID, "value");
+pub(crate) const VALUE: &str = concatcp!(PREFIX_ID, "value");
 
 impl DynCtx<Key, Val> for CellVal {
-    fn ref_(&self, key: Key) -> Option<&Val> {
+    fn ref_(&self, cfg: &mut Cfg, key: Key) -> Option<&Val> {
         if &*key == VALUE {
-            Some(&self.value)
-        } else {
-            error!("key {key:?} should be {VALUE}");
-            None
+            return Some(&self.value);
         }
+        bug!(cfg, "context cell: expected key to be {VALUE}, but got {key:?}");
+        None
     }
 
-    fn ref_mut(&mut self, key: Key) -> Option<&mut Val> {
+    fn ref_mut(&mut self, cfg: &mut Cfg, key: Key) -> Option<&mut Val> {
         if &*key == VALUE {
-            Some(&mut self.value)
-        } else {
-            error!("key {key:?} should be {VALUE}");
-            None
+            return Some(&mut self.value);
         }
+        bug!(cfg, "context cell: expected key to be {VALUE}, but got {key:?}");
+        None
     }
 
-    fn set(&mut self, key: Key, value: Val) -> Option<()> {
+    fn set(&mut self, cfg: &mut Cfg, key: Key, value: Val) -> Option<()> {
         if &*key == VALUE {
             self.value = value;
-            Some(())
-        } else {
-            error!("key {key:?} should be {VALUE}");
-            None
+            return Some(());
         }
+        bug!(cfg, "context cell: expected key to be {VALUE}, but got {key:?}");
+        None
     }
 }
 
-const LEFT: &str = concatcp!(PREFIX_ID, "left");
-const RIGHT: &str = concatcp!(PREFIX_ID, "right");
+pub(crate) const LEFT: &str = concatcp!(PREFIX_ID, "left");
+pub(crate) const RIGHT: &str = concatcp!(PREFIX_ID, "right");
 
 impl DynCtx<Key, Val> for PairVal {
-    fn ref_(&self, key: Key) -> Option<&Val> {
+    fn ref_(&self, cfg: &mut Cfg, key: Key) -> Option<&Val> {
         match &*key {
-            LEFT => Some(&self.left),
-            RIGHT => Some(&self.right),
-            _ => {
-                error!("key {key:?} should be {LEFT} or {RIGHT}");
-                None
-            }
+            LEFT => return Some(&self.left),
+            RIGHT => return Some(&self.right),
+            _ => {}
         }
+        bug!(cfg, "context pair: expected key to be {LEFT} or {RIGHT}, but got {key:?}");
+        None
     }
 
-    fn ref_mut(&mut self, key: Key) -> Option<&mut Val> {
+    fn ref_mut(&mut self, cfg: &mut Cfg, key: Key) -> Option<&mut Val> {
         match &*key {
-            LEFT => Some(&mut self.left),
-            RIGHT => Some(&mut self.right),
-            _ => {
-                error!("key {key:?} should be {LEFT} or {RIGHT}");
-                None
-            }
+            LEFT => return Some(&mut self.left),
+            RIGHT => return Some(&mut self.right),
+            _ => {}
         }
+        bug!(cfg, "context pair: expected key to be {LEFT} or {RIGHT}, but got {key:?}");
+        None
     }
 
-    fn set(&mut self, key: Key, value: Val) -> Option<()> {
+    fn set(&mut self, cfg: &mut Cfg, key: Key, value: Val) -> Option<()> {
         match &*key {
             LEFT => {
                 self.left = value;
-                Some(())
+                return Some(());
             }
             RIGHT => {
                 self.right = value;
-                Some(())
+                return Some(());
             }
-            _ => {
-                error!("key {key:?} should be {LEFT} or {RIGHT}");
-                None
-            }
+            _ => {}
         }
+        bug!(cfg, "context pair: expected key to be {LEFT} or {RIGHT}, but got {key:?}");
+        None
     }
 }
 
-const FUNCTION: &str = concatcp!(PREFIX_ID, "function");
-const INPUT: &str = concatcp!(PREFIX_ID, "input");
+pub(crate) const FUNCTION: &str = concatcp!(PREFIX_ID, "function");
+pub(crate) const INPUT: &str = concatcp!(PREFIX_ID, "input");
 
 impl DynCtx<Key, Val> for CallVal {
-    fn ref_(&self, key: Key) -> Option<&Val> {
+    fn ref_(&self, cfg: &mut Cfg, key: Key) -> Option<&Val> {
         match &*key {
-            FUNCTION => Some(&self.func),
-            INPUT => Some(&self.input),
-            _ => {
-                error!("key {key:?} should be {FUNCTION} or {INPUT}");
-                None
-            }
+            FUNCTION => return Some(&self.func),
+            INPUT => return Some(&self.input),
+            _ => {}
         }
+        bug!(cfg, "context call: expected key to be {FUNCTION} or {INPUT}, but got {key:?}");
+        None
     }
 
-    fn ref_mut(&mut self, key: Key) -> Option<&mut Val> {
+    fn ref_mut(&mut self, cfg: &mut Cfg, key: Key) -> Option<&mut Val> {
         match &*key {
-            FUNCTION => Some(&mut self.func),
-            INPUT => Some(&mut self.input),
-            _ => {
-                error!("key {key:?} should be {FUNCTION} or {INPUT}");
-                None
-            }
+            FUNCTION => return Some(&mut self.func),
+            INPUT => return Some(&mut self.input),
+            _ => {}
         }
+        bug!(cfg, "context call: expected key to be {FUNCTION} or {INPUT}, but got {key:?}");
+        None
     }
 
-    fn set(&mut self, key: Key, value: Val) -> Option<()> {
+    fn set(&mut self, cfg: &mut Cfg, key: Key, value: Val) -> Option<()> {
         match &*key {
             FUNCTION => {
                 self.func = value;
-                Some(())
+                return Some(());
             }
             INPUT => {
                 self.input = value;
-                Some(())
+                return Some(());
             }
-            _ => {
-                error!("key {key:?} should be {FUNCTION} or {INPUT}");
-                None
-            }
+            _ => {}
         }
+        bug!(cfg, "context call: expected key to be {FUNCTION} or {INPUT}, but got {key:?}");
+        None
     }
 }
 
-const FIRST: &str = concatcp!(PREFIX_ID, "first");
-const LAST: &str = concatcp!(PREFIX_ID, "last");
+pub(crate) const FIRST: &str = concatcp!(PREFIX_ID, "first");
+pub(crate) const LAST: &str = concatcp!(PREFIX_ID, "last");
 
 impl DynCtx<Key, Val> for ListVal {
-    fn ref_(&self, key: Key) -> Option<&Val> {
-        match &*key {
-            FIRST => self.first(),
-            LAST => self.last(),
-            _ => {
-                error!("key {key:?} should be {FIRST} or {LAST}");
-                None
-            }
-        }
-    }
-
-    fn ref_mut(&mut self, key: Key) -> Option<&mut Val> {
-        match &*key {
-            FIRST => self.first_mut(),
-            LAST => self.last_mut(),
-            _ => {
-                error!("key {key:?} should be {FIRST} or {LAST}");
-                None
-            }
-        }
-    }
-
-    fn set(&mut self, key: Key, value: Val) -> Option<()> {
+    fn ref_(&self, cfg: &mut Cfg, key: Key) -> Option<&Val> {
         match &*key {
             FIRST => {
-                *self.first_mut()? = value;
-                Some(())
+                if let Some(first) = self.first() {
+                    return Some(first);
+                }
+                bug!(cfg, "context list: get first item on an empty list");
             }
             LAST => {
-                *self.last_mut()? = value;
-                Some(())
+                if let Some(last) = self.last() {
+                    return Some(last);
+                }
+                bug!(cfg, "context list: get last item on an empty list");
             }
-            _ => {
-                error!("key {key:?} should be {FIRST} or {LAST}");
-                None
+            s => {
+                bug!(cfg, "context list: expected key to be {FIRST} or {LAST}, but got {s:?}");
             }
         }
+        None
+    }
+
+    fn ref_mut(&mut self, cfg: &mut Cfg, key: Key) -> Option<&mut Val> {
+        match &*key {
+            FIRST => {
+                if let Some(first) = self.first_mut() {
+                    return Some(first);
+                }
+                bug!(cfg, "context list: get first item on an empty list");
+            }
+            LAST => {
+                if let Some(last) = self.last_mut() {
+                    return Some(last);
+                }
+                bug!(cfg, "context list: get last item on an empty list");
+            }
+            s => {
+                bug!(cfg, "context list: expected key to be {FIRST} or {LAST}, but got {s:?}");
+            }
+        }
+        None
+    }
+
+    fn set(&mut self, cfg: &mut Cfg, key: Key, value: Val) -> Option<()> {
+        match &*key {
+            FIRST => {
+                if let Some(first) = self.first_mut() {
+                    *first = value;
+                    return Some(());
+                }
+                bug!(cfg, "context list: get first item on an empty list");
+            }
+            LAST => {
+                if let Some(last) = self.last_mut() {
+                    *last = value;
+                    return Some(());
+                }
+                bug!(cfg, "context list: get last item on an empty list");
+            }
+            s => {
+                bug!(cfg, "context list: expected key to be {FIRST} or {LAST}, but got {s:?}");
+            }
+        }
+        None
     }
 }
 
 impl DynCtx<Key, Val> for MapVal {
-    fn ref_(&self, key: Key) -> Option<&Val> {
-        let Some(val) = self.get(&key) else {
-            error!("key {key:?} should exist in the map");
-            return None;
-        };
-        Some(val)
+    fn ref_(&self, cfg: &mut Cfg, key: Key) -> Option<&Val> {
+        if let Some(val) = self.get(&key) {
+            return Some(val);
+        }
+        bug!(cfg, "context map: value not found for key {key:?}");
+        None
     }
 
-    fn ref_mut(&mut self, key: Key) -> Option<&mut Val> {
-        let Some(val) = self.get_mut(&key) else {
-            error!("key {key:?} should exist in the map");
-            return None;
-        };
-        Some(val)
+    fn ref_mut(&mut self, cfg: &mut Cfg, key: Key) -> Option<&mut Val> {
+        if let Some(val) = self.get_mut(&key) {
+            return Some(val);
+        }
+        bug!(cfg, "context map: value not found for key {key:?}");
+        None
     }
 
-    fn set(&mut self, key: Key, value: Val) -> Option<()> {
+    fn set(&mut self, _cfg: &mut Cfg, key: Key, value: Val) -> Option<()> {
         self.insert(key, value);
         Some(())
     }
 }
 
 impl DynCtx<Key, Val> for Val {
-    fn ref_(&self, key: Key) -> Option<&Val> {
+    fn ref_(&self, cfg: &mut Cfg, key: Key) -> Option<&Val> {
         match self {
-            Val::Cell(cell) => cell.ref_(key),
-            Val::Pair(pair) => pair.ref_(key),
-            Val::Call(call) => call.ref_(key),
-            Val::List(list) => list.ref_(key),
-            Val::Map(map) => map.ref_(key),
-            Val::Dyn(val) => val.ref_(Val::Key(key)),
+            Val::Cell(cell) => cell.ref_(cfg, key),
+            Val::Pair(pair) => pair.ref_(cfg, key),
+            Val::Call(call) => call.ref_(cfg, key),
+            Val::List(list) => list.ref_(cfg, key),
+            Val::Map(map) => map.ref_(cfg, key),
+            Val::Dyn(val) => val.ref_(cfg, Val::Key(key)),
             v => {
-                error!("key {key:?} should exist in {v:?}");
+                bug!(cfg, "context: value not found for key {key:?} in {v:?}");
                 None
             }
         }
     }
 
-    fn ref_mut(&mut self, key: Key) -> Option<&mut Val> {
+    fn ref_mut(&mut self, cfg: &mut Cfg, key: Key) -> Option<&mut Val> {
         match self {
-            Val::Cell(cell) => cell.ref_mut(key),
-            Val::Pair(pair) => pair.ref_mut(key),
-            Val::Call(call) => call.ref_mut(key),
-            Val::List(list) => list.ref_mut(key),
-            Val::Map(map) => map.ref_mut(key),
-            Val::Dyn(val) => val.ref_mut(Val::Key(key)),
+            Val::Cell(cell) => cell.ref_mut(cfg, key),
+            Val::Pair(pair) => pair.ref_mut(cfg, key),
+            Val::Call(call) => call.ref_mut(cfg, key),
+            Val::List(list) => list.ref_mut(cfg, key),
+            Val::Map(map) => map.ref_mut(cfg, key),
+            Val::Dyn(val) => val.ref_mut(cfg, Val::Key(key)),
             v => {
-                error!("key {key:?} should exist in {v:?}");
+                bug!(cfg, "context: value not found for key {key:?} in {v:?}");
                 None
             }
         }
     }
 
-    fn set(&mut self, key: Key, value: Val) -> Option<()> {
+    fn set(&mut self, cfg: &mut Cfg, key: Key, value: Val) -> Option<()> {
         match self {
-            Val::Cell(cell) => cell.set(key, value),
-            Val::Pair(pair) => pair.set(key, value),
-            Val::Call(call) => call.set(key, value),
-            Val::List(list) => list.set(key, value),
-            Val::Map(map) => map.set(key, value),
-            Val::Dyn(val) => val.set(Val::Key(key), value),
+            Val::Cell(cell) => cell.set(cfg, key, value),
+            Val::Pair(pair) => pair.set(cfg, key, value),
+            Val::Call(call) => call.set(cfg, key, value),
+            Val::List(list) => list.set(cfg, key, value),
+            Val::Map(map) => map.set(cfg, key, value),
+            Val::Dyn(val) => val.set(cfg, Val::Key(key), value),
             v => {
-                error!("key {key:?} should exist in {v:?}");
+                bug!(cfg, "context: value not found for key {key:?} in {v:?}");
                 None
             }
         }
@@ -248,40 +266,40 @@ impl DynCtx<Key, Val> for Val {
 }
 
 impl DynCtx<IntVal, Val> for ListVal {
-    fn ref_(&self, key: IntVal) -> Option<&Val> {
+    fn ref_(&self, cfg: &mut Cfg, key: IntVal) -> Option<&Val> {
         let len = self.len();
         let Some(index) = key.to_usize() else {
-            error!("key {key:?} should >= 0 and < list.len {len}");
+            bug!(cfg, "context list: key {key:?} should >= 0 and < list.length {len}");
             return None;
         };
         let Some(val) = self.get(index) else {
-            error!("key {index} should < list.len {len}");
+            bug!(cfg, "context list: key {index} should < list.length {len}");
             return None;
         };
         Some(val)
     }
 
-    fn ref_mut(&mut self, key: IntVal) -> Option<&mut Val> {
+    fn ref_mut(&mut self, cfg: &mut Cfg, key: IntVal) -> Option<&mut Val> {
         let len = self.len();
         let Some(index) = key.to_usize() else {
-            error!("key {key:?} should >= 0 and < list.len {len}");
+            bug!(cfg, "context list: key {key:?} should >= 0 and < list.length {len}");
             return None;
         };
         let Some(val) = self.get_mut(index) else {
-            error!("key {index} should < list.len {len}");
+            bug!(cfg, "context list: key {index} should < list.length {len}");
             return None;
         };
         Some(val)
     }
 
-    fn set(&mut self, key: IntVal, value: Val) -> Option<()> {
+    fn set(&mut self, cfg: &mut Cfg, key: IntVal, value: Val) -> Option<()> {
         let len = self.len();
         let Some(index) = key.to_usize() else {
-            error!("key {key:?} should >= 0 and < list.len {len}");
+            bug!(cfg, "context list: key {key:?} should >= 0 and < list.length {len}");
             return None;
         };
         let Some(val) = self.get_mut(index) else {
-            error!("key {index} should < list.len {len}");
+            bug!(cfg, "context list: key {index} should < list.length {len}");
             return None;
         };
         *val = value;
@@ -290,61 +308,61 @@ impl DynCtx<IntVal, Val> for ListVal {
 }
 
 impl DynCtx<Val, Val> for Val {
-    fn ref_(&self, key: Val) -> Option<&Val> {
+    fn ref_(&self, cfg: &mut Cfg, key: Val) -> Option<&Val> {
         if let Val::Key(name) = &key {
-            return self.ref_(name.clone());
+            return self.ref_(cfg, name.clone());
         }
         match self {
             Val::List(list) => {
                 let Val::Int(index) = key else {
-                    error!("key {key:?} should be a int");
+                    bug!(cfg, "context list: key {key:?} should be an integer");
                     return None;
                 };
-                list.ref_(index)
+                list.ref_(cfg, index)
             }
-            Val::Dyn(val) => val.ref_(key),
+            Val::Dyn(val) => val.ref_(cfg, key),
             _ => {
-                error!("ctx {self:?} should be a dyn ctx");
+                bug!(cfg, "context: value not found for key {key:?} in {self:?}");
                 None
             }
         }
     }
 
-    fn ref_mut(&mut self, key: Val) -> Option<&mut Val> {
+    fn ref_mut(&mut self, cfg: &mut Cfg, key: Val) -> Option<&mut Val> {
         if let Val::Key(name) = &key {
-            return self.ref_mut(name.clone());
+            return self.ref_mut(cfg, name.clone());
         }
         match self {
             Val::List(list) => {
                 let Val::Int(index) = key else {
-                    error!("key {key:?} should be a int");
+                    bug!(cfg, "context list: key {key:?} should be an integer");
                     return None;
                 };
-                list.ref_mut(index)
+                list.ref_mut(cfg, index)
             }
-            Val::Dyn(val) => val.ref_mut(key),
+            Val::Dyn(val) => val.ref_mut(cfg, key),
             _ => {
-                error!("ctx {self:?} should be a dyn ctx");
+                bug!(cfg, "context: value not found for key {key:?} in {self:?}");
                 None
             }
         }
     }
 
-    fn set(&mut self, key: Val, value: Val) -> Option<()> {
+    fn set(&mut self, cfg: &mut Cfg, key: Val, value: Val) -> Option<()> {
         if let Val::Key(name) = &key {
-            return self.set(name.clone(), value);
+            return self.set(cfg, name.clone(), value);
         }
         match self {
             Val::List(list) => {
                 let Val::Int(index) = key else {
-                    error!("key {key:?} should be a int");
+                    bug!(cfg, "context list: key {key:?} should be an integer");
                     return None;
                 };
-                list.set(index, value)
+                list.set(cfg, index, value)
             }
-            Val::Dyn(val) => val.set(key, value),
+            Val::Dyn(val) => val.set(cfg, key, value),
             _ => {
-                error!("ctx {self:?} should be a dyn ctx");
+                bug!(cfg, "context: value not found for key {key:?} in {self:?}");
                 None
             }
         }

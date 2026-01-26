@@ -1,7 +1,7 @@
+use std::ops::Deref;
 use std::rc::Rc;
 
 use const_format::concatcp;
-use log::error;
 
 use self::repr::generate_func;
 use self::repr::parse_func;
@@ -10,9 +10,8 @@ use super::FreeImpl;
 use super::abort_free;
 use super::func::repr::generate_code;
 use super::func::repr::generate_ctx_access;
+use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::error::illegal_ctx;
-use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
@@ -85,9 +84,8 @@ pub fn new() -> FreePrimFuncVal {
 }
 
 fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
-    let Some(func) = parse_func(input) else {
-        error!("parse func failed");
-        return illegal_input(cfg);
+    let Some(func) = parse_func(cfg, input) else {
+        return Val::default();
     };
     Val::Func(func)
 }
@@ -98,8 +96,7 @@ pub fn represent() -> FreePrimFuncVal {
 
 fn fn_represent(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Func(func) = input else {
-        error!("input {input:?} should be a function");
-        return illegal_input(cfg);
+        return bug!(cfg, "{REPRESENT}: expected input to be a function, but got {input:?}");
     };
     generate_func(func)
 }
@@ -142,13 +139,15 @@ impl MutFn<Cfg, Val, Val, Val> for Apply {
 
 fn func_input(cfg: &mut Cfg, input: Val) -> Result<(FuncVal, Val), Val> {
     let Val::Pair(pair) = input else {
-        error!("input {input:?} should be a pair");
-        return Err(illegal_input(cfg));
+        return Err(bug!(cfg, "{APPLY}: expected input to be a pair, but got {input:?}"));
     };
     let pair = Pair::from(pair);
     let Val::Func(func) = pair.left else {
-        error!("input.left {:?} should be a func", pair.left);
-        return Err(illegal_input(cfg));
+        return Err(bug!(
+            cfg,
+            "{APPLY}: expected input.left to be a function, but got {:?}",
+            pair.left
+        ));
     };
     Ok((func, pair.right))
 }
@@ -159,12 +158,14 @@ pub fn get_context_access() -> ConstPrimFuncVal {
 
 fn fn_get_context_access(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
-        error!("ctx {ctx:?} should be a function");
-        return illegal_ctx(cfg);
+        return bug!(
+            cfg,
+            "{GET_CONTEXT_ACCESS}: expected context to be a function, but got {:?}",
+            ctx.deref()
+        );
     };
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{GET_CONTEXT_ACCESS}: expected input to be a unit, but got {input:?}");
     }
     let access = generate_ctx_access(func.ctx_access());
     Val::Key(Key::from_str_unchecked(access))
@@ -176,12 +177,14 @@ pub fn is_raw_input() -> ConstPrimFuncVal {
 
 fn fn_is_raw_input(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
-        error!("ctx {ctx:?} should be a function");
-        return illegal_ctx(cfg);
+        return bug!(
+            cfg,
+            "{IS_RAW_INPUT}: expected context to be a function, but got {:?}",
+            ctx.deref()
+        );
     };
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{IS_RAW_INPUT}: expected input to be a unit, but got {input:?}");
     }
     Val::Bit(Bit::from(func.raw_input()))
 }
@@ -192,12 +195,14 @@ pub fn is_primitive() -> ConstPrimFuncVal {
 
 fn fn_is_primitive(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
-        error!("ctx {ctx:?} should be a function");
-        return illegal_ctx(cfg);
+        return bug!(
+            cfg,
+            "{IS_PRIMITIVE}: expected context to be a function, but got {:?}",
+            ctx.deref()
+        );
     };
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{IS_PRIMITIVE}: expected input to be a unit, but got {input:?}");
     }
     let is_primitive = func.is_primitive();
     Val::Bit(Bit::from(is_primitive))
@@ -209,12 +214,14 @@ pub fn get_code() -> ConstPrimFuncVal {
 
 fn fn_get_code(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
-        error!("ctx {ctx:?} should be a function");
-        return illegal_ctx(cfg);
+        return bug!(
+            cfg,
+            "{GET_CODE}: expected context to be a function, but got {:?}",
+            ctx.deref()
+        );
     };
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{GET_CODE}: expected input to be a unit, but got {input:?}");
     }
     generate_code(func)
 }
@@ -225,16 +232,17 @@ pub fn get_prelude() -> ConstPrimFuncVal {
 
 fn fn_get_prelude(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
-        error!("ctx {ctx:?} should be a function");
-        return illegal_ctx(cfg);
+        return bug!(
+            cfg,
+            "{GET_PRELUDE}: expected context to be a function, but got {:?}",
+            ctx.deref()
+        );
     };
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{GET_PRELUDE}: expected input to be a unit, but got {input:?}");
     }
     let Some(ctx) = func.prelude() else {
-        error!("func {func:?} should have a prelude");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{GET_PRELUDE}: prelude not found");
     };
     ctx.clone()
 }

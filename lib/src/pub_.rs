@@ -1,14 +1,9 @@
-use log::error;
-use log::info;
-use log::trace;
-
 use crate::cfg::CoreCfg;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::Val;
-use crate::type_::Key;
 
 #[derive(Debug, Clone)]
 pub struct Air {
@@ -17,42 +12,14 @@ pub struct Air {
 }
 
 impl Air {
-    pub fn new(cfg: Cfg) -> Option<Self> {
-        info!("cfg len {}", cfg.len());
-        let ctx = CoreCfg::prelude(&cfg).unwrap();
+    pub fn new(mut cfg: Cfg) -> Option<Self> {
+        let ctx = CoreCfg::prelude(&mut cfg, "prelude")?;
         let ctx = Val::Map(MapVal::from(ctx));
         Some(Self { cfg, ctx })
     }
 
     pub fn interpret(&mut self, input: Val) -> Val {
-        let old_steps = self.cfg.steps();
-        let output = Eval.mut_call(&mut self.cfg, &mut self.ctx, input);
-        let new_steps = self.cfg.steps();
-        trace!("takes {} steps", old_steps - new_steps);
-        self.log_abort();
-        output
-    }
-
-    fn log_abort(&self) {
-        if !self.cfg.is_aborted() {
-            return;
-        }
-        let type_ = self.cfg.import(Key::from_str_unchecked(Cfg::ABORT_TYPE));
-        let msg = self.cfg.import(Key::from_str_unchecked(Cfg::ABORT_MSG));
-        match (type_, msg) {
-            (Some(type_), Some(msg)) => {
-                error!("aborted by {type_:?}: {msg:?}");
-            }
-            (None, Some(msg)) => {
-                error!("aborted: {msg:?}");
-            }
-            (Some(type_), None) => {
-                error!("aborted by {type_:?}");
-            }
-            (None, None) => {
-                error!("aborted");
-            }
-        }
+        Eval.mut_call(&mut self.cfg, &mut self.ctx, input)
     }
 
     pub fn ctx_mut(&mut self) -> &mut Val {

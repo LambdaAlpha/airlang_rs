@@ -1,9 +1,7 @@
 use std::ops::Deref;
 
-use log::error;
-use log::info;
-
 use self::lib::CoreLib;
+use crate::bug;
 use crate::cfg::prelude::CorePrelude;
 use crate::cfg::prelude::prelude_repr;
 use crate::semantics::cfg::Cfg;
@@ -35,31 +33,30 @@ impl CfgMod for CoreCfg {
     fn extend(self, cfg: &Cfg) {
         self.lib.extend(cfg);
         let prelude = prelude_repr(self.prelude);
-        info!("core prelude len {}", prelude.len());
         let prelude = Val::Link(LinkVal::new(Val::Map(prelude.into()), false));
         cfg.extend_scope(Key::from_str_unchecked(Self::PRELUDE), prelude);
     }
 }
 
 impl CoreCfg {
-    pub const PRELUDE: &'static str = "_prelude";
+    pub const PRELUDE: &str = "_prelude";
 
-    pub fn prelude(cfg: &Cfg) -> Option<Map<Key, Val>> {
+    pub fn prelude(cfg: &mut Cfg, tag: &str) -> Option<Map<Key, Val>> {
         let prelude = cfg.import(Key::from_str_unchecked(Self::PRELUDE));
         let Some(prelude) = prelude else {
-            error!("prelude should exist in cfg");
+            bug!(cfg, "{tag}: value not found for key {} in config", Self::PRELUDE);
             return None;
         };
         let Val::Link(prelude) = prelude else {
-            error!("prelude in cfg should be a link");
+            bug!(cfg, "{tag}: expected {} to be a link, but got {prelude:?}", Self::PRELUDE);
             return None;
         };
         let Ok(prelude) = prelude.try_borrow() else {
-            error!("prelude should not be borrowed");
+            bug!(cfg, "{tag}: link is in use");
             return None;
         };
         let Val::Map(prelude) = prelude.deref().clone() else {
-            error!("prelude in cfg should be a link of map");
+            bug!(cfg, "{tag}: expected {} to be a link of a map", Self::PRELUDE);
             return None;
         };
         Some(Map::from(prelude))

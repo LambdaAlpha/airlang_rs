@@ -23,9 +23,16 @@ _ do [
 resource
 -----
 _ do [
-    .set_steps set _ import _resource.set_steps,
-    _ set_steps 100,
-    true loop []
+    .self set _ import _config.self,
+    .where set _ import _config.where,
+    .is_aborted set _ import _error.is_aborted,
+    .c set _ self .,
+    c where _ do [
+        .set_steps set _ import _resource.set_steps,
+        _ set_steps 100,
+        true loop []
+    ],
+    .c which is_aborted : .,
 ]
 -----
-.
+true

@@ -547,9 +547,21 @@ _ do [
 =====
 iterate integer negative
 -----
-0-1 iterate i : []
+_ do [
+    .config.new set _ import _config.new,
+    .link.new set _ import _link.new,
+    .where set _ import _config.where,
+    .is_aborted set _ import _error.is_aborted,
+    .c set _ config.new {
+        _prelude : _ link.new {
+            iterate : iterate,
+        },
+    },
+    c where 0-1 iterate i : [],
+    .c which is_aborted : .,
+]
 -----
-.
+true
 =====
 iterate byte
 -----

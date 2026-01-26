@@ -1,18 +1,18 @@
+use std::ops::Deref;
+
 use const_format::concatcp;
-use log::error;
 
 use super::ConstImpl;
 use super::FreeImpl;
 use super::MutImpl;
 use super::abort_const;
 use super::abort_free;
+use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::error::abort_bug_with_msg;
-use crate::cfg::error::illegal_ctx;
-use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::abort_by_bug_with_msg;
 use crate::semantics::val::ConstPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MutPrimFuncVal;
@@ -57,8 +57,7 @@ pub fn abort() -> FreePrimFuncVal {
 
 fn fn_abort(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Unit(_) = input else {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{ABORT}: expected input to be a unit, but got {input:?}");
     };
     cfg.abort();
     Val::default()
@@ -70,22 +69,18 @@ pub fn assert() -> FreePrimFuncVal {
 
 fn fn_assert(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        error!("input {input:?} should be a pair");
-        return illegal_input(cfg);
+        return bug!(cfg, "{ASSERT}: expected input to be a pair, but got {input:?}");
     };
     let pair = Pair::from(pair);
     let Val::Bit(bit) = pair.left else {
-        error!("input.left {:?} should be a bit", pair.left);
-        return illegal_input(cfg);
+        return bug!(cfg, "{ASSERT}: expected input.left to be a bit, but got {:?}", pair.left);
     };
     let Val::Text(message) = pair.right else {
-        error!("input.right {:?} should be a text", pair.right);
-        return illegal_input(cfg);
+        return bug!(cfg, "{ASSERT}: expected input.right to be a text, but got {:?}", pair.right);
     };
     let message = Text::from(message);
     if !*bit {
-        error!("assertion failed: {message}");
-        return abort_bug_with_msg(cfg, &message);
+        return abort_by_bug_with_msg(cfg, message);
     }
     Val::default()
 }
@@ -96,12 +91,14 @@ pub fn is_aborted() -> ConstPrimFuncVal {
 
 fn fn_is_aborted(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Cfg(target_cfg) = &*ctx else {
-        error!("ctx {ctx:?} should be a cfg");
-        return illegal_ctx(cfg);
+        return bug!(
+            cfg,
+            "{IS_ABORTED}: expected context to be a config, but got {:?}",
+            ctx.deref()
+        );
     };
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{IS_ABORTED}: expected input to be a unit, but got {input:?}");
     }
     let aborted = target_cfg.is_aborted();
     Val::Bit(aborted.into())
@@ -113,12 +110,10 @@ pub fn recover() -> MutPrimFuncVal {
 
 fn fn_recover(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Cfg(target_cfg) = ctx else {
-        error!("ctx {ctx:?} should be a cfg");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{RECOVER}: expected context to be a config, but got {ctx:?}");
     };
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{RECOVER}: expected input to be a unit, but got {input:?}");
     }
     target_cfg.recover();
     Val::default()

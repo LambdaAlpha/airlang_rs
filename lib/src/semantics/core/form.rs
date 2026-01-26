@@ -1,7 +1,5 @@
 use std::mem::take;
 
-use log::error;
-
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::key::KeyEval;
 use crate::semantics::func::ConstFn;
@@ -241,7 +239,6 @@ pub(crate) struct Form;
 impl FreeFn<Cfg, Val, Val> for Form {
     fn free_call(&self, cfg: &mut Cfg, val: Val) -> Val {
         if !cfg.step() {
-            error!("aborted");
             return Val::default();
         }
         match val {
@@ -259,7 +256,6 @@ impl FreeFn<Cfg, Val, Val> for Form {
 impl ConstFn<Cfg, Val, Val, Val> for Form {
     fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, val: Val) -> Val {
         if !cfg.step() {
-            error!("aborted");
             return Val::default();
         }
         match val {
@@ -277,7 +273,6 @@ impl ConstFn<Cfg, Val, Val, Val> for Form {
 impl MutFn<Cfg, Val, Val, Val> for Form {
     fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, val: Val) -> Val {
         if !cfg.step() {
-            error!("aborted");
             return Val::default();
         }
         match val {
@@ -293,7 +288,6 @@ impl MutFn<Cfg, Val, Val, Val> for Form {
 
     fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, val: Val) -> Val {
         if !cfg.step() {
-            error!("aborted");
             return Val::default();
         }
         match val {

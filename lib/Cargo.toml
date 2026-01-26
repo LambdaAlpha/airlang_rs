@@ -29,11 +29,6 @@ const_format = "0.2"
 stable_deref_trait = "1.2"
 bigdecimal = "0.4"
 
-[dependencies.log]
-version = "0.4"
-default-features = false
-features = ["release_max_level_off"]
-
 [dependencies.string_cache]
 version = "0.9"
 default-features = false
@@ -75,3 +70,8 @@ criterion = "0.8"
 
 [dev-dependencies.airlang_dev]
 path = "../dev"
+
+[dev-dependencies.log]
+version = "0.4"
+default-features = false
+features = ["release_max_level_off"]

@@ -1,15 +1,14 @@
 use std::mem::swap;
+use std::ops::Deref;
 
 use const_format::concatcp;
-use log::error;
 
 use super::ConstImpl;
 use super::MutImpl;
 use super::abort_const;
 use super::abort_free;
+use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::error::illegal_ctx;
-use crate::cfg::error::illegal_input;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
@@ -58,12 +57,10 @@ pub fn get_left() -> ConstPrimFuncVal {
 
 fn fn_get_left(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Pair(pair) = &*ctx else {
-        error!("ctx {ctx:?} should be a pair");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{GET_LEFT}: expected context to be a pair, but got {:?}", ctx.deref());
     };
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{GET_LEFT}: expected input to be a unit, but got {input:?}");
     }
     pair.left.clone()
 }
@@ -74,8 +71,7 @@ pub fn set_left() -> MutPrimFuncVal {
 
 fn fn_set_left(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Pair(pair) = ctx else {
-        error!("ctx {ctx:?} should be a pair");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{SET_LEFT}: expected context to be a pair, but got {ctx:?}");
     };
     swap(&mut pair.left, &mut input);
     input
@@ -87,12 +83,10 @@ pub fn get_right() -> ConstPrimFuncVal {
 
 fn fn_get_right(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Pair(pair) = &*ctx else {
-        error!("ctx {ctx:?} should be a pair");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{GET_RIGHT}: expected context to be a pair, but got {:?}", ctx.deref());
     };
     if !input.is_unit() {
-        error!("input {input:?} should be a unit");
-        return illegal_input(cfg);
+        return bug!(cfg, "{GET_RIGHT}: expected input to be a unit, but got {input:?}");
     }
     pair.right.clone()
 }
@@ -104,8 +98,7 @@ pub fn set_right() -> MutPrimFuncVal {
 
 fn fn_set_right(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Pair(pair) = ctx else {
-        error!("ctx {ctx:?} should be a pair");
-        return illegal_ctx(cfg);
+        return bug!(cfg, "{SET_RIGHT}: expected context to be a pair, but got {ctx:?}");
     };
     swap(&mut pair.right, &mut input);
     input

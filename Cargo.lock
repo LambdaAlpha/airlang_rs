@@ -72,7 +72,6 @@ dependencies = [
  "airlang",
  "airlang_dev",
  "const_format",
- "log",
 ]
 
 [[package]]
