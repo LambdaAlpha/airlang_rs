@@ -80,14 +80,14 @@ pub fn add() -> FreePrimFuncVal {
 
 fn fn_add(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{ADD}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{ADD}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.left else {
-        return bug!(cfg, "{ADD}: expected input.left to be an integer, but got {:?}", pair.left);
+        return bug!(cfg, "{ADD}: expected input.left to be an integer, but got {}", pair.left);
     };
     let Val::Int(i2) = pair.right else {
-        return bug!(cfg, "{ADD}: expected input.right to be an integer, but got {:?}", pair.right);
+        return bug!(cfg, "{ADD}: expected input.right to be an integer, but got {}", pair.right);
     };
     let i1 = Int::from(i1);
     let i2 = Int::from(i2);
@@ -100,20 +100,20 @@ pub fn subtract() -> FreePrimFuncVal {
 
 fn fn_subtract(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{SUBTRACT}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{SUBTRACT}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.left else {
         return bug!(
             cfg,
-            "{SUBTRACT}: expected input.left to be an integer, but got {:?}",
+            "{SUBTRACT}: expected input.left to be an integer, but got {}",
             pair.left
         );
     };
     let Val::Int(i2) = pair.right else {
         return bug!(
             cfg,
-            "{SUBTRACT}: expected input.right to be an integer, but got {:?}",
+            "{SUBTRACT}: expected input.right to be an integer, but got {}",
             pair.right
         );
     };
@@ -128,20 +128,20 @@ pub fn multiply() -> FreePrimFuncVal {
 
 fn fn_multiply(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{MULTIPLY}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{MULTIPLY}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.left else {
         return bug!(
             cfg,
-            "{MULTIPLY}: expected input.left to be an integer, but got {:?}",
+            "{MULTIPLY}: expected input.left to be an integer, but got {}",
             pair.left
         );
     };
     let Val::Int(i2) = pair.right else {
         return bug!(
             cfg,
-            "{MULTIPLY}: expected input.right to be an integer, but got {:?}",
+            "{MULTIPLY}: expected input.right to be an integer, but got {}",
             pair.right
         );
     };
@@ -156,20 +156,16 @@ pub fn divide() -> FreePrimFuncVal {
 
 fn fn_divide(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{DIVIDE}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{DIVIDE}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.left else {
-        return bug!(
-            cfg,
-            "{DIVIDE}: expected input.left to be an integer, but got {:?}",
-            pair.left
-        );
+        return bug!(cfg, "{DIVIDE}: expected input.left to be an integer, but got {}", pair.left);
     };
     let Val::Int(i2) = pair.right else {
         return bug!(
             cfg,
-            "{DIVIDE}: expected input.right to be an integer, but got {:?}",
+            "{DIVIDE}: expected input.right to be an integer, but got {}",
             pair.right
         );
     };
@@ -188,20 +184,20 @@ pub fn remainder() -> FreePrimFuncVal {
 
 fn fn_remainder(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{REMAINDER}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{REMAINDER}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.left else {
         return bug!(
             cfg,
-            "{REMAINDER}: expected input.left to be an integer, but got {:?}",
+            "{REMAINDER}: expected input.left to be an integer, but got {}",
             pair.left
         );
     };
     let Val::Int(i2) = pair.right else {
         return bug!(
             cfg,
-            "{REMAINDER}: expected input.right to be an integer, but got {:?}",
+            "{REMAINDER}: expected input.right to be an integer, but got {}",
             pair.right
         );
     };
@@ -220,20 +216,20 @@ pub fn divide_remainder() -> FreePrimFuncVal {
 
 fn fn_divide_remainder(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{DIVIDE_REMAINDER}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{DIVIDE_REMAINDER}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.left else {
         return bug!(
             cfg,
-            "{DIVIDE_REMAINDER}: expected input.left to be an integer, but got {:?}",
+            "{DIVIDE_REMAINDER}: expected input.left to be an integer, but got {}",
             pair.left
         );
     };
     let Val::Int(i2) = pair.right else {
         return bug!(
             cfg,
-            "{DIVIDE_REMAINDER}: expected input.right to be an integer, but got {:?}",
+            "{DIVIDE_REMAINDER}: expected input.right to be an integer, but got {}",
             pair.right
         );
     };
@@ -252,18 +248,14 @@ pub fn less() -> FreePrimFuncVal {
 
 fn fn_less(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{LESS}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{LESS}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.left else {
-        return bug!(cfg, "{LESS}: expected input.left to be an integer, but got {:?}", pair.left);
+        return bug!(cfg, "{LESS}: expected input.left to be an integer, but got {}", pair.left);
     };
     let Val::Int(i2) = pair.right else {
-        return bug!(
-            cfg,
-            "{LESS}: expected input.right to be an integer, but got {:?}",
-            pair.right
-        );
+        return bug!(cfg, "{LESS}: expected input.right to be an integer, but got {}", pair.right);
     };
     Val::Bit(i1.less_than(&i2))
 }
@@ -274,20 +266,20 @@ pub fn less_equal() -> FreePrimFuncVal {
 
 fn fn_less_equal(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{LESS_EQUAL}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{LESS_EQUAL}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.left else {
         return bug!(
             cfg,
-            "{LESS_EQUAL}: expected input.left to be an integer, but got {:?}",
+            "{LESS_EQUAL}: expected input.left to be an integer, but got {}",
             pair.left
         );
     };
     let Val::Int(i2) = pair.right else {
         return bug!(
             cfg,
-            "{LESS_EQUAL}: expected input.right to be an integer, but got {:?}",
+            "{LESS_EQUAL}: expected input.right to be an integer, but got {}",
             pair.right
         );
     };
@@ -300,20 +292,16 @@ pub fn greater() -> FreePrimFuncVal {
 
 fn fn_greater(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{GREATER}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{GREATER}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.left else {
-        return bug!(
-            cfg,
-            "{GREATER}: expected input.left to be an integer, but got {:?}",
-            pair.left
-        );
+        return bug!(cfg, "{GREATER}: expected input.left to be an integer, but got {}", pair.left);
     };
     let Val::Int(i2) = pair.right else {
         return bug!(
             cfg,
-            "{GREATER}: expected input.right to be an integer, but got {:?}",
+            "{GREATER}: expected input.right to be an integer, but got {}",
             pair.right
         );
     };
@@ -326,20 +314,20 @@ pub fn greater_equal() -> FreePrimFuncVal {
 
 fn fn_greater_equal(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{GREATER_EQUAL}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{GREATER_EQUAL}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.left else {
         return bug!(
             cfg,
-            "{GREATER_EQUAL}: expected input.left to be an integer, but got {:?}",
+            "{GREATER_EQUAL}: expected input.left to be an integer, but got {}",
             pair.left
         );
     };
     let Val::Int(i2) = pair.right else {
         return bug!(
             cfg,
-            "{GREATER_EQUAL}: expected input.right to be an integer, but got {:?}",
+            "{GREATER_EQUAL}: expected input.right to be an integer, but got {}",
             pair.right
         );
     };
@@ -352,20 +340,20 @@ pub fn less_greater() -> FreePrimFuncVal {
 
 fn fn_less_greater(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{LESS_GREATER}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{LESS_GREATER}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.left else {
         return bug!(
             cfg,
-            "{LESS_GREATER}: expected input.left to be an integer, but got {:?}",
+            "{LESS_GREATER}: expected input.left to be an integer, but got {}",
             pair.left
         );
     };
     let Val::Int(i2) = pair.right else {
         return bug!(
             cfg,
-            "{LESS_GREATER}: expected input.right to be an integer, but got {:?}",
+            "{LESS_GREATER}: expected input.right to be an integer, but got {}",
             pair.right
         );
     };

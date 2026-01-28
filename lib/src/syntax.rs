@@ -1,31 +1,12 @@
 pub use self::error::ParseError;
-pub use self::error::ReprError;
-pub use self::generator::GenRepr;
-pub use self::generator::escape_key;
-pub use self::generator::escape_text;
-pub use self::generator::escape_text_key;
+pub use self::generator::FmtCtx;
+pub use self::generator::FmtRepr;
 pub use self::parser::ParseRepr;
 pub use self::parser::parse;
 
 _____!();
 
 use derive_more::IsVariant;
-
-use self::generator::COMPACT_FMT;
-use self::generator::KEY_FMT;
-use self::generator::PRETTY_FMT;
-
-pub fn generate_pretty(src: GenRepr) -> String {
-    generator::generate(src, PRETTY_FMT)
-}
-
-pub fn generate_compact(src: GenRepr) -> String {
-    generator::generate(src, COMPACT_FMT)
-}
-
-pub fn generate_key(src: GenRepr) -> String {
-    generator::generate(src, KEY_FMT)
-}
 
 // delimiters {
 pub(crate) const LIST_LEFT: char = '[';

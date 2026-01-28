@@ -10,7 +10,7 @@ pub trait DynCtx<Key, Value> {
     fn set(&mut self, cfg: &mut Cfg, key: Key, value: Value) -> Option<()>;
 }
 
-#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash, IsVariant)]
+#[derive(Default, Copy, Clone, Eq, PartialEq, Hash, IsVariant)]
 pub enum CtxAccess {
     Free,
     Const,

@@ -21,7 +21,7 @@ impl DynCtx<Key, Val> for CellVal {
         if &*key == VALUE {
             return Some(&self.value);
         }
-        bug!(cfg, "context cell: expected key to be {VALUE}, but got {key:?}");
+        bug!(cfg, "context cell: expected key to be {VALUE}, but got {key}");
         None
     }
 
@@ -29,7 +29,7 @@ impl DynCtx<Key, Val> for CellVal {
         if &*key == VALUE {
             return Some(&mut self.value);
         }
-        bug!(cfg, "context cell: expected key to be {VALUE}, but got {key:?}");
+        bug!(cfg, "context cell: expected key to be {VALUE}, but got {key}");
         None
     }
 
@@ -38,7 +38,7 @@ impl DynCtx<Key, Val> for CellVal {
             self.value = value;
             return Some(());
         }
-        bug!(cfg, "context cell: expected key to be {VALUE}, but got {key:?}");
+        bug!(cfg, "context cell: expected key to be {VALUE}, but got {key}");
         None
     }
 }
@@ -53,7 +53,7 @@ impl DynCtx<Key, Val> for PairVal {
             RIGHT => return Some(&self.right),
             _ => {}
         }
-        bug!(cfg, "context pair: expected key to be {LEFT} or {RIGHT}, but got {key:?}");
+        bug!(cfg, "context pair: expected key to be {LEFT} or {RIGHT}, but got {key}");
         None
     }
 
@@ -63,7 +63,7 @@ impl DynCtx<Key, Val> for PairVal {
             RIGHT => return Some(&mut self.right),
             _ => {}
         }
-        bug!(cfg, "context pair: expected key to be {LEFT} or {RIGHT}, but got {key:?}");
+        bug!(cfg, "context pair: expected key to be {LEFT} or {RIGHT}, but got {key}");
         None
     }
 
@@ -79,7 +79,7 @@ impl DynCtx<Key, Val> for PairVal {
             }
             _ => {}
         }
-        bug!(cfg, "context pair: expected key to be {LEFT} or {RIGHT}, but got {key:?}");
+        bug!(cfg, "context pair: expected key to be {LEFT} or {RIGHT}, but got {key}");
         None
     }
 }
@@ -94,7 +94,7 @@ impl DynCtx<Key, Val> for CallVal {
             INPUT => return Some(&self.input),
             _ => {}
         }
-        bug!(cfg, "context call: expected key to be {FUNCTION} or {INPUT}, but got {key:?}");
+        bug!(cfg, "context call: expected key to be {FUNCTION} or {INPUT}, but got {key}");
         None
     }
 
@@ -104,7 +104,7 @@ impl DynCtx<Key, Val> for CallVal {
             INPUT => return Some(&mut self.input),
             _ => {}
         }
-        bug!(cfg, "context call: expected key to be {FUNCTION} or {INPUT}, but got {key:?}");
+        bug!(cfg, "context call: expected key to be {FUNCTION} or {INPUT}, but got {key}");
         None
     }
 
@@ -120,7 +120,7 @@ impl DynCtx<Key, Val> for CallVal {
             }
             _ => {}
         }
-        bug!(cfg, "context call: expected key to be {FUNCTION} or {INPUT}, but got {key:?}");
+        bug!(cfg, "context call: expected key to be {FUNCTION} or {INPUT}, but got {key}");
         None
     }
 }
@@ -144,7 +144,7 @@ impl DynCtx<Key, Val> for ListVal {
                 bug!(cfg, "context list: get last item on an empty list");
             }
             s => {
-                bug!(cfg, "context list: expected key to be {FIRST} or {LAST}, but got {s:?}");
+                bug!(cfg, "context list: expected key to be {FIRST} or {LAST}, but got {s}");
             }
         }
         None
@@ -165,7 +165,7 @@ impl DynCtx<Key, Val> for ListVal {
                 bug!(cfg, "context list: get last item on an empty list");
             }
             s => {
-                bug!(cfg, "context list: expected key to be {FIRST} or {LAST}, but got {s:?}");
+                bug!(cfg, "context list: expected key to be {FIRST} or {LAST}, but got {s}");
             }
         }
         None
@@ -188,7 +188,7 @@ impl DynCtx<Key, Val> for ListVal {
                 bug!(cfg, "context list: get last item on an empty list");
             }
             s => {
-                bug!(cfg, "context list: expected key to be {FIRST} or {LAST}, but got {s:?}");
+                bug!(cfg, "context list: expected key to be {FIRST} or {LAST}, but got {s}");
             }
         }
         None
@@ -200,7 +200,7 @@ impl DynCtx<Key, Val> for MapVal {
         if let Some(val) = self.get(&key) {
             return Some(val);
         }
-        bug!(cfg, "context map: value not found for key {key:?}");
+        bug!(cfg, "context map: value not found for key {key}");
         None
     }
 
@@ -208,7 +208,7 @@ impl DynCtx<Key, Val> for MapVal {
         if let Some(val) = self.get_mut(&key) {
             return Some(val);
         }
-        bug!(cfg, "context map: value not found for key {key:?}");
+        bug!(cfg, "context map: value not found for key {key}");
         None
     }
 
@@ -228,7 +228,7 @@ impl DynCtx<Key, Val> for Val {
             Val::Map(map) => map.ref_(cfg, key),
             Val::Dyn(val) => val.ref_(cfg, Val::Key(key)),
             v => {
-                bug!(cfg, "context: value not found for key {key:?} in {v:?}");
+                bug!(cfg, "context: value not found for key {key} in {v}");
                 None
             }
         }
@@ -243,7 +243,7 @@ impl DynCtx<Key, Val> for Val {
             Val::Map(map) => map.ref_mut(cfg, key),
             Val::Dyn(val) => val.ref_mut(cfg, Val::Key(key)),
             v => {
-                bug!(cfg, "context: value not found for key {key:?} in {v:?}");
+                bug!(cfg, "context: value not found for key {key} in {v}");
                 None
             }
         }
@@ -258,7 +258,7 @@ impl DynCtx<Key, Val> for Val {
             Val::Map(map) => map.set(cfg, key, value),
             Val::Dyn(val) => val.set(cfg, Val::Key(key), value),
             v => {
-                bug!(cfg, "context: value not found for key {key:?} in {v:?}");
+                bug!(cfg, "context: value not found for key {key} in {v}");
                 None
             }
         }
@@ -269,7 +269,7 @@ impl DynCtx<IntVal, Val> for ListVal {
     fn ref_(&self, cfg: &mut Cfg, key: IntVal) -> Option<&Val> {
         let len = self.len();
         let Some(index) = key.to_usize() else {
-            bug!(cfg, "context list: key {key:?} should >= 0 and < list.length {len}");
+            bug!(cfg, "context list: key {key} should >= 0 and < list.length {len}");
             return None;
         };
         let Some(val) = self.get(index) else {
@@ -282,7 +282,7 @@ impl DynCtx<IntVal, Val> for ListVal {
     fn ref_mut(&mut self, cfg: &mut Cfg, key: IntVal) -> Option<&mut Val> {
         let len = self.len();
         let Some(index) = key.to_usize() else {
-            bug!(cfg, "context list: key {key:?} should >= 0 and < list.length {len}");
+            bug!(cfg, "context list: key {key} should >= 0 and < list.length {len}");
             return None;
         };
         let Some(val) = self.get_mut(index) else {
@@ -295,7 +295,7 @@ impl DynCtx<IntVal, Val> for ListVal {
     fn set(&mut self, cfg: &mut Cfg, key: IntVal, value: Val) -> Option<()> {
         let len = self.len();
         let Some(index) = key.to_usize() else {
-            bug!(cfg, "context list: key {key:?} should >= 0 and < list.length {len}");
+            bug!(cfg, "context list: key {key} should >= 0 and < list.length {len}");
             return None;
         };
         let Some(val) = self.get_mut(index) else {
@@ -315,14 +315,14 @@ impl DynCtx<Val, Val> for Val {
         match self {
             Val::List(list) => {
                 let Val::Int(index) = key else {
-                    bug!(cfg, "context list: key {key:?} should be an integer");
+                    bug!(cfg, "context list: key {key} should be an integer");
                     return None;
                 };
                 list.ref_(cfg, index)
             }
             Val::Dyn(val) => val.ref_(cfg, key),
             _ => {
-                bug!(cfg, "context: value not found for key {key:?} in {self:?}");
+                bug!(cfg, "context: value not found for key {key} in {self}");
                 None
             }
         }
@@ -335,14 +335,14 @@ impl DynCtx<Val, Val> for Val {
         match self {
             Val::List(list) => {
                 let Val::Int(index) = key else {
-                    bug!(cfg, "context list: key {key:?} should be an integer");
+                    bug!(cfg, "context list: key {key} should be an integer");
                     return None;
                 };
                 list.ref_mut(cfg, index)
             }
             Val::Dyn(val) => val.ref_mut(cfg, key),
             _ => {
-                bug!(cfg, "context: value not found for key {key:?} in {self:?}");
+                bug!(cfg, "context: value not found for key {key} in {self}");
                 None
             }
         }
@@ -355,14 +355,14 @@ impl DynCtx<Val, Val> for Val {
         match self {
             Val::List(list) => {
                 let Val::Int(index) = key else {
-                    bug!(cfg, "context list: key {key:?} should be an integer");
+                    bug!(cfg, "context list: key {key} should be an integer");
                     return None;
                 };
                 list.set(cfg, index, value)
             }
             Val::Dyn(val) => val.set(cfg, key, value),
             _ => {
-                bug!(cfg, "context: value not found for key {key:?} in {self:?}");
+                bug!(cfg, "context: value not found for key {key} in {self}");
                 None
             }
         }

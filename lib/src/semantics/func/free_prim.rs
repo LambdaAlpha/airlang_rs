@@ -1,5 +1,3 @@
-use std::fmt::Debug;
-use std::fmt::Formatter;
 use std::rc::Rc;
 
 use crate::semantics::cfg::Cfg;
@@ -56,12 +54,3 @@ impl PartialEq for FreePrimFunc {
 }
 
 impl Eq for FreePrimFunc {}
-
-impl Debug for FreePrimFunc {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("FreePrimFunc")
-            .field("raw_input", &self.raw_input)
-            .field("fn", &Rc::as_ptr(&self.fn_))
-            .finish()
-    }
-}

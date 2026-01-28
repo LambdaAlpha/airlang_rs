@@ -91,7 +91,7 @@ pub fn set() -> MutPrimFuncVal {
 
 fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{SET}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{SET}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     ctx.set(cfg, pair.left, pair.right);
@@ -109,7 +109,7 @@ pub fn represent() -> MutPrimFuncVal {
 
 fn fn_represent(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{REPRESENT}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{REPRESENT}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Some(pattern) = pair.left.parse(cfg, REPRESENT) else {
@@ -129,7 +129,7 @@ pub fn is_constant() -> MutPrimFuncVal {
 
 fn fn_is_constant(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
     if !input.is_unit() {
-        return bug!(cfg, "{IS_CONSTANT}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{IS_CONSTANT}: expected input to be a unit, but got {input}");
     }
     Val::Bit(Bit::from(ctx.is_const()))
 }
@@ -140,7 +140,7 @@ pub fn self_() -> ConstPrimFuncVal {
 
 fn fn_self(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     if !input.is_unit() {
-        return bug!(cfg, "{SELF}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{SELF}: expected input to be a unit, but got {input}");
     }
     ctx.unwrap().clone()
 }
@@ -151,17 +151,17 @@ pub fn which() -> MutPrimFuncVal {
 
 fn fn_which(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{WHICH}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{WHICH}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Pair(func_input) = pair.right else {
-        return bug!(cfg, "{WHICH}: expected input.right to be a pair, but got {:?}", pair.right);
+        return bug!(cfg, "{WHICH}: expected input.right to be a pair, but got {}", pair.right);
     };
     let func_input = Pair::from(func_input);
     let Val::Func(func) = func_input.left else {
         return bug!(
             cfg,
-            "{WHICH}: expected input.right.left to be a function, but got {:?}",
+            "{WHICH}: expected input.right.left to be a function, but got {}",
             func_input.left
         );
     };

@@ -66,7 +66,7 @@ pub fn from_utf8() -> FreePrimFuncVal {
 
 fn fn_from_utf8(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Byte(byte) = input else {
-        return bug!(cfg, "{FROM_UTF8}: expected input to be a byte, but got {input:?}");
+        return bug!(cfg, "{FROM_UTF8}: expected input to be a byte, but got {input}");
     };
     let byte = Byte::from(byte);
     let Ok(str) = String::from_utf8(byte.into()) else {
@@ -81,7 +81,7 @@ pub fn into_utf8() -> FreePrimFuncVal {
 
 fn fn_into_utf8(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(text) = input else {
-        return bug!(cfg, "{INTO_UTF8}: expected input to be a text, but got {input:?}");
+        return bug!(cfg, "{INTO_UTF8}: expected input to be a text, but got {input}");
     };
     let text = Text::from(text);
     let byte = Byte::from(String::from(text).into_bytes());
@@ -94,10 +94,10 @@ pub fn get_length() -> ConstPrimFuncVal {
 
 fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Text(t) = &*ctx else {
-        return bug!(cfg, "{GET_LENGTH}: expected context to be a text, but got {:?}", ctx.deref());
+        return bug!(cfg, "{GET_LENGTH}: expected context to be a text, but got {}", ctx.deref());
     };
     if !input.is_unit() {
-        return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input}");
     }
     let len: Int = t.len().into();
     Val::Int(len.into())
@@ -109,10 +109,10 @@ pub fn push() -> MutPrimFuncVal {
 
 fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Text(text) = ctx else {
-        return bug!(cfg, "{PUSH}: expected context to be a text, but got {ctx:?}");
+        return bug!(cfg, "{PUSH}: expected context to be a text, but got {ctx}");
     };
     let Val::Text(t) = input else {
-        return bug!(cfg, "{PUSH}: expected input to be a text, but got {input:?}");
+        return bug!(cfg, "{PUSH}: expected input to be a text, but got {input}");
     };
     text.push_str(&t);
     Val::default()
@@ -125,18 +125,18 @@ pub fn join() -> FreePrimFuncVal {
 
 fn fn_join(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{JOIN}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{JOIN}: expected input to be a pair, but got {input}");
     };
     let Val::Text(separator) = &pair.left else {
-        return bug!(cfg, "{JOIN}: expected input.left to be a text, but got {:?}", pair.left);
+        return bug!(cfg, "{JOIN}: expected input.left to be a text, but got {}", pair.left);
     };
     let Val::List(texts) = &pair.right else {
-        return bug!(cfg, "{JOIN}: expected input.right to be a list, but got {:?}", pair.right);
+        return bug!(cfg, "{JOIN}: expected input.right to be a list, but got {}", pair.right);
     };
     let mut to_join: Vec<&str> = Vec::with_capacity(texts.len());
     for text in texts.iter() {
         let Val::Text(s) = text else {
-            return bug!(cfg, "{JOIN}: expected input.right.item to be a text, but got {text:?}");
+            return bug!(cfg, "{JOIN}: expected input.right.item to be a text, but got {text}");
         };
         to_join.push(s);
     }

@@ -122,7 +122,7 @@ fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
             TYPE_FUNC => Val::Func(FuncVal::any(rng, DEPTH)),
             s => bug!(cfg, "{ANY}: unknown type {s}"),
         },
-        v => bug!(cfg, "{ANY}: expected input to be a key or a unit, but got {v:?}"),
+        v => bug!(cfg, "{ANY}: expected input to be a key or a unit, but got {v}"),
     }
 }
 
@@ -132,7 +132,7 @@ pub fn get_type() -> ConstPrimFuncVal {
 
 fn fn_get_type(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     if !input.is_unit() {
-        return bug!(cfg, "{GET_TYPE}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{GET_TYPE}: expected input to be a unit, but got {input}");
     }
     let s = match &*ctx {
         Val::Unit(_) => TYPE_UNIT,
@@ -162,7 +162,7 @@ pub fn equal() -> FreePrimFuncVal {
 
 fn fn_equal(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{EQUAL}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{EQUAL}: expected input to be a pair, but got {input}");
     };
     Val::Bit(Bit::from(pair.left == pair.right))
 }

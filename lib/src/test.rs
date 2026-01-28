@@ -60,14 +60,17 @@ fn test_interpret(air: Air, input: &str, file_name: &str) -> Result<(), Box<dyn 
         };
         if show_env {
             assert_eq!(
-                ret, ret_expected,
-                "file {file_name} case({title}) input({i}): expect({o}) != real({ret:#?})\n\
-                current cfg and ctx: {air:#?}",
+                ret,
+                ret_expected,
+                "file {file_name} case({title}) input({i}): expect({o}) != real({ret:#})\n\
+                current ctx:\n{:#}\ncurrent cfg:\n{:#}",
+                air.ctx(),
+                air.cfg()
             );
         } else {
             assert_eq!(
                 ret, ret_expected,
-                "file {file_name} case({title}) input({i}): expect({o}) != real({ret:#?})",
+                "file {file_name} case({title}) input({i}): expect({o}) != real({ret:#})",
             );
         }
     }
@@ -81,9 +84,9 @@ fn log_abort(cfg: &mut Cfg) {
     let type_ = cfg.import(Key::from_str_unchecked(Cfg::ABORT_TYPE));
     let msg = cfg.import(Key::from_str_unchecked(Cfg::ABORT_MSG));
     match (type_, msg) {
-        (Some(type_), Some(msg)) => error!("aborted by {type_:?}: {msg:?}"),
-        (None, Some(msg)) => error!("aborted: {msg:?}"),
-        (Some(type_), None) => error!("aborted by {type_:?}"),
+        (Some(type_), Some(msg)) => error!("aborted by {type_}: {msg}"),
+        (None, Some(msg)) => error!("aborted: {msg}"),
+        (Some(type_), None) => error!("aborted by {type_}"),
         (None, None) => error!("aborted"),
     }
 }

@@ -50,7 +50,7 @@ const CUR_URL_KEY: &str = "build.this_url";
 
 fn fn_load(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(url) = input else {
-        return bug!(cfg, "{LOAD}: expected input to be a text, but got {input:?}");
+        return bug!(cfg, "{LOAD}: expected input to be a text, but got {input}");
     };
     let url = Text::from(url);
     let cur_url_key = Key::from_str_unchecked(CUR_URL_KEY);

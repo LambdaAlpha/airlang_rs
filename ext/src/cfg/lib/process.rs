@@ -49,24 +49,24 @@ pub fn call() -> FreePrimFuncVal {
 
 fn fn_call(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Map(mut map) = input else {
-        return bug!(cfg, "{CALL}: expected input to be a map, but got {input:?}");
+        return bug!(cfg, "{CALL}: expected input to be a map, but got {input}");
     };
     let Some(program) = map.remove(&Key::from_str_unchecked(PROGRAM)) else {
         return bug!(cfg, "{CALL}: {PROGRAM} not found");
     };
     let Val::Text(program) = program else {
-        return bug!(cfg, "{CALL}: expected {PROGRAM} to be a text, but got {program:?}");
+        return bug!(cfg, "{CALL}: expected {PROGRAM} to be a text, but got {program}");
     };
     let Some(arguments) = map.remove(&Key::from_str_unchecked(ARGUMENTS)) else {
         return bug!(cfg, "{CALL}: {ARGUMENTS} not found");
     };
     let Val::List(arguments) = arguments else {
-        return bug!(cfg, "{CALL}: expected {ARGUMENTS} to be a list, but got {arguments:?}");
+        return bug!(cfg, "{CALL}: expected {ARGUMENTS} to be a list, but got {arguments}");
     };
     let mut args = Vec::with_capacity(arguments.len());
     for arg in List::from(arguments) {
         let Val::Text(arg) = arg else {
-            return bug!(cfg, "{CALL}: expected argument to be a text, but got {arg:?}");
+            return bug!(cfg, "{CALL}: expected argument to be a text, but got {arg}");
         };
         let arg = Text::from(arg);
         args.push(String::from(arg));

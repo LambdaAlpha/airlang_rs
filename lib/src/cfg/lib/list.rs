@@ -102,10 +102,10 @@ pub fn get_length() -> ConstPrimFuncVal {
 
 fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::List(list) = &*ctx else {
-        return bug!(cfg, "{GET_LENGTH}: expected context to be a list, but got {:?}", ctx.deref());
+        return bug!(cfg, "{GET_LENGTH}: expected context to be a list, but got {}", ctx.deref());
     };
     if !input.is_unit() {
-        return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input}");
     }
     let len: Int = list.len().into();
     Val::Int(len.into())
@@ -117,10 +117,10 @@ pub fn set() -> MutPrimFuncVal {
 
 fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
-        return bug!(cfg, "{SET}: expected context to be a list, but got {ctx:?}");
+        return bug!(cfg, "{SET}: expected context to be a list, but got {ctx}");
     };
     let Val::Pair(index_value) = input else {
-        return bug!(cfg, "{SET}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{SET}: expected input to be a pair, but got {input}");
     };
     let index_value = Pair::from(index_value);
     let index = index_value.left;
@@ -129,7 +129,7 @@ fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     };
     let mut value = index_value.right;
     let Some(current) = list.get_mut(i) else {
-        return bug!(cfg, "{SET}: index {i:?} should < list.len {}", list.len());
+        return bug!(cfg, "{SET}: index {i} should < list.len {}", list.len());
     };
     swap(current, &mut value);
     value
@@ -141,10 +141,10 @@ pub fn set_many() -> MutPrimFuncVal {
 
 fn fn_set_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
-        return bug!(cfg, "{SET_MANY}: expected context to be a list, but got {ctx:?}");
+        return bug!(cfg, "{SET_MANY}: expected context to be a list, but got {ctx}");
     };
     let Val::Pair(index_value) = input else {
-        return bug!(cfg, "{SET_MANY}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{SET_MANY}: expected input to be a pair, but got {input}");
     };
     let index_value = Pair::from(index_value);
     let index = index_value.left;
@@ -154,7 +154,7 @@ fn fn_set_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(values) = index_value.right else {
         return bug!(
             cfg,
-            "{SET_MANY}: expected input.right to be a list, but got {:?}",
+            "{SET_MANY}: expected input.right to be a list, but got {}",
             index_value.right
         );
     };
@@ -173,7 +173,7 @@ pub fn get() -> ConstPrimFuncVal {
 
 fn fn_get(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::List(list) = &*ctx else {
-        return bug!(cfg, "{GET}: expected context to be a list, but got {:?}", ctx.deref());
+        return bug!(cfg, "{GET}: expected context to be a list, but got {}", ctx.deref());
     };
     let Some(i) = to_index(cfg, GET, input) else {
         return Val::default();
@@ -190,10 +190,10 @@ pub fn get_many() -> ConstPrimFuncVal {
 
 fn fn_get_many(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::List(list) = &*ctx else {
-        return bug!(cfg, "{GET_MANY}: expected context to be a list, but got {:?}", ctx.deref());
+        return bug!(cfg, "{GET_MANY}: expected context to be a list, but got {}", ctx.deref());
     };
     let Val::Pair(range) = input else {
-        return bug!(cfg, "{GET_MANY}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{GET_MANY}: expected input to be a pair, but got {input}");
     };
     let range = Pair::from(range);
     let Some((from, to)) = to_range(cfg, GET_MANY, range) else {
@@ -213,10 +213,10 @@ pub fn insert() -> MutPrimFuncVal {
 
 fn fn_insert(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
-        return bug!(cfg, "{INSERT}: expected context to be a list, but got {ctx:?}");
+        return bug!(cfg, "{INSERT}: expected context to be a list, but got {ctx}");
     };
     let Val::Pair(index_value) = input else {
-        return bug!(cfg, "{INSERT}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{INSERT}: expected input to be a pair, but got {input}");
     };
     let index_value = Pair::from(index_value);
     let index = index_value.left;
@@ -242,10 +242,10 @@ pub fn insert_many() -> MutPrimFuncVal {
 
 fn fn_insert_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
-        return bug!(cfg, "{INSERT_MANY}: expected context to be a list, but got {ctx:?}");
+        return bug!(cfg, "{INSERT_MANY}: expected context to be a list, but got {ctx}");
     };
     let Val::Pair(index_value) = input else {
-        return bug!(cfg, "{INSERT_MANY}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{INSERT_MANY}: expected input to be a pair, but got {input}");
     };
     let index_value = Pair::from(index_value);
     let index = index_value.left;
@@ -255,7 +255,7 @@ fn fn_insert_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(values) = index_value.right else {
         return bug!(
             cfg,
-            "{INSERT_MANY}: expected input.right to be a list, but got {:?}",
+            "{INSERT_MANY}: expected input.right to be a list, but got {}",
             index_value.right
         );
     };
@@ -273,7 +273,7 @@ pub fn remove() -> MutPrimFuncVal {
 
 fn fn_remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
-        return bug!(cfg, "{REMOVE}: expected context to be a list, but got {ctx:?}");
+        return bug!(cfg, "{REMOVE}: expected context to be a list, but got {ctx}");
     };
     let Some(i) = to_index(cfg, REMOVE, input) else {
         return Val::default();
@@ -295,10 +295,10 @@ pub fn remove_many() -> MutPrimFuncVal {
 
 fn fn_remove_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
-        return bug!(cfg, "{REMOVE_MANY}: expected context to be a list, but got {ctx:?}");
+        return bug!(cfg, "{REMOVE_MANY}: expected context to be a list, but got {ctx}");
     };
     let Val::Pair(range) = input else {
-        return bug!(cfg, "{REMOVE_MANY}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{REMOVE_MANY}: expected input to be a pair, but got {input}");
     };
     let range = Pair::from(range);
     let Some((from, to)) = to_range(cfg, REMOVE_MANY, range) else {
@@ -319,7 +319,7 @@ pub fn push() -> MutPrimFuncVal {
 
 fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
-        return bug!(cfg, "{PUSH}: expected context to be a list, but got {ctx:?}");
+        return bug!(cfg, "{PUSH}: expected context to be a list, but got {ctx}");
     };
     list.push(input);
     Val::default()
@@ -332,10 +332,10 @@ pub fn push_many() -> MutPrimFuncVal {
 
 fn fn_push_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
-        return bug!(cfg, "{PUSH_MANY}: expected context to be a list, but got {ctx:?}");
+        return bug!(cfg, "{PUSH_MANY}: expected context to be a list, but got {ctx}");
     };
     let Val::List(mut values) = input else {
-        return bug!(cfg, "{PUSH_MANY}: expected input to be a list, but got {input:?}");
+        return bug!(cfg, "{PUSH_MANY}: expected input to be a list, but got {input}");
     };
     list.append(&mut values);
     Val::default()
@@ -347,10 +347,10 @@ pub fn pop() -> MutPrimFuncVal {
 
 fn fn_pop(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
-        return bug!(cfg, "{POP}: expected context to be a list, but got {ctx:?}");
+        return bug!(cfg, "{POP}: expected context to be a list, but got {ctx}");
     };
     let Val::Unit(_) = input else {
-        return bug!(cfg, "{POP}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{POP}: expected input to be a unit, but got {input}");
     };
     let Some(val) = list.pop() else {
         return bug!(cfg, "{POP}: expected list to be non-empty");
@@ -364,13 +364,13 @@ pub fn pop_many() -> MutPrimFuncVal {
 
 fn fn_pop_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
-        return bug!(cfg, "{POP_MANY}: expected context to be a list, but got {ctx:?}");
+        return bug!(cfg, "{POP_MANY}: expected context to be a list, but got {ctx}");
     };
     let Val::Int(i) = input else {
-        return bug!(cfg, "{POP_MANY}: expected input to be an integer, but got {input:?}");
+        return bug!(cfg, "{POP_MANY}: expected input to be an integer, but got {input}");
     };
     let Some(i) = i.to_usize() else {
-        return bug!(cfg, "{POP_MANY}: index {i:?} should <= list.len {}", list.len());
+        return bug!(cfg, "{POP_MANY}: index {i} should <= list.len {}", list.len());
     };
     let list = &mut **list;
     if i > list.len() {
@@ -388,10 +388,10 @@ pub fn clear() -> MutPrimFuncVal {
 
 fn fn_clear(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
-        return bug!(cfg, "{CLEAR}: expected context to be a list, but got {ctx:?}");
+        return bug!(cfg, "{CLEAR}: expected context to be a list, but got {ctx}");
     };
     if !input.is_unit() {
-        return bug!(cfg, "{CLEAR}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{CLEAR}: expected input to be a unit, but got {input}");
     }
     list.clear();
     Val::default()
@@ -399,7 +399,7 @@ fn fn_clear(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 
 fn to_index(cfg: &mut Cfg, key: &str, val: Val) -> Option<usize> {
     let Val::Int(i) = val else {
-        bug!(cfg, "{key}: expected index to be an integer, but got {val:?}");
+        bug!(cfg, "{key}: expected index to be an integer, but got {val}");
         return None;
     };
     i.to_usize()
@@ -412,7 +412,7 @@ fn to_range(
         Val::Int(i) => Some(i.to_usize()?),
         Val::Unit(_) => None,
         v => {
-            bug!(cfg, "{key}: expected range.from to be an integer or a unit, but got {v:?}");
+            bug!(cfg, "{key}: expected range.from to be an integer or a unit, but got {v}");
             return None;
         }
     };
@@ -420,7 +420,7 @@ fn to_range(
         Val::Int(i) => Some(i.to_usize()?),
         Val::Unit(_) => None,
         v => {
-            bug!(cfg, "{key}: expected range.to to be an integer or a unit, but got {v:?}");
+            bug!(cfg, "{key}: expected range.to to be an integer or a unit, but got {v}");
             return None;
         }
     };

@@ -1,12 +1,10 @@
 use std::env::args;
-use std::io::Write;
 use std::io::stderr;
 use std::io::stdout;
 
 use airlang::Air;
-use airlang::syntax::escape_text;
-use airlang::syntax::generate_pretty;
 use airlang::syntax::parse;
+use airlang::type_::Text;
 
 use crate::cfg2::BinCfg2;
 use crate::repl::Repl;
@@ -23,21 +21,14 @@ pub fn main() -> std::io::Result<()> {
 }
 
 pub fn interpret_file(path: &str) -> std::io::Result<()> {
+    use std::io::Write;
     let source = generate_load(path);
     let mut air = Air::new(BinCfg2::generate()).unwrap();
     match parse(&source) {
         Ok(val) => {
             let output = air.interpret(val);
-            match (&output).try_into() {
-                Ok(o) => {
-                    let mut lock = stdout().lock();
-                    writeln!(lock, "{}", generate_pretty(o))
-                }
-                Err(e) => {
-                    let mut lock = stderr().lock();
-                    writeln!(lock, "{e}")
-                }
-            }
+            let mut lock = stdout().lock();
+            writeln!(lock, "{output:#}")
         }
         Err(e) => {
             let mut lock = stderr().lock();
@@ -48,8 +39,9 @@ pub fn interpret_file(path: &str) -> std::io::Result<()> {
 
 // AIR CODE
 fn generate_load(path: &str) -> String {
+    use std::fmt::Write;
     let mut escaped = String::new();
-    escape_text(&mut escaped, path);
+    write!(&mut escaped, "{:-}", Text::from(path)).unwrap();
     format!(
         "_ do [\
             .load set _ import _build.load,\

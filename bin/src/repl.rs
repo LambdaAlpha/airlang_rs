@@ -5,10 +5,10 @@ use std::io::Result;
 use std::io::Write;
 use std::io::stdin;
 use std::mem::take;
+use std::ops::Deref;
 
 use airlang::Air;
 use airlang::semantics::val::Val;
-use airlang::syntax::generate_pretty;
 use airlang::syntax::parse;
 use airlang::type_::Text;
 use crossterm::Command;
@@ -408,10 +408,7 @@ impl<T: ReplTerminal> Repl<T> {
         match parse::<Val>(input) {
             Ok(input) => {
                 let output = self.air.interpret(input);
-                match (&output).try_into() {
-                    Ok(o) => self.terminal.print(generate_pretty(o)),
-                    Err(e) => self.terminal.eprint(e.to_string()),
-                }
+                self.terminal.print(format!("{output:#}"))
             }
             Err(e) => self.terminal.eprint(e.to_string()),
         }
@@ -427,7 +424,7 @@ impl<T: ReplTerminal> Repl<T> {
             Ok(repr) => match self.air.interpret(repr) {
                 Val::Text(t) => {
                     let s = Text::from(t);
-                    self.terminal.print(s)
+                    self.terminal.print(s.deref())
                 }
                 _ => self.terminal.eprint("unknown version"),
             },

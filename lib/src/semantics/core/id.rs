@@ -6,7 +6,7 @@ use crate::semantics::val::Val;
 use crate::type_::ConstRef;
 use crate::type_::DynRef;
 
-#[derive(Debug, Default, Copy, Clone)]
+#[derive(Default, Copy, Clone)]
 pub(crate) struct Id;
 
 impl FreeFn<Cfg, Val, Val> for Id {

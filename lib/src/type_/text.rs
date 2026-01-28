@@ -5,21 +5,7 @@ use derive_more::DerefMut;
 use derive_more::From;
 use derive_more::Into;
 
-#[derive(
-    Clone,
-    Default,
-    PartialEq,
-    Eq,
-    Hash,
-    From,
-    Into,
-    derive_more::Debug,
-    derive_more::Display,
-    Deref,
-    DerefMut,
-)]
-#[debug("{_0:?}")]
-#[display("{_0}")]
+#[derive(Clone, Default, PartialEq, Eq, Hash, From, Into, Deref, DerefMut)]
 #[from(&str, String)]
 pub struct Text(String);
 

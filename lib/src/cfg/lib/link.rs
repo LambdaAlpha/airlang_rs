@@ -64,20 +64,20 @@ pub fn which() -> FreePrimFuncVal {
 
 fn fn_which(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{WHICH}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{WHICH}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Link(link) = pair.left else {
-        return bug!(cfg, "{WHICH}: expected input.left to be a link, but got {:?}", pair.left);
+        return bug!(cfg, "{WHICH}: expected input.left to be a link, but got {}", pair.left);
     };
     let Val::Pair(func_input) = pair.right else {
-        return bug!(cfg, "{WHICH}: expected input.right to be a pair, but got {:?}", pair.right);
+        return bug!(cfg, "{WHICH}: expected input.right to be a pair, but got {}", pair.right);
     };
     let func_input = Pair::from(func_input);
     let Val::Func(func) = func_input.left else {
         return bug!(
             cfg,
-            "{WHICH}: expected input.right.left to be a function, but got {:?}",
+            "{WHICH}: expected input.right.left to be a function, but got {}",
             func_input.left
         );
     };

@@ -48,7 +48,7 @@ impl CoreCfg {
             return None;
         };
         let Val::Link(prelude) = prelude else {
-            bug!(cfg, "{tag}: expected {} to be a link, but got {prelude:?}", Self::PRELUDE);
+            bug!(cfg, "{tag}: expected {} to be a link, but got {prelude}", Self::PRELUDE);
             return None;
         };
         let Ok(prelude) = prelude.try_borrow() else {
@@ -76,5 +76,7 @@ pub mod lib;
 pub mod prelude;
 
 pub mod error;
+
+mod repr;
 
 mod utils;

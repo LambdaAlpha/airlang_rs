@@ -2,8 +2,7 @@ use derive_more::Deref;
 use derive_more::From;
 use derive_more::Into;
 
-#[derive(Copy, Clone, Default, PartialEq, Eq, Hash, Deref, From, Into, derive_more::Debug)]
-#[debug("{_0}")]
+#[derive(Copy, Clone, Default, PartialEq, Eq, Hash, Deref, From, Into)]
 pub struct Bit(bool);
 
 impl Bit {

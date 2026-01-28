@@ -8,28 +8,17 @@ pub struct ParseError {
     pub(crate) msg: String,
 }
 
-// todo api better error info
-#[derive(Debug)]
-pub struct ReprError {}
-
 impl Debug for ParseError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "ParseError\n{}", self.msg)
+        Display::fmt(self, f)
     }
 }
 
 impl Display for ParseError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "ParseError\n{}", self.msg)
+        f.write_str("ParseError\n")?;
+        Display::fmt(&self.msg, f)
     }
 }
 
 impl Error for ParseError {}
-
-impl Display for ReprError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "ReprError")
-    }
-}
-
-impl Error for ReprError {}

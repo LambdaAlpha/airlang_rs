@@ -56,7 +56,7 @@ pub fn get_steps() -> FreePrimFuncVal {
 
 fn fn_get_steps(cfg: &mut Cfg, input: Val) -> Val {
     if !input.is_unit() {
-        return bug!(cfg, "{GET_STEPS}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{GET_STEPS}: expected input to be a unit, but got {input}");
     }
     let steps = cfg.steps();
     Val::Int(Int::from(steps).into())
@@ -68,10 +68,10 @@ pub fn set_steps() -> FreePrimFuncVal {
 
 fn fn_set_steps(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Int(steps) = input else {
-        return bug!(cfg, "{SET_STEPS}: expected input to be an integer, but got {input:?}");
+        return bug!(cfg, "{SET_STEPS}: expected input to be an integer, but got {input}");
     };
     if steps.is_negative() {
-        return bug!(cfg, "{SET_STEPS}: expected input to be non-negative, but got {steps:?}");
+        return bug!(cfg, "{SET_STEPS}: expected input to be non-negative, but got {steps}");
     }
     let steps = steps.to_u128().unwrap_or(u128::MAX);
     cfg.set_steps(steps);

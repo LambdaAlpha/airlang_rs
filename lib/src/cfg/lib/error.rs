@@ -57,7 +57,7 @@ pub fn abort() -> FreePrimFuncVal {
 
 fn fn_abort(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Unit(_) = input else {
-        return bug!(cfg, "{ABORT}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{ABORT}: expected input to be a unit, but got {input}");
     };
     cfg.abort();
     Val::default()
@@ -69,14 +69,14 @@ pub fn assert() -> FreePrimFuncVal {
 
 fn fn_assert(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{ASSERT}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{ASSERT}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Bit(bit) = pair.left else {
-        return bug!(cfg, "{ASSERT}: expected input.left to be a bit, but got {:?}", pair.left);
+        return bug!(cfg, "{ASSERT}: expected input.left to be a bit, but got {}", pair.left);
     };
     let Val::Text(message) = pair.right else {
-        return bug!(cfg, "{ASSERT}: expected input.right to be a text, but got {:?}", pair.right);
+        return bug!(cfg, "{ASSERT}: expected input.right to be a text, but got {}", pair.right);
     };
     let message = Text::from(message);
     if !*bit {
@@ -91,14 +91,10 @@ pub fn is_aborted() -> ConstPrimFuncVal {
 
 fn fn_is_aborted(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Cfg(target_cfg) = &*ctx else {
-        return bug!(
-            cfg,
-            "{IS_ABORTED}: expected context to be a config, but got {:?}",
-            ctx.deref()
-        );
+        return bug!(cfg, "{IS_ABORTED}: expected context to be a config, but got {}", ctx.deref());
     };
     if !input.is_unit() {
-        return bug!(cfg, "{IS_ABORTED}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{IS_ABORTED}: expected input to be a unit, but got {input}");
     }
     let aborted = target_cfg.is_aborted();
     Val::Bit(aborted.into())
@@ -110,10 +106,10 @@ pub fn recover() -> MutPrimFuncVal {
 
 fn fn_recover(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Cfg(target_cfg) = ctx else {
-        return bug!(cfg, "{RECOVER}: expected context to be a config, but got {ctx:?}");
+        return bug!(cfg, "{RECOVER}: expected context to be a config, but got {ctx}");
     };
     if !input.is_unit() {
-        return bug!(cfg, "{RECOVER}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{RECOVER}: expected input to be a unit, but got {input}");
     }
     target_cfg.recover();
     Val::default()

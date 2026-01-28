@@ -5,9 +5,6 @@ use bigdecimal::BigDecimal;
 use num_bigint::BigInt;
 use num_traits::Num;
 
-use super::generate_compact;
-use super::generate_key;
-use super::generate_pretty;
 use super::parse;
 use super::repr::CellRepr;
 use super::repr::PairRepr;
@@ -105,17 +102,33 @@ fn test_parse(
 }
 
 fn test_generate(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
-    let gen_fmt_list = [generate_compact, generate_pretty, generate_key];
     for [title, s] in parse_test_file::<2>(src, file_name) {
         let repr: Repr = parse(s).map_err(|e| {
             eprintln!("file {file_name} case ({title}) src({s}): parse failed\n{e}");
             e
         })?;
-        for gen_ in gen_fmt_list {
-            let string = gen_((&repr).try_into().unwrap());
-            let new_repr = parse(&string).map_err(|e| {
+        let fmt_list = [
+            format!("{repr}"),
+            format!("{repr:#}"),
+            format!("{repr:?}"),
+            format!("{repr:#?}"),
+            format!("{repr:<}"),
+            format!("{repr:<#}"),
+            format!("{repr:<?}"),
+            format!("{repr:<#?}"),
+            format!("{repr:^}"),
+            format!("{repr:^#}"),
+            format!("{repr:^?}"),
+            format!("{repr:^#?}"),
+            format!("{repr:>}"),
+            format!("{repr:>#}"),
+            format!("{repr:>?}"),
+            format!("{repr:>#?}"),
+        ];
+        for repr_str in fmt_list {
+            let new_repr = parse(&repr_str).map_err(|e| {
                 eprintln!(
-                    "file {file_name} case ({title}) src({s}): parse error with generated string ({string})!\n{e}"
+                    "file {file_name} case ({title}) src({s}): parse error with generated string ({repr_str})!\n{e}"
                 );
                 e
             })?;

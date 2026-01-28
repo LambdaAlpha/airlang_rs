@@ -72,10 +72,10 @@ pub fn read_line() -> MutPrimFuncVal {
 
 fn fn_read_line(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Text(t) = ctx else {
-        return bug!(cfg, "{READ_LINE}: expected context to be a text, but got {ctx:?}");
+        return bug!(cfg, "{READ_LINE}: expected context to be a text, but got {ctx}");
     };
     if !input.is_unit() {
-        return bug!(cfg, "{READ_LINE}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{READ_LINE}: expected input to be a unit, but got {input}");
     }
     let _ = stdin().read_line(t);
     Val::default()
@@ -87,7 +87,7 @@ pub fn print() -> FreePrimFuncVal {
 
 fn fn_print(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
-        return bug!(cfg, "{PRINT}: expected input to be a text, but got {input:?}");
+        return bug!(cfg, "{PRINT}: expected input to be a text, but got {input}");
     };
     print!("{}", &**t);
     Val::default()
@@ -99,7 +99,7 @@ pub fn print_line() -> FreePrimFuncVal {
 
 fn fn_print_line(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
-        return bug!(cfg, "{PRINT_LINE}: expected input to be a text, but got {input:?}");
+        return bug!(cfg, "{PRINT_LINE}: expected input to be a text, but got {input}");
     };
     println!("{}", &**t);
     Val::default()
@@ -111,7 +111,7 @@ pub fn flush() -> FreePrimFuncVal {
 
 fn fn_flush(cfg: &mut Cfg, input: Val) -> Val {
     if !input.is_unit() {
-        return bug!(cfg, "{FLUSH}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{FLUSH}: expected input to be a unit, but got {input}");
     }
     let _ = stdout().flush();
     Val::default()
@@ -123,7 +123,7 @@ pub fn error_print() -> FreePrimFuncVal {
 
 fn fn_error_print(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
-        return bug!(cfg, "{ERROR_PRINT}: expected input to be a text, but got {input:?}");
+        return bug!(cfg, "{ERROR_PRINT}: expected input to be a text, but got {input}");
     };
     eprint!("{}", &**t);
     Val::default()
@@ -135,7 +135,7 @@ pub fn error_print_line() -> FreePrimFuncVal {
 
 fn fn_error_print_line(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
-        return bug!(cfg, "{ERROR_PRINT_LINE}: expected input to be a text, but got {input:?}");
+        return bug!(cfg, "{ERROR_PRINT_LINE}: expected input to be a text, but got {input}");
     };
     eprintln!("{}", &**t);
     Val::default()
@@ -147,7 +147,7 @@ pub fn error_flush() -> FreePrimFuncVal {
 
 fn fn_error_flush(cfg: &mut Cfg, input: Val) -> Val {
     if !input.is_unit() {
-        return bug!(cfg, "{ERROR_FLUSH}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{ERROR_FLUSH}: expected input to be a unit, but got {input}");
     }
     let _ = stderr().flush();
     Val::default()

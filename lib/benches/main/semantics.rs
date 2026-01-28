@@ -3,8 +3,6 @@ use std::hint::black_box;
 use airlang::Air;
 use airlang::cfg2::CoreCfg2;
 use airlang::semantics::val::Val;
-use airlang::syntax::ReprError;
-use airlang::syntax::generate_pretty;
 use airlang::syntax::parse;
 use criterion::BatchSize;
 use criterion::Criterion;
@@ -40,9 +38,7 @@ fn bench_generate(c: &mut Criterion) {
         let s = include_str!("generate.air");
         let repr: Val = parse(s).expect("parse failed");
         b.iter(|| {
-            let repr = (&repr).try_into()?;
-            generate_pretty(black_box(repr));
-            Ok::<_, ReprError>(())
+            let _ = format!("{:#}", black_box(&repr));
         });
     });
 }

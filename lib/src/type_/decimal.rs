@@ -13,18 +13,17 @@ use num_traits::Zero;
 use crate::type_::Bit;
 
 // todo design
-#[derive(Clone, PartialEq, Eq, Hash, derive_more::Debug, From, Deref, DerefMut)]
+#[derive(Clone, PartialEq, Eq, Hash, From, Deref, DerefMut)]
 #[from(forward)]
-#[debug("{_0:E}")]
 pub struct Decimal(BigDecimal);
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub struct DecimalConfig {
     rounding_mode: RoundingMode,
     precision: NonZeroU64,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
 #[non_exhaustive]
 pub enum RoundingMode {
     Infinity,

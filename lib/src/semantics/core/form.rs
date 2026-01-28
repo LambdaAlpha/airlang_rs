@@ -233,7 +233,7 @@ where Value: MutFn<Cfg, Ctx, Val, Val>
     }
 }
 
-#[derive(Debug, Default, Copy, Clone)]
+#[derive(Default, Copy, Clone)]
 pub(crate) struct Form;
 
 impl FreeFn<Cfg, Val, Val> for Form {

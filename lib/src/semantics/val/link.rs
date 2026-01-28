@@ -9,7 +9,7 @@ use derive_more::From;
 
 use crate::semantics::val::Val;
 
-#[derive(Debug, Clone, PartialEq, Eq, From)]
+#[derive(Clone, PartialEq, Eq, From)]
 pub struct LinkVal {
     cell: Rc<RefCell<Val>>,
     const_: bool,
@@ -22,6 +22,10 @@ impl LinkVal {
 
     pub fn is_const(&self) -> bool {
         self.const_
+    }
+
+    pub(crate) fn ptr_addr(&self) -> usize {
+        Rc::as_ptr(&self.cell).addr()
     }
 
     pub fn try_borrow(&self) -> Result<Ref<'_, Val>, BorrowError> {

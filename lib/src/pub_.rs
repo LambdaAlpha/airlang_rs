@@ -5,7 +5,7 @@ use crate::semantics::func::MutFn;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::Val;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Air {
     cfg: Cfg,
     ctx: Val,
@@ -22,8 +22,16 @@ impl Air {
         Eval.mut_call(&mut self.cfg, &mut self.ctx, input)
     }
 
+    pub fn ctx(&self) -> &Val {
+        &self.ctx
+    }
+
     pub fn ctx_mut(&mut self) -> &mut Val {
         &mut self.ctx
+    }
+
+    pub fn cfg(&self) -> &Cfg {
+        &self.cfg
     }
 
     pub fn cfg_mut(&mut self) -> &mut Cfg {

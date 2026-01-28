@@ -1,6 +1,3 @@
-use std::fmt::Debug;
-use std::fmt::Formatter;
-
 use super::ConstFn;
 use super::FreeComposite;
 use super::FreeFn;
@@ -42,17 +39,5 @@ impl MutFn<Cfg, Val, Val, Val> for MutCompFunc {
 
     fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
         self.comp.call(cfg, ctx, input)
-    }
-}
-
-impl Debug for MutCompFunc {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MutCompFunc")
-            .field("raw_input", &self.raw_input)
-            .field("prelude", &self.comp.prelude)
-            .field("ctx_name", &self.comp.ctx_name)
-            .field("input_name", &self.comp.input_name)
-            .field("body", &self.comp.body)
-            .finish()
     }
 }

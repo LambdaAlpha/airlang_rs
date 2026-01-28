@@ -46,10 +46,10 @@ pub fn get_value() -> ConstPrimFuncVal {
 
 fn fn_get_value(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Cell(cell) = &*ctx else {
-        return bug!(cfg, "{GET_VALUE}: expected context to be a cell, but got {:?}", ctx.deref());
+        return bug!(cfg, "{GET_VALUE}: expected context to be a cell, but got {}", ctx.deref());
     };
     if !input.is_unit() {
-        return bug!(cfg, "{GET_VALUE}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{GET_VALUE}: expected input to be a unit, but got {input}");
     }
     cell.value.clone()
 }
@@ -61,7 +61,7 @@ pub fn set_value() -> MutPrimFuncVal {
 
 fn fn_set_value(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Cell(cell) = ctx else {
-        return bug!(cfg, "{SET_VALUE}: expected context to be a cell, but got {ctx:?}");
+        return bug!(cfg, "{SET_VALUE}: expected context to be a cell, but got {ctx}");
     };
     swap(&mut cell.value, &mut input);
     input

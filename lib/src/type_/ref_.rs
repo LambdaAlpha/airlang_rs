@@ -3,10 +3,10 @@ use derive_more::Deref;
 
 use crate::type_::either::Either;
 
-#[derive(Debug, PartialEq, Eq, Hash, Constructor, Deref)]
+#[derive(PartialEq, Eq, Hash, Constructor, Deref)]
 pub struct ConstRef<'a, T>(&'a mut T);
 
-#[derive(Debug, PartialEq, Eq, Hash, Constructor, Deref)]
+#[derive(PartialEq, Eq, Hash, Constructor, Deref)]
 pub struct DynRef<'a, T> {
     #[deref]
     ref_: &'a mut T,

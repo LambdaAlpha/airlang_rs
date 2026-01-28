@@ -1,12 +1,13 @@
 use std::error::Error;
+use std::fmt::Write;
 
 use airlang::Air;
 use airlang::semantics::val::Val;
-use airlang::syntax::escape_text;
 use airlang::syntax::parse;
 use airlang::type_::Bit;
 use airlang::type_::Cell;
 use airlang::type_::Int;
+use airlang::type_::Text;
 use airlang_dev::init_logger;
 
 use crate::cfg2::StdCfg2;
@@ -38,7 +39,7 @@ fn test_build_load(path: &str, expect: Val) -> Result<(), Box<dyn Error>> {
 // AIR CODE
 fn generate_load(path: &str) -> String {
     let mut path_prefix = String::new();
-    escape_text(&mut path_prefix, env!("CARGO_MANIFEST_DIR"));
+    write!(&mut path_prefix, "{:-}", Text::from(env!("CARGO_MANIFEST_DIR"))).unwrap();
     format!(
         "_ do [\
             .load set _ import _build.load,\

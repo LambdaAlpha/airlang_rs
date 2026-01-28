@@ -1,6 +1,6 @@
-macro_rules! dyn_any_debug_clone_eq {
+macro_rules! dyn_any_fmt_clone_eq {
     ($visibility:vis $trait_name:ident : $super_trait:path) => {
-        $visibility trait $trait_name: ::std::any::Any + ::std::fmt::Debug + $super_trait {
+        $visibility trait $trait_name: ::std::any::Any + ::std::fmt::Debug + ::std::fmt::Display + $super_trait {
             fn dyn_eq(&self, other: &dyn $trait_name) -> bool;
             fn dyn_clone(&self) -> ::std::boxed::Box<dyn $trait_name>;
         }
@@ -11,7 +11,8 @@ macro_rules! dyn_any_debug_clone_eq {
                 + ::std::any::Any
                 + ::std::cmp::Eq
                 + ::std::clone::Clone
-                + ::std::fmt::Debug,
+                + ::std::fmt::Debug
+                + ::std::fmt::Display,
         {
             fn dyn_eq(&self, other: &dyn $trait_name) -> bool {
                 if let Some(other) = <dyn ::std::any::Any>::downcast_ref(other) {
@@ -49,4 +50,4 @@ macro_rules! dyn_any_debug_clone_eq {
     };
 }
 
-pub(crate) use dyn_any_debug_clone_eq;
+pub(crate) use dyn_any_fmt_clone_eq;

@@ -19,14 +19,11 @@ pub use self::text::TextVal;
 
 _____!();
 
-use std::fmt::Debug;
-use std::fmt::Formatter;
-
 use derive_more::From;
 use derive_more::IsVariant;
 
 use crate::semantics::ctx::DynCtx;
-use crate::trait_::dyn_safe::dyn_any_debug_clone_eq;
+use crate::trait_::dyn_safe::dyn_any_fmt_clone_eq;
 use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
@@ -44,7 +41,7 @@ pub trait Value: DynCtx<Val, Val> {
     fn type_name(&self) -> Key;
 }
 
-dyn_any_debug_clone_eq!(pub DynVal : Value);
+dyn_any_fmt_clone_eq!(pub DynVal : Value);
 
 #[derive(Clone, PartialEq, Eq, From, IsVariant)]
 pub enum Val {
@@ -145,38 +142,6 @@ impl From<List<Val>> for Val {
 impl From<Map<Key, Val>> for Val {
     fn from(value: Map<Key, Val>) -> Self {
         Val::Map(MapVal::from(value))
-    }
-}
-
-macro_rules! match_val {
-    ($self:ident, $name:ident => $body:expr) => {
-        match $self {
-            $crate::semantics::val::Val::Unit($name) => $body,
-            $crate::semantics::val::Val::Bit($name) => $body,
-            $crate::semantics::val::Val::Key($name) => $body,
-            $crate::semantics::val::Val::Text($name) => $body,
-            $crate::semantics::val::Val::Int($name) => $body,
-            $crate::semantics::val::Val::Decimal($name) => $body,
-            $crate::semantics::val::Val::Byte($name) => $body,
-            $crate::semantics::val::Val::Cell($name) => $body,
-            $crate::semantics::val::Val::Pair($name) => $body,
-            $crate::semantics::val::Val::Call($name) => $body,
-            $crate::semantics::val::Val::List($name) => $body,
-            $crate::semantics::val::Val::Map($name) => $body,
-            $crate::semantics::val::Val::Link($name) => $body,
-            $crate::semantics::val::Val::Cfg($name) => $body,
-            $crate::semantics::val::Val::Func($name) => $body,
-            $crate::semantics::val::Val::Dyn($name) => $body,
-        }
-    };
-}
-
-#[expect(unused_imports)]
-pub(crate) use match_val;
-
-impl Debug for Val {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match_val!(self, v => <_ as Debug>::fmt(v, f))
     }
 }
 

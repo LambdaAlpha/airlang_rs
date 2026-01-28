@@ -59,16 +59,16 @@ pub fn from_text() -> FreePrimFuncVal {
 
 fn fn_from_text(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
-        return bug!(cfg, "{FROM_TEXT}: expected input to be a text, but got {input:?}");
+        return bug!(cfg, "{FROM_TEXT}: expected input to be a text, but got {input}");
     };
     let is_key = t.chars().all(Key::is_key);
     if !is_key {
         return bug!(
             cfg,
-            "{FROM_TEXT}: expected every character of input text should be a key, but got {t:?}"
+            "{FROM_TEXT}: expected every character of input text should be a key, but got {t}"
         );
     }
-    let key = Key::from_string_unchecked(t.to_string());
+    let key = Key::from_str_unchecked(t.deref());
     Val::Key(key)
 }
 
@@ -78,9 +78,9 @@ pub fn into_text() -> FreePrimFuncVal {
 
 fn fn_into_text(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Key(key) = input else {
-        return bug!(cfg, "{INTO_TEXT}: expected input to be a key, but got {input:?}");
+        return bug!(cfg, "{INTO_TEXT}: expected input to be a key, but got {input}");
     };
-    Val::Text(Text::from(String::from(key)).into())
+    Val::Text(Text::from(key.deref()).into())
 }
 
 pub fn get_length() -> ConstPrimFuncVal {
@@ -89,10 +89,10 @@ pub fn get_length() -> ConstPrimFuncVal {
 
 fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Key(key) = &*ctx else {
-        return bug!(cfg, "{GET_LENGTH}: expected context to be a key, but got {:?}", ctx.deref());
+        return bug!(cfg, "{GET_LENGTH}: expected context to be a key, but got {}", ctx.deref());
     };
     if !input.is_unit() {
-        return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input}");
     }
     let len: Int = key.len().into();
     Val::Int(len.into())
@@ -105,18 +105,18 @@ pub fn join() -> FreePrimFuncVal {
 
 fn fn_join(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{JOIN}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{JOIN}: expected input to be a pair, but got {input}");
     };
     let Val::Key(separator) = &pair.left else {
-        return bug!(cfg, "{JOIN}: expected input.left to be a key, but got {:?}", pair.left);
+        return bug!(cfg, "{JOIN}: expected input.left to be a key, but got {}", pair.left);
     };
     let Val::List(keys) = &pair.right else {
-        return bug!(cfg, "{JOIN}: expected input.right to be a list, but got {:?}", pair.right);
+        return bug!(cfg, "{JOIN}: expected input.right to be a list, but got {}", pair.right);
     };
     let mut to_join: Vec<&str> = Vec::with_capacity(keys.len());
     for key in keys.iter() {
         let Val::Key(s) = key else {
-            return bug!(cfg, "{JOIN}: expected input.right.item to be a key, but got {key:?}");
+            return bug!(cfg, "{JOIN}: expected input.right.item to be a key, but got {key}");
         };
         to_join.push(s);
     }

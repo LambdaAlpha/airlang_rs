@@ -3,8 +3,8 @@ _ do [
     .generate set _ import _language.syntax.generate,
     .join set _ import _text.join,
     [.major, .minor, .patch] = version,
-    .(.major) = _ generate major,
-    .(.minor) = _ generate minor,
-    .(.patch) = _ generate patch,
+    .major = _ generate major,
+    .minor = _ generate minor,
+    .patch = _ generate patch,
     "" join ["v", major, ".", minor, ".", patch]
 ]

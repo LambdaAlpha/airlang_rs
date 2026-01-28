@@ -1,8 +1,16 @@
+use std::fmt::Alignment;
+use std::fmt::Binary;
+use std::fmt::Debug;
+use std::fmt::Display;
+use std::fmt::Formatter;
+use std::fmt::LowerHex;
+use std::fmt::Pointer;
 use std::fmt::Write;
+use std::fmt::from_fn;
 
 use bigdecimal::BigDecimal;
 use const_format::concatcp;
-use derive_more::IsVariant;
+use num_bigint::BigInt;
 use num_traits::Signed;
 
 use super::BYTE;
@@ -37,147 +45,99 @@ use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Text;
 use crate::type_::Unit;
-use crate::utils;
 
-#[derive(Clone, PartialEq, Eq, IsVariant)]
-pub enum GenRepr<'a> {
-    Unit(&'a Unit),
-    Bit(&'a Bit),
-    Key(&'a Key),
-    Int(&'a Int),
-    Decimal(&'a Decimal),
-    Text(&'a Text),
-    Byte(&'a Byte),
-    Cell(Box<Cell<GenRepr<'a>>>),
-    Pair(Box<Pair<GenRepr<'a>, GenRepr<'a>>>),
-    Call(Box<Call<GenRepr<'a>, GenRepr<'a>>>),
-    List(List<GenRepr<'a>>),
-    Map(Map<&'a Key, GenRepr<'a>>),
-}
-
-#[derive(Copy, Clone)]
-pub(crate) struct GenFmt {
-    pub(crate) before_first: &'static str,
-    pub(crate) after_last: &'static str,
-    pub(crate) left_padding: &'static str,
-    pub(crate) right_padding: &'static str,
-    pub(crate) before_item: &'static str,
-    pub(crate) after_item: &'static str,
-    pub(crate) key_encoding: bool,
-    pub(crate) compact: bool,
-}
-
-pub(crate) const COMPACT_FMT: GenFmt = GenFmt {
-    before_first: "",
-    after_last: "",
-    left_padding: "",
-    right_padding: "",
-    before_item: "",
-    after_item: concatcp!(SEPARATOR),
-    key_encoding: false,
-    compact: true,
-};
-
-pub(crate) const KEY_FMT: GenFmt = GenFmt {
-    before_first: "",
-    after_last: "",
-    left_padding: "",
-    right_padding: "",
-    before_item: "",
-    after_item: concatcp!(SEPARATOR),
-    key_encoding: true,
-    compact: true,
-};
-
-pub(crate) const PRETTY_FMT: GenFmt = GenFmt {
-    before_first: "\n",
-    after_last: concatcp!(SEPARATOR, '\n'),
-    left_padding: "",
-    right_padding: "",
-    after_item: concatcp!(SEPARATOR, '\n'),
-    before_item: INDENT,
-    key_encoding: false,
-    compact: false,
-};
-
-const INDENT: &str = "  ";
-
-pub(crate) fn generate(repr: GenRepr, fmt: GenFmt) -> String {
-    let ctx = GenCtx { fmt, indent: 0, direction: Direction::default() };
-    let mut str = String::new();
-    repr.gen_(ctx, &mut str);
-    str
-}
-
-#[derive(Copy, Clone)]
-struct GenCtx {
-    fmt: GenFmt,
-    indent: u8,
+#[derive(Default, Copy, Clone)]
+pub struct FmtCtx {
     direction: Direction,
 }
 
-trait Gen {
-    fn gen_(self, ctx: GenCtx, s: &mut String);
-}
+pub trait FmtRepr {
+    /// '#' for pretty
+    /// alignment for direction: none or '^' for smart direction
+    fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result;
 
-// todo impl shortest repr
-impl Gen for GenRepr<'_> {
-    fn gen_(self, ctx: GenCtx, s: &mut String) {
-        match self {
-            GenRepr::Unit(unit) => unit.gen_(ctx, s),
-            GenRepr::Bit(bit) => bit.gen_(ctx, s),
-            GenRepr::Key(key) => key.gen_(ctx, s),
-            GenRepr::Text(text) => text.gen_(ctx, s),
-            GenRepr::Int(int) => int.gen_(ctx, s),
-            GenRepr::Decimal(decimal) => decimal.gen_(ctx, s),
-            GenRepr::Byte(byte) => byte.gen_(ctx, s),
-            GenRepr::Cell(cell) => cell.gen_(ctx, s),
-            GenRepr::Pair(pair) => pair.gen_(ctx, s),
-            GenRepr::Call(call) => call.gen_(ctx, s),
-            GenRepr::List(list) => list.gen_(ctx, s),
-            GenRepr::Map(map) => map.gen_(ctx, s),
-        }
+    fn is_call(&self) -> bool {
+        false
+    }
+
+    fn is_pair(&self) -> bool {
+        false
+    }
+
+    fn to_pair(&self) -> Pair<&dyn FmtRepr, &dyn FmtRepr> {
+        panic!("called `FmtRepr::to_pair()` on non-pair value")
     }
 }
 
-impl Gen for &Unit {
-    fn gen_(self, _ctx: GenCtx, s: &mut String) {
-        s.push_str(UNIT);
+impl Display for Unit {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        unit_fmt(f)
     }
 }
 
-impl Gen for &Bit {
-    fn gen_(self, _ctx: GenCtx, s: &mut String) {
-        s.push_str(if **self { TRUE } else { FALSE });
+impl Debug for Unit {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        unit_fmt(f)
     }
 }
 
-impl Gen for &Key {
-    fn gen_(self, _ctx: GenCtx, s: &mut String) {
-        if !should_quote(self) {
-            return s.push_str(self);
-        }
-        s.push(KEY_QUOTE);
-        escape_key(s, self);
-        s.push(KEY_QUOTE);
+fn unit_fmt(f: &mut Formatter<'_>) -> std::fmt::Result {
+    f.write_str(UNIT)
+}
+
+impl Display for Bit {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        bit_fmt(*self, f)
     }
 }
 
-pub fn escape_key(s: &mut String, key: &str) {
+impl Debug for Bit {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        bit_fmt(*self, f)
+    }
+}
+
+fn bit_fmt(bit: Bit, f: &mut Formatter<'_>) -> std::fmt::Result {
+    f.write_str(if *bit { TRUE } else { FALSE })
+}
+
+impl Display for Key {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        key_fmt(self.clone(), f)
+    }
+}
+
+impl Debug for Key {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        key_fmt(self.clone(), f)
+    }
+}
+
+fn key_fmt(key: Key, f: &mut Formatter<'_>) -> std::fmt::Result {
+    if f.sign_minus() {
+        return key_esc(&key, f);
+    }
+    if f.sign_plus() || key_should_quote(&key) {
+        f.write_char(KEY_QUOTE)?;
+        key_esc(&key, f)?;
+        f.write_char(KEY_QUOTE)
+    } else {
+        f.write_str(&key)
+    }
+}
+
+fn key_esc(key: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
     for c in key.chars() {
-        let escaped = match c {
-            '^' => "^^",
-            KEY_QUOTE => concatcp!('^', TEXT_QUOTE),
-            _ => {
-                s.push(c);
-                continue;
-            }
-        };
-        s.push_str(escaped);
+        match c {
+            '^' => f.write_str("^^")?,
+            KEY_QUOTE => f.write_str(concatcp!('^', TEXT_QUOTE))?,
+            _ => f.write_char(c)?,
+        }
     }
+    Ok(())
 }
 
-fn should_quote(str: &str) -> bool {
+fn key_should_quote(str: &str) -> bool {
     if str.is_empty() {
         return true;
     }
@@ -191,23 +151,48 @@ fn should_quote(str: &str) -> bool {
     str.chars().any(is_delimiter)
 }
 
-impl Gen for &Text {
-    fn gen_(self, ctx: GenCtx, s: &mut String) {
-        s.push(TEXT_QUOTE);
-        if ctx.fmt.key_encoding {
-            escape_text_key(s, self);
-        } else if ctx.fmt.compact {
-            escape_text(s, self);
-        } else if self.contains('\n') {
-            escape_text_raw(ctx, s, self);
-        } else {
-            escape_text(s, self);
-        }
-        s.push(TEXT_QUOTE);
+impl Display for Text {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        text_fmt(self, f)
     }
 }
 
-pub fn escape_text(s: &mut String, str: &str) {
+impl Debug for Text {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        text_fmt(self, f)
+    }
+}
+
+// key encoding
+impl Pointer for Text {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if !f.sign_minus() {
+            f.write_char(TEXT_QUOTE)?;
+        }
+        text_key_encoding(self, f)?;
+        if !f.sign_minus() {
+            f.write_char(TEXT_QUOTE)?;
+        }
+        Ok(())
+    }
+}
+
+fn text_fmt(text: &Text, f: &mut Formatter<'_>) -> std::fmt::Result {
+    if !f.sign_minus() {
+        f.write_char(TEXT_QUOTE)?;
+    }
+    if f.alternate() && text.contains('\n') {
+        text_raw(text, f)?;
+    } else {
+        text_esc(text, f)?;
+    }
+    if !f.sign_minus() {
+        f.write_char(TEXT_QUOTE)?;
+    }
+    Ok(())
+}
+
+fn text_esc(str: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
     for c in str.chars() {
         let escaped = match c {
             '^' => "^^",
@@ -216,15 +201,16 @@ pub fn escape_text(s: &mut String, str: &str) {
             '\t' => "^t",
             TEXT_QUOTE => concatcp!('^', KEY_QUOTE),
             _ => {
-                s.push(c);
+                f.write_char(c)?;
                 continue;
             }
         };
-        s.push_str(escaped);
+        f.write_str(escaped)?;
     }
+    Ok(())
 }
 
-pub fn escape_text_key(s: &mut String, str: &str) {
+fn text_key_encoding(str: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
     for c in str.chars() {
         let escaped = match c {
             '^' => "^^",
@@ -235,294 +221,498 @@ pub fn escape_text_key(s: &mut String, str: &str) {
             c if Key::is_key(c) => &format!("{c}"),
             c => &format!("^u({:x})", c as u32),
         };
-        s.push_str(escaped);
+        f.write_str(escaped)?;
     }
+    Ok(())
 }
 
-fn escape_text_raw(ctx: GenCtx, s: &mut String, str: &str) {
-    s.push('\n');
-    indent(ctx, s);
-    s.push_str("|(");
+fn text_raw(str: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
+    f.write_str("\n|(")?;
     for line in str.split_inclusive('\n') {
-        s.push_str(line);
+        f.write_str(line)?;
         if line.ends_with('\n') {
-            indent(ctx, s);
-            s.push_str("+ ");
+            f.write_str("+ ")?;
         }
     }
-    s.push('\n');
-    indent(ctx, s);
-    s.push_str("|)");
+    f.write_str("\n|)")
 }
 
-impl Gen for &Int {
-    fn gen_(self, _ctx: GenCtx, s: &mut String) {
-        if self.is_negative() {
-            s.push('0');
-        }
-        write!(s, "{self:?}").unwrap();
+impl Display for Int {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        int_fmt(self, f)
     }
 }
 
-impl Gen for &Decimal {
-    fn gen_(self, _ctx: GenCtx, s: &mut String) {
-        s.push('0');
-        if self.is_negative() {
-            s.push('-');
-        }
-        s.push('E');
-        write!(s, "{}", self.order_of_magnitude()).unwrap();
-        s.push('*');
-        let (i, _exp) = self.abs().into_bigint_and_scale();
-        let scale = (self.digits() - 1) as i64;
-        let significand = BigDecimal::from_bigint(i, scale);
-        let no_frac = significand.fractional_digit_count() <= 0;
-        significand.write_plain_string(s).unwrap();
-        if no_frac {
-            s.push('.');
-        }
+impl Debug for Int {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        int_fmt(self, f)
     }
 }
 
-impl Gen for &Byte {
-    fn gen_(self, _ctx: GenCtx, s: &mut String) {
-        s.push_str(BYTE);
-        s.push(KEY_QUOTE);
-        if !self.is_empty() {
-            utils::conversion::u8_array_to_hex_string_mut(self, s);
+fn int_fmt(int: &Int, f: &mut Formatter<'_>) -> std::fmt::Result {
+    if !f.sign_minus() && int.is_negative() {
+        f.write_char('0')?;
+    }
+    <BigInt as Display>::fmt(int, f)
+}
+
+impl Display for Decimal {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        decimal_fmt(self, f)
+    }
+}
+
+impl Debug for Decimal {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        decimal_fmt(self, f)
+    }
+}
+
+fn decimal_fmt(decimal: &Decimal, f: &mut Formatter<'_>) -> std::fmt::Result {
+    if !f.sign_minus() {
+        f.write_char('0')?;
+    }
+    if decimal.is_negative() {
+        f.write_char('-')?;
+    }
+    f.write_char('E')?;
+    Display::fmt(&decimal.order_of_magnitude(), f)?;
+    f.write_char('*')?;
+    let (i, _exp) = decimal.abs().into_bigint_and_scale();
+    let scale = (decimal.digits() - 1) as i64;
+    let significand = BigDecimal::from_bigint(i, scale);
+    let no_frac = significand.fractional_digit_count() <= 0;
+    significand.write_plain_string(f)?;
+    if no_frac {
+        f.write_char('.')?;
+    }
+    Ok(())
+}
+
+impl Display for Byte {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        byte_fmt(self, 16, f)
+    }
+}
+
+impl Debug for Byte {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        byte_fmt(self, 16, f)
+    }
+}
+
+impl LowerHex for Byte {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        byte_fmt(self, 16, f)
+    }
+}
+
+impl Binary for Byte {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        byte_fmt(self, 2, f)
+    }
+}
+
+fn byte_fmt(byte: &Byte, radix: u8, f: &mut Formatter<'_>) -> std::fmt::Result {
+    if !f.sign_minus() {
+        f.write_str(BYTE)?;
+        f.write_char(KEY_QUOTE)?;
+    }
+    match radix {
+        16 => {
+            for &b in byte.iter() {
+                write!(f, "{b:02x}")?;
+            }
         }
-        s.push(KEY_QUOTE);
+        2 => {
+            for &b in byte.iter() {
+                write!(f, "{b:08b}")?;
+            }
+        }
+        _ => unreachable!("invalid radix {radix}"),
+    }
+    if !f.sign_minus() {
+        f.write_char(KEY_QUOTE)?;
+    }
+    Ok(())
+}
+
+impl<T: FmtRepr> Display for Cell<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        FmtRepr::fmt(self, FmtCtx::default(), f)
     }
 }
 
-impl<'a> Gen for Cell<GenRepr<'a>> {
-    fn gen_(self, ctx: GenCtx, s: &mut String) {
-        s.push_str(UNIT);
-        scoped(ctx, s, |ctx, s| {
-            self.value.gen_(ctx, s);
-        });
+impl<T: FmtRepr> Debug for Cell<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        FmtRepr::fmt(self, FmtCtx::default(), f)
     }
 }
 
-impl<'a> Gen for Pair<GenRepr<'a>, GenRepr<'a>> {
-    fn gen_(self, mut ctx: GenCtx, s: &mut String) {
+impl<T: FmtRepr> FmtRepr for Cell<T> {
+    fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(UNIT)?;
+        f.write_char(SCOPE_LEFT)?;
+        self.value.fmt(ctx, f)?;
+        f.write_char(SCOPE_RIGHT)
+    }
+}
+
+impl<T: FmtRepr> Display for Pair<T, T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        FmtRepr::fmt(self, FmtCtx::default(), f)
+    }
+}
+
+impl<T: FmtRepr> Debug for Pair<T, T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        FmtRepr::fmt(self, FmtCtx::default(), f)
+    }
+}
+
+impl<T: FmtRepr> FmtRepr for Pair<T, T> {
+    fn fmt(&self, mut ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let align = f.align().unwrap_or(Alignment::Center);
         match ctx.direction {
             Direction::Left => {
-                if is_open(&self.left) || !is_open(&self.right) {
-                    return gen_pair_left(ctx, s, self);
+                if best_left(align, &self.left, &self.right) {
+                    return pair_fmt_left(self, ctx, f);
                 }
+                f.write_str(RIGHT)?;
+                f.write_char(SCOPE_LEFT)?;
                 ctx.direction = Direction::Right;
-                prefixed(ctx, s, RIGHT, |ctx, s| {
-                    gen_pair_right(ctx, s, self);
-                });
+                pair_fmt_right(self, ctx, f)?;
+                f.write_char(SCOPE_RIGHT)
             }
             Direction::Right => {
-                if !is_open(&self.left) || is_open(&self.right) {
-                    return gen_pair_right(ctx, s, self);
+                if best_right(align, &self.left, &self.right) {
+                    return pair_fmt_right(self, ctx, f);
                 }
+                f.write_str(LEFT)?;
+                f.write_char(SCOPE_LEFT)?;
                 ctx.direction = Direction::Left;
-                prefixed(ctx, s, LEFT, |ctx, s| {
-                    gen_pair_left(ctx, s, self);
-                });
+                pair_fmt_left(self, ctx, f)?;
+                f.write_char(SCOPE_RIGHT)
             }
         }
     }
-}
 
-fn gen_pair_left(ctx: GenCtx, s: &mut String, pair: Pair<GenRepr, GenRepr>) {
-    pair.left.gen_(ctx, s);
-    s.push(' ');
-    s.push_str(PAIR);
-    s.push(' ');
-    gen_scope_if_need(ctx, s, pair.right);
-}
+    fn is_pair(&self) -> bool {
+        true
+    }
 
-fn gen_pair_right(ctx: GenCtx, s: &mut String, pair: Pair<GenRepr, GenRepr>) {
-    gen_scope_if_need(ctx, s, pair.left);
-    s.push(' ');
-    s.push_str(PAIR);
-    s.push(' ');
-    pair.right.gen_(ctx, s);
-}
-
-impl<'a> Gen for Call<GenRepr<'a>, GenRepr<'a>> {
-    fn gen_(self, ctx: GenCtx, s: &mut String) {
-        if let GenRepr::Pair(pair) = self.input {
-            gen_call_infix(ctx, s, self.func, *pair);
-        } else {
-            gen_call(ctx, s, self.func, self.input);
-        }
+    fn to_pair(&self) -> Pair<&dyn FmtRepr, &dyn FmtRepr> {
+        Pair::new(&self.left, &self.right)
     }
 }
 
-fn gen_call_infix(mut ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<GenRepr, GenRepr>) {
+fn pair_fmt_left<T: FmtRepr>(
+    pair: &Pair<T, T>, ctx: FmtCtx, f: &mut Formatter<'_>,
+) -> std::fmt::Result {
+    pair.left.fmt(ctx, f)?;
+    f.write_char(' ')?;
+    f.write_str(PAIR)?;
+    f.write_char(' ')?;
+    closure(&pair.right, ctx, f)
+}
+
+fn pair_fmt_right<T: FmtRepr>(
+    pair: &Pair<T, T>, ctx: FmtCtx, f: &mut Formatter<'_>,
+) -> std::fmt::Result {
+    closure(&pair.left, ctx, f)?;
+    f.write_char(' ')?;
+    f.write_str(PAIR)?;
+    f.write_char(' ')?;
+    pair.right.fmt(ctx, f)
+}
+
+impl<T: FmtRepr> Display for Call<T, T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        FmtRepr::fmt(self, FmtCtx::default(), f)
+    }
+}
+
+impl<T: FmtRepr> Debug for Call<T, T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        FmtRepr::fmt(self, FmtCtx::default(), f)
+    }
+}
+
+impl<T: FmtRepr> FmtRepr for Call<T, T> {
+    fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if f.alternate() && self.input.is_pair() {
+            call_fmt_infix(&self.func, self.input.to_pair(), ctx, f)
+        } else {
+            call_fmt_default(&self.func, &self.input, ctx, f)
+        }
+    }
+
+    fn is_call(&self) -> bool {
+        true
+    }
+}
+
+fn call_fmt_infix<T: FmtRepr>(
+    func: &T, pair: Pair<&dyn FmtRepr, &dyn FmtRepr>, mut ctx: FmtCtx, f: &mut Formatter<'_>,
+) -> std::fmt::Result {
+    let align = f.align().unwrap_or(Alignment::Center);
     match ctx.direction {
         Direction::Left => {
-            if is_open(&pair.left) || !is_open(&pair.right) {
-                return gen_call_infix_left(ctx, s, func, pair);
+            if best_left(align, pair.left, pair.right) {
+                return call_fmt_infix_left(func, pair, ctx, f);
             }
+            f.write_str(RIGHT)?;
+            f.write_char(SCOPE_LEFT)?;
             ctx.direction = Direction::Right;
-            prefixed(ctx, s, RIGHT, |ctx, s| {
-                gen_call_infix_right(ctx, s, func, pair);
-            });
+            call_fmt_infix_right(func, pair, ctx, f)?;
+            f.write_char(SCOPE_RIGHT)
         }
         Direction::Right => {
-            if !is_open(&pair.left) || is_open(&pair.right) {
-                return gen_call_infix_right(ctx, s, func, pair);
+            if best_right(align, pair.left, pair.right) {
+                return call_fmt_infix_right(func, pair, ctx, f);
             }
+            f.write_str(LEFT)?;
+            f.write_char(SCOPE_LEFT)?;
             ctx.direction = Direction::Left;
-            prefixed(ctx, s, LEFT, |ctx, s| {
-                gen_call_infix_left(ctx, s, func, pair);
-            });
+            call_fmt_infix_left(func, pair, ctx, f)?;
+            f.write_char(SCOPE_RIGHT)
         }
     }
 }
 
-fn gen_call_infix_left(ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<GenRepr, GenRepr>) {
-    pair.left.gen_(ctx, s);
-    s.push(' ');
-    gen_scope_if_need(ctx, s, func);
-    s.push(' ');
-    gen_scope_if_need(ctx, s, pair.right);
+fn call_fmt_infix_left<T: FmtRepr>(
+    func: &T, pair: Pair<&dyn FmtRepr, &dyn FmtRepr>, ctx: FmtCtx, f: &mut Formatter<'_>,
+) -> std::fmt::Result {
+    pair.left.fmt(ctx, f)?;
+    f.write_char(' ')?;
+    closure(func, ctx, f)?;
+    f.write_char(' ')?;
+    closure(pair.right, ctx, f)
 }
 
-fn gen_call_infix_right(ctx: GenCtx, s: &mut String, func: GenRepr, pair: Pair<GenRepr, GenRepr>) {
-    gen_scope_if_need(ctx, s, pair.left);
-    s.push(' ');
-    gen_scope_if_need(ctx, s, func);
-    s.push(' ');
-    pair.right.gen_(ctx, s);
+fn call_fmt_infix_right<T: FmtRepr>(
+    func: &T, pair: Pair<&dyn FmtRepr, &dyn FmtRepr>, ctx: FmtCtx, f: &mut Formatter<'_>,
+) -> std::fmt::Result {
+    closure(pair.left, ctx, f)?;
+    f.write_char(' ')?;
+    closure(func, ctx, f)?;
+    f.write_char(' ')?;
+    pair.right.fmt(ctx, f)
 }
 
-fn gen_call(ctx: GenCtx, s: &mut String, func: GenRepr, input: GenRepr) {
+fn call_fmt_default<T: FmtRepr>(
+    func: &T, input: &T, ctx: FmtCtx, f: &mut Formatter<'_>,
+) -> std::fmt::Result {
     match ctx.direction {
-        Direction::Left => gen_call_left(ctx, s, func, input),
-        Direction::Right => gen_call_right(ctx, s, func, input),
+        Direction::Left => call_fmt_left(func, input, ctx, f),
+        Direction::Right => call_fmt_right(func, input, ctx, f),
     }
 }
 
-fn gen_call_left(ctx: GenCtx, s: &mut String, func: GenRepr, input: GenRepr) {
-    input.gen_(ctx, s);
-    s.push(' ');
-    gen_scope_if_need(ctx, s, func);
-    s.push(' ');
-    s.push_str(EMPTY);
+fn call_fmt_left<T: FmtRepr>(
+    func: &T, input: &T, ctx: FmtCtx, f: &mut Formatter<'_>,
+) -> std::fmt::Result {
+    input.fmt(ctx, f)?;
+    f.write_char(' ')?;
+    closure(func, ctx, f)?;
+    f.write_char(' ')?;
+    f.write_str(EMPTY)
 }
 
-fn gen_call_right(ctx: GenCtx, s: &mut String, func: GenRepr, input: GenRepr) {
-    s.push_str(EMPTY);
-    s.push(' ');
-    gen_scope_if_need(ctx, s, func);
-    s.push(' ');
-    input.gen_(ctx, s);
+fn call_fmt_right<T: FmtRepr>(
+    func: &T, input: &T, ctx: FmtCtx, f: &mut Formatter<'_>,
+) -> std::fmt::Result {
+    f.write_str(EMPTY)?;
+    f.write_char(' ')?;
+    closure(func, ctx, f)?;
+    f.write_char(' ')?;
+    input.fmt(ctx, f)
 }
 
-fn gen_scope_if_need(ctx: GenCtx, s: &mut String, repr: GenRepr) {
-    if is_open(&repr) {
-        scoped(ctx, s, |ctx, s| repr.gen_(ctx, s));
-    } else {
-        repr.gen_(ctx, s);
+fn best_left(align: Alignment, left: &dyn FmtRepr, right: &dyn FmtRepr) -> bool {
+    best_direction(Direction::Left, align, left, right) == Direction::Left
+}
+
+fn best_right(align: Alignment, left: &dyn FmtRepr, right: &dyn FmtRepr) -> bool {
+    best_direction(Direction::Right, align, left, right) == Direction::Right
+}
+
+fn best_direction(
+    direction: Direction, align: Alignment, left: &dyn FmtRepr, right: &dyn FmtRepr,
+) -> Direction {
+    if align == Alignment::Left {
+        return Direction::Left;
+    }
+    if align == Alignment::Right {
+        return Direction::Right;
+    }
+    let left_open = is_open(left);
+    let right_open = is_open(right);
+    match direction {
+        Direction::Left => {
+            if !left_open && right_open {
+                return Direction::Right;
+            }
+        }
+        Direction::Right => {
+            if left_open && !right_open {
+                return Direction::Left;
+            }
+        }
+    }
+    direction
+}
+
+fn is_open(repr: &dyn FmtRepr) -> bool {
+    repr.is_pair() || repr.is_call()
+}
+
+fn closure(repr: &dyn FmtRepr, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
+    if !is_open(repr) {
+        return repr.fmt(ctx, f);
+    }
+    f.write_char(SCOPE_LEFT)?;
+    repr.fmt(ctx, f)?;
+    f.write_char(SCOPE_RIGHT)
+}
+
+impl<T: FmtRepr> Display for List<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        FmtRepr::fmt(self, FmtCtx::default(), f)
     }
 }
 
-fn is_open(repr: &GenRepr) -> bool {
-    matches!(repr, GenRepr::Pair(_) | GenRepr::Call(_))
+impl<T: FmtRepr> Debug for List<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        FmtRepr::fmt(self, FmtCtx::default(), f)
+    }
 }
 
-impl<'a> Gen for List<GenRepr<'a>> {
-    fn gen_(self, mut ctx: GenCtx, s: &mut String) {
+impl<T: FmtRepr> FmtRepr for List<T> {
+    fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
         if self.is_empty() {
-            s.push(LIST_LEFT);
-            s.push(LIST_RIGHT);
-            return;
+            f.write_char(LIST_LEFT)?;
+            return f.write_char(LIST_RIGHT);
         }
 
         if self.len() == 1 {
-            s.push(LIST_LEFT);
-            s.push_str(ctx.fmt.left_padding);
-            self.into_iter().next().unwrap().gen_(ctx, s);
-            s.push_str(ctx.fmt.right_padding);
-            s.push(LIST_RIGHT);
-            return;
+            f.write_char(LIST_LEFT)?;
+            self.first().unwrap().fmt(ctx, f)?;
+            return f.write_char(LIST_RIGHT);
         }
 
-        s.push(LIST_LEFT);
-        ctx.indent += 1;
-        s.push_str(ctx.fmt.before_first);
-
-        for repr in self {
-            indent(ctx, s);
-            repr.gen_(ctx, s);
-            s.push_str(ctx.fmt.after_item);
+        f.write_char(LIST_LEFT)?;
+        if f.alternate() {
+            f.write_char('\n')?;
+            for repr in self {
+                let repr = from_fn(|f| repr.fmt(ctx, f));
+                indent(&repr, f)?;
+            }
+        } else {
+            f.write_char(' ')?;
+            for repr in self {
+                repr.fmt(ctx, f)?;
+                f.write_char(SEPARATOR)?;
+                f.write_char(' ')?;
+            }
         }
-        s.truncate(s.len() - ctx.fmt.after_item.len());
-
-        s.push_str(ctx.fmt.after_last);
-        ctx.indent -= 1;
-        indent(ctx, s);
-        s.push(LIST_RIGHT);
+        f.write_char(LIST_RIGHT)
     }
 }
 
-impl<'a> Gen for Map<&'a Key, GenRepr<'a>> {
-    fn gen_(self, mut ctx: GenCtx, s: &mut String) {
+impl<T: FmtRepr> Display for Map<Key, T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        FmtRepr::fmt(self, FmtCtx::default(), f)
+    }
+}
+
+impl<T: FmtRepr> Debug for Map<Key, T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        FmtRepr::fmt(self, FmtCtx::default(), f)
+    }
+}
+
+impl<T: FmtRepr> FmtRepr for Map<Key, T> {
+    fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
         if self.is_empty() {
-            s.push(MAP_LEFT);
-            s.push(MAP_RIGHT);
-            return;
+            f.write_char(MAP_LEFT)?;
+            return f.write_char(MAP_RIGHT);
         }
 
         if self.len() == 1 {
-            s.push(MAP_LEFT);
-            let pair = self.into_iter().next().unwrap();
-            s.push_str(ctx.fmt.left_padding);
-            gen_kv(ctx, s, pair.0, pair.1);
-            s.push_str(ctx.fmt.right_padding);
-            s.push(MAP_RIGHT);
-            return;
+            f.write_char(MAP_LEFT)?;
+            let (key, value) = self.iter().next().unwrap();
+            kv_fmt(key.clone(), value, ctx, f)?;
+            return f.write_char(MAP_RIGHT);
         }
 
-        s.push(MAP_LEFT);
-        ctx.indent += 1;
-        s.push_str(ctx.fmt.before_first);
-
-        for pair in self {
-            indent(ctx, s);
-            gen_kv(ctx, s, pair.0, pair.1);
-            s.push_str(ctx.fmt.after_item);
+        f.write_char(MAP_LEFT)?;
+        if f.alternate() {
+            f.write_char('\n')?;
+            for (key, value) in self {
+                let repr = from_fn(|f| kv_fmt(key.clone(), value, ctx, f));
+                indent(&repr, f)?;
+            }
+        } else {
+            f.write_char(' ')?;
+            for (key, value) in self {
+                kv_fmt(key.clone(), value, ctx, f)?;
+                f.write_char(SEPARATOR)?;
+                f.write_char(' ')?;
+            }
         }
-        s.truncate(s.len() - ctx.fmt.after_item.len());
-
-        s.push_str(ctx.fmt.after_last);
-        ctx.indent -= 1;
-        indent(ctx, s);
-        s.push(MAP_RIGHT);
+        f.write_char(MAP_RIGHT)
     }
 }
 
-fn gen_kv(ctx: GenCtx, s: &mut String, key: &Key, value: GenRepr) {
-    key.gen_(ctx, s);
-    s.push(' ');
-    s.push_str(PAIR);
-    s.push(' ');
-    value.gen_(ctx, s);
+fn kv_fmt<T: FmtRepr>(key: Key, value: &T, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
+    Display::fmt(&key, f)?;
+    f.write_char(' ')?;
+    f.write_str(PAIR)?;
+    f.write_char(' ')?;
+    value.fmt(ctx, f)
 }
 
-fn prefixed(ctx: GenCtx, s: &mut String, tag: &str, f: impl FnOnce(GenCtx, &mut String)) {
-    s.push_str(tag);
-    scoped(ctx, s, f);
+// TODO impl options lost
+fn indent(repr: &dyn Display, f: &mut Formatter<'_>) -> std::fmt::Result {
+    let align = f.align();
+    let mut writer = Indent::new(f);
+    match align {
+        Some(Alignment::Left) => writeln!(writer, "{repr:<#}{SEPARATOR}"),
+        Some(Alignment::Center) => writeln!(writer, "{repr:^#}{SEPARATOR}"),
+        Some(Alignment::Right) => writeln!(writer, "{repr:>#}{SEPARATOR}"),
+        None => writeln!(writer, "{repr:#}{SEPARATOR}"),
+    }
 }
 
-fn scoped(ctx: GenCtx, s: &mut String, f: impl FnOnce(GenCtx, &mut String)) {
-    s.push(SCOPE_LEFT);
-    s.push_str(ctx.fmt.left_padding);
-    f(ctx, s);
-    s.push_str(ctx.fmt.right_padding);
-    s.push(SCOPE_RIGHT);
+struct Indent<'a, 'b> {
+    fmt: &'a mut Formatter<'b>,
+    on_newline: bool,
 }
 
-fn indent(ctx: GenCtx, s: &mut String) {
-    for _ in 0 .. ctx.indent {
-        s.push_str(ctx.fmt.before_item);
+impl<'a, 'b> Write for Indent<'a, 'b> {
+    fn write_str(&mut self, s: &str) -> std::fmt::Result {
+        for s in s.split_inclusive('\n') {
+            if self.on_newline {
+                self.fmt.write_str("    ")?;
+            }
+            self.on_newline = s.ends_with('\n');
+            self.fmt.write_str(s)?;
+        }
+        Ok(())
+    }
+
+    fn write_char(&mut self, c: char) -> std::fmt::Result {
+        if self.on_newline {
+            self.fmt.write_str("    ")?;
+        }
+        self.on_newline = c == '\n';
+        self.fmt.write_char(c)
+    }
+}
+
+impl<'a, 'b> Indent<'a, 'b> {
+    fn new(fmt: &'a mut Formatter<'b>) -> Self {
+        Indent { fmt, on_newline: true }
     }
 }

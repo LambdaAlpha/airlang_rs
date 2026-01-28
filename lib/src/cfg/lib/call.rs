@@ -65,7 +65,7 @@ pub fn new() -> FreePrimFuncVal {
 
 fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{NEW}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{NEW}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     Val::Call(Call::new(pair.left, pair.right).into())
@@ -77,14 +77,10 @@ pub fn get_function() -> ConstPrimFuncVal {
 
 fn fn_get_function(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Call(call) = &*ctx else {
-        return bug!(
-            cfg,
-            "{GET_FUNCTION}: expected context to be a call, but got {:?}",
-            ctx.deref()
-        );
+        return bug!(cfg, "{GET_FUNCTION}: expected context to be a call, but got {}", ctx.deref());
     };
     if !input.is_unit() {
-        return bug!(cfg, "{GET_FUNCTION}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{GET_FUNCTION}: expected input to be a unit, but got {input}");
     }
     call.func.clone()
 }
@@ -100,11 +96,7 @@ pub fn set_function() -> MutPrimFuncVal {
 
 fn fn_set_function(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Call(call) = ctx else {
-        return bug!(
-            cfg,
-            "{SET_FUNCTION}: expected context to be a call, but got {:?}",
-            ctx.deref()
-        );
+        return bug!(cfg, "{SET_FUNCTION}: expected context to be a call, but got {}", ctx.deref());
     };
     swap(&mut call.func, &mut input);
     input
@@ -116,10 +108,10 @@ pub fn get_input() -> ConstPrimFuncVal {
 
 fn fn_get_input(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Call(call) = &*ctx else {
-        return bug!(cfg, "{GET_INPUT}: expected context to be a call, but got {:?}", ctx.deref());
+        return bug!(cfg, "{GET_INPUT}: expected context to be a call, but got {}", ctx.deref());
     };
     if !input.is_unit() {
-        return bug!(cfg, "{GET_INPUT}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{GET_INPUT}: expected input to be a unit, but got {input}");
     }
     call.input.clone()
 }
@@ -131,7 +123,7 @@ pub fn set_input() -> MutPrimFuncVal {
 
 fn fn_set_input(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Call(call) = ctx else {
-        return bug!(cfg, "{SET_INPUT}: expected context to be a call, but got {:?}", ctx.deref());
+        return bug!(cfg, "{SET_INPUT}: expected context to be a call, but got {}", ctx.deref());
     };
     swap(&mut call.input, &mut input);
     input

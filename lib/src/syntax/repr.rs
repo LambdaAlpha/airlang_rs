@@ -1,16 +1,16 @@
-use std::convert::Infallible;
 use std::fmt::Debug;
 use std::fmt::Display;
+use std::fmt::Formatter;
 use std::str::FromStr;
 
 use derive_more::From;
 use derive_more::IsVariant;
 
 use super::ParseError;
-use super::generate_pretty;
-use super::generator::GenRepr;
-use super::parse;
+use super::generator::FmtCtx;
+use super::generator::FmtRepr;
 use super::parser::ParseRepr;
+use super::parser::parse;
 use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
@@ -54,6 +54,12 @@ pub type ListRepr = List<Repr>;
 
 pub type MapRepr = Map<Key, Repr>;
 
+impl Default for Repr {
+    fn default() -> Self {
+        Repr::Unit(Unit)
+    }
+}
+
 impl From<CellRepr> for Repr {
     fn from(cell: CellRepr) -> Self {
         Repr::Cell(Box::new(cell))
@@ -72,24 +78,7 @@ impl From<CallRepr> for Repr {
     }
 }
 
-impl Display for Repr {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", generate_pretty(self.try_into().unwrap()))
-    }
-}
-
-impl Debug for Repr {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", generate_pretty(self.try_into().unwrap()))
-    }
-}
-
-impl TryFrom<&str> for Repr {
-    type Error = ParseError;
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        parse(value)
-    }
-}
+impl ParseRepr for Repr {}
 
 impl FromStr for Repr {
     type Err = ParseError;
@@ -98,61 +87,48 @@ impl FromStr for Repr {
     }
 }
 
-impl From<&Repr> for String {
-    fn from(value: &Repr) -> Self {
-        generate_pretty(value.try_into().unwrap())
+impl Display for Repr {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        FmtRepr::fmt(self, FmtCtx::default(), f)
     }
 }
 
-impl Default for Repr {
-    fn default() -> Self {
-        Repr::Unit(Unit)
+impl Debug for Repr {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        FmtRepr::fmt(self, FmtCtx::default(), f)
     }
 }
 
-impl ParseRepr for Repr {}
+impl FmtRepr for Repr {
+    fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Repr::Unit(unit) => <Unit as Display>::fmt(unit, f),
+            Repr::Bit(bit) => <Bit as Display>::fmt(bit, f),
+            Repr::Key(key) => <Key as Display>::fmt(key, f),
+            Repr::Text(text) => <Text as Display>::fmt(text, f),
+            Repr::Int(int) => <Int as Display>::fmt(int, f),
+            Repr::Decimal(decimal) => <Decimal as Display>::fmt(decimal, f),
+            Repr::Byte(byte) => <Byte as Display>::fmt(byte, f),
+            Repr::Cell(cell) => <CellRepr as FmtRepr>::fmt(cell, ctx, f),
+            Repr::Pair(pair) => <PairRepr as FmtRepr>::fmt(pair, ctx, f),
+            Repr::Call(call) => <CallRepr as FmtRepr>::fmt(call, ctx, f),
+            Repr::List(list) => <ListRepr as FmtRepr>::fmt(list, ctx, f),
+            Repr::Map(map) => <MapRepr as FmtRepr>::fmt(map, ctx, f),
+        }
+    }
 
-impl<'a> TryInto<GenRepr<'a>> for &'a Repr {
-    type Error = Infallible;
+    fn is_call(&self) -> bool {
+        matches!(self, Repr::Call(_))
+    }
 
-    fn try_into(self) -> Result<GenRepr<'a>, Self::Error> {
-        let r = match self {
-            Repr::Unit(unit) => GenRepr::Unit(unit),
-            Repr::Bit(bit) => GenRepr::Bit(bit),
-            Repr::Key(key) => GenRepr::Key(key),
-            Repr::Text(text) => GenRepr::Text(text),
-            Repr::Int(int) => GenRepr::Int(int),
-            Repr::Decimal(decimal) => GenRepr::Decimal(decimal),
-            Repr::Byte(byte) => GenRepr::Byte(byte),
-            Repr::Cell(cell) => {
-                let value = (&cell.value).try_into()?;
-                GenRepr::Cell(Box::new(Cell::new(value)))
-            }
-            Repr::Pair(pair) => {
-                let left = (&pair.left).try_into()?;
-                let right = (&pair.right).try_into()?;
-                GenRepr::Pair(Box::new(Pair::new(left, right)))
-            }
-            Repr::Call(call) => {
-                let func = (&call.func).try_into()?;
-                let input = (&call.input).try_into()?;
-                GenRepr::Call(Box::new(Call { func, input }))
-            }
-            Repr::List(list) => {
-                let list = list.iter().map(TryInto::try_into).collect::<Result<_, _>>()?;
-                GenRepr::List(list)
-            }
-            Repr::Map(map) => {
-                let map = map
-                    .iter()
-                    .map(|(k, v)| {
-                        let v = v.try_into()?;
-                        Ok((k, v))
-                    })
-                    .collect::<Result<_, Infallible>>()?;
-                GenRepr::Map(map)
-            }
+    fn is_pair(&self) -> bool {
+        matches!(self, Repr::Pair(_))
+    }
+
+    fn to_pair(&self) -> Pair<&dyn FmtRepr, &dyn FmtRepr> {
+        let Repr::Pair(pair) = self else {
+            panic!("called `FmtRepr::to_pair()` on non-pair value")
         };
-        Ok(r)
+        Pair::new(&pair.left, &pair.right)
     }
 }

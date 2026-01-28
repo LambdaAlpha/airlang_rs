@@ -133,7 +133,7 @@ impl PatternMatch<Val> for Val {
     fn match_(&self, cfg: &mut Cfg, force: bool, tag: &str, val: &Val) -> bool {
         let match_ = *self == *val;
         if !match_ && force {
-            bug!(cfg, "{tag}: expected {self:?}, but got {val:?}");
+            bug!(cfg, "{tag}: expected {self}, but got {val}");
         }
         match_
     }
@@ -143,7 +143,7 @@ impl PatternMatch<Val> for Cell<Pattern> {
     fn match_(&self, cfg: &mut Cfg, force: bool, tag: &str, val: &Val) -> bool {
         let Val::Cell(val) = val else {
             if force {
-                bug!(cfg, "{tag}: expected a cell, but got {val:?}");
+                bug!(cfg, "{tag}: expected a cell, but got {val}");
             }
             return false;
         };
@@ -155,7 +155,7 @@ impl PatternMatch<Val> for Pair<Pattern, Pattern> {
     fn match_(&self, cfg: &mut Cfg, force: bool, tag: &str, val: &Val) -> bool {
         let Val::Pair(val) = val else {
             if force {
-                bug!(cfg, "{tag}: expected a pair, but got {val:?}");
+                bug!(cfg, "{tag}: expected a pair, but got {val}");
             }
             return false;
         };
@@ -169,7 +169,7 @@ impl PatternMatch<Val> for Call<Pattern, Pattern> {
     fn match_(&self, cfg: &mut Cfg, force: bool, tag: &str, val: &Val) -> bool {
         let Val::Call(val) = val else {
             if force {
-                bug!(cfg, "{tag}: expected a call, but got {val:?}");
+                bug!(cfg, "{tag}: expected a call, but got {val}");
             }
             return false;
         };
@@ -183,7 +183,7 @@ impl PatternMatch<Val> for List<Pattern> {
     fn match_(&self, cfg: &mut Cfg, force: bool, tag: &str, val: &Val) -> bool {
         let Val::List(val) = val else {
             if force {
-                bug!(cfg, "{tag}: expected a list, but got {val:?}");
+                bug!(cfg, "{tag}: expected a list, but got {val}");
             }
             return false;
         };
@@ -191,7 +191,7 @@ impl PatternMatch<Val> for List<Pattern> {
             if force {
                 bug!(
                     cfg,
-                    "{tag}: expected length of list to be at least {}, but got {val:?}",
+                    "{tag}: expected length of list to be at least {}, but got {val}",
                     self.len()
                 );
             }
@@ -212,14 +212,14 @@ impl PatternMatch<Val> for Map<Key, Pattern> {
     fn match_(&self, cfg: &mut Cfg, force: bool, tag: &str, val: &Val) -> bool {
         let Val::Map(val) = val else {
             if force {
-                bug!(cfg, "{tag}: expected a map, but got {val:?}");
+                bug!(cfg, "{tag}: expected a map, but got {val}");
             }
             return false;
         };
         for (k, pattern) in self {
             let Some(val) = val.get(k) else {
                 if force {
-                    bug!(cfg, "{tag}: value not found for key {k:?} in map {val:?}");
+                    bug!(cfg, "{tag}: value not found for key {k} in map {val}");
                 }
                 return false;
             };
@@ -268,7 +268,7 @@ impl PatternAssign<Val, Val> for Val {
 impl PatternAssign<Val, Val> for Cell<Pattern> {
     fn assign(self, cfg: &mut Cfg, tag: &str, ctx: &mut Val, val: Val) -> Option<()> {
         let Val::Cell(val) = val else {
-            bug!(cfg, "{tag}: expected a cell, but got {val:?}");
+            bug!(cfg, "{tag}: expected a cell, but got {val}");
             return None;
         };
         let val = Cell::from(val);
@@ -280,7 +280,7 @@ impl PatternAssign<Val, Val> for Cell<Pattern> {
 impl PatternAssign<Val, Val> for Pair<Pattern, Pattern> {
     fn assign(self, cfg: &mut Cfg, tag: &str, ctx: &mut Val, val: Val) -> Option<()> {
         let Val::Pair(val) = val else {
-            bug!(cfg, "{tag}: expected a pair, but got {val:?}");
+            bug!(cfg, "{tag}: expected a pair, but got {val}");
             return None;
         };
         let val = Pair::from(val);
@@ -293,7 +293,7 @@ impl PatternAssign<Val, Val> for Pair<Pattern, Pattern> {
 impl PatternAssign<Val, Val> for Call<Pattern, Pattern> {
     fn assign(self, cfg: &mut Cfg, tag: &str, c: &mut Val, val: Val) -> Option<()> {
         let Val::Call(val) = val else {
-            bug!(cfg, "{tag}: expected a call, but got {val:?}");
+            bug!(cfg, "{tag}: expected a call, but got {val}");
             return None;
         };
         let val = Call::from(val);
@@ -306,13 +306,13 @@ impl PatternAssign<Val, Val> for Call<Pattern, Pattern> {
 impl PatternAssign<Val, Val> for List<Pattern> {
     fn assign(self, cfg: &mut Cfg, tag: &str, ctx: &mut Val, val: Val) -> Option<()> {
         let Val::List(val) = val else {
-            bug!(cfg, "{tag}: expected a list, but got {val:?}");
+            bug!(cfg, "{tag}: expected a list, but got {val}");
             return None;
         };
         if val.len() < self.len() {
             bug!(
                 cfg,
-                "{tag}: expected length of list to be at least {}, but got {val:?}",
+                "{tag}: expected length of list to be at least {}, but got {val}",
                 self.len()
             );
             return None;
@@ -328,12 +328,12 @@ impl PatternAssign<Val, Val> for List<Pattern> {
 impl PatternAssign<Val, Val> for Map<Key, Pattern> {
     fn assign(self, cfg: &mut Cfg, tag: &str, ctx: &mut Val, val: Val) -> Option<()> {
         let Val::Map(mut val) = val else {
-            bug!(cfg, "{tag}: expected a map, but got {val:?}");
+            bug!(cfg, "{tag}: expected a map, but got {val}");
             return None;
         };
         for (k, pattern) in self {
             let Some(val) = val.remove(&k) else {
-                bug!(cfg, "{tag}: value not found for key {k:?} in map {val:?}");
+                bug!(cfg, "{tag}: value not found for key {k} in map {val}");
                 return None;
             };
             pattern.assign(cfg, tag, ctx, val)?;

@@ -27,7 +27,7 @@ _ do [
             ]
         ]
     ],
-    .(.repr) = _ generate a,
+    .repr = _ generate a,
     .(.a1) = _ parse repr,
     a == a1
 ]
@@ -69,4 +69,4 @@ _ do [
     _ generate "1"
 ]
 -----
-.("^'1^'")
+"^'1^'"

@@ -47,7 +47,7 @@ pub fn not() -> FreePrimFuncVal {
 
 fn fn_not(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Bit(b) = input else {
-        return bug!(cfg, "{NOT}: expected input to be a bit, but got {input:?}");
+        return bug!(cfg, "{NOT}: expected input to be a bit, but got {input}");
     };
     Val::Bit(b.not())
 }
@@ -58,13 +58,13 @@ pub fn and() -> FreePrimFuncVal {
 
 fn fn_and(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{AND}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{AND}: expected input to be a pair, but got {input}");
     };
     let Val::Bit(left) = pair.left else {
-        return bug!(cfg, "{AND}: expected input.left to be a bit, but got {:?}", pair.left);
+        return bug!(cfg, "{AND}: expected input.left to be a bit, but got {}", pair.left);
     };
     let Val::Bit(right) = pair.right else {
-        return bug!(cfg, "{AND}: expected input.right to be a bit, but got {:?}", pair.right);
+        return bug!(cfg, "{AND}: expected input.right to be a bit, but got {}", pair.right);
     };
     Val::Bit(left.and(right))
 }
@@ -75,13 +75,13 @@ pub fn or() -> FreePrimFuncVal {
 
 fn fn_or(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{OR}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{OR}: expected input to be a pair, but got {input}");
     };
     let Val::Bit(left) = pair.left else {
-        return bug!(cfg, "{OR}: expected input.left to be a bit, but got {:?}", pair.left);
+        return bug!(cfg, "{OR}: expected input.left to be a bit, but got {}", pair.left);
     };
     let Val::Bit(right) = pair.right else {
-        return bug!(cfg, "{OR}: expected input.right to be a bit, but got {:?}", pair.right);
+        return bug!(cfg, "{OR}: expected input.right to be a bit, but got {}", pair.right);
     };
     Val::Bit(left.or(right))
 }
@@ -92,13 +92,13 @@ pub fn xor() -> FreePrimFuncVal {
 
 fn fn_xor(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{XOR}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{XOR}: expected input to be a pair, but got {input}");
     };
     let Val::Bit(left) = pair.left else {
-        return bug!(cfg, "{XOR}: expected input.left to be a bit, but got {:?}", pair.left);
+        return bug!(cfg, "{XOR}: expected input.left to be a bit, but got {}", pair.left);
     };
     let Val::Bit(right) = pair.right else {
-        return bug!(cfg, "{XOR}: expected input.right to be a bit, but got {:?}", pair.right);
+        return bug!(cfg, "{XOR}: expected input.right to be a bit, but got {}", pair.right);
     };
     Val::Bit(left.xor(right))
 }
@@ -109,13 +109,13 @@ pub fn imply() -> FreePrimFuncVal {
 
 fn fn_imply(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{IMPLY}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{IMPLY}: expected input to be a pair, but got {input}");
     };
     let Val::Bit(left) = pair.left else {
-        return bug!(cfg, "{IMPLY}: expected input.left to be a bit, but got {:?}", pair.left);
+        return bug!(cfg, "{IMPLY}: expected input.left to be a bit, but got {}", pair.left);
     };
     let Val::Bit(right) = pair.right else {
-        return bug!(cfg, "{IMPLY}: expected input.right to be a bit, but got {:?}", pair.right);
+        return bug!(cfg, "{IMPLY}: expected input.right to be a bit, but got {}", pair.right);
     };
     Val::Bit(left.imply(right))
 }

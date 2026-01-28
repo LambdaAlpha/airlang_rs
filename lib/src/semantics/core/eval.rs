@@ -30,7 +30,7 @@ where Func: FreeFn<Cfg, Val, Val>
         let call = Call::from(call);
         let func = self.func.free_call(cfg, call.func);
         let Val::Func(func) = func else {
-            let msg = format!("eval: expected a function, but got {func:?}");
+            let msg = format!("eval: expected a function, but got {func}");
             return abort_by_bug_with_msg(cfg, msg.into());
         };
         let input = if func.raw_input() { call.input } else { Eval.free_call(cfg, call.input) };
@@ -48,7 +48,7 @@ where Func: ConstFn<Cfg, Val, Val, Val>
         let call = Call::from(call);
         let func = self.func.const_call(cfg, ctx.reborrow(), call.func);
         let Val::Func(func) = func else {
-            let msg = format!("eval: expected a function, but got {func:?}");
+            let msg = format!("eval: expected a function, but got {func}");
             return abort_by_bug_with_msg(cfg, msg.into());
         };
         let input = if func.raw_input() {
@@ -70,7 +70,7 @@ where Func: MutFn<Cfg, Val, Val, Val>
         let call = Call::from(call);
         let func = self.func.mut_call(cfg, ctx, call.func);
         let Val::Func(func) = func else {
-            let msg = format!("eval: expected a function, but got {func:?}");
+            let msg = format!("eval: expected a function, but got {func}");
             return abort_by_bug_with_msg(cfg, msg.into());
         };
         let input = if func.raw_input() { call.input } else { Eval.mut_call(cfg, ctx, call.input) };
@@ -84,7 +84,7 @@ where Func: MutFn<Cfg, Val, Val, Val>
         let call = Call::from(call);
         let func = self.func.dyn_call(cfg, ctx.reborrow(), call.func);
         let Val::Func(func) = func else {
-            let msg = format!("eval: expected a function, but got {func:?}");
+            let msg = format!("eval: expected a function, but got {func}");
             return abort_by_bug_with_msg(cfg, msg.into());
         };
         let input = if func.raw_input() {
@@ -99,7 +99,7 @@ where Func: MutFn<Cfg, Val, Val, Val>
     }
 }
 
-#[derive(Debug, Default, Copy, Clone)]
+#[derive(Default, Copy, Clone)]
 pub(crate) struct Eval;
 
 impl FreeFn<Cfg, Val, Val> for Eval {

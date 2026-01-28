@@ -80,7 +80,7 @@ fn decimal_config(tag: &str, cfg: &mut Cfg) -> Option<DecimalConfig> {
         return None;
     };
     let Val::Key(mode) = mode else {
-        bug!(cfg, "{tag}: expected config {ROUNDING_MODE} to be a key, but got {mode:?}");
+        bug!(cfg, "{tag}: expected config {ROUNDING_MODE} to be a key, but got {mode}");
         return None;
     };
     let mode = parse_rounding_mode(&mode)?;
@@ -91,7 +91,7 @@ fn decimal_config(tag: &str, cfg: &mut Cfg) -> Option<DecimalConfig> {
     let Val::Int(precision) = precision else {
         bug!(
             cfg,
-            "{tag}: expected config {ROUNDING_PRECISION} to be an integer, but got {precision:?}"
+            "{tag}: expected config {ROUNDING_PRECISION} to be an integer, but got {precision}"
         );
         return None;
     };
@@ -129,14 +129,14 @@ pub fn add() -> FreePrimFuncVal {
 
 fn fn_add(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{ADD}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{ADD}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Decimal(d1) = pair.left else {
-        return bug!(cfg, "{ADD}: expected input.left to be a decimal, but got {:?}", pair.left);
+        return bug!(cfg, "{ADD}: expected input.left to be a decimal, but got {}", pair.left);
     };
     let Val::Decimal(d2) = pair.right else {
-        return bug!(cfg, "{ADD}: expected input.right to be a decimal, but got {:?}", pair.right);
+        return bug!(cfg, "{ADD}: expected input.right to be a decimal, but got {}", pair.right);
     };
     let Some(config) = decimal_config(ADD, cfg) else {
         return Val::default();
@@ -152,20 +152,16 @@ pub fn subtract() -> FreePrimFuncVal {
 
 fn fn_subtract(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{SUBTRACT}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{SUBTRACT}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Decimal(d1) = pair.left else {
-        return bug!(
-            cfg,
-            "{SUBTRACT}: expected input.left to be a decimal, but got {:?}",
-            pair.left
-        );
+        return bug!(cfg, "{SUBTRACT}: expected input.left to be a decimal, but got {}", pair.left);
     };
     let Val::Decimal(d2) = pair.right else {
         return bug!(
             cfg,
-            "{SUBTRACT}: expected input.right to be a decimal, but got {:?}",
+            "{SUBTRACT}: expected input.right to be a decimal, but got {}",
             pair.right
         );
     };
@@ -183,20 +179,16 @@ pub fn multiply() -> FreePrimFuncVal {
 
 fn fn_multiply(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{MULTIPLY}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{MULTIPLY}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Decimal(d1) = pair.left else {
-        return bug!(
-            cfg,
-            "{MULTIPLY}: expected input.left to be a decimal, but got {:?}",
-            pair.left
-        );
+        return bug!(cfg, "{MULTIPLY}: expected input.left to be a decimal, but got {}", pair.left);
     };
     let Val::Decimal(d2) = pair.right else {
         return bug!(
             cfg,
-            "{MULTIPLY}: expected input.right to be a decimal, but got {:?}",
+            "{MULTIPLY}: expected input.right to be a decimal, but got {}",
             pair.right
         );
     };
@@ -214,18 +206,14 @@ pub fn divide() -> FreePrimFuncVal {
 
 fn fn_divide(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{DIVIDE}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{DIVIDE}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Decimal(d1) = pair.left else {
-        return bug!(cfg, "{DIVIDE}: expected input.left to be a decimal, but got {:?}", pair.left);
+        return bug!(cfg, "{DIVIDE}: expected input.left to be a decimal, but got {}", pair.left);
     };
     let Val::Decimal(d2) = pair.right else {
-        return bug!(
-            cfg,
-            "{DIVIDE}: expected input.right to be a decimal, but got {:?}",
-            pair.right
-        );
+        return bug!(cfg, "{DIVIDE}: expected input.right to be a decimal, but got {}", pair.right);
     };
     if d2.is_zero() {
         return bug!(cfg, "{DIVIDE}: expected input.right to be non-zero");
@@ -245,14 +233,14 @@ pub fn less() -> FreePrimFuncVal {
 
 fn fn_less(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{LESS}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{LESS}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Decimal(d1) = pair.left else {
-        return bug!(cfg, "{LESS}: expected input.left to be a decimal, but got {:?}", pair.left);
+        return bug!(cfg, "{LESS}: expected input.left to be a decimal, but got {}", pair.left);
     };
     let Val::Decimal(d2) = pair.right else {
-        return bug!(cfg, "{LESS}: expected input.right to be a decimal, but got {:?}", pair.right);
+        return bug!(cfg, "{LESS}: expected input.right to be a decimal, but got {}", pair.right);
     };
     Val::Bit(d1.less_than(&d2))
 }
@@ -263,20 +251,20 @@ pub fn less_equal() -> FreePrimFuncVal {
 
 fn fn_less_equal(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{LESS_EQUAL}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{LESS_EQUAL}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Decimal(d1) = pair.left else {
         return bug!(
             cfg,
-            "{LESS_EQUAL}: expected input.left to be a decimal, but got {:?}",
+            "{LESS_EQUAL}: expected input.left to be a decimal, but got {}",
             pair.left
         );
     };
     let Val::Decimal(d2) = pair.right else {
         return bug!(
             cfg,
-            "{LESS_EQUAL}: expected input.right to be a decimal, but got {:?}",
+            "{LESS_EQUAL}: expected input.right to be a decimal, but got {}",
             pair.right
         );
     };
@@ -289,20 +277,16 @@ pub fn greater() -> FreePrimFuncVal {
 
 fn fn_greater(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{GREATER}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{GREATER}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Decimal(d1) = pair.left else {
-        return bug!(
-            cfg,
-            "{GREATER}: expected input.left to be a decimal, but got {:?}",
-            pair.left
-        );
+        return bug!(cfg, "{GREATER}: expected input.left to be a decimal, but got {}", pair.left);
     };
     let Val::Decimal(d2) = pair.right else {
         return bug!(
             cfg,
-            "{GREATER}: expected input.right to be a decimal, but got {:?}",
+            "{GREATER}: expected input.right to be a decimal, but got {}",
             pair.right
         );
     };
@@ -315,20 +299,20 @@ pub fn greater_equal() -> FreePrimFuncVal {
 
 fn fn_greater_equal(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{GREATER_EQUAL}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{GREATER_EQUAL}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Decimal(d1) = pair.left else {
         return bug!(
             cfg,
-            "{GREATER_EQUAL}: expected input.left to be a decimal, but got {:?}",
+            "{GREATER_EQUAL}: expected input.left to be a decimal, but got {}",
             pair.left
         );
     };
     let Val::Decimal(d2) = pair.right else {
         return bug!(
             cfg,
-            "{GREATER_EQUAL}: expected input.right to be a decimal, but got {:?}",
+            "{GREATER_EQUAL}: expected input.right to be a decimal, but got {}",
             pair.right
         );
     };
@@ -341,20 +325,20 @@ pub fn less_greater() -> FreePrimFuncVal {
 
 fn fn_less_greater(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{LESS_GREATER}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{LESS_GREATER}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Decimal(d1) = pair.left else {
         return bug!(
             cfg,
-            "{LESS_GREATER}: expected input.left to be a decimal, but got {:?}",
+            "{LESS_GREATER}: expected input.left to be a decimal, but got {}",
             pair.left
         );
     };
     let Val::Decimal(d2) = pair.right else {
         return bug!(
             cfg,
-            "{LESS_GREATER}: expected input.right to be a decimal, but got {:?}",
+            "{LESS_GREATER}: expected input.right to be a decimal, but got {}",
             pair.right
         );
     };

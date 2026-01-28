@@ -102,7 +102,7 @@ struct OutputCtrlFlow {
 impl Block {
     fn parse(tag: &str, cfg: &mut Cfg, val: Val) -> Result<Self, Val> {
         let Val::List(list) = val else {
-            return Err(bug!(cfg, "{tag}: expected block to be a list, but got {val:?}"));
+            return Err(bug!(cfg, "{tag}: expected block to be a list, but got {val}"));
         };
         let list = List::from(list);
         let mut statements = Vec::with_capacity(list.len());
@@ -127,7 +127,7 @@ impl Block {
                     let Val::Bit(condition) = condition else {
                         bug!(
                             cfg,
-                            "{tag}: expected block condition to be a bit, but got {condition:?}"
+                            "{tag}: expected block condition to be a bit, but got {condition}"
                         );
                         return OutputCtrlFlow {
                             output: Val::default(),
@@ -165,7 +165,7 @@ impl Statement {
         let Val::Pair(pair) = call.input else {
             return Err(bug!(
                 cfg,
-                "{tag}: expect statement condition input to be a pair, but got {:?}",
+                "{tag}: expect statement condition input to be a pair, but got {}",
                 call.input
             ));
         };
@@ -219,14 +219,14 @@ struct Test {
 impl Test {
     fn parse(cfg: &mut Cfg, input: Val) -> Result<Self, Val> {
         let Val::Pair(pair) = input else {
-            return Err(bug!(cfg, "{TEST}: expect input to be a pair, but got {input:?}"));
+            return Err(bug!(cfg, "{TEST}: expect input to be a pair, but got {input}"));
         };
         let pair = Pair::from(pair);
         let condition = pair.left;
         let Val::Pair(branches) = pair.right else {
             return Err(bug!(
                 cfg,
-                "{TEST}: expect input.right to be a pair, but got {:?}",
+                "{TEST}: expect input.right to be a pair, but got {}",
                 pair.right
             ));
         };
@@ -239,7 +239,7 @@ impl Test {
     fn eval(self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> Val {
         let condition = Eval.dyn_call(cfg, ctx.reborrow(), self.condition);
         let Val::Bit(b) = condition else {
-            return bug!(cfg, "{TEST}: expected condition to be a bit, but got {condition:?}");
+            return bug!(cfg, "{TEST}: expected condition to be a bit, but got {condition}");
         };
         let branch = if *b { self.branch_then } else { self.branch_else };
         branch.eval(TEST, cfg, ctx)
@@ -266,7 +266,7 @@ struct Switch {
 impl Switch {
     fn parse(cfg: &mut Cfg, input: Val) -> Result<Self, Val> {
         let Val::Pair(pair) = input else {
-            return Err(bug!(cfg, "{SWITCH}: expected input to be a pair, but got {input:?}"));
+            return Err(bug!(cfg, "{SWITCH}: expected input to be a pair, but got {input}"));
         };
         let pair = Pair::from(pair);
         let val = pair.left;
@@ -280,7 +280,7 @@ impl Switch {
                 let Val::Map(map) = pair.left else {
                     return Err(bug!(
                         cfg,
-                        "{SWITCH}: expected input.right.left to be a map, but got {:?}",
+                        "{SWITCH}: expected input.right.left to be a map, but got {}",
                         pair.left
                     ));
                 };
@@ -288,10 +288,9 @@ impl Switch {
                 let default = Some(Block::parse(SWITCH, cfg, pair.right)?);
                 Ok(Self { val, map, default })
             }
-            v => Err(bug!(
-                cfg,
-                "{SWITCH}: expected input.right to be a map or a pair, but got {v:?}"
-            )),
+            v => {
+                Err(bug!(cfg, "{SWITCH}: expected input.right to be a map or a pair, but got {v}"))
+            }
         }
     }
 
@@ -306,7 +305,7 @@ impl Switch {
     fn eval(mut self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> Val {
         let val = Eval.dyn_call(cfg, ctx.reborrow(), self.val);
         let Val::Key(key) = val else {
-            return bug!(cfg, "{SWITCH}: expected input.left to be a key, but got {val:?}");
+            return bug!(cfg, "{SWITCH}: expected input.left to be a key, but got {val}");
         };
         let Some(body) = self.map.remove(&key).or(self.default) else {
             return Val::default();
@@ -334,14 +333,14 @@ struct Match {
 impl Match {
     fn parse(cfg: &mut Cfg, input: Val) -> Result<Self, Val> {
         let Val::Pair(pair) = input else {
-            return Err(bug!(cfg, "{MATCH}: expected input to be a pair, but got {input:?}"));
+            return Err(bug!(cfg, "{MATCH}: expected input to be a pair, but got {input}"));
         };
         let pair = Pair::from(pair);
         let val = pair.left;
         let Val::List(list) = pair.right else {
             return Err(bug!(
                 cfg,
-                "{MATCH}: expected input.right to be a list, but got {:?}",
+                "{MATCH}: expected input.right to be a list, but got {}",
                 pair.right
             ));
         };
@@ -353,7 +352,7 @@ impl Match {
         let mut arms = Vec::with_capacity(list.len());
         for arm in List::from(list) {
             let Val::Pair(pair) = arm else {
-                return Err(bug!(cfg, "{MATCH}: expected arm to be a pair, but got {arm:?}"));
+                return Err(bug!(cfg, "{MATCH}: expected arm to be a pair, but got {arm}"));
             };
             let pair = Pair::from(pair);
             let block = Block::parse(MATCH, cfg, pair.right)?;
@@ -407,7 +406,7 @@ struct Loop {
 impl Loop {
     fn parse(cfg: &mut Cfg, input: Val) -> Result<Self, Val> {
         let Val::Pair(pair) = input else {
-            return Err(bug!(cfg, "{LOOP}: expected input to be a pair, but got {input:?}"));
+            return Err(bug!(cfg, "{LOOP}: expected input to be a pair, but got {input}"));
         };
         let pair = Pair::from(pair);
         let condition = pair.left;
@@ -419,7 +418,7 @@ impl Loop {
         loop {
             let cond = Eval.dyn_call(cfg, ctx.reborrow(), self.condition.clone());
             let Val::Bit(bit) = cond else {
-                return bug!(cfg, "{LOOP}: expected condition to be a bit, but got {cond:?}");
+                return bug!(cfg, "{LOOP}: expected condition to be a bit, but got {cond}");
             };
             if !*bit {
                 break;
@@ -454,14 +453,14 @@ struct Iterate {
 impl Iterate {
     fn parse(cfg: &mut Cfg, input: Val) -> Result<Self, Val> {
         let Val::Pair(pair) = input else {
-            return Err(bug!(cfg, "{ITERATE}: expected input to be a pair, but got {input:?}"));
+            return Err(bug!(cfg, "{ITERATE}: expected input to be a pair, but got {input}"));
         };
         let pair = Pair::from(pair);
         let val = pair.left;
         let Val::Pair(name_body) = pair.right else {
             return Err(bug!(
                 cfg,
-                "{ITERATE}: expected input.right to be a pair, but got {:?}",
+                "{ITERATE}: expected input.right to be a pair, but got {}",
                 pair.right
             ));
         };
@@ -469,7 +468,7 @@ impl Iterate {
         let Val::Key(name) = name_body.left else {
             return Err(bug!(
                 cfg,
-                "{ITERATE}: expected input.right.left to be a key, but got {:?}",
+                "{ITERATE}: expected input.right.left to be a key, but got {}",
                 name_body.left
             ));
         };
@@ -485,11 +484,11 @@ impl Iterate {
                 if i.is_negative() {
                     return bug!(
                         cfg,
-                        "{ITERATE}: expected integer to be non-negative, but got {i:?}"
+                        "{ITERATE}: expected integer to be non-negative, but got {i}"
                     );
                 }
                 let Some(i) = i.to_u128() else {
-                    return bug!(cfg, "{ITERATE}: unable to iterate {i:?}");
+                    return bug!(cfg, "{ITERATE}: unable to iterate {i}");
                 };
                 let iter = (0 .. i).map(|i| {
                     let i = Int::from(i);
@@ -531,7 +530,7 @@ impl Iterate {
                 });
                 iterate_val(cfg, ctx, self.body, self.name, iter)
             }
-            v => bug!(cfg, "{ITERATE}: expected input.left to be iterable, but got {v:?}"),
+            v => bug!(cfg, "{ITERATE}: expected input.left to be iterable, but got {v}"),
         }
     }
 }

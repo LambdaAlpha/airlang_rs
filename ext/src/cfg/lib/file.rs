@@ -36,7 +36,7 @@ pub fn read_to_text() -> FreePrimFuncVal {
 
 fn fn_read_to_text(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(path) = input else {
-        return bug!(cfg, "{READ_TO_TEXT}: expected input to be a text, but got {input:?}");
+        return bug!(cfg, "{READ_TO_TEXT}: expected input to be a text, but got {input}");
     };
     let result = std::fs::read_to_string(&**path);
     match result {

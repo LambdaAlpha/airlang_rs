@@ -54,10 +54,10 @@ pub fn get_length() -> ConstPrimFuncVal {
 
 fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Byte(byte) = &*ctx else {
-        return bug!(cfg, "{GET_LENGTH}: expected context to be a byte, but got {:?}", ctx.deref());
+        return bug!(cfg, "{GET_LENGTH}: expected context to be a byte, but got {}", ctx.deref());
     };
     if !input.is_unit() {
-        return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input}");
     }
     let len: Int = byte.len().into();
     Val::Int(len.into())
@@ -69,10 +69,10 @@ pub fn push() -> MutPrimFuncVal {
 
 fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Byte(byte) = ctx else {
-        return bug!(cfg, "{PUSH}: expected context to be a byte, but got {ctx:?}");
+        return bug!(cfg, "{PUSH}: expected context to be a byte, but got {ctx}");
     };
     let Val::Byte(b) = input else {
-        return bug!(cfg, "{PUSH}: expected input to be a byte, but got {input:?}");
+        return bug!(cfg, "{PUSH}: expected input to be a byte, but got {input}");
     };
     byte.push(&b);
     Val::default()
@@ -85,19 +85,19 @@ pub fn join() -> FreePrimFuncVal {
 
 fn fn_join(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{JOIN}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{JOIN}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Byte(separator) = pair.left else {
-        return bug!(cfg, "{JOIN}: expected input.left to be a byte, but got {:?}", pair.left);
+        return bug!(cfg, "{JOIN}: expected input.left to be a byte, but got {}", pair.left);
     };
     let Val::List(bytes) = pair.right else {
-        return bug!(cfg, "{JOIN}: expected input.right to be a list, but got {:?}", pair.right);
+        return bug!(cfg, "{JOIN}: expected input.right to be a list, but got {}", pair.right);
     };
     let mut to_join: Vec<&[u8]> = Vec::with_capacity(bytes.len());
     for byte in bytes.iter() {
         let Val::Byte(b) = byte else {
-            return bug!(cfg, "{JOIN}: expected input.right.item to be a byte, but got {byte:?}");
+            return bug!(cfg, "{JOIN}: expected input.right.item to be a byte, but got {byte}");
         };
         to_join.push(b);
     }

@@ -7,9 +7,8 @@ use derive_more::DerefMut;
 use derive_more::IntoIterator;
 use rustc_hash::FxHashMap;
 
-#[derive(Clone, IntoIterator, Deref, DerefMut, derive_more::Debug)]
+#[derive(Clone, IntoIterator, Deref, DerefMut)]
 #[into_iterator(owned, ref, ref_mut)]
-#[debug("{_0:?}")]
 pub struct Map<K, V>(FxHashMap<K, V>);
 
 impl<K, V> Map<K, V> {

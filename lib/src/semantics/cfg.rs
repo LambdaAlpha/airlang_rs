@@ -1,4 +1,3 @@
-use std::fmt::Debug;
 use std::hash::Hash;
 use std::ops::Deref;
 
@@ -15,7 +14,7 @@ use crate::type_::Map;
 use crate::type_::Text;
 
 // todo design invariant
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct Cfg {
     steps: u128,
     aborted: bool,
@@ -24,7 +23,7 @@ pub struct Cfg {
     map: OnceMap<Key, Box<OnceMap<usize /*scope*/, Box<Val>>>>,
 }
 
-#[derive(Debug, Default, Deref, DerefMut)]
+#[derive(Default, Deref, DerefMut)]
 struct OnceMap<K, V>(once_map::unsync::OnceMap<K, V, FxBuildHasher>);
 
 impl Cfg {

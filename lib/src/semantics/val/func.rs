@@ -1,6 +1,3 @@
-use std::fmt::Debug;
-use std::fmt::Formatter;
-
 use derive_more::From;
 
 use crate::semantics::cfg::Cfg;
@@ -155,12 +152,6 @@ impl FuncVal {
             FuncVal::MutPrim(_) => CtxAccess::Mut,
             FuncVal::MutComp(_) => CtxAccess::Mut,
         }
-    }
-}
-
-impl Debug for FuncVal {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        match_func_val!(self, f => f.fmt(formatter))
     }
 }
 

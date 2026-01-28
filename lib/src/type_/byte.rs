@@ -3,9 +3,9 @@ use derive_more::DerefMut;
 use derive_more::From;
 use derive_more::Into;
 
-#[derive(Clone, Default, PartialEq, Eq, Hash, From, Into, Deref, DerefMut, derive_more::Debug)]
+#[derive(Clone, Default, PartialEq, Eq, Hash, From, Into, Deref, DerefMut)]
 #[deref(forward)]
-pub struct Byte(#[debug("{_0:02x?}")] Vec<u8>);
+pub struct Byte(Vec<u8>);
 
 impl Byte {
     pub(crate) fn push(&mut self, byte: &[u8]) {

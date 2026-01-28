@@ -92,7 +92,7 @@ pub fn new() -> FreePrimFuncVal {
 
 fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Map(map) = input else {
-        return bug!(cfg, "{NEW}: expected input to be a map, but got {input:?}");
+        return bug!(cfg, "{NEW}: expected input to be a map, but got {input}");
     };
     let new_cfg = Cfg::default();
     let map = Map::from(map);
@@ -108,7 +108,7 @@ pub fn represent() -> FreePrimFuncVal {
 
 fn fn_represent(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Cfg(new_cfg) = input else {
-        return bug!(cfg, "{REPRESENT}: expected input to be a config, but got {input:?}");
+        return bug!(cfg, "{REPRESENT}: expected input to be a config, but got {input}");
     };
     Val::Map(new_cfg.snapshot().into())
 }
@@ -119,7 +119,7 @@ pub fn exist() -> FreePrimFuncVal {
 
 fn fn_exist(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Key(name) = input else {
-        return bug!(cfg, "{EXIST}: expected input to be a key, but got {input:?}");
+        return bug!(cfg, "{EXIST}: expected input to be a key, but got {input}");
     };
     let exist = cfg.exist(name);
     Val::Bit(Bit::from(exist))
@@ -131,10 +131,10 @@ pub fn import() -> FreePrimFuncVal {
 
 fn fn_import(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Key(name) = input else {
-        return bug!(cfg, "{IMPORT}: expected input to be a key, but got {input:?}");
+        return bug!(cfg, "{IMPORT}: expected input to be a key, but got {input}");
     };
     let Some(value) = cfg.import(name.clone()) else {
-        return bug!(cfg, "{IMPORT}: value not found for key {name:?} in config");
+        return bug!(cfg, "{IMPORT}: value not found for key {name} in config");
     };
     value
 }
@@ -145,14 +145,14 @@ pub fn export() -> FreePrimFuncVal {
 
 fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{EXPORT}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{EXPORT}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Key(name) = pair.left else {
-        return bug!(cfg, "{EXPORT}: expected input.left to be a key, but got {:?}", pair.left);
+        return bug!(cfg, "{EXPORT}: expected input.left to be a key, but got {}", pair.left);
     };
     if cfg.export(name.clone(), pair.right).is_none() {
-        return bug!(cfg, "{EXPORT}: already bound to value for key {name:?} in config");
+        return bug!(cfg, "{EXPORT}: already bound to value for key {name} in config");
     }
     Val::default()
 }
@@ -163,14 +163,10 @@ pub fn get_length() -> ConstPrimFuncVal {
 
 fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Cfg(new_cfg) = &*ctx else {
-        return bug!(
-            cfg,
-            "{GET_LENGTH}: expected context to be a config, but got {:?}",
-            ctx.deref()
-        );
+        return bug!(cfg, "{GET_LENGTH}: expected context to be a config, but got {}", ctx.deref());
     };
     if !input.is_unit() {
-        return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input}");
     }
     Val::Int(Int::from(new_cfg.len()).into())
 }
@@ -181,12 +177,12 @@ pub fn with() -> MutPrimFuncVal {
 
 fn fn_with(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{WITH}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{WITH}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let map = Eval.dyn_call(cfg, ctx.reborrow(), pair.left);
     let Val::Map(map) = map else {
-        return bug!(cfg, "{WITH}: expected input.left to be a map, but got {map:?}");
+        return bug!(cfg, "{WITH}: expected input.left to be a map, but got {map}");
     };
     cfg.begin_scope();
     let map = Map::from(map);
@@ -204,7 +200,7 @@ pub fn self_() -> FreePrimFuncVal {
 
 fn fn_self(cfg: &mut Cfg, input: Val) -> Val {
     if !input.is_unit() {
-        return bug!(cfg, "{SELF}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{SELF}: expected input to be a unit, but got {input}");
     }
     Val::Cfg(cfg.clone().into())
 }
@@ -215,25 +211,21 @@ pub fn where_() -> MutPrimFuncVal {
 
 fn fn_where(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{WHERE}: expected input to be a pair, but got {input:?}");
+        return bug!(cfg, "{WHERE}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Some(ctx) = ctx.ref_mut(cfg, pair.left.clone()) else {
         return Val::default();
     };
     let Val::Cfg(new_cfg) = ctx else {
-        return bug!(cfg, "{WHERE}: expected context to be a config, but got {ctx:?}");
+        return bug!(cfg, "{WHERE}: expected context to be a config, but got {ctx}");
     };
     let prelude = new_cfg.import(Key::from_str_unchecked(CoreCfg::PRELUDE));
     let Some(prelude) = prelude else {
         return bug!(cfg, "{WHERE}: value not found for key {} in config", CoreCfg::PRELUDE);
     };
     let Val::Link(prelude) = prelude else {
-        return bug!(
-            cfg,
-            "{WHERE}: expected {} to be a link, but got {prelude:?}",
-            CoreCfg::PRELUDE
-        );
+        return bug!(cfg, "{WHERE}: expected {} to be a link, but got {prelude}", CoreCfg::PRELUDE);
     };
     let Ok(prelude) = prelude.try_borrow() else {
         return bug!(cfg, "{WHERE}: link is in use");

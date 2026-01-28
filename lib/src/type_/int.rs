@@ -13,9 +13,8 @@ use num_integer::Integer;
 
 use crate::type_::bit::Bit;
 
-#[derive(Clone, Default, PartialEq, Eq, Hash, derive_more::Debug, From, Deref, DerefMut)]
+#[derive(Clone, Default, PartialEq, Eq, Hash, From, Deref, DerefMut)]
 #[from(forward)]
-#[debug("{_0:?}")]
 pub struct Int(BigInt);
 
 impl Int {

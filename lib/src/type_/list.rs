@@ -4,11 +4,8 @@ use derive_more::From;
 use derive_more::Into;
 use derive_more::IntoIterator;
 
-#[derive(
-    Clone, PartialEq, Eq, Hash, IntoIterator, Deref, DerefMut, From, Into, derive_more::Debug,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, IntoIterator, Deref, DerefMut, From, Into)]
 #[into_iterator(owned, ref, ref_mut)]
-#[debug("{_0:?}")]
 pub struct List<T>(Vec<T>);
 
 impl<T> Default for List<T> {

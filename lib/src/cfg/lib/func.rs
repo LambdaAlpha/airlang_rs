@@ -3,16 +3,16 @@ use std::rc::Rc;
 
 use const_format::concatcp;
 
-use self::repr::generate_func;
-use self::repr::parse_func;
 use super::ConstImpl;
 use super::FreeImpl;
 use super::abort_free;
-use super::func::repr::generate_code;
-use super::func::repr::generate_ctx_access;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
+use crate::cfg::repr::func::generate_code;
+use crate::cfg::repr::func::generate_ctx_access;
+use crate::cfg::repr::func::generate_func;
+use crate::cfg::repr::func::parse_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::func::ConstFn;
@@ -96,7 +96,7 @@ pub fn represent() -> FreePrimFuncVal {
 
 fn fn_represent(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Func(func) = input else {
-        return bug!(cfg, "{REPRESENT}: expected input to be a function, but got {input:?}");
+        return bug!(cfg, "{REPRESENT}: expected input to be a function, but got {input}");
     };
     generate_func(func)
 }
@@ -139,13 +139,13 @@ impl MutFn<Cfg, Val, Val, Val> for Apply {
 
 fn func_input(cfg: &mut Cfg, input: Val) -> Result<(FuncVal, Val), Val> {
     let Val::Pair(pair) = input else {
-        return Err(bug!(cfg, "{APPLY}: expected input to be a pair, but got {input:?}"));
+        return Err(bug!(cfg, "{APPLY}: expected input to be a pair, but got {input}"));
     };
     let pair = Pair::from(pair);
     let Val::Func(func) = pair.left else {
         return Err(bug!(
             cfg,
-            "{APPLY}: expected input.left to be a function, but got {:?}",
+            "{APPLY}: expected input.left to be a function, but got {}",
             pair.left
         ));
     };
@@ -160,12 +160,12 @@ fn fn_get_context_access(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         return bug!(
             cfg,
-            "{GET_CONTEXT_ACCESS}: expected context to be a function, but got {:?}",
+            "{GET_CONTEXT_ACCESS}: expected context to be a function, but got {}",
             ctx.deref()
         );
     };
     if !input.is_unit() {
-        return bug!(cfg, "{GET_CONTEXT_ACCESS}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{GET_CONTEXT_ACCESS}: expected input to be a unit, but got {input}");
     }
     let access = generate_ctx_access(func.ctx_access());
     Val::Key(Key::from_str_unchecked(access))
@@ -179,12 +179,12 @@ fn fn_is_raw_input(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         return bug!(
             cfg,
-            "{IS_RAW_INPUT}: expected context to be a function, but got {:?}",
+            "{IS_RAW_INPUT}: expected context to be a function, but got {}",
             ctx.deref()
         );
     };
     if !input.is_unit() {
-        return bug!(cfg, "{IS_RAW_INPUT}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{IS_RAW_INPUT}: expected input to be a unit, but got {input}");
     }
     Val::Bit(Bit::from(func.raw_input()))
 }
@@ -197,12 +197,12 @@ fn fn_is_primitive(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         return bug!(
             cfg,
-            "{IS_PRIMITIVE}: expected context to be a function, but got {:?}",
+            "{IS_PRIMITIVE}: expected context to be a function, but got {}",
             ctx.deref()
         );
     };
     if !input.is_unit() {
-        return bug!(cfg, "{IS_PRIMITIVE}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{IS_PRIMITIVE}: expected input to be a unit, but got {input}");
     }
     let is_primitive = func.is_primitive();
     Val::Bit(Bit::from(is_primitive))
@@ -214,14 +214,10 @@ pub fn get_code() -> ConstPrimFuncVal {
 
 fn fn_get_code(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
-        return bug!(
-            cfg,
-            "{GET_CODE}: expected context to be a function, but got {:?}",
-            ctx.deref()
-        );
+        return bug!(cfg, "{GET_CODE}: expected context to be a function, but got {}", ctx.deref());
     };
     if !input.is_unit() {
-        return bug!(cfg, "{GET_CODE}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{GET_CODE}: expected input to be a unit, but got {input}");
     }
     generate_code(func)
 }
@@ -234,17 +230,15 @@ fn fn_get_prelude(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     let Val::Func(func) = &*ctx else {
         return bug!(
             cfg,
-            "{GET_PRELUDE}: expected context to be a function, but got {:?}",
+            "{GET_PRELUDE}: expected context to be a function, but got {}",
             ctx.deref()
         );
     };
     if !input.is_unit() {
-        return bug!(cfg, "{GET_PRELUDE}: expected input to be a unit, but got {input:?}");
+        return bug!(cfg, "{GET_PRELUDE}: expected input to be a unit, but got {input}");
     }
     let Some(ctx) = func.prelude() else {
         return bug!(cfg, "{GET_PRELUDE}: prelude not found");
     };
     ctx.clone()
 }
-
-mod repr;
