@@ -77,7 +77,7 @@ fn test_interpret(air: Air, input: &str, file_name: &str) -> Result<(), Box<dyn 
     Ok(())
 }
 
-fn log_abort(cfg: &mut Cfg) {
+fn log_abort(cfg: &Cfg) {
     if !cfg.is_aborted() {
         return;
     }

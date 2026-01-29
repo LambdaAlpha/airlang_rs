@@ -5,12 +5,12 @@ use std::io::Result;
 use std::io::Write;
 use std::io::stdin;
 use std::mem::take;
-use std::ops::Deref;
 
 use airlang::Air;
+use airlang::semantics::cfg::Cfg;
 use airlang::semantics::val::Val;
 use airlang::syntax::parse;
-use airlang::type_::Text;
+use airlang::type_::Key;
 use crossterm::Command;
 use crossterm::ExecutableCommand;
 use crossterm::QueueableCommand;
@@ -408,9 +408,26 @@ impl<T: ReplTerminal> Repl<T> {
         match parse::<Val>(input) {
             Ok(input) => {
                 let output = self.air.interpret(input);
-                self.terminal.print(format!("{output:#}"))
+                if self.air.cfg().is_aborted() {
+                    self.print_abort()?;
+                    self.air.cfg_mut().recover();
+                    Ok(())
+                } else {
+                    self.terminal.print(format!("{output:#}"))
+                }
             }
             Err(e) => self.terminal.eprint(e.to_string()),
+        }
+    }
+
+    fn print_abort(&mut self) -> Result<()> {
+        let type_ = self.air.cfg().import(Key::from_str_unchecked(Cfg::ABORT_TYPE));
+        let msg = self.air.cfg().import(Key::from_str_unchecked(Cfg::ABORT_MSG));
+        match (type_, msg) {
+            (Some(type_), Some(msg)) => self.terminal.eprint(format!("aborted by {type_}: {msg}")),
+            (None, Some(msg)) => self.terminal.eprint(format!("aborted: {msg}")),
+            (Some(type_), None) => self.terminal.eprint(format!("aborted by {type_}")),
+            (None, None) => self.terminal.eprint("aborted"),
         }
     }
 
@@ -422,10 +439,7 @@ impl<T: ReplTerminal> Repl<T> {
         self.terminal.print(" ")?;
         match parse(include_str!("air/version.air")) {
             Ok(repr) => match self.air.interpret(repr) {
-                Val::Text(t) => {
-                    let s = Text::from(t);
-                    self.terminal.print(s.deref())
-                }
+                Val::Text(text) => self.terminal.print(&***text),
                 _ => self.terminal.eprint("unknown version"),
             },
             Err(err) => self.terminal.eprint(err.to_string()),
