@@ -5,6 +5,7 @@ use crate::semantics::core::Eval;
 use crate::semantics::func::MutFn;
 use crate::semantics::val::Val;
 use crate::syntax::parse;
+use crate::type_::Key;
 
 pub struct CoreCfg2;
 
@@ -50,6 +51,17 @@ impl CoreCfg2 {
             Ok(input) => input,
             Err(_) => panic!("stage 2: failed to parse {path}"),
         };
-        Eval.mut_call(cfg, ctx, input)
+        let output = Eval.mut_call(cfg, ctx, input);
+        if cfg.is_aborted() {
+            let type_ = cfg.import(Key::from_str_unchecked(Cfg::ABORT_TYPE));
+            let msg = cfg.import(Key::from_str_unchecked(Cfg::ABORT_MSG));
+            match (type_, msg) {
+                (Some(type_), Some(msg)) => panic!("stage 2: aborted by {type_}: {msg}"),
+                (None, Some(msg)) => panic!("stage 2: aborted: {msg}"),
+                (Some(type_), None) => panic!("stage 2: aborted by {type_}"),
+                (None, None) => panic!("stage 2: aborted"),
+            }
+        }
+        output
     }
 }
