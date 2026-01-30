@@ -1,6 +1,6 @@
 [package]
 name = "airlang_bin"
-version = "0.22.0"
+version = "0.23.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 description = "Air is a minimalist and universal programming language."
@@ -13,11 +13,11 @@ workspace = true
 
 [dependencies.airlang]
 path = "../lib"
-version = "0.22.0"
+version = "0.23.0"
 
 [dependencies.airlang_ext]
 path = "../ext"
-version = "0.22.0"
+version = "0.23.0"
 
 [dependencies.crossterm]
 version = "0.29"
