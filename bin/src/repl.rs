@@ -410,7 +410,7 @@ impl<T: ReplTerminal> Repl<T> {
                 let output = self.air.interpret(input);
                 if self.air.cfg().is_aborted() {
                     self.print_abort()?;
-                    self.air.cfg_mut().recover();
+                    self.recover();
                     Ok(())
                 } else {
                     self.terminal.print(format!("{output:#}"))
@@ -429,6 +429,13 @@ impl<T: ReplTerminal> Repl<T> {
             (Some(type_), None) => self.terminal.eprint(format!("aborted by {type_}")),
             (None, None) => self.terminal.eprint("aborted"),
         }
+    }
+
+    fn recover(&mut self) {
+        let cfg = self.air.cfg_mut();
+        cfg.remove(Key::from_str_unchecked(Cfg::ABORT_TYPE));
+        cfg.remove(Key::from_str_unchecked(Cfg::ABORT_MSG));
+        cfg.recover();
     }
 
     const TITLE: &'static str = "🜁 Air";

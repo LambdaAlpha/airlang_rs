@@ -78,6 +78,10 @@ impl Cfg {
         Some(())
     }
 
+    pub fn remove(&mut self, name: Key) {
+        self.map.remove(&name);
+    }
+
     pub fn scope_level(&self) -> usize {
         self.max_scope
     }
