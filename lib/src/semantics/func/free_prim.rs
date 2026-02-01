@@ -15,14 +15,6 @@ where T: FreeFn<Cfg, I, O>
     }
 }
 
-impl<Cfg, I, O, T> FreeFn<Cfg, I, O> for &mut T
-where T: FreeFn<Cfg, I, O>
-{
-    fn free_call(&self, cfg: &mut Cfg, input: I) -> O {
-        (**self).free_call(cfg, input)
-    }
-}
-
 #[derive(Clone)]
 pub struct FreePrimFunc {
     pub(crate) raw_input: bool,

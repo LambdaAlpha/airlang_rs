@@ -1,26 +1,22 @@
 use std::mem::swap;
-use std::ops::Deref;
 
 use const_format::concatcp;
 
 use super::ConstImpl;
 use super::FreeImpl;
+use super::ImplExtra;
 use super::MutImpl;
-use super::abort_const;
-use super::abort_free;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
-use crate::semantics::val::ConstPrimFuncVal;
+use crate::semantics::val::CtxPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MAP;
-use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::Cell;
-use crate::type_::ConstRef;
 use crate::type_::Int;
 use crate::type_::Key;
 use crate::type_::List;
@@ -32,24 +28,24 @@ use crate::type_::Pair;
 pub struct MapLib {
     pub new: FreePrimFuncVal,
     pub new_set: FreePrimFuncVal,
-    pub get_length: ConstPrimFuncVal,
-    pub get_items: ConstPrimFuncVal,
-    pub into_items: MutPrimFuncVal,
-    pub get_keys: ConstPrimFuncVal,
-    pub into_keys: MutPrimFuncVal,
-    pub get_values: ConstPrimFuncVal,
-    pub into_values: MutPrimFuncVal,
-    pub contain: ConstPrimFuncVal,
-    pub contain_all: ConstPrimFuncVal,
-    pub contain_any: ConstPrimFuncVal,
-    pub set: MutPrimFuncVal,
-    pub set_many: MutPrimFuncVal,
-    pub get: ConstPrimFuncVal,
-    pub get_many: ConstPrimFuncVal,
-    pub remove: MutPrimFuncVal,
-    pub remove_many: MutPrimFuncVal,
-    pub move_: MutPrimFuncVal,
-    pub clear: MutPrimFuncVal,
+    pub get_length: CtxPrimFuncVal,
+    pub get_items: CtxPrimFuncVal,
+    pub into_items: CtxPrimFuncVal,
+    pub get_keys: CtxPrimFuncVal,
+    pub into_keys: CtxPrimFuncVal,
+    pub get_values: CtxPrimFuncVal,
+    pub into_values: CtxPrimFuncVal,
+    pub contain: CtxPrimFuncVal,
+    pub contain_all: CtxPrimFuncVal,
+    pub contain_any: CtxPrimFuncVal,
+    pub set: CtxPrimFuncVal,
+    pub set_many: CtxPrimFuncVal,
+    pub get: CtxPrimFuncVal,
+    pub get_many: CtxPrimFuncVal,
+    pub remove: CtxPrimFuncVal,
+    pub remove_many: CtxPrimFuncVal,
+    pub move_: CtxPrimFuncVal,
+    pub clear: CtxPrimFuncVal,
 }
 
 pub const NEW: &str = concatcp!(PREFIX_ID, MAP, ".new");
@@ -126,7 +122,7 @@ impl CfgMod for MapLib {
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreeImpl { free: fn_new }.build()
+    FreeImpl { fn_: fn_new }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
@@ -149,7 +145,7 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn new_set() -> FreePrimFuncVal {
-    FreeImpl { free: fn_new_set }.build()
+    FreeImpl { fn_: fn_new_set }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_new_set(cfg: &mut Cfg, input: Val) -> Val {
@@ -167,13 +163,13 @@ fn fn_new_set(cfg: &mut Cfg, input: Val) -> Val {
     Val::Map(map.into())
 }
 
-pub fn get_length() -> ConstPrimFuncVal {
-    ConstImpl { free: abort_free(GET_LENGTH), const_: fn_get_length }.build()
+pub fn get_length() -> CtxPrimFuncVal {
+    ConstImpl { fn_: fn_get_length }.build(ImplExtra { raw_input: false })
 }
 
-fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::Map(map) = &*ctx else {
-        return bug!(cfg, "{GET_LENGTH}: expected context to be a map, but got {}", ctx.deref());
+fn fn_get_length(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+    let Val::Map(map) = ctx else {
+        return bug!(cfg, "{GET_LENGTH}: expected context to be a map, but got {ctx}");
     };
     if !input.is_unit() {
         return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input}");
@@ -182,13 +178,13 @@ fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     Val::Int(len.into())
 }
 
-pub fn get_items() -> ConstPrimFuncVal {
-    ConstImpl { free: abort_free(GET_ITEMS), const_: fn_get_items }.build()
+pub fn get_items() -> CtxPrimFuncVal {
+    ConstImpl { fn_: fn_get_items }.build(ImplExtra { raw_input: false })
 }
 
-fn fn_get_items(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::Map(map) = &*ctx else {
-        return bug!(cfg, "{GET_ITEMS}: expected context to be a map, but got {}", ctx.deref());
+fn fn_get_items(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+    let Val::Map(map) = ctx else {
+        return bug!(cfg, "{GET_ITEMS}: expected context to be a map, but got {ctx}");
     };
     if !input.is_unit() {
         return bug!(cfg, "{GET_ITEMS}: expected input to be a unit, but got {input}");
@@ -200,9 +196,8 @@ fn fn_get_items(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     Val::List(items.into())
 }
 
-pub fn into_items() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(INTO_ITEMS), const_: abort_const(INTO_ITEMS), mut_: fn_into_items }
-        .build()
+pub fn into_items() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_into_items }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_into_items(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -219,13 +214,13 @@ fn fn_into_items(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::List(items.into())
 }
 
-pub fn get_keys() -> ConstPrimFuncVal {
-    ConstImpl { free: abort_free(GET_KEYS), const_: fn_get_keys }.build()
+pub fn get_keys() -> CtxPrimFuncVal {
+    ConstImpl { fn_: fn_get_keys }.build(ImplExtra { raw_input: false })
 }
 
-fn fn_get_keys(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::Map(map) = &*ctx else {
-        return bug!(cfg, "{GET_KEYS}: expected context to be a map, but got {}", ctx.deref());
+fn fn_get_keys(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+    let Val::Map(map) = ctx else {
+        return bug!(cfg, "{GET_KEYS}: expected context to be a map, but got {ctx}");
     };
     if !input.is_unit() {
         return bug!(cfg, "{GET_KEYS}: expected input to be a unit, but got {input}");
@@ -234,9 +229,8 @@ fn fn_get_keys(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     Val::List(keys.into())
 }
 
-pub fn into_keys() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(INTO_KEYS), const_: abort_const(INTO_KEYS), mut_: fn_into_keys }
-        .build()
+pub fn into_keys() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_into_keys }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_into_keys(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -252,13 +246,13 @@ fn fn_into_keys(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::List(keys.into())
 }
 
-pub fn get_values() -> ConstPrimFuncVal {
-    ConstImpl { free: abort_free(GET_VALUES), const_: fn_get_values }.build()
+pub fn get_values() -> CtxPrimFuncVal {
+    ConstImpl { fn_: fn_get_values }.build(ImplExtra { raw_input: false })
 }
 
-fn fn_get_values(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::Map(map) = &*ctx else {
-        return bug!(cfg, "{GET_VALUES}: expected context to be a map, but got {}", ctx.deref());
+fn fn_get_values(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+    let Val::Map(map) = ctx else {
+        return bug!(cfg, "{GET_VALUES}: expected context to be a map, but got {ctx}");
     };
     if !input.is_unit() {
         return bug!(cfg, "{GET_VALUES}: expected input to be a unit, but got {input}");
@@ -267,13 +261,8 @@ fn fn_get_values(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     Val::List(values.into())
 }
 
-pub fn into_values() -> MutPrimFuncVal {
-    MutImpl {
-        free: abort_free(INTO_VALUES),
-        const_: abort_const(INTO_VALUES),
-        mut_: fn_into_values,
-    }
-    .build()
+pub fn into_values() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_into_values }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_into_values(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -289,13 +278,13 @@ fn fn_into_values(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::List(values.into())
 }
 
-pub fn contain() -> ConstPrimFuncVal {
-    ConstImpl { free: abort_free(CONTAIN), const_: fn_contain }.build()
+pub fn contain() -> CtxPrimFuncVal {
+    ConstImpl { fn_: fn_contain }.build(ImplExtra { raw_input: false })
 }
 
-fn fn_contain(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::Map(map) = &*ctx else {
-        return bug!(cfg, "{CONTAIN}: expected context to be a map, but got {}", ctx.deref());
+fn fn_contain(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+    let Val::Map(map) = ctx else {
+        return bug!(cfg, "{CONTAIN}: expected context to be a map, but got {ctx}");
     };
     let Val::Key(key) = input else {
         return bug!(cfg, "{CONTAIN}: expected input to be a key, but got {input}");
@@ -303,13 +292,13 @@ fn fn_contain(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     Val::Bit(Bit::from(map.contains_key(&key)))
 }
 
-pub fn contain_all() -> ConstPrimFuncVal {
-    ConstImpl { free: abort_free(CONTAIN_ALL), const_: fn_contain_all }.build()
+pub fn contain_all() -> CtxPrimFuncVal {
+    ConstImpl { fn_: fn_contain_all }.build(ImplExtra { raw_input: false })
 }
 
-fn fn_contain_all(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::Map(map) = &*ctx else {
-        return bug!(cfg, "{CONTAIN_ALL}: expected context to be a map, but got {}", ctx.deref());
+fn fn_contain_all(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+    let Val::Map(map) = ctx else {
+        return bug!(cfg, "{CONTAIN_ALL}: expected context to be a map, but got {ctx}");
     };
     let Val::List(keys) = input else {
         return bug!(cfg, "{CONTAIN_ALL}: expected input to be a list, but got {input}");
@@ -326,13 +315,13 @@ fn fn_contain_all(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     Val::Bit(Bit::from(true))
 }
 
-pub fn contain_any() -> ConstPrimFuncVal {
-    ConstImpl { free: abort_free(CONTAIN_ANY), const_: fn_contain_any }.build()
+pub fn contain_any() -> CtxPrimFuncVal {
+    ConstImpl { fn_: fn_contain_any }.build(ImplExtra { raw_input: false })
 }
 
-fn fn_contain_any(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::Map(map) = &*ctx else {
-        return bug!(cfg, "{CONTAIN_ANY}: expected context to be a map, but got {}", ctx.deref());
+fn fn_contain_any(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+    let Val::Map(map) = ctx else {
+        return bug!(cfg, "{CONTAIN_ANY}: expected context to be a map, but got {ctx}");
     };
     let Val::List(keys) = input else {
         return bug!(cfg, "{CONTAIN_ANY}: expected input to be a list, but got {input}");
@@ -349,8 +338,8 @@ fn fn_contain_any(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     Val::Bit(Bit::from(false))
 }
 
-pub fn set() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(SET), const_: abort_const(SET), mut_: fn_set }.build()
+pub fn set() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_set }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -371,8 +360,8 @@ fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::Cell(Cell::new(value).into())
 }
 
-pub fn set_many() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(SET_MANY), const_: abort_const(SET_MANY), mut_: fn_set_many }.build()
+pub fn set_many() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_set_many }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_set_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -388,13 +377,13 @@ fn fn_set_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::Map(map.into())
 }
 
-pub fn get() -> ConstPrimFuncVal {
-    ConstImpl { free: abort_free(GET), const_: fn_get }.build()
+pub fn get() -> CtxPrimFuncVal {
+    ConstImpl { fn_: fn_get }.build(ImplExtra { raw_input: false })
 }
 
-fn fn_get(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::Map(map) = &*ctx else {
-        return bug!(cfg, "{GET}: expected context to be a map, but got {}", ctx.deref());
+fn fn_get(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+    let Val::Map(map) = ctx else {
+        return bug!(cfg, "{GET}: expected context to be a map, but got {ctx}");
     };
     let Val::Key(key) = input else {
         return bug!(cfg, "{GET}: expected input to be a key, but got {input}");
@@ -405,13 +394,13 @@ fn fn_get(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     Val::Cell(Cell::new(value.clone()).into())
 }
 
-pub fn get_many() -> ConstPrimFuncVal {
-    ConstImpl { free: abort_free(GET_MANY), const_: fn_get_many }.build()
+pub fn get_many() -> CtxPrimFuncVal {
+    ConstImpl { fn_: fn_get_many }.build(ImplExtra { raw_input: false })
 }
 
-fn fn_get_many(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::Map(map) = &*ctx else {
-        return bug!(cfg, "{GET_MANY}: expected context to be a map, but got {}", ctx.deref());
+fn fn_get_many(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+    let Val::Map(map) = ctx else {
+        return bug!(cfg, "{GET_MANY}: expected context to be a map, but got {ctx}");
     };
     let Val::List(keys) = input else {
         return bug!(cfg, "{GET_MANY}: expected input to be a list, but got {input}");
@@ -429,8 +418,8 @@ fn fn_get_many(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     Val::Map(new_map.into())
 }
 
-pub fn remove() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(REMOVE), const_: abort_const(REMOVE), mut_: fn_remove }.build()
+pub fn remove() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_remove }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -446,13 +435,8 @@ fn fn_remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::Cell(Cell::new(value).into())
 }
 
-pub fn remove_many() -> MutPrimFuncVal {
-    MutImpl {
-        free: abort_free(REMOVE_MANY),
-        const_: abort_const(REMOVE_MANY),
-        mut_: fn_remove_many,
-    }
-    .build()
+pub fn remove_many() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_remove_many }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_remove_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -475,8 +459,8 @@ fn fn_remove_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::Map(new_map.into())
 }
 
-pub fn move_() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(MOVE), const_: abort_const(MOVE), mut_: fn_move }.build()
+pub fn move_() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_move }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_move(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -492,8 +476,8 @@ fn fn_move(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     value
 }
 
-pub fn clear() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(CLEAR), const_: abort_const(CLEAR), mut_: fn_clear }.build()
+pub fn clear() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_clear }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_clear(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {

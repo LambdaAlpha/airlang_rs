@@ -1,8 +1,7 @@
 use crate::cfg::lib::CoreLib;
-use crate::semantics::val::ConstPrimFuncVal;
+use crate::semantics::val::CtxPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
-use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Key;
 use crate::type_::Map;
@@ -37,30 +36,30 @@ pub struct CorePrelude {
 
     pub call: FreePrimFuncVal,
 
-    pub move_: MutPrimFuncVal,
+    pub move_: CtxPrimFuncVal,
 
     pub exist: FreePrimFuncVal,
     pub import: FreePrimFuncVal,
     pub export: FreePrimFuncVal,
-    pub with: MutPrimFuncVal,
+    pub with: CtxPrimFuncVal,
 
     pub function: FreePrimFuncVal,
-    pub apply: MutPrimFuncVal,
+    pub apply: CtxPrimFuncVal,
 
-    pub get: ConstPrimFuncVal,
-    pub set: MutPrimFuncVal,
-    pub form: ConstPrimFuncVal,
-    pub represent: MutPrimFuncVal,
-    pub which: MutPrimFuncVal,
+    pub get: CtxPrimFuncVal,
+    pub set: CtxPrimFuncVal,
+    pub form: CtxPrimFuncVal,
+    pub represent: CtxPrimFuncVal,
+    pub which: CtxPrimFuncVal,
 
-    pub do_: MutPrimFuncVal,
-    pub test: MutPrimFuncVal,
-    pub switch: MutPrimFuncVal,
-    pub match_: MutPrimFuncVal,
-    pub loop_: MutPrimFuncVal,
-    pub iterate: MutPrimFuncVal,
+    pub do_: CtxPrimFuncVal,
+    pub test: CtxPrimFuncVal,
+    pub switch: CtxPrimFuncVal,
+    pub match_: CtxPrimFuncVal,
+    pub loop_: CtxPrimFuncVal,
+    pub iterate: CtxPrimFuncVal,
 
-    pub get_type: ConstPrimFuncVal,
+    pub get_type: CtxPrimFuncVal,
     pub equal: FreePrimFuncVal,
 
     pub abort: FreePrimFuncVal,
@@ -68,8 +67,8 @@ pub struct CorePrelude {
 
     pub data: FreePrimFuncVal,
     pub id: FreePrimFuncVal,
-    pub code: MutPrimFuncVal,
-    pub eval: MutPrimFuncVal,
+    pub code: CtxPrimFuncVal,
+    pub eval: CtxPrimFuncVal,
 }
 
 pub trait Prelude {

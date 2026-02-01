@@ -3,6 +3,7 @@ use std::rc::Rc;
 use const_format::concatcp;
 
 use super::FreeImpl;
+use super::ImplExtra;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
@@ -10,10 +11,10 @@ use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::Id;
 use crate::semantics::core::PREFIX_ID;
+use crate::semantics::func::CtxPrimFunc;
 use crate::semantics::func::FreePrimFunc;
-use crate::semantics::func::MutPrimFunc;
+use crate::semantics::val::CtxPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
-use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Cell;
 use crate::type_::Text;
@@ -22,8 +23,8 @@ use crate::type_::Text;
 pub struct LangLib {
     pub data: FreePrimFuncVal,
     pub id: FreePrimFuncVal,
-    pub code: MutPrimFuncVal,
-    pub eval: MutPrimFuncVal,
+    pub code: CtxPrimFuncVal,
+    pub eval: CtxPrimFuncVal,
     pub parse: FreePrimFuncVal,
     pub generate: FreePrimFuncVal,
 }
@@ -69,16 +70,16 @@ pub fn id() -> FreePrimFuncVal {
     FreePrimFunc { raw_input: false, fn_: Rc::new(Id) }.into()
 }
 
-pub fn code() -> MutPrimFuncVal {
-    MutPrimFunc { raw_input: true, fn_: Rc::new(Eval) }.into()
+pub fn code() -> CtxPrimFuncVal {
+    CtxPrimFunc { raw_input: true, fn_: Rc::new(Eval), const_: false }.into()
 }
 
-pub fn eval() -> MutPrimFuncVal {
-    MutPrimFunc { raw_input: false, fn_: Rc::new(Eval) }.into()
+pub fn eval() -> CtxPrimFuncVal {
+    CtxPrimFunc { raw_input: false, fn_: Rc::new(Eval), const_: false }.into()
 }
 
 pub fn parse() -> FreePrimFuncVal {
-    FreeImpl { free: fn_parse }.build()
+    FreeImpl { fn_: fn_parse }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_parse(cfg: &mut Cfg, input: Val) -> Val {
@@ -92,7 +93,7 @@ fn fn_parse(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn generate() -> FreePrimFuncVal {
-    FreeImpl { free: fn_generate }.build()
+    FreeImpl { fn_: fn_generate }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_generate(_cfg: &mut Cfg, input: Val) -> Val {

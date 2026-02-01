@@ -2,6 +2,7 @@ use const_format::concatcp;
 use num_traits::Zero;
 
 use super::FreeImpl;
+use super::ImplExtra;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
@@ -75,7 +76,7 @@ impl CfgMod for IntLib {
 }
 
 pub fn add() -> FreePrimFuncVal {
-    FreeImpl { free: fn_add }.build()
+    FreeImpl { fn_: fn_add }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_add(cfg: &mut Cfg, input: Val) -> Val {
@@ -95,7 +96,7 @@ fn fn_add(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn subtract() -> FreePrimFuncVal {
-    FreeImpl { free: fn_subtract }.build()
+    FreeImpl { fn_: fn_subtract }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_subtract(cfg: &mut Cfg, input: Val) -> Val {
@@ -123,7 +124,7 @@ fn fn_subtract(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn multiply() -> FreePrimFuncVal {
-    FreeImpl { free: fn_multiply }.build()
+    FreeImpl { fn_: fn_multiply }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_multiply(cfg: &mut Cfg, input: Val) -> Val {
@@ -151,7 +152,7 @@ fn fn_multiply(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn divide() -> FreePrimFuncVal {
-    FreeImpl { free: fn_divide }.build()
+    FreeImpl { fn_: fn_divide }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_divide(cfg: &mut Cfg, input: Val) -> Val {
@@ -179,7 +180,7 @@ fn fn_divide(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn remainder() -> FreePrimFuncVal {
-    FreeImpl { free: fn_remainder }.build()
+    FreeImpl { fn_: fn_remainder }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_remainder(cfg: &mut Cfg, input: Val) -> Val {
@@ -211,7 +212,7 @@ fn fn_remainder(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn divide_remainder() -> FreePrimFuncVal {
-    FreeImpl { free: fn_divide_remainder }.build()
+    FreeImpl { fn_: fn_divide_remainder }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_divide_remainder(cfg: &mut Cfg, input: Val) -> Val {
@@ -243,7 +244,7 @@ fn fn_divide_remainder(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn less() -> FreePrimFuncVal {
-    FreeImpl { free: fn_less }.build()
+    FreeImpl { fn_: fn_less }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_less(cfg: &mut Cfg, input: Val) -> Val {
@@ -261,7 +262,7 @@ fn fn_less(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn less_equal() -> FreePrimFuncVal {
-    FreeImpl { free: fn_less_equal }.build()
+    FreeImpl { fn_: fn_less_equal }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_less_equal(cfg: &mut Cfg, input: Val) -> Val {
@@ -287,7 +288,7 @@ fn fn_less_equal(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn greater() -> FreePrimFuncVal {
-    FreeImpl { free: fn_greater }.build()
+    FreeImpl { fn_: fn_greater }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_greater(cfg: &mut Cfg, input: Val) -> Val {
@@ -309,7 +310,7 @@ fn fn_greater(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn greater_equal() -> FreePrimFuncVal {
-    FreeImpl { free: fn_greater_equal }.build()
+    FreeImpl { fn_: fn_greater_equal }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_greater_equal(cfg: &mut Cfg, input: Val) -> Val {
@@ -335,7 +336,7 @@ fn fn_greater_equal(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn less_greater() -> FreePrimFuncVal {
-    FreeImpl { free: fn_less_greater }.build()
+    FreeImpl { fn_: fn_less_greater }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_less_greater(cfg: &mut Cfg, input: Val) -> Val {

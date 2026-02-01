@@ -1,6 +1,7 @@
 use const_format::concatcp;
 
 use super::FreeImpl;
+use super::ImplExtra;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
@@ -42,7 +43,7 @@ impl CfgMod for BitLib {
 }
 
 pub fn not() -> FreePrimFuncVal {
-    FreeImpl { free: fn_not }.build()
+    FreeImpl { fn_: fn_not }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_not(cfg: &mut Cfg, input: Val) -> Val {
@@ -53,7 +54,7 @@ fn fn_not(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn and() -> FreePrimFuncVal {
-    FreeImpl { free: fn_and }.build()
+    FreeImpl { fn_: fn_and }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_and(cfg: &mut Cfg, input: Val) -> Val {
@@ -70,7 +71,7 @@ fn fn_and(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn or() -> FreePrimFuncVal {
-    FreeImpl { free: fn_or }.build()
+    FreeImpl { fn_: fn_or }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_or(cfg: &mut Cfg, input: Val) -> Val {
@@ -87,7 +88,7 @@ fn fn_or(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn xor() -> FreePrimFuncVal {
-    FreeImpl { free: fn_xor }.build()
+    FreeImpl { fn_: fn_xor }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_xor(cfg: &mut Cfg, input: Val) -> Val {
@@ -104,7 +105,7 @@ fn fn_xor(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn imply() -> FreePrimFuncVal {
-    FreeImpl { free: fn_imply }.build()
+    FreeImpl { fn_: fn_imply }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_imply(cfg: &mut Cfg, input: Val) -> Val {

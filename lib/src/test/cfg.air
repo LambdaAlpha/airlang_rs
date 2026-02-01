@@ -167,7 +167,7 @@ _ do [
     .any set _ import _value.any,
     .a0 set _ any .,
     .f set _ function {
-        context_access : _free,
+        context_free : true,
         code : __ : _ form _ import _a,
         prelude : {},
     },

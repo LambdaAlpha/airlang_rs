@@ -21,21 +21,15 @@ use self::resource::ResourceLib;
 use self::text::TextLib;
 use self::unit::UnitLib;
 use self::value::ValueLib;
-use crate::bug;
 use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::func::ConstFn;
-use crate::semantics::func::ConstPrimFunc;
+use crate::semantics::func::CtxFn;
+use crate::semantics::func::CtxPrimFunc;
 use crate::semantics::func::FreeFn;
 use crate::semantics::func::FreePrimFunc;
-use crate::semantics::func::MutFn;
-use crate::semantics::func::MutPrimFunc;
-use crate::semantics::val::ConstPrimFuncVal;
+use crate::semantics::val::CtxPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
-use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
-use crate::type_::ConstRef;
-use crate::type_::DynRef;
 
 #[derive(Default, Clone)]
 pub struct CoreLib {
@@ -88,178 +82,69 @@ impl CfgMod for CoreLib {
     }
 }
 
-pub struct FreeImpl<Free> {
-    pub free: Free,
+pub struct FreeImpl<F> {
+    pub fn_: F,
 }
 
-impl<Free> FreeFn<Cfg, Val, Val> for FreeImpl<Free>
-where Free: Fn(&mut Cfg, Val) -> Val + 'static
+impl<F> FreeFn<Cfg, Val, Val> for FreeImpl<F>
+where F: Fn(&mut Cfg, Val) -> Val + 'static
 {
     fn free_call(&self, cfg: &mut Cfg, input: Val) -> Val {
-        (self.free)(cfg, input)
+        (self.fn_)(cfg, input)
     }
 }
 
-impl<Free> FreeImpl<Free>
-where Free: Fn(&mut Cfg, Val) -> Val + 'static
+impl<F> FreeImpl<F>
+where F: Fn(&mut Cfg, Val) -> Val + 'static
 {
-    pub fn build(self) -> FreePrimFuncVal {
-        FreePrimFunc { raw_input: false, fn_: Rc::new(self) }.into()
-    }
-
-    pub fn build_with(self, raw_input: bool) -> FreePrimFuncVal {
-        FreePrimFunc { raw_input, fn_: Rc::new(self) }.into()
+    pub fn build(self, extra: ImplExtra) -> FreePrimFuncVal {
+        FreePrimFunc { raw_input: extra.raw_input, fn_: Rc::new(self) }.into()
     }
 }
 
-pub struct ConstImpl<Free, Const> {
-    pub free: Free,
-    pub const_: Const,
+pub struct ConstImpl<F> {
+    pub fn_: F,
 }
 
-impl<Free, Const> FreeFn<Cfg, Val, Val> for ConstImpl<Free, Const>
-where Free: Fn(&mut Cfg, Val) -> Val + 'static
+impl<F> CtxFn<Cfg, Val, Val, Val> for ConstImpl<F>
+where F: Fn(&mut Cfg, &Val, Val) -> Val + 'static
 {
-    fn free_call(&self, cfg: &mut Cfg, input: Val) -> Val {
-        (self.free)(cfg, input)
+    fn ctx_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+        (self.fn_)(cfg, ctx, input)
     }
 }
 
-impl<Free, Const> ConstFn<Cfg, Val, Val, Val> for ConstImpl<Free, Const>
-where
-    Free: Fn(&mut Cfg, Val) -> Val + 'static,
-    Const: Fn(&mut Cfg, ConstRef<Val>, Val) -> Val + 'static,
+impl<F> ConstImpl<F>
+where F: Fn(&mut Cfg, &Val, Val) -> Val + 'static
 {
-    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-        (self.const_)(cfg, ctx, input)
+    pub fn build(self, extra: ImplExtra) -> CtxPrimFuncVal {
+        CtxPrimFunc { raw_input: extra.raw_input, fn_: Rc::new(self), const_: true }.into()
     }
 }
 
-impl<Free, Const> ConstImpl<Free, Const>
-where
-    Free: Fn(&mut Cfg, Val) -> Val + 'static,
-    Const: Fn(&mut Cfg, ConstRef<Val>, Val) -> Val + 'static,
+pub struct MutImpl<F> {
+    pub fn_: F,
+}
+
+impl<F> CtxFn<Cfg, Val, Val, Val> for MutImpl<F>
+where F: Fn(&mut Cfg, &mut Val, Val) -> Val + 'static
 {
-    pub fn build(self) -> ConstPrimFuncVal {
-        ConstPrimFunc { raw_input: false, fn_: Rc::new(self) }.into()
-    }
-
-    pub fn build_with(self, raw_input: bool) -> ConstPrimFuncVal {
-        ConstPrimFunc { raw_input, fn_: Rc::new(self) }.into()
+    fn ctx_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+        (self.fn_)(cfg, ctx, input)
     }
 }
 
-pub struct MutImpl<Free, Const, Mut> {
-    pub free: Free,
-    pub const_: Const,
-    pub mut_: Mut,
-}
-
-impl<Free, Const, Mut> FreeFn<Cfg, Val, Val> for MutImpl<Free, Const, Mut>
-where Free: Fn(&mut Cfg, Val) -> Val + 'static
+impl<F> MutImpl<F>
+where F: Fn(&mut Cfg, &mut Val, Val) -> Val + 'static
 {
-    fn free_call(&self, cfg: &mut Cfg, input: Val) -> Val {
-        (self.free)(cfg, input)
+    pub fn build(self, extra: ImplExtra) -> CtxPrimFuncVal {
+        CtxPrimFunc { raw_input: extra.raw_input, fn_: Rc::new(self), const_: false }.into()
     }
 }
 
-impl<Free, Const, Mut> ConstFn<Cfg, Val, Val, Val> for MutImpl<Free, Const, Mut>
-where
-    Free: Fn(&mut Cfg, Val) -> Val + 'static,
-    Const: Fn(&mut Cfg, ConstRef<Val>, Val) -> Val + 'static,
-{
-    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-        (self.const_)(cfg, ctx, input)
-    }
-}
-
-impl<Free, Const, Mut> MutFn<Cfg, Val, Val, Val> for MutImpl<Free, Const, Mut>
-where
-    Free: Fn(&mut Cfg, Val) -> Val + 'static,
-    Const: Fn(&mut Cfg, ConstRef<Val>, Val) -> Val + 'static,
-    Mut: Fn(&mut Cfg, &mut Val, Val) -> Val + 'static,
-{
-    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
-        (self.mut_)(cfg, ctx, input)
-    }
-}
-
-impl<Free, Const, Mut> MutImpl<Free, Const, Mut>
-where
-    Free: Fn(&mut Cfg, Val) -> Val + 'static,
-    Const: Fn(&mut Cfg, ConstRef<Val>, Val) -> Val + 'static,
-    Mut: Fn(&mut Cfg, &mut Val, Val) -> Val + 'static,
-{
-    pub fn build(self) -> MutPrimFuncVal {
-        MutPrimFunc { raw_input: false, fn_: Rc::new(self) }.into()
-    }
-
-    pub fn build_with(self, raw_input: bool) -> MutPrimFuncVal {
-        MutPrimFunc { raw_input, fn_: Rc::new(self) }.into()
-    }
-}
-
-pub struct DynImpl<Free, Dyn> {
-    pub free: Free,
-    pub dyn_: Dyn,
-}
-
-impl<Free, Dyn> FreeFn<Cfg, Val, Val> for DynImpl<Free, Dyn>
-where Free: Fn(&mut Cfg, Val) -> Val + 'static
-{
-    fn free_call(&self, cfg: &mut Cfg, input: Val) -> Val {
-        (self.free)(cfg, input)
-    }
-}
-
-impl<Free, Dyn> ConstFn<Cfg, Val, Val, Val> for DynImpl<Free, Dyn>
-where
-    Free: Fn(&mut Cfg, Val) -> Val + 'static,
-    Dyn: Fn(&mut Cfg, DynRef<Val>, Val) -> Val + 'static,
-{
-    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-        (self.dyn_)(cfg, ctx.into_dyn(), input)
-    }
-}
-
-impl<Free, Dyn> MutFn<Cfg, Val, Val, Val> for DynImpl<Free, Dyn>
-where
-    Free: Fn(&mut Cfg, Val) -> Val + 'static,
-    Dyn: Fn(&mut Cfg, DynRef<Val>, Val) -> Val + 'static,
-{
-    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
-        (self.dyn_)(cfg, DynRef::new_mut(ctx), input)
-    }
-
-    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
-        (self.dyn_)(cfg, ctx, input)
-    }
-}
-
-impl<Free, Dyn> DynImpl<Free, Dyn>
-where
-    Free: Fn(&mut Cfg, Val) -> Val + 'static,
-    Dyn: Fn(&mut Cfg, DynRef<Val>, Val) -> Val + 'static,
-{
-    pub fn build(self) -> MutPrimFuncVal {
-        MutPrimFunc { raw_input: false, fn_: Rc::new(self) }.into()
-    }
-
-    pub fn build_with(self, raw_input: bool) -> MutPrimFuncVal {
-        MutPrimFunc { raw_input, fn_: Rc::new(self) }.into()
-    }
-}
-
-pub fn abort_free(key: &'static str) -> impl Fn(&mut Cfg, Val) -> Val + 'static {
-    move |cfg: &mut Cfg, _val: Val| {
-        bug!(cfg, "function {key} should not be called in a free context")
-    }
-}
-
-pub fn abort_const(key: &'static str) -> impl Fn(&mut Cfg, ConstRef<Val>, Val) -> Val + 'static {
-    move |cfg: &mut Cfg, _ctx: ConstRef<Val>, _val: Val| {
-        bug!(cfg, "function {key} should not be called in a constant context")
-    }
+#[derive(Copy, Clone)]
+pub struct ImplExtra {
+    pub raw_input: bool,
 }
 
 pub mod unit;

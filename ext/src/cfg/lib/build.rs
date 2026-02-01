@@ -8,6 +8,7 @@ use airlang::bug;
 use airlang::cfg::CfgMod;
 use airlang::cfg::extend_func;
 use airlang::cfg::lib::FreeImpl;
+use airlang::cfg::lib::ImplExtra;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_ID;
 use airlang::semantics::val::FreePrimFuncVal;
@@ -42,7 +43,7 @@ impl CfgMod for BuildLib {
 // todo rename
 // todo design
 pub fn load() -> FreePrimFuncVal {
-    FreeImpl { free: fn_load }.build()
+    FreeImpl { fn_: fn_load }.build(ImplExtra { raw_input: false })
 }
 
 // todo rename

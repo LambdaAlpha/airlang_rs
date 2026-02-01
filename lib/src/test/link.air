@@ -31,15 +31,24 @@ true
 const is_constant
 -----
 _ do [
-    .any set _ import _value.any,
     .new_constant set _ import _link.new_constant,
-    .which set _ import _link.which,
-    .is_constant set _ import _context.is_constant,
+    .is_constant set _ import _link.is_constant,
     .l set _ new_constant {},
-    l which is_constant : .,
+    _ is_constant l,
 ]
 -----
 true
+=====
+mut is_constant
+-----
+_ do [
+    .new set _ import _link.new,
+    .is_constant set _ import _link.is_constant,
+    .l set _ new {},
+    _ is_constant l,
+]
+-----
+false
 =====
 sync
 -----

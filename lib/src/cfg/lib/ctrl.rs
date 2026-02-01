@@ -4,8 +4,8 @@ use const_format::concatcp;
 use num_traits::Signed;
 use num_traits::ToPrimitive;
 
-use super::DynImpl;
-use super::abort_free;
+use super::ImplExtra;
+use super::MutImpl;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
@@ -16,14 +16,13 @@ use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::ctx::DynCtx;
-use crate::semantics::func::MutFn;
+use crate::semantics::func::CtxFn;
+use crate::semantics::val::CtxPrimFuncVal;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
-use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Byte;
 use crate::type_::Call;
-use crate::type_::DynRef;
 use crate::type_::Int;
 use crate::type_::Key;
 use crate::type_::List;
@@ -33,12 +32,12 @@ use crate::type_::Text;
 
 #[derive(Clone)]
 pub struct CtrlLib {
-    pub do_: MutPrimFuncVal,
-    pub test: MutPrimFuncVal,
-    pub switch: MutPrimFuncVal,
-    pub match_: MutPrimFuncVal,
-    pub loop_: MutPrimFuncVal,
-    pub iterate: MutPrimFuncVal,
+    pub do_: CtxPrimFuncVal,
+    pub test: CtxPrimFuncVal,
+    pub switch: CtxPrimFuncVal,
+    pub match_: CtxPrimFuncVal,
+    pub loop_: CtxPrimFuncVal,
+    pub iterate: CtxPrimFuncVal,
 }
 
 const CTRL: &str = "control";
@@ -112,7 +111,7 @@ impl Block {
         Ok(Block { statements })
     }
 
-    fn flow(self, tag: &str, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> OutputCtrlFlow {
+    fn flow(self, tag: &str, cfg: &mut Cfg, ctx: &mut Val) -> OutputCtrlFlow {
         let mut output = Val::default();
         for statement in self.statements {
             if cfg.is_aborted() {
@@ -120,10 +119,10 @@ impl Block {
             }
             match statement {
                 Statement::Normal(val) => {
-                    output = Eval.dyn_call(cfg, ctx.reborrow(), val);
+                    output = Eval.ctx_call(cfg, ctx, val);
                 }
                 Statement::Condition { ctrl_flow, condition, body } => {
-                    let condition = Eval.dyn_call(cfg, ctx.reborrow(), condition);
+                    let condition = Eval.ctx_call(cfg, ctx, condition);
                     let Val::Bit(condition) = condition else {
                         bug!(
                             cfg,
@@ -135,7 +134,7 @@ impl Block {
                         };
                     };
                     if *condition {
-                        let output = Eval.dyn_call(cfg, ctx, body);
+                        let output = Eval.ctx_call(cfg, ctx, body);
                         return OutputCtrlFlow { output, ctrl_flow };
                     }
                     output = Val::default();
@@ -145,7 +144,7 @@ impl Block {
         OutputCtrlFlow { output, ctrl_flow: CtrlFlow::Continue }
     }
 
-    fn eval(self, tag: &str, cfg: &mut Cfg, ctx: DynRef<Val>) -> Val {
+    fn eval(self, tag: &str, cfg: &mut Cfg, ctx: &mut Val) -> Val {
         self.flow(tag, cfg, ctx).output
     }
 }
@@ -188,22 +187,22 @@ impl CtrlFlow {
     }
 }
 
-pub fn do_() -> MutPrimFuncVal {
-    DynImpl { free: abort_free(DO), dyn_: fn_do }.build_with(true)
+pub fn do_() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_do }.build(ImplExtra { raw_input: true })
 }
 
-fn fn_do(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
+fn fn_do(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Ok(block) = Block::parse(DO, cfg, input) else {
         return Val::default();
     };
     block.eval(DO, cfg, ctx)
 }
 
-pub fn test() -> MutPrimFuncVal {
-    DynImpl { free: abort_free(TEST), dyn_: fn_test }.build_with(true)
+pub fn test() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_test }.build(ImplExtra { raw_input: true })
 }
 
-fn fn_test(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
+fn fn_test(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Ok(test) = Test::parse(cfg, input) else {
         return Val::default();
     };
@@ -236,8 +235,8 @@ impl Test {
         Ok(Test { condition, branch_then, branch_else })
     }
 
-    fn eval(self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> Val {
-        let condition = Eval.dyn_call(cfg, ctx.reborrow(), self.condition);
+    fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
+        let condition = Eval.ctx_call(cfg, ctx, self.condition);
         let Val::Bit(b) = condition else {
             return bug!(cfg, "{TEST}: expected condition to be a bit, but got {condition}");
         };
@@ -246,11 +245,11 @@ impl Test {
     }
 }
 
-pub fn switch() -> MutPrimFuncVal {
-    DynImpl { free: abort_free(SWITCH), dyn_: fn_switch }.build_with(true)
+pub fn switch() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_switch }.build(ImplExtra { raw_input: true })
 }
 
-fn fn_switch(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
+fn fn_switch(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Ok(switch) = Switch::parse(cfg, input) else {
         return Val::default();
     };
@@ -302,8 +301,8 @@ impl Switch {
         Ok(block_map)
     }
 
-    fn eval(mut self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> Val {
-        let val = Eval.dyn_call(cfg, ctx.reborrow(), self.val);
+    fn eval(mut self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
+        let val = Eval.ctx_call(cfg, ctx, self.val);
         let Val::Key(key) = val else {
             return bug!(cfg, "{SWITCH}: expected input.left to be a key, but got {val}");
         };
@@ -314,11 +313,11 @@ impl Switch {
     }
 }
 
-pub fn match_() -> MutPrimFuncVal {
-    DynImpl { free: abort_free(MATCH), dyn_: fn_match }.build_with(true)
+pub fn match_() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_match }.build(ImplExtra { raw_input: true })
 }
 
-fn fn_match(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
+fn fn_match(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Ok(match_) = Match::parse(cfg, input) else {
         return Val::default();
     };
@@ -361,13 +360,13 @@ impl Match {
         Ok(arms)
     }
 
-    fn eval(self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> Val {
-        let val = Eval.dyn_call(cfg, ctx.reborrow(), self.val);
+    fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
+        let val = Eval.ctx_call(cfg, ctx, self.val);
         for (pattern, block) in self.arms {
             if cfg.is_aborted() {
                 return Val::default();
             }
-            let pattern = Eval.dyn_call(cfg, ctx.reborrow(), pattern);
+            let pattern = Eval.ctx_call(cfg, ctx, pattern);
             let Some(pattern) = pattern.parse(cfg, MATCH) else {
                 return Val::default();
             };
@@ -375,11 +374,9 @@ impl Match {
                 continue;
             }
             // todo design
-            if !ctx.is_const() {
-                let result = pattern.assign(cfg, MATCH, ctx.reborrow().unwrap(), val);
-                if result.is_none() {
-                    return Val::default();
-                }
+            let result = pattern.assign(cfg, MATCH, ctx, val);
+            if result.is_none() {
+                return Val::default();
             }
             return block.eval(MATCH, cfg, ctx);
         }
@@ -387,11 +384,11 @@ impl Match {
     }
 }
 
-pub fn loop_() -> MutPrimFuncVal {
-    DynImpl { free: abort_free(LOOP), dyn_: fn_loop }.build_with(true)
+pub fn loop_() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_loop }.build(ImplExtra { raw_input: true })
 }
 
-fn fn_loop(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
+fn fn_loop(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Ok(loop_) = Loop::parse(cfg, input) else {
         return Val::default();
     };
@@ -414,16 +411,16 @@ impl Loop {
         Ok(Self { condition, body })
     }
 
-    fn eval(self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> Val {
+    fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
         loop {
-            let cond = Eval.dyn_call(cfg, ctx.reborrow(), self.condition.clone());
+            let cond = Eval.ctx_call(cfg, ctx, self.condition.clone());
             let Val::Bit(bit) = cond else {
                 return bug!(cfg, "{LOOP}: expected condition to be a bit, but got {cond}");
             };
             if !*bit {
                 break;
             }
-            let v = self.body.clone().flow(LOOP, cfg, ctx.reborrow());
+            let v = self.body.clone().flow(LOOP, cfg, ctx);
             match v.ctrl_flow {
                 CtrlFlow::Continue => {}
                 CtrlFlow::Return => return v.output,
@@ -433,11 +430,11 @@ impl Loop {
     }
 }
 
-pub fn iterate() -> MutPrimFuncVal {
-    DynImpl { free: abort_free(ITERATE), dyn_: fn_iterate }.build_with(true)
+pub fn iterate() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_iterate }.build(ImplExtra { raw_input: true })
 }
 
-fn fn_iterate(cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
+fn fn_iterate(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Ok(iterate) = Iterate::parse(cfg, input) else {
         return Val::default();
     };
@@ -476,8 +473,8 @@ impl Iterate {
         Ok(Self { val, name, body })
     }
 
-    fn eval(self, cfg: &mut Cfg, mut ctx: DynRef<Val>) -> Val {
-        let val = Eval.dyn_call(cfg, ctx.reborrow(), self.val);
+    fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
+        let val = Eval.ctx_call(cfg, ctx, self.val);
         match val {
             Val::Int(i) => {
                 let i = Int::from(i);
@@ -536,17 +533,17 @@ impl Iterate {
 }
 
 fn iterate_val<ValIter>(
-    cfg: &mut Cfg, mut ctx: DynRef<Val>, body: Block, name: Key, values: ValIter,
+    cfg: &mut Cfg, ctx: &mut Val, body: Block, name: Key, values: ValIter,
 ) -> Val
 where ValIter: Iterator<Item = Val> {
     for val in values {
         if cfg.is_aborted() {
             return Val::default();
         }
-        if !ctx.is_const() {
-            let _ = ctx.reborrow().unwrap().set(cfg, name.clone(), val);
+        if ctx.set(cfg, name.clone(), val).is_none() {
+            return Val::default();
         }
-        let v = body.clone().flow(ITERATE, cfg, ctx.reborrow());
+        let v = body.clone().flow(ITERATE, cfg, ctx);
         match v.ctrl_flow {
             CtrlFlow::Continue => {}
             CtrlFlow::Return => return v.output,

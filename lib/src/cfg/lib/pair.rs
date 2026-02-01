@@ -1,29 +1,25 @@
 use std::mem::swap;
-use std::ops::Deref;
 
 use const_format::concatcp;
 
 use super::ConstImpl;
+use super::ImplExtra;
 use super::MutImpl;
-use super::abort_const;
-use super::abort_free;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
-use crate::semantics::val::ConstPrimFuncVal;
-use crate::semantics::val::MutPrimFuncVal;
+use crate::semantics::val::CtxPrimFuncVal;
 use crate::semantics::val::PAIR;
 use crate::semantics::val::Val;
-use crate::type_::ConstRef;
 
 #[derive(Clone)]
 pub struct PairLib {
-    pub get_left: ConstPrimFuncVal,
-    pub set_left: MutPrimFuncVal,
-    pub get_right: ConstPrimFuncVal,
-    pub set_right: MutPrimFuncVal,
+    pub get_left: CtxPrimFuncVal,
+    pub set_left: CtxPrimFuncVal,
+    pub get_right: CtxPrimFuncVal,
+    pub set_right: CtxPrimFuncVal,
 }
 
 pub const GET_LEFT: &str = concatcp!(PREFIX_ID, PAIR, ".get_left");
@@ -51,13 +47,13 @@ impl CfgMod for PairLib {
     }
 }
 
-pub fn get_left() -> ConstPrimFuncVal {
-    ConstImpl { free: abort_free(GET_LEFT), const_: fn_get_left }.build()
+pub fn get_left() -> CtxPrimFuncVal {
+    ConstImpl { fn_: fn_get_left }.build(ImplExtra { raw_input: false })
 }
 
-fn fn_get_left(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::Pair(pair) = &*ctx else {
-        return bug!(cfg, "{GET_LEFT}: expected context to be a pair, but got {}", ctx.deref());
+fn fn_get_left(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+    let Val::Pair(pair) = ctx else {
+        return bug!(cfg, "{GET_LEFT}: expected context to be a pair, but got {ctx}");
     };
     if !input.is_unit() {
         return bug!(cfg, "{GET_LEFT}: expected input to be a unit, but got {input}");
@@ -65,8 +61,8 @@ fn fn_get_left(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     pair.left.clone()
 }
 
-pub fn set_left() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(SET_LEFT), const_: abort_const(SET_LEFT), mut_: fn_set_left }.build()
+pub fn set_left() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_set_left }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_set_left(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
@@ -77,13 +73,13 @@ fn fn_set_left(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     input
 }
 
-pub fn get_right() -> ConstPrimFuncVal {
-    ConstImpl { free: abort_free(GET_RIGHT), const_: fn_get_right }.build()
+pub fn get_right() -> CtxPrimFuncVal {
+    ConstImpl { fn_: fn_get_right }.build(ImplExtra { raw_input: false })
 }
 
-fn fn_get_right(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::Pair(pair) = &*ctx else {
-        return bug!(cfg, "{GET_RIGHT}: expected context to be a pair, but got {}", ctx.deref());
+fn fn_get_right(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+    let Val::Pair(pair) = ctx else {
+        return bug!(cfg, "{GET_RIGHT}: expected context to be a pair, but got {ctx}");
     };
     if !input.is_unit() {
         return bug!(cfg, "{GET_RIGHT}: expected input to be a unit, but got {input}");
@@ -91,9 +87,8 @@ fn fn_get_right(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     pair.right.clone()
 }
 
-pub fn set_right() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(SET_RIGHT), const_: abort_const(SET_RIGHT), mut_: fn_set_right }
-        .build()
+pub fn set_right() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_set_right }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_set_right(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {

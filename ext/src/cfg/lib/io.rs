@@ -7,20 +7,19 @@ use airlang::bug;
 use airlang::cfg::CfgMod;
 use airlang::cfg::extend_func;
 use airlang::cfg::lib::FreeImpl;
+use airlang::cfg::lib::ImplExtra;
 use airlang::cfg::lib::MutImpl;
-use airlang::cfg::lib::abort_const;
-use airlang::cfg::lib::abort_free;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_ID;
+use airlang::semantics::val::CtxPrimFuncVal;
 use airlang::semantics::val::FreePrimFuncVal;
-use airlang::semantics::val::MutPrimFuncVal;
 use airlang::semantics::val::Val;
 use const_format::concatcp;
 
 // todo design
 #[derive(Clone)]
 pub struct IoLib {
-    pub read_line: MutPrimFuncVal,
+    pub read_line: CtxPrimFuncVal,
     pub print: FreePrimFuncVal,
     pub print_line: FreePrimFuncVal,
     pub flush: FreePrimFuncVal,
@@ -65,9 +64,8 @@ impl CfgMod for IoLib {
     }
 }
 
-pub fn read_line() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(READ_LINE), const_: abort_const(READ_LINE), mut_: fn_read_line }
-        .build()
+pub fn read_line() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_read_line }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_read_line(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -82,7 +80,7 @@ fn fn_read_line(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn print() -> FreePrimFuncVal {
-    FreeImpl { free: fn_print }.build()
+    FreeImpl { fn_: fn_print }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_print(cfg: &mut Cfg, input: Val) -> Val {
@@ -94,7 +92,7 @@ fn fn_print(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn print_line() -> FreePrimFuncVal {
-    FreeImpl { free: fn_print_line }.build()
+    FreeImpl { fn_: fn_print_line }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_print_line(cfg: &mut Cfg, input: Val) -> Val {
@@ -106,7 +104,7 @@ fn fn_print_line(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn flush() -> FreePrimFuncVal {
-    FreeImpl { free: fn_flush }.build()
+    FreeImpl { fn_: fn_flush }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_flush(cfg: &mut Cfg, input: Val) -> Val {
@@ -118,7 +116,7 @@ fn fn_flush(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn error_print() -> FreePrimFuncVal {
-    FreeImpl { free: fn_error_print }.build()
+    FreeImpl { fn_: fn_error_print }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_error_print(cfg: &mut Cfg, input: Val) -> Val {
@@ -130,7 +128,7 @@ fn fn_error_print(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn error_print_line() -> FreePrimFuncVal {
-    FreeImpl { free: fn_error_print_line }.build()
+    FreeImpl { fn_: fn_error_print_line }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_error_print_line(cfg: &mut Cfg, input: Val) -> Val {
@@ -142,7 +140,7 @@ fn fn_error_print_line(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn error_flush() -> FreePrimFuncVal {
-    FreeImpl { free: fn_error_flush }.build()
+    FreeImpl { fn_: fn_error_flush }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_error_flush(cfg: &mut Cfg, input: Val) -> Val {

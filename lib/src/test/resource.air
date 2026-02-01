@@ -38,6 +38,7 @@ _ do [
     .link.new set _ import _link.new,
     .set_steps set _ import _resource.set_steps,
     .where set _ import _config.where,
+    .is_aborted set _ import _error.is_aborted,
     .prelude set _ link.new {
         do : do,
         set_steps : set_steps,
@@ -64,7 +65,7 @@ _ do [
         _ set_steps 7,
         1 + 1
     ],
-    (a5 == .) and (a6 == 2) and (a7 == 2)
+    (.c5 which is_aborted : .) and (a6 == 2) and (a7 == 2)
 ]
 -----
 true

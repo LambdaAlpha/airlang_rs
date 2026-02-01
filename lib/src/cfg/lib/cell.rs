@@ -1,27 +1,23 @@
 use std::mem::swap;
-use std::ops::Deref;
 
 use const_format::concatcp;
 
 use super::ConstImpl;
+use super::ImplExtra;
 use super::MutImpl;
-use super::abort_const;
-use super::abort_free;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::val::CELL;
-use crate::semantics::val::ConstPrimFuncVal;
-use crate::semantics::val::MutPrimFuncVal;
+use crate::semantics::val::CtxPrimFuncVal;
 use crate::semantics::val::Val;
-use crate::type_::ConstRef;
 
 #[derive(Clone)]
 pub struct CellLib {
-    pub get_value: ConstPrimFuncVal,
-    pub set_value: MutPrimFuncVal,
+    pub get_value: CtxPrimFuncVal,
+    pub set_value: CtxPrimFuncVal,
 }
 
 pub const GET_VALUE: &str = concatcp!(PREFIX_ID, CELL, ".get_value");
@@ -40,13 +36,13 @@ impl CfgMod for CellLib {
     }
 }
 
-pub fn get_value() -> ConstPrimFuncVal {
-    ConstImpl { free: abort_free(GET_VALUE), const_: fn_get_value }.build()
+pub fn get_value() -> CtxPrimFuncVal {
+    ConstImpl { fn_: fn_get_value }.build(ImplExtra { raw_input: false })
 }
 
-fn fn_get_value(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::Cell(cell) = &*ctx else {
-        return bug!(cfg, "{GET_VALUE}: expected context to be a cell, but got {}", ctx.deref());
+fn fn_get_value(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+    let Val::Cell(cell) = ctx else {
+        return bug!(cfg, "{GET_VALUE}: expected context to be a cell, but got {ctx}");
     };
     if !input.is_unit() {
         return bug!(cfg, "{GET_VALUE}: expected input to be a unit, but got {input}");
@@ -54,9 +50,8 @@ fn fn_get_value(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     cell.value.clone()
 }
 
-pub fn set_value() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(SET_VALUE), const_: abort_const(SET_VALUE), mut_: fn_set_value }
-        .build()
+pub fn set_value() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_set_value }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_set_value(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {

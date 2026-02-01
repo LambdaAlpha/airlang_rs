@@ -4,17 +4,16 @@ use const_format::concatcp;
 
 use super::ConstImpl;
 use super::FreeImpl;
-use super::abort_free;
+use super::ImplExtra;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
-use crate::semantics::val::ConstPrimFuncVal;
+use crate::semantics::val::CtxPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::KEY;
 use crate::semantics::val::Val;
-use crate::type_::ConstRef;
 use crate::type_::Int;
 use crate::type_::Key;
 use crate::type_::Text;
@@ -24,7 +23,7 @@ use crate::type_::Text;
 pub struct KeyLib {
     pub from_text: FreePrimFuncVal,
     pub into_text: FreePrimFuncVal,
-    pub get_length: ConstPrimFuncVal,
+    pub get_length: CtxPrimFuncVal,
     pub join: FreePrimFuncVal,
 }
 
@@ -54,7 +53,7 @@ impl CfgMod for KeyLib {
 }
 
 pub fn from_text() -> FreePrimFuncVal {
-    FreeImpl { free: fn_from_text }.build()
+    FreeImpl { fn_: fn_from_text }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_from_text(cfg: &mut Cfg, input: Val) -> Val {
@@ -73,7 +72,7 @@ fn fn_from_text(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn into_text() -> FreePrimFuncVal {
-    FreeImpl { free: fn_into_text }.build()
+    FreeImpl { fn_: fn_into_text }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_into_text(cfg: &mut Cfg, input: Val) -> Val {
@@ -83,13 +82,13 @@ fn fn_into_text(cfg: &mut Cfg, input: Val) -> Val {
     Val::Text(Text::from(key.deref()).into())
 }
 
-pub fn get_length() -> ConstPrimFuncVal {
-    ConstImpl { free: abort_free(GET_LENGTH), const_: fn_get_length }.build()
+pub fn get_length() -> CtxPrimFuncVal {
+    ConstImpl { fn_: fn_get_length }.build(ImplExtra { raw_input: false })
 }
 
-fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::Key(key) = &*ctx else {
-        return bug!(cfg, "{GET_LENGTH}: expected context to be a key, but got {}", ctx.deref());
+fn fn_get_length(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+    let Val::Key(key) = ctx else {
+        return bug!(cfg, "{GET_LENGTH}: expected context to be a key, but got {ctx}");
     };
     if !input.is_unit() {
         return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input}");
@@ -100,7 +99,7 @@ fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 
 // todo design
 pub fn join() -> FreePrimFuncVal {
-    FreeImpl { free: fn_join }.build()
+    FreeImpl { fn_: fn_join }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_join(cfg: &mut Cfg, input: Val) -> Val {

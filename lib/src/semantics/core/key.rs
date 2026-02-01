@@ -1,12 +1,9 @@
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::abort_by_bug_with_msg;
 use crate::semantics::ctx::DynCtx;
-use crate::semantics::func::ConstFn;
+use crate::semantics::func::CtxFn;
 use crate::semantics::func::FreeFn;
-use crate::semantics::func::MutFn;
 use crate::semantics::val::Val;
-use crate::type_::ConstRef;
-use crate::type_::DynRef;
 use crate::type_::Key;
 
 pub(crate) struct KeyEval;
@@ -45,8 +42,8 @@ impl FreeFn<Cfg, Key, Val> for KeyEval {
     }
 }
 
-impl ConstFn<Cfg, Val, Key, Val> for KeyEval {
-    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, key: Key) -> Val {
+impl CtxFn<Cfg, Val, Key, Val> for KeyEval {
+    fn ctx_call(&self, cfg: &mut Cfg, ctx: &mut Val, key: Key) -> Val {
         let (mode, key) = self.recognize(key);
         match mode {
             KeyMode::Id => return Val::Key(key),
@@ -57,15 +54,5 @@ impl ConstFn<Cfg, Val, Key, Val> for KeyEval {
             return Val::default();
         };
         val.clone()
-    }
-}
-
-impl MutFn<Cfg, Val, Key, Val> for KeyEval {
-    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, key: Key) -> Val {
-        self.const_call(cfg, ConstRef::new(ctx), key)
-    }
-
-    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, key: Key) -> Val {
-        self.const_call(cfg, ctx.into_const(), key)
     }
 }

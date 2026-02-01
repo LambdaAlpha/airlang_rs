@@ -1,23 +1,18 @@
-use std::ops::Deref;
-
 use const_format::concatcp;
 
 use super::ConstImpl;
 use super::FreeImpl;
+use super::ImplExtra;
 use super::MutImpl;
-use super::abort_const;
-use super::abort_free;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::core::abort_by_bug_with_msg;
-use crate::semantics::val::ConstPrimFuncVal;
+use crate::semantics::val::CtxPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
-use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
-use crate::type_::ConstRef;
 use crate::type_::Pair;
 use crate::type_::Text;
 
@@ -25,8 +20,8 @@ use crate::type_::Text;
 pub struct ErrorLib {
     pub abort: FreePrimFuncVal,
     pub assert: FreePrimFuncVal,
-    pub is_aborted: ConstPrimFuncVal,
-    pub recover: MutPrimFuncVal,
+    pub is_aborted: CtxPrimFuncVal,
+    pub recover: CtxPrimFuncVal,
 }
 
 const ERROR: &str = "error";
@@ -52,7 +47,7 @@ impl CfgMod for ErrorLib {
 }
 
 pub fn abort() -> FreePrimFuncVal {
-    FreeImpl { free: fn_abort }.build()
+    FreeImpl { fn_: fn_abort }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_abort(cfg: &mut Cfg, input: Val) -> Val {
@@ -64,7 +59,7 @@ fn fn_abort(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn assert() -> FreePrimFuncVal {
-    FreeImpl { free: fn_assert }.build()
+    FreeImpl { fn_: fn_assert }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_assert(cfg: &mut Cfg, input: Val) -> Val {
@@ -85,13 +80,13 @@ fn fn_assert(cfg: &mut Cfg, input: Val) -> Val {
     Val::default()
 }
 
-pub fn is_aborted() -> ConstPrimFuncVal {
-    ConstImpl { free: abort_free(IS_ABORTED), const_: fn_is_aborted }.build()
+pub fn is_aborted() -> CtxPrimFuncVal {
+    ConstImpl { fn_: fn_is_aborted }.build(ImplExtra { raw_input: false })
 }
 
-fn fn_is_aborted(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::Cfg(target_cfg) = &*ctx else {
-        return bug!(cfg, "{IS_ABORTED}: expected context to be a config, but got {}", ctx.deref());
+fn fn_is_aborted(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+    let Val::Cfg(target_cfg) = ctx else {
+        return bug!(cfg, "{IS_ABORTED}: expected context to be a config, but got {ctx}");
     };
     if !input.is_unit() {
         return bug!(cfg, "{IS_ABORTED}: expected input to be a unit, but got {input}");
@@ -100,8 +95,8 @@ fn fn_is_aborted(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     Val::Bit(aborted.into())
 }
 
-pub fn recover() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(RECOVER), const_: abort_const(RECOVER), mut_: fn_recover }.build()
+pub fn recover() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_recover }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_recover(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {

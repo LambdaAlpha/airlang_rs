@@ -5,11 +5,9 @@ use std::panic::catch_unwind;
 use const_format::concatcp;
 
 use super::ConstImpl;
-use super::DynImpl;
 use super::FreeImpl;
+use super::ImplExtra;
 use super::MutImpl;
-use super::abort_const;
-use super::abort_free;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
@@ -18,15 +16,12 @@ use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::ctx::DynCtx;
-use crate::semantics::func::MutFn;
+use crate::semantics::func::CtxFn;
 use crate::semantics::val::CFG;
-use crate::semantics::val::ConstPrimFuncVal;
+use crate::semantics::val::CtxPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
-use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
-use crate::type_::ConstRef;
-use crate::type_::DynRef;
 use crate::type_::Int;
 use crate::type_::Key;
 use crate::type_::Map;
@@ -40,10 +35,10 @@ pub struct CfgLib {
     pub exist: FreePrimFuncVal,
     pub import: FreePrimFuncVal,
     pub export: FreePrimFuncVal,
-    pub get_length: ConstPrimFuncVal,
-    pub with: MutPrimFuncVal,
+    pub get_length: CtxPrimFuncVal,
+    pub with: CtxPrimFuncVal,
     pub self_: FreePrimFuncVal,
-    pub where_: MutPrimFuncVal,
+    pub where_: CtxPrimFuncVal,
 }
 
 pub const NEW: &str = concatcp!(PREFIX_ID, CFG, ".new");
@@ -87,7 +82,7 @@ impl CfgMod for CfgLib {
 }
 
 pub fn new() -> FreePrimFuncVal {
-    FreeImpl { free: fn_new }.build()
+    FreeImpl { fn_: fn_new }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
@@ -103,7 +98,7 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn represent() -> FreePrimFuncVal {
-    FreeImpl { free: fn_represent }.build()
+    FreeImpl { fn_: fn_represent }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_represent(cfg: &mut Cfg, input: Val) -> Val {
@@ -114,7 +109,7 @@ fn fn_represent(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn exist() -> FreePrimFuncVal {
-    FreeImpl { free: fn_exist }.build()
+    FreeImpl { fn_: fn_exist }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_exist(cfg: &mut Cfg, input: Val) -> Val {
@@ -126,7 +121,7 @@ fn fn_exist(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn import() -> FreePrimFuncVal {
-    FreeImpl { free: fn_import }.build()
+    FreeImpl { fn_: fn_import }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_import(cfg: &mut Cfg, input: Val) -> Val {
@@ -140,7 +135,7 @@ fn fn_import(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn export() -> FreePrimFuncVal {
-    FreeImpl { free: fn_export }.build()
+    FreeImpl { fn_: fn_export }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
@@ -157,13 +152,13 @@ fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
     Val::default()
 }
 
-pub fn get_length() -> ConstPrimFuncVal {
-    ConstImpl { free: abort_free(GET_LENGTH), const_: fn_get_length }.build()
+pub fn get_length() -> CtxPrimFuncVal {
+    ConstImpl { fn_: fn_get_length }.build(ImplExtra { raw_input: false })
 }
 
-fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::Cfg(new_cfg) = &*ctx else {
-        return bug!(cfg, "{GET_LENGTH}: expected context to be a config, but got {}", ctx.deref());
+fn fn_get_length(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+    let Val::Cfg(new_cfg) = ctx else {
+        return bug!(cfg, "{GET_LENGTH}: expected context to be a config, but got {ctx}");
     };
     if !input.is_unit() {
         return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input}");
@@ -171,16 +166,16 @@ fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     Val::Int(Int::from(new_cfg.len()).into())
 }
 
-pub fn with() -> MutPrimFuncVal {
-    DynImpl { free: abort_free(WITH), dyn_: fn_with }.build_with(true)
+pub fn with() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_with }.build(ImplExtra { raw_input: true })
 }
 
-fn fn_with(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {
+fn fn_with(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{WITH}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
-    let map = Eval.dyn_call(cfg, ctx.reborrow(), pair.left);
+    let map = Eval.ctx_call(cfg, ctx, pair.left);
     let Val::Map(map) = map else {
         return bug!(cfg, "{WITH}: expected input.left to be a map, but got {map}");
     };
@@ -189,13 +184,13 @@ fn fn_with(cfg: &mut Cfg, mut ctx: DynRef<Val>, input: Val) -> Val {
     for (k, v) in map {
         cfg.extend_scope(k, v);
     }
-    let output = Eval.dyn_call(cfg, ctx, pair.right);
+    let output = Eval.ctx_call(cfg, ctx, pair.right);
     cfg.end_scope();
     output
 }
 
 pub fn self_() -> FreePrimFuncVal {
-    FreeImpl { free: fn_self }.build()
+    FreeImpl { fn_: fn_self }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_self(cfg: &mut Cfg, input: Val) -> Val {
@@ -205,8 +200,8 @@ fn fn_self(cfg: &mut Cfg, input: Val) -> Val {
     Val::Cfg(cfg.clone().into())
 }
 
-pub fn where_() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(WHERE), const_: abort_const(WHERE), mut_: fn_where }.build_with(true)
+pub fn where_() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_where }.build(ImplExtra { raw_input: true })
 }
 
 fn fn_where(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -235,7 +230,7 @@ fn fn_where(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     // new_ctx is local variable
     // new_cfg is aborted
     let result =
-        catch_unwind(AssertUnwindSafe(|| Eval.mut_call(&mut **new_cfg, &mut new_ctx, pair.right)));
+        catch_unwind(AssertUnwindSafe(|| Eval.ctx_call(&mut **new_cfg, &mut new_ctx, pair.right)));
     match result {
         Ok(output) => output,
         Err(err) => {

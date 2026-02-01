@@ -1,12 +1,9 @@
-pub use self::const_comp::ConstCompFunc;
-pub use self::const_prim::ConstFn;
-pub use self::const_prim::ConstPrimFunc;
+pub use self::ctx_comp::CtxCompFunc;
+pub use self::ctx_prim::CtxFn;
+pub use self::ctx_prim::CtxPrimFunc;
 pub use self::free_comp::FreeCompFunc;
 pub use self::free_prim::FreeFn;
 pub use self::free_prim::FreePrimFunc;
-pub use self::mut_comp::MutCompFunc;
-pub use self::mut_prim::MutFn;
-pub use self::mut_prim::MutPrimFunc;
 
 _____!();
 
@@ -21,10 +18,6 @@ mod free_prim;
 
 mod free_comp;
 
-mod const_prim;
+mod ctx_prim;
 
-mod const_comp;
-
-mod mut_prim;
-
-mod mut_comp;
+mod ctx_comp;

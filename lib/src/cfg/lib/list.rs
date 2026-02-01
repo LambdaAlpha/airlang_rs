@@ -1,23 +1,19 @@
 use std::mem::swap;
-use std::ops::Deref;
 
 use const_format::concatcp;
 use num_traits::ToPrimitive;
 
 use super::ConstImpl;
+use super::ImplExtra;
 use super::MutImpl;
-use super::abort_const;
-use super::abort_free;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
-use crate::semantics::val::ConstPrimFuncVal;
+use crate::semantics::val::CtxPrimFuncVal;
 use crate::semantics::val::LIST;
-use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::Val;
-use crate::type_::ConstRef;
 use crate::type_::Int;
 use crate::type_::List;
 use crate::type_::Pair;
@@ -25,20 +21,20 @@ use crate::type_::Pair;
 // todo design
 #[derive(Clone)]
 pub struct ListLib {
-    pub get_length: ConstPrimFuncVal,
-    pub set: MutPrimFuncVal,
-    pub set_many: MutPrimFuncVal,
-    pub get: ConstPrimFuncVal,
-    pub get_many: ConstPrimFuncVal,
-    pub insert: MutPrimFuncVal,
-    pub insert_many: MutPrimFuncVal,
-    pub remove: MutPrimFuncVal,
-    pub remove_many: MutPrimFuncVal,
-    pub push: MutPrimFuncVal,
-    pub push_many: MutPrimFuncVal,
-    pub pop: MutPrimFuncVal,
-    pub pop_many: MutPrimFuncVal,
-    pub clear: MutPrimFuncVal,
+    pub get_length: CtxPrimFuncVal,
+    pub set: CtxPrimFuncVal,
+    pub set_many: CtxPrimFuncVal,
+    pub get: CtxPrimFuncVal,
+    pub get_many: CtxPrimFuncVal,
+    pub insert: CtxPrimFuncVal,
+    pub insert_many: CtxPrimFuncVal,
+    pub remove: CtxPrimFuncVal,
+    pub remove_many: CtxPrimFuncVal,
+    pub push: CtxPrimFuncVal,
+    pub push_many: CtxPrimFuncVal,
+    pub pop: CtxPrimFuncVal,
+    pub pop_many: CtxPrimFuncVal,
+    pub clear: CtxPrimFuncVal,
 }
 
 pub const GET_LENGTH: &str = concatcp!(PREFIX_ID, LIST, ".get_length");
@@ -96,13 +92,13 @@ impl CfgMod for ListLib {
     }
 }
 
-pub fn get_length() -> ConstPrimFuncVal {
-    ConstImpl { free: abort_free(GET_LENGTH), const_: fn_get_length }.build()
+pub fn get_length() -> CtxPrimFuncVal {
+    ConstImpl { fn_: fn_get_length }.build(ImplExtra { raw_input: false })
 }
 
-fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::List(list) = &*ctx else {
-        return bug!(cfg, "{GET_LENGTH}: expected context to be a list, but got {}", ctx.deref());
+fn fn_get_length(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+    let Val::List(list) = ctx else {
+        return bug!(cfg, "{GET_LENGTH}: expected context to be a list, but got {ctx}");
     };
     if !input.is_unit() {
         return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input}");
@@ -111,8 +107,8 @@ fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     Val::Int(len.into())
 }
 
-pub fn set() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(SET), const_: abort_const(SET), mut_: fn_set }.build()
+pub fn set() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_set }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -135,8 +131,8 @@ fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     value
 }
 
-pub fn set_many() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(SET_MANY), const_: abort_const(SET_MANY), mut_: fn_set_many }.build()
+pub fn set_many() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_set_many }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_set_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -167,13 +163,13 @@ fn fn_set_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::List(ret.into())
 }
 
-pub fn get() -> ConstPrimFuncVal {
-    ConstImpl { free: abort_free(GET), const_: fn_get }.build()
+pub fn get() -> CtxPrimFuncVal {
+    ConstImpl { fn_: fn_get }.build(ImplExtra { raw_input: false })
 }
 
-fn fn_get(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::List(list) = &*ctx else {
-        return bug!(cfg, "{GET}: expected context to be a list, but got {}", ctx.deref());
+fn fn_get(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+    let Val::List(list) = ctx else {
+        return bug!(cfg, "{GET}: expected context to be a list, but got {ctx}");
     };
     let Some(i) = to_index(cfg, GET, input) else {
         return Val::default();
@@ -184,13 +180,13 @@ fn fn_get(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     val.clone()
 }
 
-pub fn get_many() -> ConstPrimFuncVal {
-    ConstImpl { free: abort_free(GET_MANY), const_: fn_get_many }.build()
+pub fn get_many() -> CtxPrimFuncVal {
+    ConstImpl { fn_: fn_get_many }.build(ImplExtra { raw_input: false })
 }
 
-fn fn_get_many(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::List(list) = &*ctx else {
-        return bug!(cfg, "{GET_MANY}: expected context to be a list, but got {}", ctx.deref());
+fn fn_get_many(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+    let Val::List(list) = ctx else {
+        return bug!(cfg, "{GET_MANY}: expected context to be a list, but got {ctx}");
     };
     let Val::Pair(range) = input else {
         return bug!(cfg, "{GET_MANY}: expected input to be a pair, but got {input}");
@@ -207,8 +203,8 @@ fn fn_get_many(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
     Val::List(List::from(slice.to_owned()).into())
 }
 
-pub fn insert() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(INSERT), const_: abort_const(INSERT), mut_: fn_insert }.build()
+pub fn insert() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_insert }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_insert(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -231,13 +227,8 @@ fn fn_insert(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-pub fn insert_many() -> MutPrimFuncVal {
-    MutImpl {
-        free: abort_free(INSERT_MANY),
-        const_: abort_const(INSERT_MANY),
-        mut_: fn_insert_many,
-    }
-    .build()
+pub fn insert_many() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_insert_many }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_insert_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -267,8 +258,8 @@ fn fn_insert_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-pub fn remove() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(REMOVE), const_: abort_const(REMOVE), mut_: fn_remove }.build()
+pub fn remove() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_remove }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -284,13 +275,8 @@ fn fn_remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     list.remove(i)
 }
 
-pub fn remove_many() -> MutPrimFuncVal {
-    MutImpl {
-        free: abort_free(REMOVE_MANY),
-        const_: abort_const(REMOVE_MANY),
-        mut_: fn_remove_many,
-    }
-    .build()
+pub fn remove_many() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_remove_many }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_remove_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -313,8 +299,8 @@ fn fn_remove_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::List(ret.into())
 }
 
-pub fn push() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(PUSH), const_: abort_const(PUSH), mut_: fn_push }.build()
+pub fn push() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_push }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -325,9 +311,8 @@ fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-pub fn push_many() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(PUSH_MANY), const_: abort_const(PUSH_MANY), mut_: fn_push_many }
-        .build()
+pub fn push_many() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_push_many }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_push_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -341,8 +326,8 @@ fn fn_push_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-pub fn pop() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(POP), const_: abort_const(POP), mut_: fn_pop }.build()
+pub fn pop() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_pop }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_pop(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -358,8 +343,8 @@ fn fn_pop(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     val
 }
 
-pub fn pop_many() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(POP_MANY), const_: abort_const(POP_MANY), mut_: fn_pop_many }.build()
+pub fn pop_many() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_pop_many }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_pop_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -382,8 +367,8 @@ fn fn_pop_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::List(list.into())
 }
 
-pub fn clear() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(CLEAR), const_: abort_const(CLEAR), mut_: fn_clear }.build()
+pub fn clear() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_clear }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_clear(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {

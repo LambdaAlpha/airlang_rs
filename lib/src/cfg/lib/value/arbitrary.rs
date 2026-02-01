@@ -10,16 +10,14 @@ use rand::distr::weighted::WeightedIndex;
 use rand::prelude::Distribution;
 
 use crate::semantics::cfg::Cfg;
-use crate::semantics::func::ConstCompFunc;
+use crate::semantics::func::CtxCompFunc;
 use crate::semantics::func::DynComposite;
 use crate::semantics::func::FreeCompFunc;
 use crate::semantics::func::FreeComposite;
-use crate::semantics::func::MutCompFunc;
-use crate::semantics::val::ConstCompFuncVal;
+use crate::semantics::val::CtxCompFuncVal;
 use crate::semantics::val::FreeCompFuncVal;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::LinkVal;
-use crate::semantics::val::MutCompFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::Byte;
@@ -270,18 +268,14 @@ impl Arbitrary for FuncVal {
         if rng.random() {
             return FuncVal::default();
         }
-        match rng.random_range(0 .. 3) {
+        match rng.random_range(0 .. 2) {
             0 => {
                 let func = Arbitrary::any(rng, depth);
                 FuncVal::FreeComp(func)
             }
             1 => {
                 let func = Arbitrary::any(rng, depth);
-                FuncVal::ConstComp(func)
-            }
-            2 => {
-                let func = Arbitrary::any(rng, depth);
-                FuncVal::MutComp(func)
+                FuncVal::CtxComp(func)
             }
             _ => unreachable!(),
         }
@@ -307,6 +301,7 @@ impl Arbitrary for DynComposite {
             body: Arbitrary::any(rng, depth),
             input_name: Arbitrary::any(rng, depth),
             ctx_name: Arbitrary::any(rng, depth),
+            const_: rng.random(),
         }
     }
 }
@@ -319,19 +314,11 @@ impl Arbitrary for FreeCompFuncVal {
     }
 }
 
-impl Arbitrary for ConstCompFuncVal {
+impl Arbitrary for CtxCompFuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
-        let func = ConstCompFunc { raw_input: rng.random(), comp: Arbitrary::any(rng, depth) };
-        ConstCompFuncVal::from(func)
-    }
-}
-
-impl Arbitrary for MutCompFuncVal {
-    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let depth = depth + 1;
-        let func = MutCompFunc { raw_input: rng.random(), comp: Arbitrary::any(rng, depth) };
-        MutCompFuncVal::from(func)
+        let func = CtxCompFunc { raw_input: rng.random(), comp: Arbitrary::any(rng, depth) };
+        CtxCompFuncVal::from(func)
     }
 }
 

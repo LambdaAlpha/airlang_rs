@@ -239,37 +239,6 @@ _ do [
 -----
 .(3)
 =====
-is_constant default
------
-_ do [
-    .is_constant set _ import _context.is_constant,
-    _ is_constant .
-]
------
-false
-=====
-is_constant true
------
-_ do [
-    .is_constant set _ import _context.is_constant,
-    .const_link set _ import _link.new_constant,
-    .link_which set _ import _link.which,
-    .a set _ const_link .,
-    a link_which is_constant : .
-]
------
-true
-=====
-is_constant false
------
-_ do [
-    .is_constant set _ import _context.is_constant,
-    _a set {},
-    _a which is_constant : .
-]
------
-false
-=====
 which 1
 -----
 _ do [

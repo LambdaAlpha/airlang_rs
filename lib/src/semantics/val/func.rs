@@ -1,117 +1,62 @@
 use derive_more::From;
 
 use crate::semantics::cfg::Cfg;
-use crate::semantics::ctx::CtxAccess;
-use crate::semantics::func::ConstCompFunc;
-use crate::semantics::func::ConstFn;
-use crate::semantics::func::ConstPrimFunc;
+use crate::semantics::core::abort_by_bug_with_msg;
+use crate::semantics::func::CtxCompFunc;
+use crate::semantics::func::CtxFn;
+use crate::semantics::func::CtxPrimFunc;
 use crate::semantics::func::FreeCompFunc;
 use crate::semantics::func::FreeFn;
 use crate::semantics::func::FreePrimFunc;
-use crate::semantics::func::MutCompFunc;
-use crate::semantics::func::MutFn;
-use crate::semantics::func::MutPrimFunc;
 use crate::semantics::val::Val;
-use crate::type_::ConstRef;
-use crate::type_::DynRef;
 use crate::type_::wrap::rc_wrap;
 
 #[derive(Clone, PartialEq, Eq, From)]
 pub enum FuncVal {
     FreePrim(FreePrimFuncVal),
     FreeComp(FreeCompFuncVal),
-    ConstPrim(ConstPrimFuncVal),
-    ConstComp(ConstCompFuncVal),
-    MutPrim(MutPrimFuncVal),
-    MutComp(MutCompFuncVal),
+    CtxPrim(CtxPrimFuncVal),
+    CtxComp(CtxCompFuncVal),
 }
 
 rc_wrap!(pub FreePrimFuncVal(FreePrimFunc));
 
 rc_wrap!(pub FreeCompFuncVal(FreeCompFunc));
 
-rc_wrap!(pub ConstPrimFuncVal(ConstPrimFunc));
+rc_wrap!(pub CtxPrimFuncVal(CtxPrimFunc));
 
-rc_wrap!(pub ConstCompFuncVal(ConstCompFunc));
-
-rc_wrap!(pub MutPrimFuncVal(MutPrimFunc));
-
-rc_wrap!(pub MutCompFuncVal(MutCompFunc));
+rc_wrap!(pub CtxCompFuncVal(CtxCompFunc));
 
 macro_rules! match_func_val {
     ($self:ident, $name:ident => $body:expr) => {
         match $self {
             FuncVal::FreePrim($name) => $body,
             FuncVal::FreeComp($name) => $body,
-            FuncVal::ConstPrim($name) => $body,
-            FuncVal::ConstComp($name) => $body,
-            FuncVal::MutPrim($name) => $body,
-            FuncVal::MutComp($name) => $body,
+            FuncVal::CtxPrim($name) => $body,
+            FuncVal::CtxComp($name) => $body,
         }
     };
 }
 
 impl FreeFn<Cfg, Val, Val> for FuncVal {
     fn free_call(&self, cfg: &mut Cfg, input: Val) -> Val {
-        match_func_val!(self, f => f.free_call(cfg,input))
+        match self {
+            FuncVal::FreePrim(f) => return f.free_call(cfg, input),
+            FuncVal::FreeComp(f) => return f.free_call(cfg, input),
+            _ => {}
+        }
+        let msg = format!("eval: no context for function {self}");
+        abort_by_bug_with_msg(cfg, msg.into())
     }
 }
 
-impl ConstFn<Cfg, Val, Val, Val> for FuncVal {
-    fn const_call(&self, cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
+impl CtxFn<Cfg, Val, Val, Val> for FuncVal {
+    fn ctx_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         match self {
             FuncVal::FreePrim(f) => f.free_call(cfg, input),
             FuncVal::FreeComp(f) => f.free_call(cfg, input),
-            FuncVal::ConstPrim(f) => f.const_call(cfg, ctx, input),
-            FuncVal::ConstComp(f) => f.const_call(cfg, ctx, input),
-            FuncVal::MutPrim(f) => f.const_call(cfg, ctx, input),
-            FuncVal::MutComp(f) => f.const_call(cfg, ctx, input),
-        }
-    }
-
-    fn opt_const_call(&self, cfg: &mut Cfg, ctx: Option<ConstRef<Val>>, input: Val) -> Val {
-        match self {
-            FuncVal::FreePrim(f) => f.free_call(cfg, input),
-            FuncVal::FreeComp(f) => f.free_call(cfg, input),
-            FuncVal::ConstPrim(f) => f.opt_const_call(cfg, ctx, input),
-            FuncVal::ConstComp(f) => f.opt_const_call(cfg, ctx, input),
-            FuncVal::MutPrim(f) => f.opt_const_call(cfg, ctx, input),
-            FuncVal::MutComp(f) => f.opt_const_call(cfg, ctx, input),
-        }
-    }
-}
-
-impl MutFn<Cfg, Val, Val, Val> for FuncVal {
-    fn mut_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
-        match self {
-            FuncVal::FreePrim(f) => f.free_call(cfg, input),
-            FuncVal::FreeComp(f) => f.free_call(cfg, input),
-            FuncVal::ConstPrim(f) => f.const_call(cfg, ConstRef::new(ctx), input),
-            FuncVal::ConstComp(f) => f.const_call(cfg, ConstRef::new(ctx), input),
-            FuncVal::MutPrim(f) => f.mut_call(cfg, ctx, input),
-            FuncVal::MutComp(f) => f.mut_call(cfg, ctx, input),
-        }
-    }
-
-    fn dyn_call(&self, cfg: &mut Cfg, ctx: DynRef<Val>, input: Val) -> Val {
-        match self {
-            FuncVal::FreePrim(f) => f.free_call(cfg, input),
-            FuncVal::FreeComp(f) => f.free_call(cfg, input),
-            FuncVal::ConstPrim(f) => f.const_call(cfg, ctx.into_const(), input),
-            FuncVal::ConstComp(f) => f.const_call(cfg, ctx.into_const(), input),
-            FuncVal::MutPrim(f) => f.dyn_call(cfg, ctx, input),
-            FuncVal::MutComp(f) => f.dyn_call(cfg, ctx, input),
-        }
-    }
-
-    fn opt_dyn_call(&self, cfg: &mut Cfg, ctx: Option<DynRef<Val>>, input: Val) -> Val {
-        match self {
-            FuncVal::FreePrim(f) => f.free_call(cfg, input),
-            FuncVal::FreeComp(f) => f.free_call(cfg, input),
-            FuncVal::ConstPrim(f) => f.opt_const_call(cfg, ctx.map(DynRef::into_const), input),
-            FuncVal::ConstComp(f) => f.opt_const_call(cfg, ctx.map(DynRef::into_const), input),
-            FuncVal::MutPrim(f) => f.opt_dyn_call(cfg, ctx, input),
-            FuncVal::MutComp(f) => f.opt_dyn_call(cfg, ctx, input),
+            FuncVal::CtxPrim(f) => f.ctx_call(cfg, ctx, input),
+            FuncVal::CtxComp(f) => f.ctx_call(cfg, ctx, input),
         }
     }
 }
@@ -125,10 +70,8 @@ impl FuncVal {
         match self {
             FuncVal::FreePrim(_) => None,
             FuncVal::FreeComp(f) => Some(&f.comp.prelude),
-            FuncVal::ConstPrim(_) => None,
-            FuncVal::ConstComp(f) => Some(&f.comp.prelude),
-            FuncVal::MutPrim(_) => None,
-            FuncVal::MutComp(f) => Some(&f.comp.prelude),
+            FuncVal::CtxPrim(_) => None,
+            FuncVal::CtxComp(f) => Some(&f.comp.prelude),
         }
     }
 
@@ -136,21 +79,26 @@ impl FuncVal {
         match self {
             FuncVal::FreePrim(_) => true,
             FuncVal::FreeComp(_) => false,
-            FuncVal::ConstPrim(_) => true,
-            FuncVal::ConstComp(_) => false,
-            FuncVal::MutPrim(_) => true,
-            FuncVal::MutComp(_) => false,
+            FuncVal::CtxPrim(_) => true,
+            FuncVal::CtxComp(_) => false,
         }
     }
 
-    pub fn ctx_access(&self) -> CtxAccess {
+    pub fn is_free(&self) -> bool {
         match self {
-            FuncVal::FreePrim(_) => CtxAccess::Free,
-            FuncVal::FreeComp(_) => CtxAccess::Free,
-            FuncVal::ConstPrim(_) => CtxAccess::Const,
-            FuncVal::ConstComp(_) => CtxAccess::Const,
-            FuncVal::MutPrim(_) => CtxAccess::Mut,
-            FuncVal::MutComp(_) => CtxAccess::Mut,
+            FuncVal::FreePrim(_) => true,
+            FuncVal::FreeComp(_) => true,
+            FuncVal::CtxPrim(_) => false,
+            FuncVal::CtxComp(_) => false,
+        }
+    }
+
+    pub fn is_const(&self) -> bool {
+        match self {
+            FuncVal::FreePrim(_) => true,
+            FuncVal::FreeComp(_) => true,
+            FuncVal::CtxPrim(f) => f.const_,
+            FuncVal::CtxComp(f) => f.comp.const_,
         }
     }
 }

@@ -1,24 +1,19 @@
-use std::ops::Deref;
-
 use const_format::concatcp;
 
 use super::ConstImpl;
 use super::FreeImpl;
+use super::ImplExtra;
 use super::MutImpl;
-use super::abort_const;
-use super::abort_free;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
-use crate::semantics::val::ConstPrimFuncVal;
+use crate::semantics::val::CtxPrimFuncVal;
 use crate::semantics::val::FreePrimFuncVal;
-use crate::semantics::val::MutPrimFuncVal;
 use crate::semantics::val::TEXT;
 use crate::semantics::val::Val;
 use crate::type_::Byte;
-use crate::type_::ConstRef;
 use crate::type_::Int;
 use crate::type_::Text;
 
@@ -27,8 +22,8 @@ use crate::type_::Text;
 pub struct TextLib {
     pub from_utf8: FreePrimFuncVal,
     pub into_utf8: FreePrimFuncVal,
-    pub get_length: ConstPrimFuncVal,
-    pub push: MutPrimFuncVal,
+    pub get_length: CtxPrimFuncVal,
+    pub push: CtxPrimFuncVal,
     pub join: FreePrimFuncVal,
 }
 
@@ -61,7 +56,7 @@ impl CfgMod for TextLib {
 }
 
 pub fn from_utf8() -> FreePrimFuncVal {
-    FreeImpl { free: fn_from_utf8 }.build()
+    FreeImpl { fn_: fn_from_utf8 }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_from_utf8(cfg: &mut Cfg, input: Val) -> Val {
@@ -76,7 +71,7 @@ fn fn_from_utf8(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn into_utf8() -> FreePrimFuncVal {
-    FreeImpl { free: fn_into_utf8 }.build()
+    FreeImpl { fn_: fn_into_utf8 }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_into_utf8(cfg: &mut Cfg, input: Val) -> Val {
@@ -88,23 +83,23 @@ fn fn_into_utf8(cfg: &mut Cfg, input: Val) -> Val {
     Val::Byte(byte.into())
 }
 
-pub fn get_length() -> ConstPrimFuncVal {
-    ConstImpl { free: abort_free(GET_LENGTH), const_: fn_get_length }.build()
+pub fn get_length() -> CtxPrimFuncVal {
+    ConstImpl { fn_: fn_get_length }.build(ImplExtra { raw_input: false })
 }
 
-fn fn_get_length(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
-    let Val::Text(t) = &*ctx else {
-        return bug!(cfg, "{GET_LENGTH}: expected context to be a text, but got {}", ctx.deref());
+fn fn_get_length(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+    let Val::Text(text) = ctx else {
+        return bug!(cfg, "{GET_LENGTH}: expected context to be a text, but got {ctx}");
     };
     if !input.is_unit() {
         return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input}");
     }
-    let len: Int = t.len().into();
+    let len: Int = text.len().into();
     Val::Int(len.into())
 }
 
-pub fn push() -> MutPrimFuncVal {
-    MutImpl { free: abort_free(PUSH), const_: abort_const(PUSH), mut_: fn_push }.build()
+pub fn push() -> CtxPrimFuncVal {
+    MutImpl { fn_: fn_push }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -120,7 +115,7 @@ fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 
 // todo design
 pub fn join() -> FreePrimFuncVal {
-    FreeImpl { free: fn_join }.build()
+    FreeImpl { fn_: fn_join }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_join(cfg: &mut Cfg, input: Val) -> Val {

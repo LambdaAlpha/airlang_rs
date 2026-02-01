@@ -9,7 +9,7 @@ use rand::prelude::SmallRng;
 
 use super::ConstImpl;
 use super::FreeImpl;
-use super::abort_free;
+use super::ImplExtra;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
@@ -20,7 +20,7 @@ use crate::semantics::val::BYTE;
 use crate::semantics::val::CALL;
 use crate::semantics::val::CELL;
 use crate::semantics::val::CFG;
-use crate::semantics::val::ConstPrimFuncVal;
+use crate::semantics::val::CtxPrimFuncVal;
 use crate::semantics::val::DECIMAL;
 use crate::semantics::val::FUNC;
 use crate::semantics::val::FreePrimFuncVal;
@@ -39,7 +39,6 @@ use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
 use crate::type_::Cell;
-use crate::type_::ConstRef;
 use crate::type_::Decimal;
 use crate::type_::Int;
 use crate::type_::Key;
@@ -53,7 +52,7 @@ use crate::type_::Unit;
 pub struct ValueLib {
     /// should be overridden if there are extension types
     pub any: FreePrimFuncVal,
-    pub get_type: ConstPrimFuncVal,
+    pub get_type: CtxPrimFuncVal,
     pub equal: FreePrimFuncVal,
 }
 
@@ -95,7 +94,7 @@ const TYPE_FUNC: &str = concatcp!(PREFIX_ID, FUNC);
 
 // todo design pick value from cfg or ctx
 pub fn any() -> FreePrimFuncVal {
-    FreeImpl { free: fn_any }.build()
+    FreeImpl { fn_: fn_any }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
@@ -126,15 +125,15 @@ fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
     }
 }
 
-pub fn get_type() -> ConstPrimFuncVal {
-    ConstImpl { free: abort_free(GET_TYPE), const_: fn_get_type }.build()
+pub fn get_type() -> CtxPrimFuncVal {
+    ConstImpl { fn_: fn_get_type }.build(ImplExtra { raw_input: false })
 }
 
-fn fn_get_type(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
+fn fn_get_type(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     if !input.is_unit() {
         return bug!(cfg, "{GET_TYPE}: expected input to be a unit, but got {input}");
     }
-    let s = match &*ctx {
+    let s = match ctx {
         Val::Unit(_) => TYPE_UNIT,
         Val::Bit(_) => TYPE_BIT,
         Val::Key(_) => TYPE_KEY,
@@ -157,7 +156,7 @@ fn fn_get_type(cfg: &mut Cfg, ctx: ConstRef<Val>, input: Val) -> Val {
 
 // todo design
 pub fn equal() -> FreePrimFuncVal {
-    FreeImpl { free: fn_equal }.build()
+    FreeImpl { fn_: fn_equal }.build(ImplExtra { raw_input: false })
 }
 
 fn fn_equal(cfg: &mut Cfg, input: Val) -> Val {

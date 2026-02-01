@@ -56,7 +56,7 @@ _ do [
     .new_link set _ import _link.new,
     .link_which set _ import _link.which,
     .f set _ function {
-        context_access : _free,
+        context_free : true,
         code : __ : _ form _ do [
             ..i set .a link_which get : _i,
             .a link_which set : _i : .i + 1,
@@ -77,7 +77,7 @@ _ do [
     .new_link set _ import _link.new,
     .link_which set _ import _link.which,
     .f set _ data _ function {
-        context_access : _free,
+        context_free : true,
         code : __ : _ form _ do [
             ..i set .a link_which get : _value,
             .a link_which set : _value : .i + 1,
@@ -101,7 +101,7 @@ _ do [
     _a set 1,
     .f set _ function {
         code : (.c : __) : _ form .c link_which get : _a,
-        context_access : _constant,
+        context_constant : true,
         prelude : {},
     },
     _ f .
@@ -116,7 +116,8 @@ _ do [
     _a set 1,
     .f set _ function {
         code : (.c : __) : _ form .c link_which get : _a,
-        context_access : _mutable,
+        context_free : false,
+        context_constant : false,
         prelude : {},
     },
     _ f .
@@ -130,7 +131,8 @@ _ do [
     .link_which set _ import _link.which,
     .f set _ function {
         code : (.c : .i) : _ form .c link_which set : .i : 2,
-        context_access : _mutable,
+        context_free : false,
+                context_constant : false,
         prelude : {},
     },
     .a set 1,
@@ -150,7 +152,7 @@ _ do [
     .is_aborted set _ import _error.is_aborted,
     .f set _ function {
         code : (.c : .i) : _ form .c link_which set : .i : 2,
-        context_access : _constant,
+        context_constant : true,
         prelude : {},
     },
     .c set _ config.new {
@@ -171,7 +173,7 @@ _ do [
     .a set .,
     .f set _ function {
         code : (__c : __) : 1,
-        context_access : _constant,
+        context_constant : true,
         prelude : {},
     },
     .a which f : .
@@ -185,7 +187,7 @@ _ do [
     .a set 1,
     .f set _ function {
         code : (_ctx : __) : 2,
-        context_access : _constant,
+        context_constant : true,
         prelude : {
             ctx : 3
         },
@@ -224,7 +226,8 @@ _ do [
 
 -----
 {
-    context_access : _mutable,
+    context_free : false,
+    context_constant : false,
     raw_input : false,
     code : (c : i) : i,
     prelude : {}
@@ -237,7 +240,7 @@ _ do [
     .function.get_code set _ import _function.get_code,
     .not_code set .not which function.get_code : .,
     .repr set {
-        context_access : _free,
+        context_free : true,
         raw_input : false,
         code : not_code,
     },
@@ -252,12 +255,13 @@ _ do [
     .represent set _ import _function.represent,
     _ represent _ function {
         code : (_c : .i) : .i,
-        context_access : _constant
+        context_constant : true
     }
 ]
 -----
 {
-    context_access : _constant,
+    context_free : false,
+    context_constant : true,
     raw_input : false,
     code : (_c : i) : i,
     prelude : .,
@@ -270,7 +274,8 @@ _ do [
     .function.get_code set _ import _function.get_code,
     .type_code set .get_type which function.get_code : .,
     .repr set {
-        context_access : _constant,
+        context_free : false,
+        context_constant : true,
         raw_input : false,
         code : type_code,
     },
@@ -284,7 +289,8 @@ repr composite
 _ do [
     .represent set _ import _function.represent,
     .repr set {
-        context_access : _constant,
+        context_free : false,
+        context_constant : true,
         raw_input : false,
         code : (_ctx : .in) : .in,
         prelude : {},
@@ -295,42 +301,59 @@ _ do [
 -----
 true
 =====
-access free
+is_context_free free
 -----
 _ do [
-    .get_context_access set _ import _function.get_context_access,
-    .function which get_context_access : .
+    .is_context_free set _ import _function.is_context_free,
+    .function which is_context_free : .
 ]
 -----
-_free
+true
 =====
-access const
+is_context_free constant
 -----
 _ do [
-    .get_context_access set _ import _function.get_context_access,
-    .get which get_context_access : .
+    .is_context_free set _ import _function.is_context_free,
+    .get which is_context_free : .
 ]
 -----
-_constant
+false
 =====
-access mutable
+is_context_free mutable
 -----
 _ do [
-    .get_context_access set _ import _function.get_context_access,
-    .code which get_context_access : .
+    .is_context_free set _ import _function.is_context_free,
+    .code which is_context_free : .
 ]
 -----
-_mutable
+false
 =====
-access default
+is_context_constant free
 -----
 _ do [
-    .get_context_access set _ import _function.get_context_access,
-    .f set _ function {},
-    .f which get_context_access : .
+    .is_context_constant set _ import _function.is_context_constant,
+    .function which is_context_constant : .
 ]
 -----
-_mutable
+true
+=====
+is_context_constant constant
+-----
+_ do [
+    .is_context_constant set _ import _function.is_context_constant,
+    .get which is_context_constant : .
+]
+-----
+true
+=====
+is_context_constant mutable
+-----
+_ do [
+    .is_context_constant set _ import _function.is_context_constant,
+    .code which is_context_constant : .
+]
+-----
+false
 =====
 is_raw_input true
 -----
@@ -442,7 +465,7 @@ _ do [
                 .i + .f .f .i - 1
             ]
         ],
-        context_access : _free,
+        context_free : true,
         prelude : {},
     },
     g g 10
