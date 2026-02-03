@@ -126,9 +126,9 @@ false test [1] : [2]
 -----
 2
 =====
-test else .
+test no default
 -----
-true test [1] : []
+true test [1]
 -----
 1
 =====

@@ -92,7 +92,7 @@ _ do [
         .t set la,
         .la set lb,
         .lb set t,
-    ] : [],
+    ],
     .a1 set a,
     .d set la - lb,
     .i set (d == 0) test [0] : [(d + (_ any _integer) % d) % d],

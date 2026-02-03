@@ -211,8 +211,8 @@ fn fn_test(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 
 struct Test {
     condition: Val,
-    branch_then: Block,
-    branch_else: Block,
+    body: Block,
+    default: Option<Block>,
 }
 
 impl Test {
@@ -222,17 +222,18 @@ impl Test {
         };
         let pair = Pair::from(pair);
         let condition = pair.left;
-        let Val::Pair(branches) = pair.right else {
-            return Err(bug!(
-                cfg,
-                "{TEST}: expect input.right to be a pair, but got {}",
-                pair.right
-            ));
-        };
-        let branches = Pair::from(branches);
-        let branch_then = Block::parse(TEST, cfg, branches.left)?;
-        let branch_else = Block::parse(TEST, cfg, branches.right)?;
-        Ok(Test { condition, branch_then, branch_else })
+        match pair.right {
+            Val::Pair(branches) => {
+                let branches = Pair::from(branches);
+                let body = Block::parse(TEST, cfg, branches.left)?;
+                let default = Block::parse(TEST, cfg, branches.right)?;
+                Ok(Test { condition, body, default: Some(default) })
+            }
+            body => {
+                let body = Block::parse(TEST, cfg, body)?;
+                Ok(Test { condition, body, default: None })
+            }
+        }
     }
 
     fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
@@ -240,8 +241,13 @@ impl Test {
         let Val::Bit(b) = condition else {
             return bug!(cfg, "{TEST}: expected condition to be a bit, but got {condition}");
         };
-        let branch = if *b { self.branch_then } else { self.branch_else };
-        branch.eval(TEST, cfg, ctx)
+        if *b {
+            return self.body.eval(TEST, cfg, ctx);
+        }
+        let Some(default) = self.default else {
+            return Val::default();
+        };
+        default.eval(TEST, cfg, ctx)
     }
 }
 
