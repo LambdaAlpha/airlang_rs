@@ -46,35 +46,35 @@ _ do [
 -----
 3
 =====
-do return true
+do try return
 -----
 _ do [
     1,
     2,
-    true _return 3,
+    _ _try .(3),
     4
 ]
 -----
 3
 =====
-do return false
+do try continue
 -----
 _ do [
     1,
     2,
-    false _return 3,
+    _ _try .,
     4
 ]
 -----
 4
 =====
-do return scope 1
+do try scope 1
 -----
 _ do [
     1,
     _ do [
         2,
-        true _return 3,
+        _ _try .(3),
         4
     ],
     5
@@ -82,13 +82,13 @@ _ do [
 -----
 5
 =====
-do return scope 2
+do try scope 2
 -----
 _ do [
     1,
     .a set _ do [
         2,
-        true _return 3,
+        _ _try .(3),
         4
     ],
     a + 2
@@ -96,11 +96,11 @@ _ do [
 -----
 5
 =====
-do return eval
+do try eval
 -----
 _ do [
     .b set 2,
-    (b > 0) _return b - 1,
+    _ _try .(b - 1),
     b + 1
 ]
 -----
@@ -156,23 +156,11 @@ true test [
 -----
 2
 =====
-test return
+test try return
 -----
 true test [
     1,
-    true _return 2,
-    3
-] : [
-    4
-]
------
-2
-=====
-test return
------
-true test [
-    1,
-    true _return 2,
+    _ _try .(2),
     3
 ] : [
     4
@@ -328,24 +316,12 @@ _ do [
 -----
 1
 =====
-match return
+match try return
 -----
 1 match [
     1 : [
         2,
-        true _return 3,
-        4
-    ]
-]
------
-3
-=====
-match return
------
-1 match [
-    1 : [
-        2,
-        true _return 3,
+        _ _try .(3),
         4
     ]
 ]
@@ -427,7 +403,7 @@ _ do [
     .b set 0,
     (b < 5) loop [
         .b set b + 1,
-        (b == 2) _continue .,
+        _ _try (b == 2) test [continue],
         .a set a + b,
     ],
     a
@@ -441,7 +417,7 @@ _ do [
     .a set 0,
     .b set 0,
     (b < 5) loop [
-        (a > 5) _return a,
+        _ _try (a > 5) test [.(.(a))],
         .b set b + 1,
         .a set a + b,
     ]
@@ -476,7 +452,7 @@ _ do [
 iterate return 1
 -----
 [1, 2, 3, 4, 5] iterate i : [
-    (i == 3) _return true
+    _ _try (i == 3) test [.(.(true))]
 ]
 -----
 true
@@ -485,7 +461,7 @@ iterate return 2
 -----
 _ do [
     [1, 2, 3, 4, 5] iterate i : [
-        (i == 3) _return .,
+        _ _try (i == 3) test [break],
         .a set i
     ],
     a
@@ -500,7 +476,7 @@ _ do [
     .b set 0,
     [1, 2, 3, 4, 5] iterate i : [
         .a set a + i,
-        (i == 3) _continue .,
+        _ _try (i == 3) test [continue],
         .b set b + i
     ],
     a : b

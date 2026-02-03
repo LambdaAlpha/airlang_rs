@@ -3,4 +3,7 @@ _ do [
     .link_which set _ import _link.which,
     
     prelude link_which set : .empty : empty,
+    prelude link_which set : .return : return,
+    prelude link_which set : .continue : continue,
+    prelude link_which set : .break : break,
 ]

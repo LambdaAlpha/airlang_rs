@@ -128,7 +128,7 @@ true
 _ do [
     .any set _ import _value.any,
     .a set _ any _integer,
-    (a == 0) _return true,
+    _ _try (a == 0) test [.(true)],
     0 == 0 / a
 ]
 -----
@@ -139,7 +139,7 @@ true
 _ do [
     .any set _ import _value.any,
     .a set _ any _integer,
-    (a == 0) _return true,
+    _ _try (a == 0) test [.(true)],
     .% set _ import _integer.remainder,
     0 == 0 % a
 ]
@@ -185,7 +185,7 @@ _ do [
     .any set _ import _value.any,
     .a set _ any _integer,
     .b set _ any _integer,
-    (b == 0) _return true,
+    _ _try (b == 0) test [.(true)],
     .% set _ import _integer.remainder,
     0 == (a * b) % b
 ]
@@ -198,7 +198,7 @@ _ do [
     .any set _ import _value.any,
     .a set _ any _integer,
     .b set _ any _integer,
-    (b == 0) _return true,
+    _ _try (b == 0) test [.(true)],
     .% set _ import _integer.remainder,
     (0 <= a) == 0 <= a % b
 ]
@@ -211,7 +211,7 @@ _ do [
     .any set _ import _value.any,
     .a set _ any _integer,
     .b set _ any _integer,
-    (b == 0) _return true,
+    _ _try (b == 0) test [.(true)],
     .% set _ import _integer.remainder,
     (0 <= b) == 0 <= b + a % b
 ]
@@ -224,7 +224,7 @@ _ do [
     .any set _ import _value.any,
     .a set _ any _integer,
     .b set _ any _integer,
-    (b == 0) _return true,
+    _ _try (b == 0) test [.(true)],
     a == <(a * b / b)
 ]
 -----
@@ -236,7 +236,7 @@ _ do [
     .any set _ import _value.any,
     .a set _ any _integer,
     .b set _ any _integer,
-    (b == 0) _return true,
+    _ _try (b == 0) test [.(true)],
     .c set a * b,
     c == <(c / b * b)
 ]
@@ -249,7 +249,7 @@ _ do [
     .any set _ import _value.any,
     .a set _ any _integer,
     .b set _ any _integer,
-    (b == 0) _return true,
+    _ _try (b == 0) test [.(true)],
     (0 <= a) == 0 <= a - a / b * b
 ]
 -----
@@ -261,7 +261,7 @@ _ do [
     .any set _ import _value.any,
     .a set _ any _integer,
     .b set _ any _integer,
-    (b == 0) _return true,
+    _ _try (b == 0) test [.(true)],
     .% set _ import _integer.remainder,
     a == (b * a / b) + a % b
 ]
@@ -370,7 +370,7 @@ _ do [
     .any set _ import _value.any,
     .a set _ any _integer,
     .b set _ any _integer,
-    (b == 0) _return true,
+    _ _try (b == 0) test [.(true)],
     .% set _ import _integer.remainder,
     ./% set _ import _integer.divide_remainder,
     (a /% b) == (a / b) : (a % b)

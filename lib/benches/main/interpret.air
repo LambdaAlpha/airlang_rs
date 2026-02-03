@@ -6,7 +6,7 @@ _ do [
         code : .n : _ form _ do [
             ..sum set 0,
             .n iterate .i : [
-                (0 == .i % 3) _continue .,
+                _ _try (0 == .i % 3) test [continue],
                 ..sum set .sum + .i,
             ],
             .sum

@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::ops::Deref;
 
 use const_format::concatcp;
 use num_traits::Signed;
@@ -23,6 +24,7 @@ use crate::semantics::val::MapVal;
 use crate::semantics::val::Val;
 use crate::type_::Byte;
 use crate::type_::Call;
+use crate::type_::Cell;
 use crate::type_::Int;
 use crate::type_::Key;
 use crate::type_::List;
@@ -73,8 +75,7 @@ impl CfgMod for CtrlLib {
     }
 }
 
-const CONTINUE: &str = concatcp!(PREFIX_ID, "continue");
-const RETURN: &str = concatcp!(PREFIX_ID, "return");
+const TRY: &str = concatcp!(PREFIX_ID, "try");
 
 #[derive(Clone)]
 struct Block {
@@ -82,20 +83,9 @@ struct Block {
 }
 
 #[derive(Clone)]
-enum Statement {
-    Normal(Val),
-    Condition { ctrl_flow: CtrlFlow, condition: Val, body: Val },
-}
-
-#[derive(Copy, Clone)]
-enum CtrlFlow {
-    Continue,
-    Return,
-}
-
-struct OutputCtrlFlow {
-    output: Val,
-    ctrl_flow: CtrlFlow,
+struct Statement {
+    try_: bool,
+    body: Val,
 }
 
 impl Block {
@@ -111,79 +101,49 @@ impl Block {
         Ok(Block { statements })
     }
 
-    fn flow(self, tag: &str, cfg: &mut Cfg, ctx: &mut Val) -> OutputCtrlFlow {
+    fn flow(self, tag: &str, cfg: &mut Cfg, ctx: &mut Val) -> Option<Val> {
         let mut output = Val::default();
         for statement in self.statements {
             if cfg.is_aborted() {
-                return OutputCtrlFlow { output: Val::default(), ctrl_flow: CtrlFlow::Return };
+                return None;
             }
-            match statement {
-                Statement::Normal(val) => {
-                    output = Eval.ctx_call(cfg, ctx, val);
-                }
-                Statement::Condition { ctrl_flow, condition, body } => {
-                    let condition = Eval.ctx_call(cfg, ctx, condition);
-                    let Val::Bit(condition) = condition else {
-                        bug!(
-                            cfg,
-                            "{tag}: expected block condition to be a bit, but got {condition}"
-                        );
-                        return OutputCtrlFlow {
-                            output: Val::default(),
-                            ctrl_flow: CtrlFlow::Return,
-                        };
-                    };
-                    if *condition {
-                        let output = Eval.ctx_call(cfg, ctx, body);
-                        return OutputCtrlFlow { output, ctrl_flow };
-                    }
-                    output = Val::default();
+            output = Eval.ctx_call(cfg, ctx, statement.body);
+            if !statement.try_ {
+                continue;
+            }
+            match output {
+                Val::Cell(cell) => return Some(Cell::from(cell).value),
+                Val::Unit(_) => {}
+                output => {
+                    bug!(
+                        cfg,
+                        "{tag}: expected body of {TRY} to be a cell or unit, but got {output:?}"
+                    );
+                    return None;
                 }
             }
         }
-        OutputCtrlFlow { output, ctrl_flow: CtrlFlow::Continue }
-    }
-
-    fn eval(self, tag: &str, cfg: &mut Cfg, ctx: &mut Val) -> Val {
-        self.flow(tag, cfg, ctx).output
+        Some(output)
     }
 }
 
 impl Statement {
     fn parse(tag: &str, cfg: &mut Cfg, val: Val) -> Result<Self, Val> {
+        let try_ = false;
         let Val::Call(call) = val else {
-            return Ok(Statement::Normal(val));
+            return Ok(Statement { try_, body: val });
         };
         let Val::Key(s) = &call.func else {
-            return Ok(Statement::Normal(Val::Call(call)));
+            return Ok(Statement { try_, body: Val::Call(call) });
         };
-        let Some(ctrl_flow) = CtrlFlow::parse(s) else {
-            return Ok(Statement::Normal(Val::Call(call)));
-        };
+        if !s.starts_with(PREFIX_ID) {
+            return Ok(Statement { try_, body: Val::Call(call) });
+        }
+        if s.deref() != TRY {
+            return Err(bug!(cfg, "{tag}: expect {TRY}, but got {s}",));
+        }
         let call = Call::from(call);
-        let Val::Pair(pair) = call.input else {
-            return Err(bug!(
-                cfg,
-                "{tag}: expect statement condition input to be a pair, but got {}",
-                call.input
-            ));
-        };
-        let pair = Pair::from(pair);
-        let condition = pair.left;
-        let body = pair.right;
-        let statement = Statement::Condition { ctrl_flow, condition, body };
-        Ok(statement)
-    }
-}
-
-impl CtrlFlow {
-    fn parse(str: &str) -> Option<Self> {
-        let ctrl_flow = match str {
-            RETURN => Self::Return,
-            CONTINUE => Self::Continue,
-            _ => return None,
-        };
-        Some(ctrl_flow)
+        Ok(Statement { try_: true, body: call.input })
     }
 }
 
@@ -195,7 +155,7 @@ fn fn_do(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Ok(block) = Block::parse(DO, cfg, input) else {
         return Val::default();
     };
-    block.eval(DO, cfg, ctx)
+    block.flow(DO, cfg, ctx).unwrap_or_default()
 }
 
 pub fn test() -> CtxPrimFuncVal {
@@ -242,12 +202,12 @@ impl Test {
             return bug!(cfg, "{TEST}: expected condition to be a bit, but got {condition}");
         };
         if *b {
-            return self.body.eval(TEST, cfg, ctx);
+            return self.body.flow(TEST, cfg, ctx).unwrap_or_default();
         }
         let Some(default) = self.default else {
             return Val::default();
         };
-        default.eval(TEST, cfg, ctx)
+        default.flow(TEST, cfg, ctx).unwrap_or_default()
     }
 }
 
@@ -315,7 +275,7 @@ impl Switch {
         let Some(body) = self.map.remove(&key).or(self.default) else {
             return Val::default();
         };
-        body.eval(SWITCH, cfg, ctx)
+        body.flow(SWITCH, cfg, ctx).unwrap_or_default()
     }
 }
 
@@ -384,7 +344,7 @@ impl Match {
             if result.is_none() {
                 return Val::default();
             }
-            return block.eval(MATCH, cfg, ctx);
+            return block.flow(MATCH, cfg, ctx).unwrap_or_default();
         }
         Val::default()
     }
@@ -426,10 +386,19 @@ impl Loop {
             if !*bit {
                 break;
             }
-            let v = self.body.clone().flow(LOOP, cfg, ctx);
-            match v.ctrl_flow {
-                CtrlFlow::Continue => {}
-                CtrlFlow::Return => return v.output,
+            let Some(output) = self.body.clone().flow(LOOP, cfg, ctx) else {
+                return Val::default();
+            };
+            match output {
+                Val::Cell(cell) => return Cell::from(cell).value,
+                Val::Unit(_) => {}
+                output => {
+                    bug!(
+                        cfg,
+                        "{LOOP}: expected return value of body to be a cell or unit, but got {output:?}"
+                    );
+                    return Val::default();
+                }
             }
         }
         Val::default()
@@ -549,10 +518,19 @@ where ValIter: Iterator<Item = Val> {
         if ctx.set(cfg, name.clone(), val).is_none() {
             return Val::default();
         }
-        let v = body.clone().flow(ITERATE, cfg, ctx);
-        match v.ctrl_flow {
-            CtrlFlow::Continue => {}
-            CtrlFlow::Return => return v.output,
+        let Some(output) = body.clone().flow(ITERATE, cfg, ctx) else {
+            return Val::default();
+        };
+        match output {
+            Val::Cell(cell) => return Cell::from(cell).value,
+            Val::Unit(_) => {}
+            output => {
+                bug!(
+                    cfg,
+                    "{ITERATE}: expected return value of body to be a cell or unit, but got {output:?}"
+                );
+                return Val::default();
+            }
         }
     }
     Val::default()

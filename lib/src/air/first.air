@@ -1,2 +1,5 @@
 _ do [
+    .return set .(.),
+    .continue set .(.),
+    .break set .(.(.)),
 ]
