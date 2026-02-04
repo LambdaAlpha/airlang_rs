@@ -3,9 +3,13 @@ name = "airlang_dev"
 edition = "2024"
 publish = false
 
-[dependencies]
-log = "0.4"
-env_logger = "0.11"
+# log
+[dependencies.log]
+version = "0.4"
+
+# log
+[dependencies.env_logger]
+version = "0.11"
 
 [lints]
 workspace = true

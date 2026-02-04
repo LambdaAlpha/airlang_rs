@@ -18,27 +18,57 @@ name = "main"
 [lints]
 workspace = true
 
-[dependencies]
-rustc-hash = "2"
-winnow = "0.7"
-num-bigint = "0.4"
-num-traits = "0.2"
-num-integer = "0.1"
-const_format = "0.2"
-# for once_map
-stable_deref_trait = "1.2"
-bigdecimal = "0.4"
+# faster hash map
+[dependencies.rustc-hash]
+version = "2"
 
+# config
+[dependencies.once_map]
+version = "0.4"
+default-features = false
+features = ["std"]
+
+# config once_map
+[dependencies.stable_deref_trait]
+version = "1.2"
+
+# integer and decimal
+[dependencies.num-traits]
+version = "0.2"
+
+# integer
+[dependencies.num-bigint]
+version = "0.4"
+
+# integer
+[dependencies.num-integer]
+version = "0.1"
+
+# decimal
+[dependencies.bigdecimal]
+version = "0.4"
+
+# key
 [dependencies.string_cache]
 version = "0.9"
 default-features = false
 features = []
 
+# syntax parsing
+[dependencies.winnow]
+version = "0.7"
+
+# val generation
 [dependencies.rand]
 version = "0.9"
 default-features = false
 features = ["small_rng", "alloc", "os_rng"]
 
+# const str
+[dependencies.const_format]
+version = "0.2"
+
+# derive
 [dependencies.derive_more]
 version = "2"
 default-features = false
@@ -60,17 +90,15 @@ features = [
     "display",
 ]
 
-[dependencies.once_map]
-version = "0.4"
-default-features = false
-features = ["std"]
+# bench
+[dev-dependencies.criterion]
+version = "0.8"
 
-[dev-dependencies]
-criterion = "0.8"
-
+# log
 [dev-dependencies.airlang_dev]
 path = "../dev"
 
+# log
 [dev-dependencies.log]
 version = "0.4"
 default-features = false

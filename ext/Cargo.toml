@@ -15,8 +15,10 @@ workspace = true
 path = "../lib"
 version = "0.23.0"
 
+# const str
 [dependencies.const_format]
 version = "0.2"
 
+# log
 [dev-dependencies.airlang_dev]
 path = "../dev"
