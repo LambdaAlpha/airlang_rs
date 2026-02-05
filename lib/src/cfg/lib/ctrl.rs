@@ -113,14 +113,14 @@ impl Block {
             }
             match output {
                 Val::Cell(cell) => return Some(Cell::from(cell).value),
-                Val::Unit(_) => {}
+                Val::Unit(_) => {},
                 output => {
                     bug!(
                         cfg,
                         "{tag}: expected body of {TRY} to be a cell or unit, but got {output:?}"
                     );
                     return None;
-                }
+                },
             }
         }
         Some(output)
@@ -188,11 +188,11 @@ impl Test {
                 let body = Block::parse(TEST, cfg, branches.left)?;
                 let default = Block::parse(TEST, cfg, branches.right)?;
                 Ok(Test { condition, body, default: Some(default) })
-            }
+            },
             body => {
                 let body = Block::parse(TEST, cfg, body)?;
                 Ok(Test { condition, body, default: None })
-            }
+            },
         }
     }
 
@@ -239,7 +239,7 @@ impl Switch {
             Val::Map(map) => {
                 let map = Self::parse_block_map(cfg, map)?;
                 Ok(Self { val, map, default: None })
-            }
+            },
             Val::Pair(pair) => {
                 let pair = Pair::from(pair);
                 let Val::Map(map) = pair.left else {
@@ -252,10 +252,10 @@ impl Switch {
                 let map = Self::parse_block_map(cfg, map)?;
                 let default = Some(Block::parse(SWITCH, cfg, pair.right)?);
                 Ok(Self { val, map, default })
-            }
+            },
             v => {
                 Err(bug!(cfg, "{SWITCH}: expected input.right to be a map or a pair, but got {v}"))
-            }
+            },
         }
     }
 
@@ -391,14 +391,14 @@ impl Loop {
             };
             match output {
                 Val::Cell(cell) => return Cell::from(cell).value,
-                Val::Unit(_) => {}
+                Val::Unit(_) => {},
                 output => {
                     bug!(
                         cfg,
                         "{LOOP}: expected return value of body to be a cell or unit, but got {output:?}"
                     );
                     return Val::default();
-                }
+                },
             }
         }
         Val::default()
@@ -467,33 +467,33 @@ impl Iterate {
                     Val::Int(i.into())
                 });
                 iterate_val(cfg, ctx, self.body, self.name, iter)
-            }
+            },
             Val::Byte(byte) => {
                 let iter = byte.iter().map(|byte| {
                     let byte = Byte::from(vec![*byte]);
                     Val::Byte(byte.into())
                 });
                 iterate_val(cfg, ctx, self.body, self.name, iter)
-            }
+            },
             Val::Key(key) => {
                 let iter = key.char_indices().map(|(start, c)| {
                     let key = Key::from_str_unchecked(&key[start .. start + c.len_utf8()]);
                     Val::Key(key)
                 });
                 iterate_val(cfg, ctx, self.body, self.name, iter)
-            }
+            },
             Val::Text(t) => {
                 let iter = t.chars().map(|c| {
                     let text = Text::from(c.to_string());
                     Val::Text(text.into())
                 });
                 iterate_val(cfg, ctx, self.body, self.name, iter)
-            }
+            },
             Val::List(list) => {
                 let list = List::from(list);
                 let iter = list.into_iter();
                 iterate_val(cfg, ctx, self.body, self.name, iter)
-            }
+            },
             Val::Map(map) => {
                 let map = Map::from(map);
                 let iter = map.into_iter().map(|pair| {
@@ -501,7 +501,7 @@ impl Iterate {
                     Val::Pair(pair.into())
                 });
                 iterate_val(cfg, ctx, self.body, self.name, iter)
-            }
+            },
             v => bug!(cfg, "{ITERATE}: expected input.left to be iterable, but got {v}"),
         }
     }
@@ -523,14 +523,14 @@ where ValIter: Iterator<Item = Val> {
         };
         match output {
             Val::Cell(cell) => return Cell::from(cell).value,
-            Val::Unit(_) => {}
+            Val::Unit(_) => {},
             output => {
                 bug!(
                     cfg,
                     "{ITERATE}: expected return value of body to be a cell or unit, but got {output:?}"
                 );
                 return Val::default();
-            }
+            },
         }
     }
     Val::default()

@@ -203,7 +203,7 @@ fn text_esc(str: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
             _ => {
                 f.write_char(c)?;
                 continue;
-            }
+            },
         };
         f.write_str(escaped)?;
     }
@@ -323,12 +323,12 @@ fn byte_fmt(byte: &Byte, radix: u8, f: &mut Formatter<'_>) -> std::fmt::Result {
             for &b in byte.iter() {
                 write!(f, "{b:02x}")?;
             }
-        }
+        },
         2 => {
             for &b in byte.iter() {
                 write!(f, "{b:08b}")?;
             }
-        }
+        },
         _ => unreachable!("invalid radix {radix}"),
     }
     if !f.sign_minus() {
@@ -383,7 +383,7 @@ impl<T: FmtRepr> FmtRepr for Pair<T, T> {
                 ctx.direction = Direction::Right;
                 pair_fmt_right(self, ctx, f)?;
                 f.write_char(SCOPE_RIGHT)
-            }
+            },
             Direction::Right => {
                 if best_right(align, &self.left, &self.right) {
                     return pair_fmt_right(self, ctx, f);
@@ -393,7 +393,7 @@ impl<T: FmtRepr> FmtRepr for Pair<T, T> {
                 ctx.direction = Direction::Left;
                 pair_fmt_left(self, ctx, f)?;
                 f.write_char(SCOPE_RIGHT)
-            }
+            },
         }
     }
 
@@ -466,7 +466,7 @@ fn call_fmt_infix<T: FmtRepr>(
             ctx.direction = Direction::Right;
             call_fmt_infix_right(func, pair, ctx, f)?;
             f.write_char(SCOPE_RIGHT)
-        }
+        },
         Direction::Right => {
             if best_right(align, pair.left, pair.right) {
                 return call_fmt_infix_right(func, pair, ctx, f);
@@ -476,7 +476,7 @@ fn call_fmt_infix<T: FmtRepr>(
             ctx.direction = Direction::Left;
             call_fmt_infix_left(func, pair, ctx, f)?;
             f.write_char(SCOPE_RIGHT)
-        }
+        },
     }
 }
 
@@ -553,12 +553,12 @@ fn best_direction(
             if !left_open && right_open {
                 return Direction::Right;
             }
-        }
+        },
         Direction::Right => {
             if left_open && !right_open {
                 return Direction::Left;
             }
-        }
+        },
     }
     direction
 }

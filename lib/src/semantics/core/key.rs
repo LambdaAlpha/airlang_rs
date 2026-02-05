@@ -35,7 +35,7 @@ impl FreeFn<Cfg, Key, Val> for KeyEval {
         match mode {
             KeyMode::Id => return Val::Key(key),
             KeyMode::Shift => return Val::Key(key),
-            KeyMode::Ctx => {}
+            KeyMode::Ctx => {},
         }
         let msg = format!("eval: no context for key {key}");
         abort_by_bug_with_msg(cfg, msg.into())
@@ -48,7 +48,7 @@ impl CtxFn<Cfg, Val, Key, Val> for KeyEval {
         match mode {
             KeyMode::Id => return Val::Key(key),
             KeyMode::Shift => return Val::Key(key),
-            KeyMode::Ctx => {}
+            KeyMode::Ctx => {},
         }
         let Some(val) = ctx.ref_(cfg, key) else {
             return Val::default();

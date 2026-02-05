@@ -152,17 +152,17 @@ impl<T: ReplTerminal> Repl<T> {
             let event = read()?;
             match event {
                 Event::Key(key) => match self.handle_key(key)? {
-                    CtrlFlow::None => {}
+                    CtrlFlow::None => {},
                     CtrlFlow::Continue => break Ok(false),
                     CtrlFlow::Break => break Ok(true),
                 },
-                Event::Mouse(_) => {}
+                Event::Mouse(_) => {},
                 Event::Paste(text) => {
                     self.handle_paste(text)?;
-                }
-                Event::Resize(_, _) => {}
-                Event::FocusGained => {}
-                Event::FocusLost => {}
+                },
+                Event::Resize(_, _) => {},
+                Event::FocusGained => {},
+                Event::FocusLost => {},
             }
         }
     }
@@ -198,24 +198,24 @@ impl<T: ReplTerminal> Repl<T> {
             KeyCode::Down => self.handle_up_down(false)?,
             KeyCode::Home => self.handle_home()?,
             KeyCode::End => self.handle_end()?,
-            KeyCode::PageUp => {}
-            KeyCode::PageDown => {}
-            KeyCode::Tab => {}
-            KeyCode::BackTab => {}
+            KeyCode::PageUp => {},
+            KeyCode::PageDown => {},
+            KeyCode::Tab => {},
+            KeyCode::BackTab => {},
             KeyCode::Delete => self.handle_delete()?,
-            KeyCode::Insert => {}
-            KeyCode::F(_) => {}
-            KeyCode::Null => {}
-            KeyCode::Esc => {}
-            KeyCode::CapsLock => {}
-            KeyCode::ScrollLock => {}
-            KeyCode::NumLock => {}
-            KeyCode::PrintScreen => {}
-            KeyCode::Pause => {}
-            KeyCode::Menu => {}
-            KeyCode::KeypadBegin => {}
-            KeyCode::Media(_) => {}
-            KeyCode::Modifier(_) => {}
+            KeyCode::Insert => {},
+            KeyCode::F(_) => {},
+            KeyCode::Null => {},
+            KeyCode::Esc => {},
+            KeyCode::CapsLock => {},
+            KeyCode::ScrollLock => {},
+            KeyCode::NumLock => {},
+            KeyCode::PrintScreen => {},
+            KeyCode::Pause => {},
+            KeyCode::Menu => {},
+            KeyCode::KeypadBegin => {},
+            KeyCode::Media(_) => {},
+            KeyCode::Modifier(_) => {},
         }
         Ok(CtrlFlow::None)
     }
@@ -415,7 +415,7 @@ impl<T: ReplTerminal> Repl<T> {
                 } else {
                     self.terminal.print(format!("{output:#}"))
                 }
-            }
+            },
             Err(e) => self.terminal.eprint(e.to_string()),
         }
     }
@@ -529,11 +529,11 @@ impl<T: ReplTerminal> Terminal<T> {
             match c {
                 '\n' => {
                     self.newline_multiline_prompt()?;
-                }
-                '\r' => {}
+                },
+                '\r' => {},
                 c => {
                     self.0.queue(Print(c))?;
-                }
+                },
             }
         }
         Ok(())

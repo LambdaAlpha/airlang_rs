@@ -29,11 +29,11 @@ pub fn interpret_file(path: &str) -> std::io::Result<()> {
             let output = air.interpret(val);
             let mut lock = stdout().lock();
             writeln!(lock, "{output:#}")
-        }
+        },
         Err(e) => {
             let mut lock = stderr().lock();
             writeln!(lock, "{e}")
-        }
+        },
     }
 }
 

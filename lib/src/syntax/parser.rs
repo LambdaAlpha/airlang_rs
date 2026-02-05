@@ -332,7 +332,7 @@ fn compose_one<'a, T: ParseRepr>(
         (InputToken::Empty(_), InputToken::Empty(checkpoint)) => {
             i.reset(&checkpoint);
             return Err(cut_expect_desc(concatcp!("at most one ", EMPTY)));
-        }
+        },
     };
     Ok(compose_func_input(ctx, func, input))
 }
@@ -388,7 +388,7 @@ fn func_token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, FuncToken
         Token::Empty(checkpoint) => {
             i.reset(&checkpoint);
             Err(cut_expect_desc(QUOTE_EMPTY))
-        }
+        },
         Token::Pair(_) => Ok(FuncToken::Pair),
         Token::Default(token) => Ok(FuncToken::Default(token)),
     }
@@ -400,7 +400,7 @@ fn input_token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, InputTok
         Token::Pair(checkpoint) => {
             i.reset(&checkpoint);
             Err(cut_expect_desc(QUOTE_PAIR))
-        }
+        },
         Token::Default(token) => Ok(InputToken::Default(token)),
     }
 }
@@ -410,11 +410,11 @@ fn repr<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
         Token::Empty(checkpoint) => {
             i.reset(&checkpoint);
             Err(cut_expect_desc(QUOTE_EMPTY))
-        }
+        },
         Token::Pair(checkpoint) => {
             i.reset(&checkpoint);
             Err(cut_expect_desc(QUOTE_PAIR))
-        }
+        },
         Token::Default(token) => Ok(token),
     }
 }
@@ -425,7 +425,7 @@ fn input_repr<'a, T: ParseRepr>(i: &mut &'a str, input: InputToken<'a, T>) -> Mo
         InputToken::Empty(checkpoint) => {
             i.reset(&checkpoint);
             Err(cut_expect_desc(QUOTE_EMPTY))
-        }
+        },
     }
 }
 
@@ -529,10 +529,10 @@ fn key(i: &mut &str) -> ModalResult<Key> {
                         key_newline.parse_next(i)?;
                         match any.parse_next(i)? {
                             SCOPE_RIGHT => raw = false,
-                            ' ' => {}
+                            ' ' => {},
                             _ => return fail.parse_next(i),
                         }
-                    }
+                    },
                     _ => s.push_str(raw_literal.parse_next(i)?),
                 }
             } else {
@@ -543,10 +543,10 @@ fn key(i: &mut &str) -> ModalResult<Key> {
                         key_newline.parse_next(i)?;
                         match any.parse_next(i)? {
                             SCOPE_LEFT => raw = true,
-                            ' ' => {}
+                            ' ' => {},
                             _ => return fail.parse_next(i),
                         }
-                    }
+                    },
                     _ => s.push_str(literal.parse_next(i)?),
                 }
             }
@@ -586,10 +586,10 @@ fn text(i: &mut &str) -> ModalResult<Text> {
                         s.push_str(text_newline.parse_next(i)?);
                         match any.parse_next(i)? {
                             SCOPE_RIGHT => raw = false,
-                            ' ' => {}
+                            ' ' => {},
                             _ => return fail.parse_next(i),
                         }
-                    }
+                    },
                     _ => s.push_str(raw_literal.parse_next(i)?),
                 }
             } else {
@@ -600,10 +600,10 @@ fn text(i: &mut &str) -> ModalResult<Text> {
                         s.push_str(text_newline.parse_next(i)?);
                         match any.parse_next(i)? {
                             SCOPE_LEFT => raw = true,
-                            ' ' => {}
+                            ' ' => {},
                             _ => return fail.parse_next(i),
                         }
-                    }
+                    },
                     _ => s.push_str(literal.parse_next(i)?),
                 }
             }

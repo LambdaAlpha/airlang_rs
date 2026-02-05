@@ -67,7 +67,7 @@ fn load_from_url(cfg: &mut Cfg, url: String) -> Val {
         Ok(content) => content,
         Err(_err) => {
             return Val::Key(Key::from_str_unchecked("_read_error"));
-        }
+        },
     };
     let Ok(val) = parse(content) else {
         return Val::Key(Key::from_str_unchecked("_parse_error"));

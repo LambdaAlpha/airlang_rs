@@ -102,20 +102,20 @@ fn parse_code(cfg: &mut Cfg, code: Val) -> Option<CompCode> {
                         input_name: input.clone(),
                         body: names_body.right,
                     }
-                }
+                },
                 Val::Key(input) => {
                     CompCode { ctx_name: None, input_name: input, body: names_body.right }
-                }
+                },
                 v => {
                     bug!(cfg, "{NEW}: expected names to be a key or a pair of key, but got {v}");
                     return None;
-                }
+                },
             }
-        }
+        },
         v => {
             bug!(cfg, "{NEW}: expected {CODE} to be a pair or a unit, but got {v}");
             return None;
-        }
+        },
     };
     Some(code)
 }
@@ -155,7 +155,7 @@ fn parse_bit(tag: &str, cfg: &mut Cfg, val: Val) -> Option<bool> {
         v => {
             bug!(cfg, "{NEW}: expected {tag} to be a unit or a bit, but got {v}");
             None
-        }
+        },
     }
 }
 

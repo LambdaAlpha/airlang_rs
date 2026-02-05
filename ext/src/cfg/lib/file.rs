@@ -45,6 +45,6 @@ fn fn_read_to_text(cfg: &mut Cfg, input: Val) -> Val {
         Err(err) => {
             eprintln!("{err}");
             Val::default()
-        }
+        },
     }
 }

@@ -272,11 +272,11 @@ impl Arbitrary for FuncVal {
             0 => {
                 let func = Arbitrary::any(rng, depth);
                 FuncVal::FreeComp(func)
-            }
+            },
             1 => {
                 let func = Arbitrary::any(rng, depth);
                 FuncVal::CtxComp(func)
-            }
+            },
             _ => unreachable!(),
         }
     }

@@ -52,7 +52,7 @@ fn fn_call(cfg: &mut Cfg, input: Val) -> Val {
         Val::Key(key) => key,
         v => {
             return bug!(cfg, "{CALL}: expected input.left to be a text or a key, but got {v}");
-        }
+        },
     };
     let Val::List(arguments) = pair.right else {
         return bug!(cfg, "{CALL}: expected input.right to be a list, but got {}", pair.right);

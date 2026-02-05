@@ -241,6 +241,6 @@ fn fn_where(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
             } else {
                 bug!(new_cfg, "{WHERE}: panic")
             }
-        }
+        },
     }
 }

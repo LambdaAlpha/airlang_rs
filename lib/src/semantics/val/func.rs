@@ -43,7 +43,7 @@ impl FreeFn<Cfg, Val, Val> for FuncVal {
         match self {
             FuncVal::FreePrim(f) => return f.free_call(cfg, input),
             FuncVal::FreeComp(f) => return f.free_call(cfg, input),
-            _ => {}
+            _ => {},
         }
         let msg = format!("eval: no context for function {self}");
         abort_by_bug_with_msg(cfg, msg.into())

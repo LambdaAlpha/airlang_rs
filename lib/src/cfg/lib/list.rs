@@ -399,7 +399,7 @@ fn to_range(
         v => {
             bug!(cfg, "{key}: expected range.from to be an integer or a unit, but got {v}");
             return None;
-        }
+        },
     };
     let to = match pair.right {
         Val::Int(i) => Some(i.to_usize()?),
@@ -407,7 +407,7 @@ fn to_range(
         v => {
             bug!(cfg, "{key}: expected range.to to be an integer or a unit, but got {v}");
             return None;
-        }
+        },
     };
     Some((from, to))
 }
