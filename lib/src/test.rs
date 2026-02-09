@@ -112,8 +112,8 @@ fn test_text() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_int() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/int.air"), "test/int.air")
+fn test_integer() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/integer.air"), "test/integer.air")
 }
 
 #[test]
@@ -157,44 +157,23 @@ fn test_link() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_cfg() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/cfg.air"), "test/cfg.air")
+fn test_config() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/config.air"), "test/config.air")
 }
 
 #[test]
-fn test_func() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/func.air"), "test/func.air")
+fn test_function() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/function.air"), "test/function.air")
 }
 
 #[test]
-fn test_debug() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/debug.air"), "test/debug.air")
+fn test_context() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/context.air"), "test/context.air")
 }
 
 #[test]
-fn test_doc() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/doc.air"), "test/doc.air")
-}
-
-#[test]
-fn test_val_size() {
-    let size = size_of::<Val>();
-    assert_eq!(size, 24);
-}
-
-#[test]
-fn test_core() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/core.air"), "test/core.air")
-}
-
-#[test]
-fn test_ctx() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/ctx.air"), "test/ctx.air")
-}
-
-#[test]
-fn test_ctrl() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/ctrl.air"), "test/ctrl.air")
+fn test_control() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/control.air"), "test/control.air")
 }
 
 #[test]
@@ -213,6 +192,27 @@ fn test_error() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_lang() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/lang.air"), "test/lang.air")
+fn test_language() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/language.air"), "test/language.air")
+}
+
+#[test]
+fn test_core() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/core.air"), "test/core.air")
+}
+
+#[test]
+fn test_doc() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/doc.air"), "test/doc.air")
+}
+
+#[test]
+fn test_debug() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/debug.air"), "test/debug.air")
+}
+
+#[test]
+fn test_val_size() {
+    let size = size_of::<Val>();
+    assert_eq!(size, 24);
 }

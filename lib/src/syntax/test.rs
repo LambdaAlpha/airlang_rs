@@ -167,21 +167,6 @@ fn test_parse_bad(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_scope() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/scope.air"), "test/scope.air", scope::expected)
-}
-
-#[test]
-fn test_generate_scope() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/scope.air"), "test/scope.air")
-}
-
-#[test]
-fn test_space() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/space.air"), "test/space.air", space::expected)
-}
-
-#[test]
 fn test_parse_unit() -> Result<(), Box<dyn Error>> {
     test_parse(include_str!("test/unit.air"), "test/unit.air", unit::expected)
 }
@@ -222,13 +207,13 @@ fn test_generate_text() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_int() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/int.air"), "test/int.air", int::expected)
+fn test_parse_integer() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/integer.air"), "test/integer.air", integer::expected)
 }
 
 #[test]
-fn test_generate_int() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/int.air"), "test/int.air")
+fn test_generate_integer() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/integer.air"), "test/integer.air")
 }
 
 #[test]
@@ -302,8 +287,18 @@ fn test_generate_map() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_doc() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/doc.air"), "test/doc.air", doc::expected)
+fn test_parse_scope() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/scope.air"), "test/scope.air", scope::expected)
+}
+
+#[test]
+fn test_generate_scope() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/scope.air"), "test/scope.air")
+}
+
+#[test]
+fn test_space() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/space.air"), "test/space.air", space::expected)
 }
 
 #[test]
@@ -316,6 +311,11 @@ fn test_parse_bad_example() -> Result<(), Box<dyn Error>> {
     test_parse_bad(include_str!("test/bad.air"), "test/bad.air")
 }
 
+#[test]
+fn test_doc() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/doc.air"), "test/doc.air", doc::expected)
+}
+
 mod unit;
 
 mod bit;
@@ -324,7 +324,7 @@ mod key;
 
 mod text;
 
-mod int;
+mod integer;
 
 mod decimal;
 
