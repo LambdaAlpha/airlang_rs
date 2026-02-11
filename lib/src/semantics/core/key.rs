@@ -1,8 +1,6 @@
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::abort_by_bug_with_msg;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::CtxFn;
-use crate::semantics::func::FreeFn;
 use crate::semantics::val::Val;
 use crate::type_::Key;
 
@@ -26,19 +24,6 @@ impl KeyEval {
             Some(PREFIX_CTX) => (KeyMode::Ctx, Key::from_str_unchecked(&key[1 ..])),
             _ => (KeyMode::Ctx, key),
         }
-    }
-}
-
-impl FreeFn<Cfg, Key, Val> for KeyEval {
-    fn free_call(&self, cfg: &mut Cfg, key: Key) -> Val {
-        let (mode, key) = self.recognize(key);
-        match mode {
-            KeyMode::Id => return Val::Key(key),
-            KeyMode::Shift => return Val::Key(key),
-            KeyMode::Ctx => {},
-        }
-        let msg = format!("eval: no context for key {key}");
-        abort_by_bug_with_msg(cfg, msg.into())
     }
 }
 

@@ -1,12 +1,10 @@
 use derive_more::From;
 
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::abort_by_bug_with_msg;
 use crate::semantics::func::CtxCompFunc;
 use crate::semantics::func::CtxFn;
 use crate::semantics::func::CtxPrimFunc;
 use crate::semantics::func::FreeCompFunc;
-use crate::semantics::func::FreeFn;
 use crate::semantics::func::FreePrimFunc;
 use crate::semantics::val::Val;
 use crate::type_::wrap::rc_wrap;
@@ -38,26 +36,9 @@ macro_rules! match_func_val {
     };
 }
 
-impl FreeFn<Cfg, Val, Val> for FuncVal {
-    fn free_call(&self, cfg: &mut Cfg, input: Val) -> Val {
-        match self {
-            FuncVal::FreePrim(f) => return f.free_call(cfg, input),
-            FuncVal::FreeComp(f) => return f.free_call(cfg, input),
-            _ => {},
-        }
-        let msg = format!("eval: no context for function {self}");
-        abort_by_bug_with_msg(cfg, msg.into())
-    }
-}
-
 impl CtxFn<Cfg, Val, Val, Val> for FuncVal {
     fn ctx_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
-        match self {
-            FuncVal::FreePrim(f) => f.free_call(cfg, input),
-            FuncVal::FreeComp(f) => f.free_call(cfg, input),
-            FuncVal::CtxPrim(f) => f.ctx_call(cfg, ctx, input),
-            FuncVal::CtxComp(f) => f.ctx_call(cfg, ctx, input),
-        }
+        match_func_val!(self, f => f.ctx_call(cfg, ctx, input))
     }
 }
 

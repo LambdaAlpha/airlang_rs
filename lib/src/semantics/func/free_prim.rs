@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use crate::semantics::cfg::Cfg;
+use crate::semantics::func::CtxFn;
 use crate::semantics::val::Val;
 
 pub trait FreeFn<Cfg, I, O> {
@@ -23,6 +24,12 @@ pub struct FreePrimFunc {
 
 impl FreeFn<Cfg, Val, Val> for FreePrimFunc {
     fn free_call(&self, cfg: &mut Cfg, input: Val) -> Val {
+        self.fn_.free_call(cfg, input)
+    }
+}
+
+impl CtxFn<Cfg, Val, Val, Val> for FreePrimFunc {
+    fn ctx_call(&self, cfg: &mut Cfg, _ctx: &mut Val, input: Val) -> Val {
         self.fn_.free_call(cfg, input)
     }
 }

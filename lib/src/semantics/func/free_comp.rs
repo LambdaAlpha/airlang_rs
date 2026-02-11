@@ -1,3 +1,4 @@
+use super::CtxFn;
 use super::FreeFn;
 use super::comp::FreeComposite;
 use crate::semantics::cfg::Cfg;
@@ -18,5 +19,11 @@ impl FreeFn<Cfg, Val, Val> for FreeCompFunc {
             self.comp.input_name.clone(),
             self.comp.body.clone(),
         )
+    }
+}
+
+impl CtxFn<Cfg, Val, Val, Val> for FreeCompFunc {
+    fn ctx_call(&self, cfg: &mut Cfg, _ctx: &mut Val, input: Val) -> Val {
+        self.free_call(cfg, input)
     }
 }
