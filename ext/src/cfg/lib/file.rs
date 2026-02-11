@@ -5,14 +5,14 @@ use airlang::cfg::lib::FreeImpl;
 use airlang::cfg::lib::ImplExtra;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_ID;
-use airlang::semantics::val::FreePrimFuncVal;
+use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Text;
 use const_format::concatcp;
 
 #[derive(Clone)]
 pub struct FileLib {
-    pub read_to_text: FreePrimFuncVal,
+    pub read_to_text: PrimFuncVal,
 }
 
 const FILE: &str = "file";
@@ -31,7 +31,7 @@ impl CfgMod for FileLib {
     }
 }
 
-pub fn read_to_text() -> FreePrimFuncVal {
+pub fn read_to_text() -> PrimFuncVal {
     FreeImpl { fn_: fn_read_to_text }.build(ImplExtra { raw_input: false })
 }
 

@@ -11,13 +11,13 @@ use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::val::CELL;
-use crate::semantics::val::CtxPrimFuncVal;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 
 #[derive(Clone)]
 pub struct CellLib {
-    pub get_value: CtxPrimFuncVal,
-    pub set_value: CtxPrimFuncVal,
+    pub get_value: PrimFuncVal,
+    pub set_value: PrimFuncVal,
 }
 
 pub const GET_VALUE: &str = concatcp!(PREFIX_ID, CELL, ".get_value");
@@ -36,7 +36,7 @@ impl CfgMod for CellLib {
     }
 }
 
-pub fn get_value() -> CtxPrimFuncVal {
+pub fn get_value() -> PrimFuncVal {
     ConstImpl { fn_: fn_get_value }.build(ImplExtra { raw_input: false })
 }
 
@@ -50,7 +50,7 @@ fn fn_get_value(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     cell.value.clone()
 }
 
-pub fn set_value() -> CtxPrimFuncVal {
+pub fn set_value() -> PrimFuncVal {
     MutImpl { fn_: fn_set_value }.build(ImplExtra { raw_input: false })
 }
 

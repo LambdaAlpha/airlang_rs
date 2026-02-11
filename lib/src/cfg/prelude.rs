@@ -1,74 +1,73 @@
 use crate::cfg::lib::CoreLib;
-use crate::semantics::val::CtxPrimFuncVal;
-use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Key;
 use crate::type_::Map;
 
 #[derive(Clone)]
 pub struct CorePrelude {
-    pub not: FreePrimFuncVal,
-    pub and: FreePrimFuncVal,
-    pub or: FreePrimFuncVal,
-    pub xor: FreePrimFuncVal,
-    pub imply: FreePrimFuncVal,
+    pub not: PrimFuncVal,
+    pub and: PrimFuncVal,
+    pub or: PrimFuncVal,
+    pub xor: PrimFuncVal,
+    pub imply: PrimFuncVal,
 
-    pub int_add: FreePrimFuncVal,
-    pub int_subtract: FreePrimFuncVal,
-    pub int_multiply: FreePrimFuncVal,
-    pub int_divide: FreePrimFuncVal,
-    pub int_less: FreePrimFuncVal,
-    pub int_less_equal: FreePrimFuncVal,
-    pub int_greater: FreePrimFuncVal,
-    pub int_greater_equal: FreePrimFuncVal,
-    pub int_less_greater: FreePrimFuncVal,
+    pub int_add: PrimFuncVal,
+    pub int_subtract: PrimFuncVal,
+    pub int_multiply: PrimFuncVal,
+    pub int_divide: PrimFuncVal,
+    pub int_less: PrimFuncVal,
+    pub int_less_equal: PrimFuncVal,
+    pub int_greater: PrimFuncVal,
+    pub int_greater_equal: PrimFuncVal,
+    pub int_less_greater: PrimFuncVal,
 
-    pub decimal_add: FreePrimFuncVal,
-    pub decimal_subtract: FreePrimFuncVal,
-    pub decimal_multiply: FreePrimFuncVal,
-    pub decimal_divide: FreePrimFuncVal,
-    pub decimal_less: FreePrimFuncVal,
-    pub decimal_less_equal: FreePrimFuncVal,
-    pub decimal_greater: FreePrimFuncVal,
-    pub decimal_greater_equal: FreePrimFuncVal,
-    pub decimal_less_greater: FreePrimFuncVal,
+    pub decimal_add: PrimFuncVal,
+    pub decimal_subtract: PrimFuncVal,
+    pub decimal_multiply: PrimFuncVal,
+    pub decimal_divide: PrimFuncVal,
+    pub decimal_less: PrimFuncVal,
+    pub decimal_less_equal: PrimFuncVal,
+    pub decimal_greater: PrimFuncVal,
+    pub decimal_greater_equal: PrimFuncVal,
+    pub decimal_less_greater: PrimFuncVal,
 
-    pub call: FreePrimFuncVal,
+    pub call: PrimFuncVal,
 
-    pub move_: CtxPrimFuncVal,
+    pub move_: PrimFuncVal,
 
-    pub exist: FreePrimFuncVal,
-    pub import: FreePrimFuncVal,
-    pub export: FreePrimFuncVal,
-    pub with: CtxPrimFuncVal,
+    pub exist: PrimFuncVal,
+    pub import: PrimFuncVal,
+    pub export: PrimFuncVal,
+    pub with: PrimFuncVal,
 
-    pub function: FreePrimFuncVal,
-    pub apply: CtxPrimFuncVal,
+    pub function: PrimFuncVal,
+    pub apply: PrimFuncVal,
 
-    pub get: CtxPrimFuncVal,
-    pub set: CtxPrimFuncVal,
-    pub form: CtxPrimFuncVal,
-    pub represent: CtxPrimFuncVal,
-    pub which: CtxPrimFuncVal,
+    pub get: PrimFuncVal,
+    pub set: PrimFuncVal,
+    pub form: PrimFuncVal,
+    pub represent: PrimFuncVal,
+    pub which: PrimFuncVal,
 
-    pub do_: CtxPrimFuncVal,
-    pub test: CtxPrimFuncVal,
-    pub switch: CtxPrimFuncVal,
-    pub match_: CtxPrimFuncVal,
-    pub loop_: CtxPrimFuncVal,
-    pub iterate: CtxPrimFuncVal,
+    pub do_: PrimFuncVal,
+    pub test: PrimFuncVal,
+    pub switch: PrimFuncVal,
+    pub match_: PrimFuncVal,
+    pub loop_: PrimFuncVal,
+    pub iterate: PrimFuncVal,
 
-    pub get_type: CtxPrimFuncVal,
-    pub equal: FreePrimFuncVal,
+    pub get_type: PrimFuncVal,
+    pub equal: PrimFuncVal,
 
-    pub abort: FreePrimFuncVal,
-    pub assert: FreePrimFuncVal,
+    pub abort: PrimFuncVal,
+    pub assert: PrimFuncVal,
 
-    pub data: FreePrimFuncVal,
-    pub id: FreePrimFuncVal,
-    pub code: CtxPrimFuncVal,
-    pub eval: CtxPrimFuncVal,
+    pub data: PrimFuncVal,
+    pub id: PrimFuncVal,
+    pub code: PrimFuncVal,
+    pub eval: PrimFuncVal,
 }
 
 pub trait Prelude {

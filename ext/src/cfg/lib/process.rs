@@ -7,7 +7,7 @@ use airlang::cfg::lib::FreeImpl;
 use airlang::cfg::lib::ImplExtra;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_ID;
-use airlang::semantics::val::FreePrimFuncVal;
+use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Byte;
 use airlang::type_::Cell;
@@ -20,7 +20,7 @@ use const_format::concatcp;
 
 #[derive(Clone)]
 pub struct ProcessLib {
-    pub call: FreePrimFuncVal,
+    pub call: PrimFuncVal,
 }
 
 const PROCESS: &str = "process";
@@ -44,7 +44,7 @@ const ARGUMENTS: &str = "arguments";
 
 // todo design
 // todo impl
-pub fn call() -> FreePrimFuncVal {
+pub fn call() -> PrimFuncVal {
     FreeImpl { fn_: fn_call }.build(ImplExtra { raw_input: false })
 }
 

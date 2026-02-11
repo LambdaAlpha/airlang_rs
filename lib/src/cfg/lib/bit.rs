@@ -8,16 +8,16 @@ use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::val::BIT;
-use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 
 #[derive(Clone)]
 pub struct BitLib {
-    pub not: FreePrimFuncVal,
-    pub and: FreePrimFuncVal,
-    pub or: FreePrimFuncVal,
-    pub xor: FreePrimFuncVal,
-    pub imply: FreePrimFuncVal,
+    pub not: PrimFuncVal,
+    pub and: PrimFuncVal,
+    pub or: PrimFuncVal,
+    pub xor: PrimFuncVal,
+    pub imply: PrimFuncVal,
 }
 
 pub const NOT: &str = concatcp!(PREFIX_ID, BIT, ".not");
@@ -42,7 +42,7 @@ impl CfgMod for BitLib {
     }
 }
 
-pub fn not() -> FreePrimFuncVal {
+pub fn not() -> PrimFuncVal {
     FreeImpl { fn_: fn_not }.build(ImplExtra { raw_input: false })
 }
 
@@ -53,7 +53,7 @@ fn fn_not(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(b.not())
 }
 
-pub fn and() -> FreePrimFuncVal {
+pub fn and() -> PrimFuncVal {
     FreeImpl { fn_: fn_and }.build(ImplExtra { raw_input: false })
 }
 
@@ -70,7 +70,7 @@ fn fn_and(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(left.and(right))
 }
 
-pub fn or() -> FreePrimFuncVal {
+pub fn or() -> PrimFuncVal {
     FreeImpl { fn_: fn_or }.build(ImplExtra { raw_input: false })
 }
 
@@ -87,7 +87,7 @@ fn fn_or(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(left.or(right))
 }
 
-pub fn xor() -> FreePrimFuncVal {
+pub fn xor() -> PrimFuncVal {
     FreeImpl { fn_: fn_xor }.build(ImplExtra { raw_input: false })
 }
 
@@ -104,7 +104,7 @@ fn fn_xor(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(left.xor(right))
 }
 
-pub fn imply() -> FreePrimFuncVal {
+pub fn imply() -> PrimFuncVal {
     FreeImpl { fn_: fn_imply }.build(ImplExtra { raw_input: false })
 }
 

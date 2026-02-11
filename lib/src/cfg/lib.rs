@@ -23,12 +23,10 @@ use self::unit::UnitLib;
 use self::value::ValueLib;
 use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::func::CtxFn;
-use crate::semantics::func::CtxPrimFunc;
-use crate::semantics::func::FreeFn;
-use crate::semantics::func::FreePrimFunc;
-use crate::semantics::val::CtxPrimFuncVal;
-use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::func::DynFunc;
+use crate::semantics::func::PrimCtx;
+use crate::semantics::func::PrimFunc;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 
 #[derive(Default, Clone)]
@@ -86,10 +84,10 @@ pub struct FreeImpl<F> {
     pub fn_: F,
 }
 
-impl<F> FreeFn<Cfg, Val, Val> for FreeImpl<F>
+impl<F> DynFunc<Cfg, Val, Val, Val> for FreeImpl<F>
 where F: Fn(&mut Cfg, Val) -> Val + 'static
 {
-    fn free_call(&self, cfg: &mut Cfg, input: Val) -> Val {
+    fn call(&self, cfg: &mut Cfg, _ctx: &mut Val, input: Val) -> Val {
         (self.fn_)(cfg, input)
     }
 }
@@ -97,8 +95,8 @@ where F: Fn(&mut Cfg, Val) -> Val + 'static
 impl<F> FreeImpl<F>
 where F: Fn(&mut Cfg, Val) -> Val + 'static
 {
-    pub fn build(self, extra: ImplExtra) -> FreePrimFuncVal {
-        FreePrimFunc { raw_input: extra.raw_input, fn_: Rc::new(self) }.into()
+    pub fn build(self, extra: ImplExtra) -> PrimFuncVal {
+        PrimFunc { raw_input: extra.raw_input, fn_: Rc::new(self), ctx: PrimCtx::Free }.into()
     }
 }
 
@@ -106,10 +104,10 @@ pub struct ConstImpl<F> {
     pub fn_: F,
 }
 
-impl<F> CtxFn<Cfg, Val, Val, Val> for ConstImpl<F>
+impl<F> DynFunc<Cfg, Val, Val, Val> for ConstImpl<F>
 where F: Fn(&mut Cfg, &Val, Val) -> Val + 'static
 {
-    fn ctx_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+    fn call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         (self.fn_)(cfg, ctx, input)
     }
 }
@@ -117,8 +115,8 @@ where F: Fn(&mut Cfg, &Val, Val) -> Val + 'static
 impl<F> ConstImpl<F>
 where F: Fn(&mut Cfg, &Val, Val) -> Val + 'static
 {
-    pub fn build(self, extra: ImplExtra) -> CtxPrimFuncVal {
-        CtxPrimFunc { raw_input: extra.raw_input, fn_: Rc::new(self), const_: true }.into()
+    pub fn build(self, extra: ImplExtra) -> PrimFuncVal {
+        PrimFunc { raw_input: extra.raw_input, fn_: Rc::new(self), ctx: PrimCtx::Const_ }.into()
     }
 }
 
@@ -126,10 +124,10 @@ pub struct MutImpl<F> {
     pub fn_: F,
 }
 
-impl<F> CtxFn<Cfg, Val, Val, Val> for MutImpl<F>
+impl<F> DynFunc<Cfg, Val, Val, Val> for MutImpl<F>
 where F: Fn(&mut Cfg, &mut Val, Val) -> Val + 'static
 {
-    fn ctx_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+    fn call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         (self.fn_)(cfg, ctx, input)
     }
 }
@@ -137,8 +135,8 @@ where F: Fn(&mut Cfg, &mut Val, Val) -> Val + 'static
 impl<F> MutImpl<F>
 where F: Fn(&mut Cfg, &mut Val, Val) -> Val + 'static
 {
-    pub fn build(self, extra: ImplExtra) -> CtxPrimFuncVal {
-        CtxPrimFunc { raw_input: extra.raw_input, fn_: Rc::new(self), const_: false }.into()
+    pub fn build(self, extra: ImplExtra) -> PrimFuncVal {
+        PrimFunc { raw_input: extra.raw_input, fn_: Rc::new(self), ctx: PrimCtx::Mut }.into()
     }
 }
 

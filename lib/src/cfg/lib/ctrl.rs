@@ -17,10 +17,10 @@ use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::ctx::DynCtx;
-use crate::semantics::func::CtxFn;
-use crate::semantics::val::CtxPrimFuncVal;
+use crate::semantics::func::DynFunc;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Byte;
 use crate::type_::Call;
@@ -34,12 +34,12 @@ use crate::type_::Text;
 
 #[derive(Clone)]
 pub struct CtrlLib {
-    pub do_: CtxPrimFuncVal,
-    pub test: CtxPrimFuncVal,
-    pub switch: CtxPrimFuncVal,
-    pub match_: CtxPrimFuncVal,
-    pub loop_: CtxPrimFuncVal,
-    pub iterate: CtxPrimFuncVal,
+    pub do_: PrimFuncVal,
+    pub test: PrimFuncVal,
+    pub switch: PrimFuncVal,
+    pub match_: PrimFuncVal,
+    pub loop_: PrimFuncVal,
+    pub iterate: PrimFuncVal,
 }
 
 const CTRL: &str = "control";
@@ -107,7 +107,7 @@ impl Block {
             if cfg.is_aborted() {
                 return None;
             }
-            output = Eval.ctx_call(cfg, ctx, statement.body);
+            output = Eval.call(cfg, ctx, statement.body);
             if !statement.try_ {
                 continue;
             }
@@ -147,7 +147,7 @@ impl Statement {
     }
 }
 
-pub fn do_() -> CtxPrimFuncVal {
+pub fn do_() -> PrimFuncVal {
     MutImpl { fn_: fn_do }.build(ImplExtra { raw_input: true })
 }
 
@@ -158,7 +158,7 @@ fn fn_do(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     block.flow(DO, cfg, ctx).unwrap_or_default()
 }
 
-pub fn test() -> CtxPrimFuncVal {
+pub fn test() -> PrimFuncVal {
     MutImpl { fn_: fn_test }.build(ImplExtra { raw_input: true })
 }
 
@@ -197,7 +197,7 @@ impl Test {
     }
 
     fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
-        let condition = Eval.ctx_call(cfg, ctx, self.condition);
+        let condition = Eval.call(cfg, ctx, self.condition);
         let Val::Bit(b) = condition else {
             return bug!(cfg, "{TEST}: expected condition to be a bit, but got {condition}");
         };
@@ -211,7 +211,7 @@ impl Test {
     }
 }
 
-pub fn switch() -> CtxPrimFuncVal {
+pub fn switch() -> PrimFuncVal {
     MutImpl { fn_: fn_switch }.build(ImplExtra { raw_input: true })
 }
 
@@ -268,7 +268,7 @@ impl Switch {
     }
 
     fn eval(mut self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
-        let val = Eval.ctx_call(cfg, ctx, self.val);
+        let val = Eval.call(cfg, ctx, self.val);
         let Val::Key(key) = val else {
             return bug!(cfg, "{SWITCH}: expected input.left to be a key, but got {val}");
         };
@@ -279,7 +279,7 @@ impl Switch {
     }
 }
 
-pub fn match_() -> CtxPrimFuncVal {
+pub fn match_() -> PrimFuncVal {
     MutImpl { fn_: fn_match }.build(ImplExtra { raw_input: true })
 }
 
@@ -327,12 +327,12 @@ impl Match {
     }
 
     fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
-        let val = Eval.ctx_call(cfg, ctx, self.val);
+        let val = Eval.call(cfg, ctx, self.val);
         for (pattern, block) in self.arms {
             if cfg.is_aborted() {
                 return Val::default();
             }
-            let pattern = Eval.ctx_call(cfg, ctx, pattern);
+            let pattern = Eval.call(cfg, ctx, pattern);
             let Some(pattern) = pattern.parse(cfg, MATCH) else {
                 return Val::default();
             };
@@ -350,7 +350,7 @@ impl Match {
     }
 }
 
-pub fn loop_() -> CtxPrimFuncVal {
+pub fn loop_() -> PrimFuncVal {
     MutImpl { fn_: fn_loop }.build(ImplExtra { raw_input: true })
 }
 
@@ -379,7 +379,7 @@ impl Loop {
 
     fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
         loop {
-            let cond = Eval.ctx_call(cfg, ctx, self.condition.clone());
+            let cond = Eval.call(cfg, ctx, self.condition.clone());
             let Val::Bit(bit) = cond else {
                 return bug!(cfg, "{LOOP}: expected condition to be a bit, but got {cond}");
             };
@@ -405,7 +405,7 @@ impl Loop {
     }
 }
 
-pub fn iterate() -> CtxPrimFuncVal {
+pub fn iterate() -> PrimFuncVal {
     MutImpl { fn_: fn_iterate }.build(ImplExtra { raw_input: true })
 }
 
@@ -449,7 +449,7 @@ impl Iterate {
     }
 
     fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
-        let val = Eval.ctx_call(cfg, ctx, self.val);
+        let val = Eval.call(cfg, ctx, self.val);
         match val {
             Val::Int(i) => {
                 let i = Int::from(i);

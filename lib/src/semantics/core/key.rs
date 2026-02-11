@@ -1,6 +1,6 @@
 use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::DynCtx;
-use crate::semantics::func::CtxFn;
+use crate::semantics::func::DynFunc;
 use crate::semantics::val::Val;
 use crate::type_::Key;
 
@@ -27,8 +27,8 @@ impl KeyEval {
     }
 }
 
-impl CtxFn<Cfg, Val, Key, Val> for KeyEval {
-    fn ctx_call(&self, cfg: &mut Cfg, ctx: &mut Val, key: Key) -> Val {
+impl DynFunc<Cfg, Val, Key, Val> for KeyEval {
+    fn call(&self, cfg: &mut Cfg, ctx: &mut Val, key: Key) -> Val {
         let (mode, key) = self.recognize(key);
         match mode {
             KeyMode::Id => return Val::Key(key),

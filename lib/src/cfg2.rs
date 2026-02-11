@@ -2,7 +2,7 @@ use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
-use crate::semantics::func::CtxFn;
+use crate::semantics::func::DynFunc;
 use crate::semantics::val::Val;
 use crate::syntax::parse;
 use crate::type_::Key;
@@ -51,7 +51,7 @@ impl CoreCfg2 {
             Ok(input) => input,
             Err(_) => panic!("stage 2: failed to parse {path}"),
         };
-        let output = Eval.ctx_call(cfg, ctx, input);
+        let output = Eval.call(cfg, ctx, input);
         if cfg.is_aborted() {
             let type_ = cfg.import(Key::from_str_unchecked(Cfg::ABORT_TYPE));
             let msg = cfg.import(Key::from_str_unchecked(Cfg::ABORT_MSG));

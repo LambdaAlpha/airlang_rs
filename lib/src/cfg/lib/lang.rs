@@ -11,22 +11,21 @@ use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::Id;
 use crate::semantics::core::PREFIX_ID;
-use crate::semantics::func::CtxPrimFunc;
-use crate::semantics::func::FreePrimFunc;
-use crate::semantics::val::CtxPrimFuncVal;
-use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::func::PrimCtx;
+use crate::semantics::func::PrimFunc;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Cell;
 use crate::type_::Text;
 
 #[derive(Clone)]
 pub struct LangLib {
-    pub data: FreePrimFuncVal,
-    pub id: FreePrimFuncVal,
-    pub code: CtxPrimFuncVal,
-    pub eval: CtxPrimFuncVal,
-    pub parse: FreePrimFuncVal,
-    pub generate: FreePrimFuncVal,
+    pub data: PrimFuncVal,
+    pub id: PrimFuncVal,
+    pub code: PrimFuncVal,
+    pub eval: PrimFuncVal,
+    pub parse: PrimFuncVal,
+    pub generate: PrimFuncVal,
 }
 
 const LANGUAGE: &str = "language";
@@ -62,23 +61,23 @@ impl CfgMod for LangLib {
     }
 }
 
-pub fn data() -> FreePrimFuncVal {
-    FreePrimFunc { raw_input: true, fn_: Rc::new(Id) }.into()
+pub fn data() -> PrimFuncVal {
+    PrimFunc { raw_input: true, fn_: Rc::new(Id), ctx: PrimCtx::Free }.into()
 }
 
-pub fn id() -> FreePrimFuncVal {
-    FreePrimFunc { raw_input: false, fn_: Rc::new(Id) }.into()
+pub fn id() -> PrimFuncVal {
+    PrimFunc { raw_input: false, fn_: Rc::new(Id), ctx: PrimCtx::Free }.into()
 }
 
-pub fn code() -> CtxPrimFuncVal {
-    CtxPrimFunc { raw_input: true, fn_: Rc::new(Eval), const_: false }.into()
+pub fn code() -> PrimFuncVal {
+    PrimFunc { raw_input: true, fn_: Rc::new(Eval), ctx: PrimCtx::Mut }.into()
 }
 
-pub fn eval() -> CtxPrimFuncVal {
-    CtxPrimFunc { raw_input: false, fn_: Rc::new(Eval), const_: false }.into()
+pub fn eval() -> PrimFuncVal {
+    PrimFunc { raw_input: false, fn_: Rc::new(Eval), ctx: PrimCtx::Mut }.into()
 }
 
-pub fn parse() -> FreePrimFuncVal {
+pub fn parse() -> PrimFuncVal {
     FreeImpl { fn_: fn_parse }.build(ImplExtra { raw_input: false })
 }
 
@@ -92,7 +91,7 @@ fn fn_parse(cfg: &mut Cfg, input: Val) -> Val {
     Val::Cell(Cell::new(val).into())
 }
 
-pub fn generate() -> FreePrimFuncVal {
+pub fn generate() -> PrimFuncVal {
     FreeImpl { fn_: fn_generate }.build(ImplExtra { raw_input: false })
 }
 

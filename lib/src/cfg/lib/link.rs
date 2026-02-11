@@ -9,10 +9,10 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
-use crate::semantics::func::CtxFn;
-use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::func::DynFunc;
 use crate::semantics::val::LINK;
 use crate::semantics::val::LinkVal;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::Pair;
@@ -20,10 +20,10 @@ use crate::type_::Pair;
 // todo design
 #[derive(Clone)]
 pub struct LinkLib {
-    pub new: FreePrimFuncVal,
-    pub new_constant: FreePrimFuncVal,
-    pub is_constant: FreePrimFuncVal,
-    pub which: FreePrimFuncVal,
+    pub new: PrimFuncVal,
+    pub new_constant: PrimFuncVal,
+    pub is_constant: PrimFuncVal,
+    pub which: PrimFuncVal,
 }
 
 pub const NEW: &str = concatcp!(PREFIX_ID, LINK, ".new");
@@ -51,7 +51,7 @@ impl CfgMod for LinkLib {
     }
 }
 
-pub fn new() -> FreePrimFuncVal {
+pub fn new() -> PrimFuncVal {
     FreeImpl { fn_: fn_new }.build(ImplExtra { raw_input: false })
 }
 
@@ -59,7 +59,7 @@ fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
     Val::Link(LinkVal::new(input, false))
 }
 
-pub fn new_constant() -> FreePrimFuncVal {
+pub fn new_constant() -> PrimFuncVal {
     FreeImpl { fn_: fn_new_constant }.build(ImplExtra { raw_input: false })
 }
 
@@ -67,7 +67,7 @@ fn fn_new_constant(_cfg: &mut Cfg, input: Val) -> Val {
     Val::Link(LinkVal::new(input, true))
 }
 
-pub fn is_constant() -> FreePrimFuncVal {
+pub fn is_constant() -> PrimFuncVal {
     FreeImpl { fn_: fn_is_constant }.build(ImplExtra { raw_input: false })
 }
 
@@ -78,7 +78,7 @@ fn fn_is_constant(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(Bit::from(link.is_const()))
 }
 
-pub fn which() -> FreePrimFuncVal {
+pub fn which() -> PrimFuncVal {
     FreeImpl { fn_: fn_which }.build(ImplExtra { raw_input: false })
 }
 
@@ -111,5 +111,5 @@ fn fn_which(cfg: &mut Cfg, input: Val) -> Val {
     let Ok(mut ctx) = link.try_borrow_mut() else {
         return bug!(cfg, "{WHICH}: link is in use");
     };
-    func.ctx_call(cfg, ctx.deref_mut(), func_input.right)
+    func.call(cfg, ctx.deref_mut(), func_input.right)
 }

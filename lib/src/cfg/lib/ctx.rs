@@ -15,20 +15,21 @@ use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Form;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::ctx::DynCtx;
-use crate::semantics::func::CtxFn;
-use crate::semantics::func::CtxPrimFunc;
-use crate::semantics::val::CtxPrimFuncVal;
+use crate::semantics::func::DynFunc;
+use crate::semantics::func::PrimCtx;
+use crate::semantics::func::PrimFunc;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Pair;
 
 #[derive(Clone)]
 pub struct CtxLib {
-    pub get: CtxPrimFuncVal,
-    pub set: CtxPrimFuncVal,
-    pub form: CtxPrimFuncVal,
-    pub represent: CtxPrimFuncVal,
-    pub self_: CtxPrimFuncVal,
-    pub which: CtxPrimFuncVal,
+    pub get: PrimFuncVal,
+    pub set: PrimFuncVal,
+    pub form: PrimFuncVal,
+    pub represent: PrimFuncVal,
+    pub self_: PrimFuncVal,
+    pub which: PrimFuncVal,
 }
 
 const CTX: &str = "context";
@@ -64,7 +65,7 @@ impl CfgMod for CtxLib {
     }
 }
 
-pub fn get() -> CtxPrimFuncVal {
+pub fn get() -> PrimFuncVal {
     ConstImpl { fn_: fn_get }.build(ImplExtra { raw_input: false })
 }
 
@@ -75,7 +76,7 @@ fn fn_get(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     val.clone()
 }
 
-pub fn set() -> CtxPrimFuncVal {
+pub fn set() -> PrimFuncVal {
     MutImpl { fn_: fn_set }.build(ImplExtra { raw_input: false })
 }
 
@@ -88,11 +89,11 @@ fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-pub fn form() -> CtxPrimFuncVal {
-    CtxPrimFunc { raw_input: true, fn_: Rc::new(Form), const_: true }.into()
+pub fn form() -> PrimFuncVal {
+    PrimFunc { raw_input: true, fn_: Rc::new(Form), ctx: PrimCtx::Const_ }.into()
 }
 
-pub fn represent() -> CtxPrimFuncVal {
+pub fn represent() -> PrimFuncVal {
     MutImpl { fn_: fn_represent }.build(ImplExtra { raw_input: false })
 }
 
@@ -112,7 +113,7 @@ fn fn_represent(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-pub fn self_() -> CtxPrimFuncVal {
+pub fn self_() -> PrimFuncVal {
     ConstImpl { fn_: fn_self }.build(ImplExtra { raw_input: false })
 }
 
@@ -123,7 +124,7 @@ fn fn_self(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     ctx.clone()
 }
 
-pub fn which() -> CtxPrimFuncVal {
+pub fn which() -> PrimFuncVal {
     MutImpl { fn_: fn_which }.build(ImplExtra { raw_input: false })
 }
 
@@ -146,7 +147,7 @@ fn fn_which(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Some(ctx) = ctx.ref_mut(cfg, pair.left) else {
         return Val::default();
     };
-    func.ctx_call(cfg, ctx, func_input.right)
+    func.call(cfg, ctx, func_input.right)
 }
 
 pub(in crate::cfg) mod pattern;

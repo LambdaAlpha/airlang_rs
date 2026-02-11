@@ -1,6 +1,6 @@
 use airlang::cfg::prelude::Prelude;
 use airlang::cfg::prelude::map_put_func;
-use airlang::semantics::val::FreePrimFuncVal;
+use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::TextVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Key;
@@ -13,7 +13,7 @@ use crate::cfg::lib::BinLib;
 pub struct BinPrelude {
     pub std: StdPrelude,
     pub help: TextVal,
-    pub call: FreePrimFuncVal,
+    pub call: PrimFuncVal,
 }
 
 impl BinPrelude {

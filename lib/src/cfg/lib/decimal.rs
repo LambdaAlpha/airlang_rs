@@ -10,7 +10,7 @@ use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::val::DECIMAL;
-use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Decimal;
 use crate::type_::DecimalConfig;
@@ -21,15 +21,15 @@ use crate::type_::RoundingMode;
 // todo design
 #[derive(Clone)]
 pub struct DecimalLib {
-    pub add: FreePrimFuncVal,
-    pub subtract: FreePrimFuncVal,
-    pub multiply: FreePrimFuncVal,
-    pub divide: FreePrimFuncVal,
-    pub less: FreePrimFuncVal,
-    pub less_equal: FreePrimFuncVal,
-    pub greater: FreePrimFuncVal,
-    pub greater_equal: FreePrimFuncVal,
-    pub less_greater: FreePrimFuncVal,
+    pub add: PrimFuncVal,
+    pub subtract: PrimFuncVal,
+    pub multiply: PrimFuncVal,
+    pub divide: PrimFuncVal,
+    pub less: PrimFuncVal,
+    pub less_equal: PrimFuncVal,
+    pub greater: PrimFuncVal,
+    pub greater_equal: PrimFuncVal,
+    pub less_greater: PrimFuncVal,
 }
 
 pub const ADD: &str = concatcp!(PREFIX_ID, DECIMAL, ".add");
@@ -124,7 +124,7 @@ fn parse_rounding_mode(key: &str) -> Option<RoundingMode> {
     Some(mode)
 }
 
-pub fn add() -> FreePrimFuncVal {
+pub fn add() -> PrimFuncVal {
     FreeImpl { fn_: fn_add }.build(ImplExtra { raw_input: false })
 }
 
@@ -147,7 +147,7 @@ fn fn_add(cfg: &mut Cfg, input: Val) -> Val {
     Val::Decimal(d1.add(d2, config).into())
 }
 
-pub fn subtract() -> FreePrimFuncVal {
+pub fn subtract() -> PrimFuncVal {
     FreeImpl { fn_: fn_subtract }.build(ImplExtra { raw_input: false })
 }
 
@@ -174,7 +174,7 @@ fn fn_subtract(cfg: &mut Cfg, input: Val) -> Val {
     Val::Decimal(d1.subtract(d2, config).into())
 }
 
-pub fn multiply() -> FreePrimFuncVal {
+pub fn multiply() -> PrimFuncVal {
     FreeImpl { fn_: fn_multiply }.build(ImplExtra { raw_input: false })
 }
 
@@ -201,7 +201,7 @@ fn fn_multiply(cfg: &mut Cfg, input: Val) -> Val {
     Val::Decimal(d1.multiply(d2, config).into())
 }
 
-pub fn divide() -> FreePrimFuncVal {
+pub fn divide() -> PrimFuncVal {
     FreeImpl { fn_: fn_divide }.build(ImplExtra { raw_input: false })
 }
 
@@ -228,7 +228,7 @@ fn fn_divide(cfg: &mut Cfg, input: Val) -> Val {
     Val::Decimal(d.into())
 }
 
-pub fn less() -> FreePrimFuncVal {
+pub fn less() -> PrimFuncVal {
     FreeImpl { fn_: fn_less }.build(ImplExtra { raw_input: false })
 }
 
@@ -246,7 +246,7 @@ fn fn_less(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(d1.less_than(&d2))
 }
 
-pub fn less_equal() -> FreePrimFuncVal {
+pub fn less_equal() -> PrimFuncVal {
     FreeImpl { fn_: fn_less_equal }.build(ImplExtra { raw_input: false })
 }
 
@@ -272,7 +272,7 @@ fn fn_less_equal(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(d1.less_equal(&d2))
 }
 
-pub fn greater() -> FreePrimFuncVal {
+pub fn greater() -> PrimFuncVal {
     FreeImpl { fn_: fn_greater }.build(ImplExtra { raw_input: false })
 }
 
@@ -294,7 +294,7 @@ fn fn_greater(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(d1.greater_than(&d2))
 }
 
-pub fn greater_equal() -> FreePrimFuncVal {
+pub fn greater_equal() -> PrimFuncVal {
     FreeImpl { fn_: fn_greater_equal }.build(ImplExtra { raw_input: false })
 }
 
@@ -320,7 +320,7 @@ fn fn_greater_equal(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(d1.greater_equal(&d2))
 }
 
-pub fn less_greater() -> FreePrimFuncVal {
+pub fn less_greater() -> PrimFuncVal {
     FreeImpl { fn_: fn_less_greater }.build(ImplExtra { raw_input: false })
 }
 

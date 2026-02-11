@@ -10,9 +10,8 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
-use crate::semantics::val::CtxPrimFuncVal;
-use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::KEY;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Int;
 use crate::type_::Key;
@@ -21,10 +20,10 @@ use crate::type_::Text;
 // todo design add more
 #[derive(Clone)]
 pub struct KeyLib {
-    pub from_text: FreePrimFuncVal,
-    pub into_text: FreePrimFuncVal,
-    pub get_length: CtxPrimFuncVal,
-    pub join: FreePrimFuncVal,
+    pub from_text: PrimFuncVal,
+    pub into_text: PrimFuncVal,
+    pub get_length: PrimFuncVal,
+    pub join: PrimFuncVal,
 }
 
 pub const FROM_TEXT: &str = concatcp!(PREFIX_ID, KEY, ".from_text");
@@ -52,7 +51,7 @@ impl CfgMod for KeyLib {
     }
 }
 
-pub fn from_text() -> FreePrimFuncVal {
+pub fn from_text() -> PrimFuncVal {
     FreeImpl { fn_: fn_from_text }.build(ImplExtra { raw_input: false })
 }
 
@@ -71,7 +70,7 @@ fn fn_from_text(cfg: &mut Cfg, input: Val) -> Val {
     Val::Key(key)
 }
 
-pub fn into_text() -> FreePrimFuncVal {
+pub fn into_text() -> PrimFuncVal {
     FreeImpl { fn_: fn_into_text }.build(ImplExtra { raw_input: false })
 }
 
@@ -82,7 +81,7 @@ fn fn_into_text(cfg: &mut Cfg, input: Val) -> Val {
     Val::Text(Text::from(key.deref()).into())
 }
 
-pub fn get_length() -> CtxPrimFuncVal {
+pub fn get_length() -> PrimFuncVal {
     ConstImpl { fn_: fn_get_length }.build(ImplExtra { raw_input: false })
 }
 
@@ -98,7 +97,7 @@ fn fn_get_length(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
 }
 
 // todo design
-pub fn join() -> FreePrimFuncVal {
+pub fn join() -> PrimFuncVal {
     FreeImpl { fn_: fn_join }.build(ImplExtra { raw_input: false })
 }
 

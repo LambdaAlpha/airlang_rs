@@ -10,16 +10,16 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
-use crate::semantics::val::CtxPrimFuncVal;
 use crate::semantics::val::PAIR;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 
 #[derive(Clone)]
 pub struct PairLib {
-    pub get_left: CtxPrimFuncVal,
-    pub set_left: CtxPrimFuncVal,
-    pub get_right: CtxPrimFuncVal,
-    pub set_right: CtxPrimFuncVal,
+    pub get_left: PrimFuncVal,
+    pub set_left: PrimFuncVal,
+    pub get_right: PrimFuncVal,
+    pub set_right: PrimFuncVal,
 }
 
 pub const GET_LEFT: &str = concatcp!(PREFIX_ID, PAIR, ".get_left");
@@ -47,7 +47,7 @@ impl CfgMod for PairLib {
     }
 }
 
-pub fn get_left() -> CtxPrimFuncVal {
+pub fn get_left() -> PrimFuncVal {
     ConstImpl { fn_: fn_get_left }.build(ImplExtra { raw_input: false })
 }
 
@@ -61,7 +61,7 @@ fn fn_get_left(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     pair.left.clone()
 }
 
-pub fn set_left() -> CtxPrimFuncVal {
+pub fn set_left() -> PrimFuncVal {
     MutImpl { fn_: fn_set_left }.build(ImplExtra { raw_input: false })
 }
 
@@ -73,7 +73,7 @@ fn fn_set_left(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     input
 }
 
-pub fn get_right() -> CtxPrimFuncVal {
+pub fn get_right() -> PrimFuncVal {
     ConstImpl { fn_: fn_get_right }.build(ImplExtra { raw_input: false })
 }
 
@@ -87,7 +87,7 @@ fn fn_get_right(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     pair.right.clone()
 }
 
-pub fn set_right() -> CtxPrimFuncVal {
+pub fn set_right() -> PrimFuncVal {
     MutImpl { fn_: fn_set_right }.build(ImplExtra { raw_input: false })
 }
 

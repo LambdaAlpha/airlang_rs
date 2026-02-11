@@ -11,18 +11,17 @@ use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::PREFIX_ID;
-use crate::semantics::func::CtxFn;
-use crate::semantics::val::CtxPrimFuncVal;
-use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::func::DynFunc;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Int;
 use crate::type_::Pair;
 
 #[derive(Clone)]
 pub struct ResourceLib {
-    pub get_steps: FreePrimFuncVal,
-    pub set_steps: FreePrimFuncVal,
-    pub measure_steps: CtxPrimFuncVal,
+    pub get_steps: PrimFuncVal,
+    pub set_steps: PrimFuncVal,
+    pub measure_steps: PrimFuncVal,
 }
 
 const RESOURCE: &str = "resource";
@@ -49,7 +48,7 @@ impl CfgMod for ResourceLib {
     }
 }
 
-pub fn get_steps() -> FreePrimFuncVal {
+pub fn get_steps() -> PrimFuncVal {
     FreeImpl { fn_: fn_get_steps }.build(ImplExtra { raw_input: false })
 }
 
@@ -61,7 +60,7 @@ fn fn_get_steps(cfg: &mut Cfg, input: Val) -> Val {
     Val::Int(Int::from(steps).into())
 }
 
-pub fn set_steps() -> FreePrimFuncVal {
+pub fn set_steps() -> PrimFuncVal {
     FreeImpl { fn_: fn_set_steps }.build(ImplExtra { raw_input: false })
 }
 
@@ -77,13 +76,13 @@ fn fn_set_steps(cfg: &mut Cfg, input: Val) -> Val {
     Val::default()
 }
 
-pub fn measure_steps() -> CtxPrimFuncVal {
+pub fn measure_steps() -> PrimFuncVal {
     MutImpl { fn_: fn_measure_steps }.build(ImplExtra { raw_input: true })
 }
 
 fn fn_measure_steps(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let old_steps = cfg.steps();
-    let output = Eval.ctx_call(cfg, ctx, input);
+    let output = Eval.call(cfg, ctx, input);
     let steps = old_steps - cfg.steps();
     let steps = Val::Int(Int::from(steps).into());
     Val::Pair(Pair::new(output, steps).into())

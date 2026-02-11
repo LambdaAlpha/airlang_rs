@@ -10,12 +10,10 @@ use rand::distr::weighted::WeightedIndex;
 use rand::prelude::Distribution;
 
 use crate::semantics::cfg::Cfg;
-use crate::semantics::func::CtxCompFunc;
-use crate::semantics::func::DynComposite;
-use crate::semantics::func::FreeCompFunc;
-use crate::semantics::func::FreeComposite;
-use crate::semantics::val::CtxCompFuncVal;
-use crate::semantics::val::FreeCompFuncVal;
+use crate::semantics::func::CompCtx;
+use crate::semantics::func::CompFn;
+use crate::semantics::func::CompFunc;
+use crate::semantics::val::CompFuncVal;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::LinkVal;
 use crate::semantics::val::Val;
@@ -268,57 +266,33 @@ impl Arbitrary for FuncVal {
         if rng.random() {
             return FuncVal::default();
         }
-        match rng.random_range(0 .. 2) {
-            0 => {
-                let func = Arbitrary::any(rng, depth);
-                FuncVal::FreeComp(func)
-            },
-            1 => {
-                let func = Arbitrary::any(rng, depth);
-                FuncVal::CtxComp(func)
-            },
-            _ => unreachable!(),
-        }
+        let func = Arbitrary::any(rng, depth);
+        FuncVal::Comp(func)
     }
 }
 
-impl Arbitrary for FreeComposite {
+impl Arbitrary for CompFn {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
-        FreeComposite {
+        let ctx = if rng.random() {
+            CompCtx::Default { name: Arbitrary::any(rng, depth), const_: rng.random() }
+        } else {
+            CompCtx::Free
+        };
+        CompFn {
             prelude: Arbitrary::any(rng, depth),
             body: Arbitrary::any(rng, depth),
             input_name: Arbitrary::any(rng, depth),
+            ctx,
         }
     }
 }
 
-impl Arbitrary for DynComposite {
+impl Arbitrary for CompFuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
-        DynComposite {
-            prelude: Arbitrary::any(rng, depth),
-            body: Arbitrary::any(rng, depth),
-            input_name: Arbitrary::any(rng, depth),
-            ctx_name: Arbitrary::any(rng, depth),
-            const_: rng.random(),
-        }
-    }
-}
-
-impl Arbitrary for FreeCompFuncVal {
-    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let depth = depth + 1;
-        let func = FreeCompFunc { raw_input: rng.random(), comp: Arbitrary::any(rng, depth) };
-        FreeCompFuncVal::from(func)
-    }
-}
-
-impl Arbitrary for CtxCompFuncVal {
-    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let depth = depth + 1;
-        let func = CtxCompFunc { raw_input: rng.random(), comp: Arbitrary::any(rng, depth) };
-        CtxCompFuncVal::from(func)
+        let func = CompFunc { raw_input: rng.random(), fn_: Arbitrary::any(rng, depth) };
+        CompFuncVal::from(func)
     }
 }
 

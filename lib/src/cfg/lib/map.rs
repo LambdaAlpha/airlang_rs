@@ -11,9 +11,8 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
-use crate::semantics::val::CtxPrimFuncVal;
-use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::MAP;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::Cell;
@@ -26,26 +25,26 @@ use crate::type_::Pair;
 // todo design
 #[derive(Clone)]
 pub struct MapLib {
-    pub new: FreePrimFuncVal,
-    pub new_set: FreePrimFuncVal,
-    pub get_length: CtxPrimFuncVal,
-    pub get_items: CtxPrimFuncVal,
-    pub into_items: CtxPrimFuncVal,
-    pub get_keys: CtxPrimFuncVal,
-    pub into_keys: CtxPrimFuncVal,
-    pub get_values: CtxPrimFuncVal,
-    pub into_values: CtxPrimFuncVal,
-    pub contain: CtxPrimFuncVal,
-    pub contain_all: CtxPrimFuncVal,
-    pub contain_any: CtxPrimFuncVal,
-    pub set: CtxPrimFuncVal,
-    pub set_many: CtxPrimFuncVal,
-    pub get: CtxPrimFuncVal,
-    pub get_many: CtxPrimFuncVal,
-    pub remove: CtxPrimFuncVal,
-    pub remove_many: CtxPrimFuncVal,
-    pub move_: CtxPrimFuncVal,
-    pub clear: CtxPrimFuncVal,
+    pub new: PrimFuncVal,
+    pub new_set: PrimFuncVal,
+    pub get_length: PrimFuncVal,
+    pub get_items: PrimFuncVal,
+    pub into_items: PrimFuncVal,
+    pub get_keys: PrimFuncVal,
+    pub into_keys: PrimFuncVal,
+    pub get_values: PrimFuncVal,
+    pub into_values: PrimFuncVal,
+    pub contain: PrimFuncVal,
+    pub contain_all: PrimFuncVal,
+    pub contain_any: PrimFuncVal,
+    pub set: PrimFuncVal,
+    pub set_many: PrimFuncVal,
+    pub get: PrimFuncVal,
+    pub get_many: PrimFuncVal,
+    pub remove: PrimFuncVal,
+    pub remove_many: PrimFuncVal,
+    pub move_: PrimFuncVal,
+    pub clear: PrimFuncVal,
 }
 
 pub const NEW: &str = concatcp!(PREFIX_ID, MAP, ".new");
@@ -121,7 +120,7 @@ impl CfgMod for MapLib {
     }
 }
 
-pub fn new() -> FreePrimFuncVal {
+pub fn new() -> PrimFuncVal {
     FreeImpl { fn_: fn_new }.build(ImplExtra { raw_input: false })
 }
 
@@ -144,7 +143,7 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
     Val::Map(map.into())
 }
 
-pub fn new_set() -> FreePrimFuncVal {
+pub fn new_set() -> PrimFuncVal {
     FreeImpl { fn_: fn_new_set }.build(ImplExtra { raw_input: false })
 }
 
@@ -163,7 +162,7 @@ fn fn_new_set(cfg: &mut Cfg, input: Val) -> Val {
     Val::Map(map.into())
 }
 
-pub fn get_length() -> CtxPrimFuncVal {
+pub fn get_length() -> PrimFuncVal {
     ConstImpl { fn_: fn_get_length }.build(ImplExtra { raw_input: false })
 }
 
@@ -178,7 +177,7 @@ fn fn_get_length(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     Val::Int(len.into())
 }
 
-pub fn get_items() -> CtxPrimFuncVal {
+pub fn get_items() -> PrimFuncVal {
     ConstImpl { fn_: fn_get_items }.build(ImplExtra { raw_input: false })
 }
 
@@ -196,7 +195,7 @@ fn fn_get_items(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     Val::List(items.into())
 }
 
-pub fn into_items() -> CtxPrimFuncVal {
+pub fn into_items() -> PrimFuncVal {
     MutImpl { fn_: fn_into_items }.build(ImplExtra { raw_input: false })
 }
 
@@ -214,7 +213,7 @@ fn fn_into_items(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::List(items.into())
 }
 
-pub fn get_keys() -> CtxPrimFuncVal {
+pub fn get_keys() -> PrimFuncVal {
     ConstImpl { fn_: fn_get_keys }.build(ImplExtra { raw_input: false })
 }
 
@@ -229,7 +228,7 @@ fn fn_get_keys(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     Val::List(keys.into())
 }
 
-pub fn into_keys() -> CtxPrimFuncVal {
+pub fn into_keys() -> PrimFuncVal {
     MutImpl { fn_: fn_into_keys }.build(ImplExtra { raw_input: false })
 }
 
@@ -246,7 +245,7 @@ fn fn_into_keys(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::List(keys.into())
 }
 
-pub fn get_values() -> CtxPrimFuncVal {
+pub fn get_values() -> PrimFuncVal {
     ConstImpl { fn_: fn_get_values }.build(ImplExtra { raw_input: false })
 }
 
@@ -261,7 +260,7 @@ fn fn_get_values(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     Val::List(values.into())
 }
 
-pub fn into_values() -> CtxPrimFuncVal {
+pub fn into_values() -> PrimFuncVal {
     MutImpl { fn_: fn_into_values }.build(ImplExtra { raw_input: false })
 }
 
@@ -278,7 +277,7 @@ fn fn_into_values(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::List(values.into())
 }
 
-pub fn contain() -> CtxPrimFuncVal {
+pub fn contain() -> PrimFuncVal {
     ConstImpl { fn_: fn_contain }.build(ImplExtra { raw_input: false })
 }
 
@@ -292,7 +291,7 @@ fn fn_contain(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     Val::Bit(Bit::from(map.contains_key(&key)))
 }
 
-pub fn contain_all() -> CtxPrimFuncVal {
+pub fn contain_all() -> PrimFuncVal {
     ConstImpl { fn_: fn_contain_all }.build(ImplExtra { raw_input: false })
 }
 
@@ -315,7 +314,7 @@ fn fn_contain_all(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     Val::Bit(Bit::from(true))
 }
 
-pub fn contain_any() -> CtxPrimFuncVal {
+pub fn contain_any() -> PrimFuncVal {
     ConstImpl { fn_: fn_contain_any }.build(ImplExtra { raw_input: false })
 }
 
@@ -338,7 +337,7 @@ fn fn_contain_any(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     Val::Bit(Bit::from(false))
 }
 
-pub fn set() -> CtxPrimFuncVal {
+pub fn set() -> PrimFuncVal {
     MutImpl { fn_: fn_set }.build(ImplExtra { raw_input: false })
 }
 
@@ -360,7 +359,7 @@ fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::Cell(Cell::new(value).into())
 }
 
-pub fn set_many() -> CtxPrimFuncVal {
+pub fn set_many() -> PrimFuncVal {
     MutImpl { fn_: fn_set_many }.build(ImplExtra { raw_input: false })
 }
 
@@ -377,7 +376,7 @@ fn fn_set_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::Map(map.into())
 }
 
-pub fn get() -> CtxPrimFuncVal {
+pub fn get() -> PrimFuncVal {
     ConstImpl { fn_: fn_get }.build(ImplExtra { raw_input: false })
 }
 
@@ -394,7 +393,7 @@ fn fn_get(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     Val::Cell(Cell::new(value.clone()).into())
 }
 
-pub fn get_many() -> CtxPrimFuncVal {
+pub fn get_many() -> PrimFuncVal {
     ConstImpl { fn_: fn_get_many }.build(ImplExtra { raw_input: false })
 }
 
@@ -418,7 +417,7 @@ fn fn_get_many(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     Val::Map(new_map.into())
 }
 
-pub fn remove() -> CtxPrimFuncVal {
+pub fn remove() -> PrimFuncVal {
     MutImpl { fn_: fn_remove }.build(ImplExtra { raw_input: false })
 }
 
@@ -435,7 +434,7 @@ fn fn_remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::Cell(Cell::new(value).into())
 }
 
-pub fn remove_many() -> CtxPrimFuncVal {
+pub fn remove_many() -> PrimFuncVal {
     MutImpl { fn_: fn_remove_many }.build(ImplExtra { raw_input: false })
 }
 
@@ -459,7 +458,7 @@ fn fn_remove_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::Map(new_map.into())
 }
 
-pub fn move_() -> CtxPrimFuncVal {
+pub fn move_() -> PrimFuncVal {
     MutImpl { fn_: fn_move }.build(ImplExtra { raw_input: false })
 }
 
@@ -476,7 +475,7 @@ fn fn_move(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     value
 }
 
-pub fn clear() -> CtxPrimFuncVal {
+pub fn clear() -> PrimFuncVal {
     MutImpl { fn_: fn_clear }.build(ImplExtra { raw_input: false })
 }
 

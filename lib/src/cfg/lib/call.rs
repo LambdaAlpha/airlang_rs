@@ -12,19 +12,18 @@ use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::val::CALL;
-use crate::semantics::val::CtxPrimFuncVal;
-use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Call;
 use crate::type_::Pair;
 
 #[derive(Clone)]
 pub struct CallLib {
-    pub new: FreePrimFuncVal,
-    pub get_function: CtxPrimFuncVal,
-    pub set_function: CtxPrimFuncVal,
-    pub get_input: CtxPrimFuncVal,
-    pub set_input: CtxPrimFuncVal,
+    pub new: PrimFuncVal,
+    pub get_function: PrimFuncVal,
+    pub set_function: PrimFuncVal,
+    pub get_input: PrimFuncVal,
+    pub set_input: PrimFuncVal,
 }
 
 pub const NEW: &str = concatcp!(PREFIX_ID, CALL, ".new");
@@ -55,7 +54,7 @@ impl CfgMod for CallLib {
     }
 }
 
-pub fn new() -> FreePrimFuncVal {
+pub fn new() -> PrimFuncVal {
     FreeImpl { fn_: fn_new }.build(ImplExtra { raw_input: false })
 }
 
@@ -67,7 +66,7 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
     Val::Call(Call::new(pair.left, pair.right).into())
 }
 
-pub fn get_function() -> CtxPrimFuncVal {
+pub fn get_function() -> PrimFuncVal {
     ConstImpl { fn_: fn_get_function }.build(ImplExtra { raw_input: false })
 }
 
@@ -81,7 +80,7 @@ fn fn_get_function(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     call.func.clone()
 }
 
-pub fn set_function() -> CtxPrimFuncVal {
+pub fn set_function() -> PrimFuncVal {
     MutImpl { fn_: fn_set_function }.build(ImplExtra { raw_input: false })
 }
 
@@ -93,7 +92,7 @@ fn fn_set_function(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     input
 }
 
-pub fn get_input() -> CtxPrimFuncVal {
+pub fn get_input() -> PrimFuncVal {
     ConstImpl { fn_: fn_get_input }.build(ImplExtra { raw_input: false })
 }
 
@@ -107,7 +106,7 @@ fn fn_get_input(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     call.input.clone()
 }
 
-pub fn set_input() -> CtxPrimFuncVal {
+pub fn set_input() -> PrimFuncVal {
     MutImpl { fn_: fn_set_input }.build(ImplExtra { raw_input: false })
 }
 

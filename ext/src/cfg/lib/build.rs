@@ -11,7 +11,7 @@ use airlang::cfg::lib::FreeImpl;
 use airlang::cfg::lib::ImplExtra;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_ID;
-use airlang::semantics::val::FreePrimFuncVal;
+use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::syntax::parse;
 use airlang::type_::Cell;
@@ -21,7 +21,7 @@ use const_format::concatcp;
 
 #[derive(Clone)]
 pub struct BuildLib {
-    pub load: FreePrimFuncVal,
+    pub load: PrimFuncVal,
 }
 
 const BUILD: &str = "build";
@@ -42,7 +42,7 @@ impl CfgMod for BuildLib {
 
 // todo rename
 // todo design
-pub fn load() -> FreePrimFuncVal {
+pub fn load() -> PrimFuncVal {
     FreeImpl { fn_: fn_load }.build(ImplExtra { raw_input: false })
 }
 

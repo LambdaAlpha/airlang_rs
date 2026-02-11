@@ -16,10 +16,9 @@ use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::ctx::DynCtx;
-use crate::semantics::func::CtxFn;
+use crate::semantics::func::DynFunc;
 use crate::semantics::val::CFG;
-use crate::semantics::val::CtxPrimFuncVal;
-use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::Int;
@@ -30,15 +29,15 @@ use crate::type_::Pair;
 // todo design more
 #[derive(Clone)]
 pub struct CfgLib {
-    pub new: FreePrimFuncVal,
-    pub represent: FreePrimFuncVal,
-    pub exist: FreePrimFuncVal,
-    pub import: FreePrimFuncVal,
-    pub export: FreePrimFuncVal,
-    pub get_length: CtxPrimFuncVal,
-    pub with: CtxPrimFuncVal,
-    pub self_: FreePrimFuncVal,
-    pub where_: CtxPrimFuncVal,
+    pub new: PrimFuncVal,
+    pub represent: PrimFuncVal,
+    pub exist: PrimFuncVal,
+    pub import: PrimFuncVal,
+    pub export: PrimFuncVal,
+    pub get_length: PrimFuncVal,
+    pub with: PrimFuncVal,
+    pub self_: PrimFuncVal,
+    pub where_: PrimFuncVal,
 }
 
 pub const NEW: &str = concatcp!(PREFIX_ID, CFG, ".new");
@@ -81,7 +80,7 @@ impl CfgMod for CfgLib {
     }
 }
 
-pub fn new() -> FreePrimFuncVal {
+pub fn new() -> PrimFuncVal {
     FreeImpl { fn_: fn_new }.build(ImplExtra { raw_input: false })
 }
 
@@ -97,7 +96,7 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
     Val::Cfg(new_cfg.into())
 }
 
-pub fn represent() -> FreePrimFuncVal {
+pub fn represent() -> PrimFuncVal {
     FreeImpl { fn_: fn_represent }.build(ImplExtra { raw_input: false })
 }
 
@@ -108,7 +107,7 @@ fn fn_represent(cfg: &mut Cfg, input: Val) -> Val {
     Val::Map(new_cfg.snapshot().into())
 }
 
-pub fn exist() -> FreePrimFuncVal {
+pub fn exist() -> PrimFuncVal {
     FreeImpl { fn_: fn_exist }.build(ImplExtra { raw_input: false })
 }
 
@@ -120,7 +119,7 @@ fn fn_exist(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(Bit::from(exist))
 }
 
-pub fn import() -> FreePrimFuncVal {
+pub fn import() -> PrimFuncVal {
     FreeImpl { fn_: fn_import }.build(ImplExtra { raw_input: false })
 }
 
@@ -134,7 +133,7 @@ fn fn_import(cfg: &mut Cfg, input: Val) -> Val {
     value
 }
 
-pub fn export() -> FreePrimFuncVal {
+pub fn export() -> PrimFuncVal {
     FreeImpl { fn_: fn_export }.build(ImplExtra { raw_input: false })
 }
 
@@ -152,7 +151,7 @@ fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
     Val::default()
 }
 
-pub fn get_length() -> CtxPrimFuncVal {
+pub fn get_length() -> PrimFuncVal {
     ConstImpl { fn_: fn_get_length }.build(ImplExtra { raw_input: false })
 }
 
@@ -166,7 +165,7 @@ fn fn_get_length(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     Val::Int(Int::from(new_cfg.len()).into())
 }
 
-pub fn with() -> CtxPrimFuncVal {
+pub fn with() -> PrimFuncVal {
     MutImpl { fn_: fn_with }.build(ImplExtra { raw_input: true })
 }
 
@@ -175,7 +174,7 @@ fn fn_with(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return bug!(cfg, "{WITH}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
-    let map = Eval.ctx_call(cfg, ctx, pair.left);
+    let map = Eval.call(cfg, ctx, pair.left);
     let Val::Map(map) = map else {
         return bug!(cfg, "{WITH}: expected input.left to be a map, but got {map}");
     };
@@ -184,12 +183,12 @@ fn fn_with(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     for (k, v) in map {
         cfg.extend_scope(k, v);
     }
-    let output = Eval.ctx_call(cfg, ctx, pair.right);
+    let output = Eval.call(cfg, ctx, pair.right);
     cfg.end_scope();
     output
 }
 
-pub fn self_() -> FreePrimFuncVal {
+pub fn self_() -> PrimFuncVal {
     FreeImpl { fn_: fn_self }.build(ImplExtra { raw_input: false })
 }
 
@@ -200,7 +199,7 @@ fn fn_self(cfg: &mut Cfg, input: Val) -> Val {
     Val::Cfg(cfg.clone().into())
 }
 
-pub fn where_() -> CtxPrimFuncVal {
+pub fn where_() -> PrimFuncVal {
     MutImpl { fn_: fn_where }.build(ImplExtra { raw_input: true })
 }
 
@@ -230,7 +229,7 @@ fn fn_where(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     // new_ctx is local variable
     // new_cfg is aborted
     let result =
-        catch_unwind(AssertUnwindSafe(|| Eval.ctx_call(&mut **new_cfg, &mut new_ctx, pair.right)));
+        catch_unwind(AssertUnwindSafe(|| Eval.call(&mut **new_cfg, &mut new_ctx, pair.right)));
     match result {
         Ok(output) => output,
         Err(err) => {

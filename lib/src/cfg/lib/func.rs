@@ -13,27 +13,27 @@ use crate::cfg::repr::func::generate_func;
 use crate::cfg::repr::func::parse_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
-use crate::semantics::func::CtxFn;
-use crate::semantics::func::CtxPrimFunc;
-use crate::semantics::val::CtxPrimFuncVal;
+use crate::semantics::func::DynFunc;
+use crate::semantics::func::PrimCtx;
+use crate::semantics::func::PrimFunc;
 use crate::semantics::val::FUNC;
-use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::Pair;
 
 #[derive(Clone)]
 pub struct FuncLib {
-    pub new: FreePrimFuncVal,
-    pub represent: FreePrimFuncVal,
-    pub apply: CtxPrimFuncVal,
-    pub is_context_free: CtxPrimFuncVal,
-    pub is_context_constant: CtxPrimFuncVal,
-    pub is_raw_input: CtxPrimFuncVal,
-    pub is_primitive: CtxPrimFuncVal,
-    pub get_code: CtxPrimFuncVal,
-    pub get_prelude: CtxPrimFuncVal,
+    pub new: PrimFuncVal,
+    pub represent: PrimFuncVal,
+    pub apply: PrimFuncVal,
+    pub is_context_free: PrimFuncVal,
+    pub is_context_constant: PrimFuncVal,
+    pub is_raw_input: PrimFuncVal,
+    pub is_primitive: PrimFuncVal,
+    pub get_code: PrimFuncVal,
+    pub get_prelude: PrimFuncVal,
 }
 
 pub const NEW: &str = concatcp!(PREFIX_ID, FUNC, ".new");
@@ -76,7 +76,7 @@ impl CfgMod for FuncLib {
     }
 }
 
-pub fn new() -> FreePrimFuncVal {
+pub fn new() -> PrimFuncVal {
     FreeImpl { fn_: fn_new }.build(ImplExtra { raw_input: false })
 }
 
@@ -87,7 +87,7 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
     Val::Func(func)
 }
 
-pub fn represent() -> FreePrimFuncVal {
+pub fn represent() -> PrimFuncVal {
     FreeImpl { fn_: fn_represent }.build(ImplExtra { raw_input: false })
 }
 
@@ -98,19 +98,19 @@ fn fn_represent(cfg: &mut Cfg, input: Val) -> Val {
     generate_func(func)
 }
 
-pub fn apply() -> CtxPrimFuncVal {
-    CtxPrimFunc { raw_input: false, fn_: Rc::new(Apply), const_: false }.into()
+pub fn apply() -> PrimFuncVal {
+    PrimFunc { raw_input: false, fn_: Rc::new(Apply), ctx: PrimCtx::Mut }.into()
 }
 
 struct Apply;
 
-impl CtxFn<Cfg, Val, Val, Val> for Apply {
-    fn ctx_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+impl DynFunc<Cfg, Val, Val, Val> for Apply {
+    fn call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         let (func, input) = match func_input(cfg, input) {
             Ok(pair) => pair,
             Err(err) => return err,
         };
-        func.ctx_call(cfg, ctx, input)
+        func.call(cfg, ctx, input)
     }
 }
 
@@ -129,7 +129,7 @@ fn func_input(cfg: &mut Cfg, input: Val) -> Result<(FuncVal, Val), Val> {
     Ok((func, pair.right))
 }
 
-pub fn is_context_free() -> CtxPrimFuncVal {
+pub fn is_context_free() -> PrimFuncVal {
     ConstImpl { fn_: fn_is_context_free }.build(ImplExtra { raw_input: false })
 }
 
@@ -143,7 +143,7 @@ fn fn_is_context_free(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     Val::Bit(Bit::from(func.is_free()))
 }
 
-pub fn is_context_constant() -> CtxPrimFuncVal {
+pub fn is_context_constant() -> PrimFuncVal {
     ConstImpl { fn_: fn_is_context_constant }.build(ImplExtra { raw_input: false })
 }
 
@@ -160,7 +160,7 @@ fn fn_is_context_constant(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     Val::Bit(Bit::from(func.is_const()))
 }
 
-pub fn is_raw_input() -> CtxPrimFuncVal {
+pub fn is_raw_input() -> PrimFuncVal {
     ConstImpl { fn_: fn_is_raw_input }.build(ImplExtra { raw_input: false })
 }
 
@@ -174,7 +174,7 @@ fn fn_is_raw_input(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     Val::Bit(Bit::from(func.raw_input()))
 }
 
-pub fn is_primitive() -> CtxPrimFuncVal {
+pub fn is_primitive() -> PrimFuncVal {
     ConstImpl { fn_: fn_is_primitive }.build(ImplExtra { raw_input: false })
 }
 
@@ -189,7 +189,7 @@ fn fn_is_primitive(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     Val::Bit(Bit::from(is_primitive))
 }
 
-pub fn get_code() -> CtxPrimFuncVal {
+pub fn get_code() -> PrimFuncVal {
     ConstImpl { fn_: fn_get_code }.build(ImplExtra { raw_input: false })
 }
 
@@ -203,7 +203,7 @@ fn fn_get_code(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     generate_code(func)
 }
 
-pub fn get_prelude() -> CtxPrimFuncVal {
+pub fn get_prelude() -> PrimFuncVal {
     ConstImpl { fn_: fn_get_prelude }.build(ImplExtra { raw_input: false })
 }
 

@@ -10,8 +10,7 @@ use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::val::BYTE;
-use crate::semantics::val::CtxPrimFuncVal;
-use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Byte;
 use crate::type_::Int;
@@ -20,9 +19,9 @@ use crate::type_::Pair;
 // todo design add more
 #[derive(Clone)]
 pub struct ByteLib {
-    pub get_length: CtxPrimFuncVal,
-    pub push: CtxPrimFuncVal,
-    pub join: FreePrimFuncVal,
+    pub get_length: PrimFuncVal,
+    pub push: PrimFuncVal,
+    pub join: PrimFuncVal,
 }
 
 pub const GET_LENGTH: &str = concatcp!(PREFIX_ID, BYTE, ".get_length");
@@ -43,7 +42,7 @@ impl CfgMod for ByteLib {
     }
 }
 
-pub fn get_length() -> CtxPrimFuncVal {
+pub fn get_length() -> PrimFuncVal {
     ConstImpl { fn_: fn_get_length }.build(ImplExtra { raw_input: false })
 }
 
@@ -58,7 +57,7 @@ fn fn_get_length(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     Val::Int(len.into())
 }
 
-pub fn push() -> CtxPrimFuncVal {
+pub fn push() -> PrimFuncVal {
     MutImpl { fn_: fn_push }.build(ImplExtra { raw_input: false })
 }
 
@@ -74,7 +73,7 @@ fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 // todo design
-pub fn join() -> FreePrimFuncVal {
+pub fn join() -> PrimFuncVal {
     FreeImpl { fn_: fn_join }.build(ImplExtra { raw_input: false })
 }
 

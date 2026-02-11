@@ -1,97 +1,81 @@
 use derive_more::From;
 
 use crate::semantics::cfg::Cfg;
-use crate::semantics::func::CtxCompFunc;
-use crate::semantics::func::CtxFn;
-use crate::semantics::func::CtxPrimFunc;
-use crate::semantics::func::FreeCompFunc;
-use crate::semantics::func::FreePrimFunc;
+use crate::semantics::func::CompCtx;
+use crate::semantics::func::CompFunc;
+use crate::semantics::func::DynFunc;
+use crate::semantics::func::PrimCtx;
+use crate::semantics::func::PrimFunc;
 use crate::semantics::val::Val;
 use crate::type_::wrap::rc_wrap;
 
 #[derive(Clone, PartialEq, Eq, From)]
 pub enum FuncVal {
-    FreePrim(FreePrimFuncVal),
-    FreeComp(FreeCompFuncVal),
-    CtxPrim(CtxPrimFuncVal),
-    CtxComp(CtxCompFuncVal),
+    Prim(PrimFuncVal),
+    Comp(CompFuncVal),
 }
 
-rc_wrap!(pub FreePrimFuncVal(FreePrimFunc));
+rc_wrap!(pub PrimFuncVal(PrimFunc));
 
-rc_wrap!(pub FreeCompFuncVal(FreeCompFunc));
+rc_wrap!(pub CompFuncVal(CompFunc));
 
-rc_wrap!(pub CtxPrimFuncVal(CtxPrimFunc));
-
-rc_wrap!(pub CtxCompFuncVal(CtxCompFunc));
-
-macro_rules! match_func_val {
-    ($self:ident, $name:ident => $body:expr) => {
-        match $self {
-            FuncVal::FreePrim($name) => $body,
-            FuncVal::FreeComp($name) => $body,
-            FuncVal::CtxPrim($name) => $body,
-            FuncVal::CtxComp($name) => $body,
+impl DynFunc<Cfg, Val, Val, Val> for FuncVal {
+    fn call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+        match self {
+            FuncVal::Prim(prim) => prim.call(cfg, ctx, input),
+            FuncVal::Comp(comp) => comp.call(cfg, ctx, input),
         }
-    };
-}
-
-impl CtxFn<Cfg, Val, Val, Val> for FuncVal {
-    fn ctx_call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
-        match_func_val!(self, f => f.ctx_call(cfg, ctx, input))
     }
 }
 
 impl FuncVal {
     pub fn raw_input(&self) -> bool {
-        match_func_val!(self, f => f.raw_input)
+        match self {
+            FuncVal::Prim(f) => f.raw_input,
+            FuncVal::Comp(f) => f.raw_input,
+        }
     }
 
     pub fn prelude(&self) -> Option<&Val> {
         match self {
-            FuncVal::FreePrim(_) => None,
-            FuncVal::FreeComp(f) => Some(&f.comp.prelude),
-            FuncVal::CtxPrim(_) => None,
-            FuncVal::CtxComp(f) => Some(&f.comp.prelude),
+            FuncVal::Prim(_) => None,
+            FuncVal::Comp(f) => Some(&f.fn_.prelude),
         }
     }
 
     pub fn is_primitive(&self) -> bool {
         match self {
-            FuncVal::FreePrim(_) => true,
-            FuncVal::FreeComp(_) => false,
-            FuncVal::CtxPrim(_) => true,
-            FuncVal::CtxComp(_) => false,
+            FuncVal::Prim(_) => true,
+            FuncVal::Comp(_) => false,
         }
     }
 
     pub fn is_free(&self) -> bool {
         match self {
-            FuncVal::FreePrim(_) => true,
-            FuncVal::FreeComp(_) => true,
-            FuncVal::CtxPrim(_) => false,
-            FuncVal::CtxComp(_) => false,
+            FuncVal::Prim(f) => matches!(f.ctx, PrimCtx::Free),
+            FuncVal::Comp(f) => matches!(f.fn_.ctx, CompCtx::Free),
         }
     }
 
     pub fn is_const(&self) -> bool {
         match self {
-            FuncVal::FreePrim(_) => true,
-            FuncVal::FreeComp(_) => true,
-            FuncVal::CtxPrim(f) => f.const_,
-            FuncVal::CtxComp(f) => f.comp.const_,
+            FuncVal::Prim(f) => !matches!(f.ctx, PrimCtx::Mut),
+            FuncVal::Comp(f) => match &f.fn_.ctx {
+                CompCtx::Free => true,
+                CompCtx::Default { const_, .. } => *const_,
+            },
         }
     }
 }
 
-impl Default for FreePrimFuncVal {
+impl Default for PrimFuncVal {
     fn default() -> Self {
-        Self::from(FreePrimFunc::default())
+        Self::from(PrimFunc::default())
     }
 }
 
 impl Default for FuncVal {
     fn default() -> Self {
-        Self::FreePrim(FreePrimFuncVal::default())
+        Self::Prim(PrimFuncVal::default())
     }
 }

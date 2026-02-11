@@ -1,7 +1,7 @@
 use crate::cfg::CoreCfg;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
-use crate::semantics::func::CtxFn;
+use crate::semantics::func::DynFunc;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::Val;
 
@@ -19,7 +19,7 @@ impl Air {
     }
 
     pub fn interpret(&mut self, input: Val) -> Val {
-        Eval.ctx_call(&mut self.cfg, &mut self.ctx, input)
+        Eval.call(&mut self.cfg, &mut self.ctx, input)
     }
 
     pub fn ctx(&self) -> &Val {

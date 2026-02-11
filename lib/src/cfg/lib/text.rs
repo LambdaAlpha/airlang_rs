@@ -9,8 +9,7 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
-use crate::semantics::val::CtxPrimFuncVal;
-use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::TEXT;
 use crate::semantics::val::Val;
 use crate::type_::Byte;
@@ -20,11 +19,11 @@ use crate::type_::Text;
 // todo design add more
 #[derive(Clone)]
 pub struct TextLib {
-    pub from_utf8: FreePrimFuncVal,
-    pub into_utf8: FreePrimFuncVal,
-    pub get_length: CtxPrimFuncVal,
-    pub push: CtxPrimFuncVal,
-    pub join: FreePrimFuncVal,
+    pub from_utf8: PrimFuncVal,
+    pub into_utf8: PrimFuncVal,
+    pub get_length: PrimFuncVal,
+    pub push: PrimFuncVal,
+    pub join: PrimFuncVal,
 }
 
 pub const FROM_UTF8: &str = concatcp!(PREFIX_ID, TEXT, ".from_utf8");
@@ -55,7 +54,7 @@ impl CfgMod for TextLib {
     }
 }
 
-pub fn from_utf8() -> FreePrimFuncVal {
+pub fn from_utf8() -> PrimFuncVal {
     FreeImpl { fn_: fn_from_utf8 }.build(ImplExtra { raw_input: false })
 }
 
@@ -70,7 +69,7 @@ fn fn_from_utf8(cfg: &mut Cfg, input: Val) -> Val {
     Val::Text(Text::from(str).into())
 }
 
-pub fn into_utf8() -> FreePrimFuncVal {
+pub fn into_utf8() -> PrimFuncVal {
     FreeImpl { fn_: fn_into_utf8 }.build(ImplExtra { raw_input: false })
 }
 
@@ -83,7 +82,7 @@ fn fn_into_utf8(cfg: &mut Cfg, input: Val) -> Val {
     Val::Byte(byte.into())
 }
 
-pub fn get_length() -> CtxPrimFuncVal {
+pub fn get_length() -> PrimFuncVal {
     ConstImpl { fn_: fn_get_length }.build(ImplExtra { raw_input: false })
 }
 
@@ -98,7 +97,7 @@ fn fn_get_length(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     Val::Int(len.into())
 }
 
-pub fn push() -> CtxPrimFuncVal {
+pub fn push() -> PrimFuncVal {
     MutImpl { fn_: fn_push }.build(ImplExtra { raw_input: false })
 }
 
@@ -114,7 +113,7 @@ fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 // todo design
-pub fn join() -> FreePrimFuncVal {
+pub fn join() -> PrimFuncVal {
     FreeImpl { fn_: fn_join }.build(ImplExtra { raw_input: false })
 }
 

@@ -1,23 +1,26 @@
-pub use self::ctx_comp::CtxCompFunc;
-pub use self::ctx_prim::CtxFn;
-pub use self::ctx_prim::CtxPrimFunc;
-pub use self::free_comp::FreeCompFunc;
-pub use self::free_prim::FreeFn;
-pub use self::free_prim::FreePrimFunc;
+pub use self::comp::CompFunc;
+pub use self::prim::PrimFunc;
 
 _____!();
 
-pub(crate) use self::comp::DynComposite;
-pub(crate) use self::comp::FreeComposite;
+pub(crate) use self::comp::CompCtx;
+pub(crate) use self::comp::CompFn;
+pub(crate) use self::prim::PrimCtx;
 
 _____!();
+
+pub trait DynFunc<Cfg, Ctx, I, O> {
+    fn call(&self, cfg: &mut Cfg, ctx: &mut Ctx, input: I) -> O;
+}
+
+impl<Cfg, Ctx, I, O, T> DynFunc<Cfg, Ctx, I, O> for &T
+where T: DynFunc<Cfg, Ctx, I, O>
+{
+    fn call(&self, cfg: &mut Cfg, ctx: &mut Ctx, input: I) -> O {
+        (**self).call(cfg, ctx, input)
+    }
+}
+
+mod prim;
 
 mod comp;
-
-mod free_prim;
-
-mod free_comp;
-
-mod ctx_prim;
-
-mod ctx_comp;

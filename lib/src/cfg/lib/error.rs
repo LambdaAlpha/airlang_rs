@@ -10,18 +10,17 @@ use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::core::abort_by_bug_with_msg;
-use crate::semantics::val::CtxPrimFuncVal;
-use crate::semantics::val::FreePrimFuncVal;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Pair;
 use crate::type_::Text;
 
 #[derive(Clone)]
 pub struct ErrorLib {
-    pub abort: FreePrimFuncVal,
-    pub assert: FreePrimFuncVal,
-    pub is_aborted: CtxPrimFuncVal,
-    pub recover: CtxPrimFuncVal,
+    pub abort: PrimFuncVal,
+    pub assert: PrimFuncVal,
+    pub is_aborted: PrimFuncVal,
+    pub recover: PrimFuncVal,
 }
 
 const ERROR: &str = "error";
@@ -46,7 +45,7 @@ impl CfgMod for ErrorLib {
     }
 }
 
-pub fn abort() -> FreePrimFuncVal {
+pub fn abort() -> PrimFuncVal {
     FreeImpl { fn_: fn_abort }.build(ImplExtra { raw_input: false })
 }
 
@@ -58,7 +57,7 @@ fn fn_abort(cfg: &mut Cfg, input: Val) -> Val {
     Val::default()
 }
 
-pub fn assert() -> FreePrimFuncVal {
+pub fn assert() -> PrimFuncVal {
     FreeImpl { fn_: fn_assert }.build(ImplExtra { raw_input: false })
 }
 
@@ -80,7 +79,7 @@ fn fn_assert(cfg: &mut Cfg, input: Val) -> Val {
     Val::default()
 }
 
-pub fn is_aborted() -> CtxPrimFuncVal {
+pub fn is_aborted() -> PrimFuncVal {
     ConstImpl { fn_: fn_is_aborted }.build(ImplExtra { raw_input: false })
 }
 
@@ -95,7 +94,7 @@ fn fn_is_aborted(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     Val::Bit(aborted.into())
 }
 
-pub fn recover() -> CtxPrimFuncVal {
+pub fn recover() -> PrimFuncVal {
     MutImpl { fn_: fn_recover }.build(ImplExtra { raw_input: false })
 }
 

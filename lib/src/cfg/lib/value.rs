@@ -20,10 +20,8 @@ use crate::semantics::val::BYTE;
 use crate::semantics::val::CALL;
 use crate::semantics::val::CELL;
 use crate::semantics::val::CFG;
-use crate::semantics::val::CtxPrimFuncVal;
 use crate::semantics::val::DECIMAL;
 use crate::semantics::val::FUNC;
-use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::INT;
 use crate::semantics::val::KEY;
@@ -32,6 +30,7 @@ use crate::semantics::val::LIST;
 use crate::semantics::val::LinkVal;
 use crate::semantics::val::MAP;
 use crate::semantics::val::PAIR;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::TEXT;
 use crate::semantics::val::UNIT;
 use crate::semantics::val::Val;
@@ -51,9 +50,9 @@ use crate::type_::Unit;
 #[derive(Clone)]
 pub struct ValueLib {
     /// should be overridden if there are extension types
-    pub any: FreePrimFuncVal,
-    pub get_type: CtxPrimFuncVal,
-    pub equal: FreePrimFuncVal,
+    pub any: PrimFuncVal,
+    pub get_type: PrimFuncVal,
+    pub equal: PrimFuncVal,
 }
 
 const VALUE: &str = "value";
@@ -93,7 +92,7 @@ const TYPE_CFG: &str = concatcp!(PREFIX_ID, CFG);
 const TYPE_FUNC: &str = concatcp!(PREFIX_ID, FUNC);
 
 // todo design pick value from cfg or ctx
-pub fn any() -> FreePrimFuncVal {
+pub fn any() -> PrimFuncVal {
     FreeImpl { fn_: fn_any }.build(ImplExtra { raw_input: false })
 }
 
@@ -125,7 +124,7 @@ fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
     }
 }
 
-pub fn get_type() -> CtxPrimFuncVal {
+pub fn get_type() -> PrimFuncVal {
     ConstImpl { fn_: fn_get_type }.build(ImplExtra { raw_input: false })
 }
 
@@ -155,7 +154,7 @@ fn fn_get_type(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
 }
 
 // todo design
-pub fn equal() -> FreePrimFuncVal {
+pub fn equal() -> PrimFuncVal {
     FreeImpl { fn_: fn_equal }.build(ImplExtra { raw_input: false })
 }
 

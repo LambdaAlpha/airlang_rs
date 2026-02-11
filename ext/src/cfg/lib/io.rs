@@ -11,21 +11,20 @@ use airlang::cfg::lib::ImplExtra;
 use airlang::cfg::lib::MutImpl;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_ID;
-use airlang::semantics::val::CtxPrimFuncVal;
-use airlang::semantics::val::FreePrimFuncVal;
+use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
 use const_format::concatcp;
 
 // todo design
 #[derive(Clone)]
 pub struct IoLib {
-    pub read_line: CtxPrimFuncVal,
-    pub print: FreePrimFuncVal,
-    pub print_line: FreePrimFuncVal,
-    pub flush: FreePrimFuncVal,
-    pub error_print: FreePrimFuncVal,
-    pub error_print_line: FreePrimFuncVal,
-    pub error_flush: FreePrimFuncVal,
+    pub read_line: PrimFuncVal,
+    pub print: PrimFuncVal,
+    pub print_line: PrimFuncVal,
+    pub flush: PrimFuncVal,
+    pub error_print: PrimFuncVal,
+    pub error_print_line: PrimFuncVal,
+    pub error_flush: PrimFuncVal,
 }
 
 const IO: &str = "io";
@@ -64,7 +63,7 @@ impl CfgMod for IoLib {
     }
 }
 
-pub fn read_line() -> CtxPrimFuncVal {
+pub fn read_line() -> PrimFuncVal {
     MutImpl { fn_: fn_read_line }.build(ImplExtra { raw_input: false })
 }
 
@@ -79,7 +78,7 @@ fn fn_read_line(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-pub fn print() -> FreePrimFuncVal {
+pub fn print() -> PrimFuncVal {
     FreeImpl { fn_: fn_print }.build(ImplExtra { raw_input: false })
 }
 
@@ -91,7 +90,7 @@ fn fn_print(cfg: &mut Cfg, input: Val) -> Val {
     Val::default()
 }
 
-pub fn print_line() -> FreePrimFuncVal {
+pub fn print_line() -> PrimFuncVal {
     FreeImpl { fn_: fn_print_line }.build(ImplExtra { raw_input: false })
 }
 
@@ -103,7 +102,7 @@ fn fn_print_line(cfg: &mut Cfg, input: Val) -> Val {
     Val::default()
 }
 
-pub fn flush() -> FreePrimFuncVal {
+pub fn flush() -> PrimFuncVal {
     FreeImpl { fn_: fn_flush }.build(ImplExtra { raw_input: false })
 }
 
@@ -115,7 +114,7 @@ fn fn_flush(cfg: &mut Cfg, input: Val) -> Val {
     Val::default()
 }
 
-pub fn error_print() -> FreePrimFuncVal {
+pub fn error_print() -> PrimFuncVal {
     FreeImpl { fn_: fn_error_print }.build(ImplExtra { raw_input: false })
 }
 
@@ -127,7 +126,7 @@ fn fn_error_print(cfg: &mut Cfg, input: Val) -> Val {
     Val::default()
 }
 
-pub fn error_print_line() -> FreePrimFuncVal {
+pub fn error_print_line() -> PrimFuncVal {
     FreeImpl { fn_: fn_error_print_line }.build(ImplExtra { raw_input: false })
 }
 
@@ -139,7 +138,7 @@ fn fn_error_print_line(cfg: &mut Cfg, input: Val) -> Val {
     Val::default()
 }
 
-pub fn error_flush() -> FreePrimFuncVal {
+pub fn error_flush() -> PrimFuncVal {
     FreeImpl { fn_: fn_error_flush }.build(ImplExtra { raw_input: false })
 }
 

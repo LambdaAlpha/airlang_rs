@@ -8,25 +8,25 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
-use crate::semantics::val::FreePrimFuncVal;
 use crate::semantics::val::INT;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Int;
 use crate::type_::Pair;
 
 #[derive(Clone)]
 pub struct IntLib {
-    pub add: FreePrimFuncVal,
-    pub subtract: FreePrimFuncVal,
-    pub multiply: FreePrimFuncVal,
-    pub divide: FreePrimFuncVal,
-    pub remainder: FreePrimFuncVal,
-    pub divide_remainder: FreePrimFuncVal,
-    pub less: FreePrimFuncVal,
-    pub less_equal: FreePrimFuncVal,
-    pub greater: FreePrimFuncVal,
-    pub greater_equal: FreePrimFuncVal,
-    pub less_greater: FreePrimFuncVal,
+    pub add: PrimFuncVal,
+    pub subtract: PrimFuncVal,
+    pub multiply: PrimFuncVal,
+    pub divide: PrimFuncVal,
+    pub remainder: PrimFuncVal,
+    pub divide_remainder: PrimFuncVal,
+    pub less: PrimFuncVal,
+    pub less_equal: PrimFuncVal,
+    pub greater: PrimFuncVal,
+    pub greater_equal: PrimFuncVal,
+    pub less_greater: PrimFuncVal,
 }
 
 pub const ADD: &str = concatcp!(PREFIX_ID, INT, ".add");
@@ -75,7 +75,7 @@ impl CfgMod for IntLib {
     }
 }
 
-pub fn add() -> FreePrimFuncVal {
+pub fn add() -> PrimFuncVal {
     FreeImpl { fn_: fn_add }.build(ImplExtra { raw_input: false })
 }
 
@@ -95,7 +95,7 @@ fn fn_add(cfg: &mut Cfg, input: Val) -> Val {
     Val::Int(i1.add(i2).into())
 }
 
-pub fn subtract() -> FreePrimFuncVal {
+pub fn subtract() -> PrimFuncVal {
     FreeImpl { fn_: fn_subtract }.build(ImplExtra { raw_input: false })
 }
 
@@ -123,7 +123,7 @@ fn fn_subtract(cfg: &mut Cfg, input: Val) -> Val {
     Val::Int(i1.subtract(i2).into())
 }
 
-pub fn multiply() -> FreePrimFuncVal {
+pub fn multiply() -> PrimFuncVal {
     FreeImpl { fn_: fn_multiply }.build(ImplExtra { raw_input: false })
 }
 
@@ -151,7 +151,7 @@ fn fn_multiply(cfg: &mut Cfg, input: Val) -> Val {
     Val::Int(i1.multiply(i2).into())
 }
 
-pub fn divide() -> FreePrimFuncVal {
+pub fn divide() -> PrimFuncVal {
     FreeImpl { fn_: fn_divide }.build(ImplExtra { raw_input: false })
 }
 
@@ -179,7 +179,7 @@ fn fn_divide(cfg: &mut Cfg, input: Val) -> Val {
     Val::Int(i.into())
 }
 
-pub fn remainder() -> FreePrimFuncVal {
+pub fn remainder() -> PrimFuncVal {
     FreeImpl { fn_: fn_remainder }.build(ImplExtra { raw_input: false })
 }
 
@@ -211,7 +211,7 @@ fn fn_remainder(cfg: &mut Cfg, input: Val) -> Val {
     Val::Int(i.into())
 }
 
-pub fn divide_remainder() -> FreePrimFuncVal {
+pub fn divide_remainder() -> PrimFuncVal {
     FreeImpl { fn_: fn_divide_remainder }.build(ImplExtra { raw_input: false })
 }
 
@@ -243,7 +243,7 @@ fn fn_divide_remainder(cfg: &mut Cfg, input: Val) -> Val {
     Val::Pair(Pair::new(Val::Int(quotient.into()), Val::Int(rem.into())).into())
 }
 
-pub fn less() -> FreePrimFuncVal {
+pub fn less() -> PrimFuncVal {
     FreeImpl { fn_: fn_less }.build(ImplExtra { raw_input: false })
 }
 
@@ -261,7 +261,7 @@ fn fn_less(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(i1.less_than(&i2))
 }
 
-pub fn less_equal() -> FreePrimFuncVal {
+pub fn less_equal() -> PrimFuncVal {
     FreeImpl { fn_: fn_less_equal }.build(ImplExtra { raw_input: false })
 }
 
@@ -287,7 +287,7 @@ fn fn_less_equal(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(i1.less_equal(&i2))
 }
 
-pub fn greater() -> FreePrimFuncVal {
+pub fn greater() -> PrimFuncVal {
     FreeImpl { fn_: fn_greater }.build(ImplExtra { raw_input: false })
 }
 
@@ -309,7 +309,7 @@ fn fn_greater(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(i1.greater_than(&i2))
 }
 
-pub fn greater_equal() -> FreePrimFuncVal {
+pub fn greater_equal() -> PrimFuncVal {
     FreeImpl { fn_: fn_greater_equal }.build(ImplExtra { raw_input: false })
 }
 
@@ -335,7 +335,7 @@ fn fn_greater_equal(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(i1.greater_equal(&i2))
 }
 
-pub fn less_greater() -> FreePrimFuncVal {
+pub fn less_greater() -> PrimFuncVal {
     FreeImpl { fn_: fn_less_greater }.build(ImplExtra { raw_input: false })
 }
 
