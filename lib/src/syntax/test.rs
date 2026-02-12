@@ -75,8 +75,8 @@ fn list(v: Vec<Repr>) -> Repr {
     Repr::List(v.into())
 }
 
-fn map(v: Vec<(Key, Repr)>) -> Repr {
-    Repr::Map(Map::from_iter(v))
+fn map(v: Vec<(&str, Repr)>) -> Repr {
+    Repr::Map(Map::from_iter(v.into_iter().map(|(k, v)| (Key::from_str_unchecked(k), v))))
 }
 
 fn test_parse(

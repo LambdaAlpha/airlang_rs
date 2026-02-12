@@ -5,7 +5,6 @@ use crate::syntax::test::key;
 use crate::syntax::test::list;
 use crate::syntax::test::map;
 use crate::syntax::test::pair;
-use crate::type_::Key;
 
 pub(super) fn expected() -> Vec<Repr> {
     vec![
@@ -37,7 +36,7 @@ pub(super) fn expected() -> Vec<Repr> {
         call(list(vec![key("a"), key("b")]), key("c")),
         call(key("a"), list(vec![key("b"), key("c")])),
         list(vec![call(key("a"), key("b"))]),
-        map(vec![(Key::from_str_unchecked("a"), call(key("b"), key("c")))]),
+        map(vec![("a", call(key("b"), key("c")))]),
         infix_call(key("_"), key("_"), key("_")),
     ]
 }

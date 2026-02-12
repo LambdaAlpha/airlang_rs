@@ -12,12 +12,11 @@ use crate::syntax::test::map;
 use crate::syntax::test::pair;
 use crate::syntax::test::text;
 use crate::syntax::test::unit;
-use crate::type_::Key;
 
 pub(super) fn expected() -> Vec<Repr> {
     vec![
         list(vec![int("1", 10), int("4", 10)]),
-        map(vec![(Key::from_str_unchecked("a"), int("2", 10))]),
+        map(vec![("a", int("2", 10))]),
         key("key"),
         key(">="),
         key("a.b.c"),
@@ -46,21 +45,9 @@ pub(super) fn expected() -> Vec<Repr> {
         pair(key("a"), pair(key("b"), key("c"))),
         list(vec![int("0", 10), int("1", 10), int("2", 10)]),
         list(vec![unit(), bit(false), int("0", 10), key("")]),
-        map(vec![
-            (Key::from_str_unchecked("a"), int("1", 10)),
-            (Key::from_str_unchecked("b"), int("2", 10)),
-            (Key::from_str_unchecked("c"), int("3", 10)),
-        ]),
-        map(vec![
-            (Key::from_str_unchecked("a"), int("1", 10)),
-            (Key::from_str_unchecked("b"), bit(true)),
-            (Key::from_str_unchecked("c"), key(" ")),
-        ]),
-        map(vec![
-            (Key::from_str_unchecked("a"), unit()),
-            (Key::from_str_unchecked("b"), unit()),
-            (Key::from_str_unchecked("c"), unit()),
-        ]),
+        map(vec![("a", int("1", 10)), ("b", int("2", 10)), ("c", int("3", 10))]),
+        map(vec![("a", int("1", 10)), ("b", bit(true)), ("c", key(" "))]),
+        map(vec![("a", unit()), ("b", unit()), ("c", unit())]),
         call(key("not"), bit(true)),
         infix_call(int("1", 10), key("+"), int("1", 10)),
         infix_call(key("a"), key("and"), infix_call(key("b"), key("or"), key("c"))),
