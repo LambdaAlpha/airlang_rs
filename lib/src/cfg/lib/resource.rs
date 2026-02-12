@@ -2,15 +2,15 @@ use const_format::concatcp;
 use num_traits::Signed;
 use num_traits::ToPrimitive;
 
-use super::FreeImpl;
-use super::ImplExtra;
-use super::MutImpl;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::PREFIX_ID;
+use crate::semantics::func::CtxFreeInputEvalFunc;
+use crate::semantics::func::CtxFreeInputFreeFunc;
+use crate::semantics::func::CtxMutInputRawFunc;
 use crate::semantics::func::DynFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -49,19 +49,16 @@ impl CfgMod for ResourceLib {
 }
 
 pub fn get_steps() -> PrimFuncVal {
-    FreeImpl { fn_: fn_get_steps }.build(ImplExtra { raw_input: false })
+    CtxFreeInputFreeFunc { fn_: fn_get_steps }.build()
 }
 
-fn fn_get_steps(cfg: &mut Cfg, input: Val) -> Val {
-    if !input.is_unit() {
-        return bug!(cfg, "{GET_STEPS}: expected input to be a unit, but got {input}");
-    }
+fn fn_get_steps(cfg: &mut Cfg) -> Val {
     let steps = cfg.steps();
     Val::Int(Int::from(steps).into())
 }
 
 pub fn set_steps() -> PrimFuncVal {
-    FreeImpl { fn_: fn_set_steps }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_set_steps }.build()
 }
 
 fn fn_set_steps(cfg: &mut Cfg, input: Val) -> Val {
@@ -77,7 +74,7 @@ fn fn_set_steps(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn measure_steps() -> PrimFuncVal {
-    MutImpl { fn_: fn_measure_steps }.build(ImplExtra { raw_input: true })
+    CtxMutInputRawFunc { fn_: fn_measure_steps }.build()
 }
 
 fn fn_measure_steps(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {

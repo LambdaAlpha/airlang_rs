@@ -5,8 +5,6 @@ use const_format::concatcp;
 use num_traits::Signed;
 use num_traits::ToPrimitive;
 
-use super::ImplExtra;
-use super::MutImpl;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
@@ -17,6 +15,7 @@ use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::ctx::DynCtx;
+use crate::semantics::func::CtxMutInputRawFunc;
 use crate::semantics::func::DynFunc;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
@@ -148,7 +147,7 @@ impl Statement {
 }
 
 pub fn do_() -> PrimFuncVal {
-    MutImpl { fn_: fn_do }.build(ImplExtra { raw_input: true })
+    CtxMutInputRawFunc { fn_: fn_do }.build()
 }
 
 fn fn_do(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -159,7 +158,7 @@ fn fn_do(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn test() -> PrimFuncVal {
-    MutImpl { fn_: fn_test }.build(ImplExtra { raw_input: true })
+    CtxMutInputRawFunc { fn_: fn_test }.build()
 }
 
 fn fn_test(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -212,7 +211,7 @@ impl Test {
 }
 
 pub fn switch() -> PrimFuncVal {
-    MutImpl { fn_: fn_switch }.build(ImplExtra { raw_input: true })
+    CtxMutInputRawFunc { fn_: fn_switch }.build()
 }
 
 fn fn_switch(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -280,7 +279,7 @@ impl Switch {
 }
 
 pub fn match_() -> PrimFuncVal {
-    MutImpl { fn_: fn_match }.build(ImplExtra { raw_input: true })
+    CtxMutInputRawFunc { fn_: fn_match }.build()
 }
 
 fn fn_match(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -351,7 +350,7 @@ impl Match {
 }
 
 pub fn loop_() -> PrimFuncVal {
-    MutImpl { fn_: fn_loop }.build(ImplExtra { raw_input: true })
+    CtxMutInputRawFunc { fn_: fn_loop }.build()
 }
 
 fn fn_loop(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -406,7 +405,7 @@ impl Loop {
 }
 
 pub fn iterate() -> PrimFuncVal {
-    MutImpl { fn_: fn_iterate }.build(ImplExtra { raw_input: true })
+    CtxMutInputRawFunc { fn_: fn_iterate }.build()
 }
 
 fn fn_iterate(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {

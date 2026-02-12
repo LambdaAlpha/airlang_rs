@@ -7,10 +7,9 @@ use airlang::Air;
 use airlang::bug;
 use airlang::cfg::CfgMod;
 use airlang::cfg::extend_func;
-use airlang::cfg::lib::FreeImpl;
-use airlang::cfg::lib::ImplExtra;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_ID;
+use airlang::semantics::func::CtxFreeInputEvalFunc;
 use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::syntax::parse;
@@ -43,7 +42,7 @@ impl CfgMod for BuildLib {
 // todo rename
 // todo design
 pub fn load() -> PrimFuncVal {
-    FreeImpl { fn_: fn_load }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_load }.build()
 }
 
 // todo rename

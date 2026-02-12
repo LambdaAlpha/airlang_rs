@@ -3,10 +3,9 @@ use std::process::Command;
 use airlang::bug;
 use airlang::cfg::CfgMod;
 use airlang::cfg::extend_func;
-use airlang::cfg::lib::FreeImpl;
-use airlang::cfg::lib::ImplExtra;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_ID;
+use airlang::semantics::func::CtxFreeInputEvalFunc;
 use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::List;
@@ -39,7 +38,7 @@ impl CfgMod for CmdLib {
 // todo design
 // todo impl
 pub fn call() -> PrimFuncVal {
-    FreeImpl { fn_: fn_call }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_call }.build()
 }
 
 fn fn_call(cfg: &mut Cfg, input: Val) -> Val {

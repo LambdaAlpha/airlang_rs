@@ -1,12 +1,11 @@
 use const_format::concatcp;
 
-use super::FreeImpl;
-use super::ImplExtra;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
+use crate::semantics::func::CtxFreeInputEvalFunc;
 use crate::semantics::val::BIT;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -43,7 +42,7 @@ impl CfgMod for BitLib {
 }
 
 pub fn not() -> PrimFuncVal {
-    FreeImpl { fn_: fn_not }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_not }.build()
 }
 
 fn fn_not(cfg: &mut Cfg, input: Val) -> Val {
@@ -54,7 +53,7 @@ fn fn_not(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn and() -> PrimFuncVal {
-    FreeImpl { fn_: fn_and }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_and }.build()
 }
 
 fn fn_and(cfg: &mut Cfg, input: Val) -> Val {
@@ -71,7 +70,7 @@ fn fn_and(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn or() -> PrimFuncVal {
-    FreeImpl { fn_: fn_or }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_or }.build()
 }
 
 fn fn_or(cfg: &mut Cfg, input: Val) -> Val {
@@ -88,7 +87,7 @@ fn fn_or(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn xor() -> PrimFuncVal {
-    FreeImpl { fn_: fn_xor }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_xor }.build()
 }
 
 fn fn_xor(cfg: &mut Cfg, input: Val) -> Val {
@@ -105,7 +104,7 @@ fn fn_xor(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn imply() -> PrimFuncVal {
-    FreeImpl { fn_: fn_imply }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_imply }.build()
 }
 
 fn fn_imply(cfg: &mut Cfg, input: Val) -> Val {

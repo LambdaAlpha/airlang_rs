@@ -2,14 +2,13 @@ use std::mem::swap;
 
 use const_format::concatcp;
 
-use super::ConstImpl;
-use super::ImplExtra;
-use super::MutImpl;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
+use crate::semantics::func::CtxConstInputFreeFunc;
+use crate::semantics::func::CtxMutInputEvalFunc;
 use crate::semantics::val::PAIR;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -48,21 +47,18 @@ impl CfgMod for PairLib {
 }
 
 pub fn get_left() -> PrimFuncVal {
-    ConstImpl { fn_: fn_get_left }.build(ImplExtra { raw_input: false })
+    CtxConstInputFreeFunc { fn_: fn_get_left }.build()
 }
 
-fn fn_get_left(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+fn fn_get_left(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Pair(pair) = ctx else {
         return bug!(cfg, "{GET_LEFT}: expected context to be a pair, but got {ctx}");
     };
-    if !input.is_unit() {
-        return bug!(cfg, "{GET_LEFT}: expected input to be a unit, but got {input}");
-    }
     pair.left.clone()
 }
 
 pub fn set_left() -> PrimFuncVal {
-    MutImpl { fn_: fn_set_left }.build(ImplExtra { raw_input: false })
+    CtxMutInputEvalFunc { fn_: fn_set_left }.build()
 }
 
 fn fn_set_left(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
@@ -74,21 +70,18 @@ fn fn_set_left(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
 }
 
 pub fn get_right() -> PrimFuncVal {
-    ConstImpl { fn_: fn_get_right }.build(ImplExtra { raw_input: false })
+    CtxConstInputFreeFunc { fn_: fn_get_right }.build()
 }
 
-fn fn_get_right(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+fn fn_get_right(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Pair(pair) = ctx else {
         return bug!(cfg, "{GET_RIGHT}: expected context to be a pair, but got {ctx}");
     };
-    if !input.is_unit() {
-        return bug!(cfg, "{GET_RIGHT}: expected input to be a unit, but got {input}");
-    }
     pair.right.clone()
 }
 
 pub fn set_right() -> PrimFuncVal {
-    MutImpl { fn_: fn_set_right }.build(ImplExtra { raw_input: false })
+    CtxMutInputEvalFunc { fn_: fn_set_right }.build()
 }
 
 fn fn_set_right(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {

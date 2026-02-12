@@ -1,14 +1,13 @@
 use const_format::concatcp;
 
-use super::ConstImpl;
-use super::FreeImpl;
-use super::ImplExtra;
-use super::MutImpl;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
+use crate::semantics::func::CtxConstInputFreeFunc;
+use crate::semantics::func::CtxFreeInputEvalFunc;
+use crate::semantics::func::CtxMutInputEvalFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::TEXT;
 use crate::semantics::val::Val;
@@ -55,7 +54,7 @@ impl CfgMod for TextLib {
 }
 
 pub fn from_utf8() -> PrimFuncVal {
-    FreeImpl { fn_: fn_from_utf8 }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_from_utf8 }.build()
 }
 
 fn fn_from_utf8(cfg: &mut Cfg, input: Val) -> Val {
@@ -70,7 +69,7 @@ fn fn_from_utf8(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn into_utf8() -> PrimFuncVal {
-    FreeImpl { fn_: fn_into_utf8 }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_into_utf8 }.build()
 }
 
 fn fn_into_utf8(cfg: &mut Cfg, input: Val) -> Val {
@@ -83,22 +82,19 @@ fn fn_into_utf8(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn get_length() -> PrimFuncVal {
-    ConstImpl { fn_: fn_get_length }.build(ImplExtra { raw_input: false })
+    CtxConstInputFreeFunc { fn_: fn_get_length }.build()
 }
 
-fn fn_get_length(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+fn fn_get_length(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Text(text) = ctx else {
         return bug!(cfg, "{GET_LENGTH}: expected context to be a text, but got {ctx}");
     };
-    if !input.is_unit() {
-        return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input}");
-    }
     let len: Int = text.len().into();
     Val::Int(len.into())
 }
 
 pub fn push() -> PrimFuncVal {
-    MutImpl { fn_: fn_push }.build(ImplExtra { raw_input: false })
+    CtxMutInputEvalFunc { fn_: fn_push }.build()
 }
 
 fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -114,7 +110,7 @@ fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 
 // todo design
 pub fn join() -> PrimFuncVal {
-    FreeImpl { fn_: fn_join }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_join }.build()
 }
 
 fn fn_join(cfg: &mut Cfg, input: Val) -> Val {

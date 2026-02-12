@@ -5,9 +5,10 @@ use crate::cfg::lib::func::NEW;
 use crate::cfg::utils::map_remove;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::func::CompCtx;
-use crate::semantics::func::CompFn;
 use crate::semantics::func::CompFunc;
+use crate::semantics::func::CompInput;
 use crate::semantics::func::PrimCtx;
+use crate::semantics::func::PrimInput;
 use crate::semantics::val::CompFuncVal;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::PrimFuncVal;
@@ -21,33 +22,29 @@ use crate::type_::Pair;
 // todo rename
 const CODE: &str = "code";
 const PRELUDE: &str = "prelude";
-const RAW_INPUT: &str = "raw_input";
-const CTX_FREE: &str = "context_free";
 const CTX_CONST: &str = "context_constant";
+const INPUT_RAW: &str = "input_raw";
 
-// todo design defaults
 pub(in crate::cfg) fn parse_func(cfg: &mut Cfg, input: Val) -> Option<FuncVal> {
     let Val::Map(mut map) = input else {
         bug!(cfg, "{NEW}: expected input to be a map, but got {input}");
         return None;
     };
-    let raw_input = parse_bit(RAW_INPUT, cfg, map_remove(&mut map, RAW_INPUT))?;
-    // todo design
     let CompCode { ctx_name, input_name, body } = parse_code(cfg, map_remove(&mut map, CODE))?;
     let prelude = map_remove(&mut map, PRELUDE);
-    let ctx_free = parse_bit(CTX_FREE, cfg, map_remove(&mut map, CTX_FREE))?;
-    let ctx = if ctx_free {
-        CompCtx::Free
-    } else {
-        let Some(name) = ctx_name else {
-            bug!(cfg, "{NEW}: mutable context function need a context name");
-            return None;
-        };
+    let ctx = if let Some(name) = ctx_name {
         let const_ = parse_bit(CTX_CONST, cfg, map_remove(&mut map, CTX_CONST))?;
         CompCtx::Default { name, const_ }
+    } else {
+        CompCtx::Free
     };
-    let comp = CompFn { prelude, body, input_name, ctx };
-    let func = CompFunc { raw_input, fn_: comp };
+    let input = if let Some(name) = input_name {
+        let raw = parse_bit(INPUT_RAW, cfg, map_remove(&mut map, INPUT_RAW))?;
+        CompInput::Default { name, raw }
+    } else {
+        CompInput::Free
+    };
+    let func = CompFunc { prelude, body, ctx, input };
     let func = FuncVal::Comp(CompFuncVal::from(func));
     Some(func)
 }
@@ -72,64 +69,47 @@ pub(in crate::cfg) fn generate_func(f: FuncVal) -> Val {
 
 struct CompCode {
     ctx_name: Option<Key>,
-    input_name: Key,
+    input_name: Option<Key>,
     body: Val,
 }
 
 fn parse_code(cfg: &mut Cfg, code: Val) -> Option<CompCode> {
-    let code = match code {
-        Val::Unit(_) => CompCode {
-            ctx_name: Some(Key::default()),
-            input_name: Key::default(),
-            body: Val::default(),
-        },
-        Val::Pair(names_body) => {
-            let names_body = Pair::from(names_body);
-            match names_body.left {
-                Val::Pair(ctx_input) => {
-                    let Val::Key(ctx) = &ctx_input.left else {
-                        bug!(
-                            cfg,
-                            "{NEW}: expected context name to be a key, but got {}",
-                            ctx_input.left
-                        );
-                        return None;
-                    };
-                    let Val::Key(input) = &ctx_input.right else {
-                        bug!(
-                            cfg,
-                            "{NEW}: expected input name to be a key, but got {}",
-                            ctx_input.right
-                        );
-                        return None;
-                    };
-                    CompCode {
-                        ctx_name: Some(ctx.clone()),
-                        input_name: input.clone(),
-                        body: names_body.right,
-                    }
-                },
-                Val::Key(input) => {
-                    CompCode { ctx_name: None, input_name: input, body: names_body.right }
-                },
-                v => {
-                    bug!(cfg, "{NEW}: expected names to be a key or a pair of key, but got {v}");
-                    return None;
-                },
-            }
-        },
-        v => {
-            bug!(cfg, "{NEW}: expected {CODE} to be a pair or a unit, but got {v}");
+    let Val::Pair(names_body) = code else {
+        bug!(cfg, "{NEW}: expected {CODE} to be a pair, but got {code}");
+        return None;
+    };
+    let names_body = Pair::from(names_body);
+    let ctx_input = names_body.left;
+    let body = names_body.right;
+    let Val::Pair(ctx_input) = ctx_input else {
+        bug!(cfg, "{NEW}: expected names to be a pair, but got {ctx_input}");
+        return None;
+    };
+    let ctx = &ctx_input.left;
+    let ctx_name = match ctx {
+        Val::Key(ctx) => Some(ctx.clone()),
+        Val::Unit(_) => None,
+        _ => {
+            bug!(cfg, "{NEW}: expected context name to be a key or a unit, but got {ctx}");
             return None;
         },
     };
-    Some(code)
+    let input = &ctx_input.right;
+    let input_name = match input {
+        Val::Key(input) => Some(input.clone()),
+        Val::Unit(_) => None,
+        _ => {
+            bug!(cfg, "{NEW}: expected input name to be a key or a unit, but got {input}");
+            return None;
+        },
+    };
+    Some(CompCode { ctx_name, input_name, body })
 }
 
 pub(in crate::cfg) fn generate_code(func: &FuncVal) -> Val {
     match func {
         FuncVal::Prim(f) => prim_code(&f.fn_),
-        FuncVal::Comp(f) => comp_code(&f.fn_),
+        FuncVal::Comp(f) => comp_code(f),
     }
 }
 
@@ -139,56 +119,46 @@ fn prim_code<T: ?Sized>(fn_: &Rc<T>) -> Val {
     Val::Int(int.into())
 }
 
-fn comp_code(comp: &CompFn) -> Val {
-    let input = Val::Key(comp.input_name.clone());
-    let names = if let CompCtx::Default { name, .. } = &comp.ctx {
-        let ctx = Val::Key(name.clone());
-        Val::Pair(Pair::new(ctx, input).into())
-    } else {
-        input
+fn comp_code(comp: &CompFunc) -> Val {
+    let ctx = match &comp.ctx {
+        CompCtx::Free => Val::default(),
+        CompCtx::Default { name, .. } => Val::Key(name.clone()),
     };
+    let input = match &comp.input {
+        CompInput::Free => Val::default(),
+        CompInput::Default { name, .. } => Val::Key(name.clone()),
+    };
+    let names = Val::Pair(Pair::new(ctx, input).into());
     Val::Pair(Pair::new(names, comp.body.clone()).into())
 }
 
 fn generate_prim(f: PrimFuncVal) -> Val {
-    prim(PrimRepr {
-        common: CommonRepr { ctx: f.ctx, raw_input: f.raw_input, code: prim_code(&f.fn_) },
-    })
+    prim(PrimRepr { common: CommonRepr { ctx: f.ctx, input: f.input, code: prim_code(&f.fn_) } })
 }
 
 fn generate_comp(f: CompFuncVal) -> Val {
     comp(CompRepr {
         common: CommonRepr {
-            ctx: f.fn_.ctx.to_prim_ctx(),
-            raw_input: f.raw_input,
-            code: comp_code(&f.fn_),
+            ctx: f.ctx.to_prim_ctx(),
+            input: f.input.to_prim_input(),
+            code: comp_code(&f),
         },
-        prelude: f.fn_.prelude.clone(),
+        prelude: f.prelude.clone(),
     })
 }
 
 struct CommonRepr {
     ctx: PrimCtx,
-    raw_input: bool,
+    input: PrimInput,
     code: Val,
 }
 
 fn generate_common(repr: &mut Map<Key, Val>, common: CommonRepr) {
-    repr.insert(Key::from_str_unchecked(RAW_INPUT), Val::Bit(Bit::from(common.raw_input)));
     repr.insert(Key::from_str_unchecked(CODE), common.code);
-    match common.ctx {
-        PrimCtx::Free => {
-            repr.insert(Key::from_str_unchecked(CTX_FREE), Val::Bit(Bit::true_()));
-        },
-        PrimCtx::Const_ => {
-            repr.insert(Key::from_str_unchecked(CTX_FREE), Val::Bit(Bit::false_()));
-            repr.insert(Key::from_str_unchecked(CTX_CONST), Val::Bit(Bit::true_()));
-        },
-        PrimCtx::Mut => {
-            repr.insert(Key::from_str_unchecked(CTX_FREE), Val::Bit(Bit::false_()));
-            repr.insert(Key::from_str_unchecked(CTX_CONST), Val::Bit(Bit::false_()));
-        },
-    }
+    let const_ = !matches!(common.ctx, PrimCtx::Mut);
+    repr.insert(Key::from_str_unchecked(CTX_CONST), Val::Bit(Bit::from(const_)));
+    let raw = !matches!(common.input, PrimInput::Eval);
+    repr.insert(Key::from_str_unchecked(INPUT_RAW), Val::Bit(Bit::from(raw)));
 }
 
 struct PrimRepr {

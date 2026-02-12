@@ -3,14 +3,15 @@ use std::mem::swap;
 use const_format::concatcp;
 use num_traits::ToPrimitive;
 
-use super::ConstImpl;
-use super::ImplExtra;
-use super::MutImpl;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
+use crate::semantics::func::CtxConstInputEvalFunc;
+use crate::semantics::func::CtxConstInputFreeFunc;
+use crate::semantics::func::CtxMutInputEvalFunc;
+use crate::semantics::func::CtxMutInputFreeFunc;
 use crate::semantics::val::LIST;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -93,22 +94,19 @@ impl CfgMod for ListLib {
 }
 
 pub fn get_length() -> PrimFuncVal {
-    ConstImpl { fn_: fn_get_length }.build(ImplExtra { raw_input: false })
+    CtxConstInputFreeFunc { fn_: fn_get_length }.build()
 }
 
-fn fn_get_length(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+fn fn_get_length(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::List(list) = ctx else {
         return bug!(cfg, "{GET_LENGTH}: expected context to be a list, but got {ctx}");
     };
-    if !input.is_unit() {
-        return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input}");
-    }
     let len: Int = list.len().into();
     Val::Int(len.into())
 }
 
 pub fn set() -> PrimFuncVal {
-    MutImpl { fn_: fn_set }.build(ImplExtra { raw_input: false })
+    CtxMutInputEvalFunc { fn_: fn_set }.build()
 }
 
 fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -132,7 +130,7 @@ fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn set_many() -> PrimFuncVal {
-    MutImpl { fn_: fn_set_many }.build(ImplExtra { raw_input: false })
+    CtxMutInputEvalFunc { fn_: fn_set_many }.build()
 }
 
 fn fn_set_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -164,7 +162,7 @@ fn fn_set_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn get() -> PrimFuncVal {
-    ConstImpl { fn_: fn_get }.build(ImplExtra { raw_input: false })
+    CtxConstInputEvalFunc { fn_: fn_get }.build()
 }
 
 fn fn_get(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
@@ -181,7 +179,7 @@ fn fn_get(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
 }
 
 pub fn get_many() -> PrimFuncVal {
-    ConstImpl { fn_: fn_get_many }.build(ImplExtra { raw_input: false })
+    CtxConstInputEvalFunc { fn_: fn_get_many }.build()
 }
 
 fn fn_get_many(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
@@ -204,7 +202,7 @@ fn fn_get_many(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
 }
 
 pub fn insert() -> PrimFuncVal {
-    MutImpl { fn_: fn_insert }.build(ImplExtra { raw_input: false })
+    CtxMutInputEvalFunc { fn_: fn_insert }.build()
 }
 
 fn fn_insert(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -228,7 +226,7 @@ fn fn_insert(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn insert_many() -> PrimFuncVal {
-    MutImpl { fn_: fn_insert_many }.build(ImplExtra { raw_input: false })
+    CtxMutInputEvalFunc { fn_: fn_insert_many }.build()
 }
 
 fn fn_insert_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -259,7 +257,7 @@ fn fn_insert_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn remove() -> PrimFuncVal {
-    MutImpl { fn_: fn_remove }.build(ImplExtra { raw_input: false })
+    CtxMutInputEvalFunc { fn_: fn_remove }.build()
 }
 
 fn fn_remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -276,7 +274,7 @@ fn fn_remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn remove_many() -> PrimFuncVal {
-    MutImpl { fn_: fn_remove_many }.build(ImplExtra { raw_input: false })
+    CtxMutInputEvalFunc { fn_: fn_remove_many }.build()
 }
 
 fn fn_remove_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -300,7 +298,7 @@ fn fn_remove_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn push() -> PrimFuncVal {
-    MutImpl { fn_: fn_push }.build(ImplExtra { raw_input: false })
+    CtxMutInputEvalFunc { fn_: fn_push }.build()
 }
 
 fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -312,7 +310,7 @@ fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn push_many() -> PrimFuncVal {
-    MutImpl { fn_: fn_push_many }.build(ImplExtra { raw_input: false })
+    CtxMutInputEvalFunc { fn_: fn_push_many }.build()
 }
 
 fn fn_push_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -327,15 +325,12 @@ fn fn_push_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn pop() -> PrimFuncVal {
-    MutImpl { fn_: fn_pop }.build(ImplExtra { raw_input: false })
+    CtxMutInputFreeFunc { fn_: fn_pop }.build()
 }
 
-fn fn_pop(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+fn fn_pop(cfg: &mut Cfg, ctx: &mut Val) -> Val {
     let Val::List(list) = ctx else {
         return bug!(cfg, "{POP}: expected context to be a list, but got {ctx}");
-    };
-    let Val::Unit(_) = input else {
-        return bug!(cfg, "{POP}: expected input to be a unit, but got {input}");
     };
     let Some(val) = list.pop() else {
         return bug!(cfg, "{POP}: expected list to be non-empty");
@@ -344,7 +339,7 @@ fn fn_pop(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn pop_many() -> PrimFuncVal {
-    MutImpl { fn_: fn_pop_many }.build(ImplExtra { raw_input: false })
+    CtxMutInputEvalFunc { fn_: fn_pop_many }.build()
 }
 
 fn fn_pop_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -368,16 +363,13 @@ fn fn_pop_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn clear() -> PrimFuncVal {
-    MutImpl { fn_: fn_clear }.build(ImplExtra { raw_input: false })
+    CtxMutInputFreeFunc { fn_: fn_clear }.build()
 }
 
-fn fn_clear(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+fn fn_clear(cfg: &mut Cfg, ctx: &mut Val) -> Val {
     let Val::List(list) = ctx else {
         return bug!(cfg, "{CLEAR}: expected context to be a list, but got {ctx}");
     };
-    if !input.is_unit() {
-        return bug!(cfg, "{CLEAR}: expected input to be a unit, but got {input}");
-    }
     list.clear();
     Val::default()
 }

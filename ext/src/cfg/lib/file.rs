@@ -1,10 +1,9 @@
 use airlang::bug;
 use airlang::cfg::CfgMod;
 use airlang::cfg::extend_func;
-use airlang::cfg::lib::FreeImpl;
-use airlang::cfg::lib::ImplExtra;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_ID;
+use airlang::semantics::func::CtxFreeInputEvalFunc;
 use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Text;
@@ -32,7 +31,7 @@ impl CfgMod for FileLib {
 }
 
 pub fn read_to_text() -> PrimFuncVal {
-    FreeImpl { fn_: fn_read_to_text }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_read_to_text }.build()
 }
 
 fn fn_read_to_text(cfg: &mut Cfg, input: Val) -> Val {

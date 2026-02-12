@@ -1,14 +1,13 @@
 use const_format::concatcp;
 
-use super::ConstImpl;
-use super::FreeImpl;
-use super::ImplExtra;
-use super::MutImpl;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
+use crate::semantics::func::CtxConstInputFreeFunc;
+use crate::semantics::func::CtxFreeInputEvalFunc;
+use crate::semantics::func::CtxMutInputEvalFunc;
 use crate::semantics::val::BYTE;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -43,22 +42,19 @@ impl CfgMod for ByteLib {
 }
 
 pub fn get_length() -> PrimFuncVal {
-    ConstImpl { fn_: fn_get_length }.build(ImplExtra { raw_input: false })
+    CtxConstInputFreeFunc { fn_: fn_get_length }.build()
 }
 
-fn fn_get_length(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+fn fn_get_length(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Byte(byte) = ctx else {
         return bug!(cfg, "{GET_LENGTH}: expected context to be a byte, but got {ctx}");
     };
-    if !input.is_unit() {
-        return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input}");
-    }
     let len: Int = byte.len().into();
     Val::Int(len.into())
 }
 
 pub fn push() -> PrimFuncVal {
-    MutImpl { fn_: fn_push }.build(ImplExtra { raw_input: false })
+    CtxMutInputEvalFunc { fn_: fn_push }.build()
 }
 
 fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -74,7 +70,7 @@ fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 
 // todo design
 pub fn join() -> PrimFuncVal {
-    FreeImpl { fn_: fn_join }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_join }.build()
 }
 
 fn fn_join(cfg: &mut Cfg, input: Val) -> Val {

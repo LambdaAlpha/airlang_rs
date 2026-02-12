@@ -2,14 +2,14 @@ use std::ops::DerefMut;
 
 use const_format::concatcp;
 
-use super::FreeImpl;
-use super::ImplExtra;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
+use crate::semantics::func::CtxFreeInputEvalFunc;
 use crate::semantics::func::DynFunc;
+use crate::semantics::func::PrimCtx;
 use crate::semantics::val::LINK;
 use crate::semantics::val::LinkVal;
 use crate::semantics::val::PrimFuncVal;
@@ -52,7 +52,7 @@ impl CfgMod for LinkLib {
 }
 
 pub fn new() -> PrimFuncVal {
-    FreeImpl { fn_: fn_new }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_new }.build()
 }
 
 fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
@@ -60,7 +60,7 @@ fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn new_constant() -> PrimFuncVal {
-    FreeImpl { fn_: fn_new_constant }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_new_constant }.build()
 }
 
 fn fn_new_constant(_cfg: &mut Cfg, input: Val) -> Val {
@@ -68,7 +68,7 @@ fn fn_new_constant(_cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn is_constant() -> PrimFuncVal {
-    FreeImpl { fn_: fn_is_constant }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_is_constant }.build()
 }
 
 fn fn_is_constant(cfg: &mut Cfg, input: Val) -> Val {
@@ -79,7 +79,7 @@ fn fn_is_constant(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn which() -> PrimFuncVal {
-    FreeImpl { fn_: fn_which }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_which }.build()
 }
 
 fn fn_which(cfg: &mut Cfg, input: Val) -> Val {
@@ -102,7 +102,7 @@ fn fn_which(cfg: &mut Cfg, input: Val) -> Val {
         );
     };
     // todo design support control flow
-    if link.is_const() && !func.is_const() {
+    if link.is_const() && matches!(func.ctx(), PrimCtx::Mut) {
         return bug!(
             cfg,
             "{WHICH}: expected input.right.left to be a context-constant function, but got {func}"

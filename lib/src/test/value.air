@@ -270,7 +270,9 @@ _link
 get_type function
 -----
 _ do [
-    .a set _ function {},
+    .a set _ function {
+        code : (. : .) : .,
+    },
     .a which get_type : .
 ]
 -----
@@ -368,8 +370,12 @@ true
 == function
 -----
 _ do [
-    .a set _ function {},
-    .b set _ function {},
+    .a set _ function {
+        code : (. : .) : .,
+    },
+    .b set _ function {
+        code : (. : .) : .,
+    },
     (a == b) and _ not a == .
 ]
 -----

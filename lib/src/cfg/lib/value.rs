@@ -7,14 +7,13 @@ _____!();
 use rand::SeedableRng;
 use rand::prelude::SmallRng;
 
-use super::ConstImpl;
-use super::FreeImpl;
-use super::ImplExtra;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
+use crate::semantics::func::CtxConstInputFreeFunc;
+use crate::semantics::func::CtxFreeInputEvalFunc;
 use crate::semantics::val::BIT;
 use crate::semantics::val::BYTE;
 use crate::semantics::val::CALL;
@@ -93,7 +92,7 @@ const TYPE_FUNC: &str = concatcp!(PREFIX_ID, FUNC);
 
 // todo design pick value from cfg or ctx
 pub fn any() -> PrimFuncVal {
-    FreeImpl { fn_: fn_any }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_any }.build()
 }
 
 fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
@@ -125,13 +124,10 @@ fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn get_type() -> PrimFuncVal {
-    ConstImpl { fn_: fn_get_type }.build(ImplExtra { raw_input: false })
+    CtxConstInputFreeFunc { fn_: fn_get_type }.build()
 }
 
-fn fn_get_type(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
-    if !input.is_unit() {
-        return bug!(cfg, "{GET_TYPE}: expected input to be a unit, but got {input}");
-    }
+fn fn_get_type(_cfg: &mut Cfg, ctx: &Val) -> Val {
     let s = match ctx {
         Val::Unit(_) => TYPE_UNIT,
         Val::Bit(_) => TYPE_BIT,
@@ -155,7 +151,7 @@ fn fn_get_type(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
 
 // todo design
 pub fn equal() -> PrimFuncVal {
-    FreeImpl { fn_: fn_equal }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_equal }.build()
 }
 
 fn fn_equal(cfg: &mut Cfg, input: Val) -> Val {

@@ -6,11 +6,11 @@ use std::io::stdout;
 use airlang::bug;
 use airlang::cfg::CfgMod;
 use airlang::cfg::extend_func;
-use airlang::cfg::lib::FreeImpl;
-use airlang::cfg::lib::ImplExtra;
-use airlang::cfg::lib::MutImpl;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_ID;
+use airlang::semantics::func::CtxFreeInputEvalFunc;
+use airlang::semantics::func::CtxFreeInputFreeFunc;
+use airlang::semantics::func::CtxMutInputFreeFunc;
 use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
 use const_format::concatcp;
@@ -64,22 +64,19 @@ impl CfgMod for IoLib {
 }
 
 pub fn read_line() -> PrimFuncVal {
-    MutImpl { fn_: fn_read_line }.build(ImplExtra { raw_input: false })
+    CtxMutInputFreeFunc { fn_: fn_read_line }.build()
 }
 
-fn fn_read_line(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+fn fn_read_line(cfg: &mut Cfg, ctx: &mut Val) -> Val {
     let Val::Text(t) = ctx else {
         return bug!(cfg, "{READ_LINE}: expected context to be a text, but got {ctx}");
     };
-    if !input.is_unit() {
-        return bug!(cfg, "{READ_LINE}: expected input to be a unit, but got {input}");
-    }
     let _ = stdin().read_line(t);
     Val::default()
 }
 
 pub fn print() -> PrimFuncVal {
-    FreeImpl { fn_: fn_print }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_print }.build()
 }
 
 fn fn_print(cfg: &mut Cfg, input: Val) -> Val {
@@ -91,7 +88,7 @@ fn fn_print(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn print_line() -> PrimFuncVal {
-    FreeImpl { fn_: fn_print_line }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_print_line }.build()
 }
 
 fn fn_print_line(cfg: &mut Cfg, input: Val) -> Val {
@@ -103,19 +100,16 @@ fn fn_print_line(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn flush() -> PrimFuncVal {
-    FreeImpl { fn_: fn_flush }.build(ImplExtra { raw_input: false })
+    CtxFreeInputFreeFunc { fn_: fn_flush }.build()
 }
 
-fn fn_flush(cfg: &mut Cfg, input: Val) -> Val {
-    if !input.is_unit() {
-        return bug!(cfg, "{FLUSH}: expected input to be a unit, but got {input}");
-    }
+fn fn_flush(_cfg: &mut Cfg) -> Val {
     let _ = stdout().flush();
     Val::default()
 }
 
 pub fn error_print() -> PrimFuncVal {
-    FreeImpl { fn_: fn_error_print }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_error_print }.build()
 }
 
 fn fn_error_print(cfg: &mut Cfg, input: Val) -> Val {
@@ -127,7 +121,7 @@ fn fn_error_print(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn error_print_line() -> PrimFuncVal {
-    FreeImpl { fn_: fn_error_print_line }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_error_print_line }.build()
 }
 
 fn fn_error_print_line(cfg: &mut Cfg, input: Val) -> Val {
@@ -139,13 +133,10 @@ fn fn_error_print_line(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn error_flush() -> PrimFuncVal {
-    FreeImpl { fn_: fn_error_flush }.build(ImplExtra { raw_input: false })
+    CtxFreeInputFreeFunc { fn_: fn_error_flush }.build()
 }
 
-fn fn_error_flush(cfg: &mut Cfg, input: Val) -> Val {
-    if !input.is_unit() {
-        return bug!(cfg, "{ERROR_FLUSH}: expected input to be a unit, but got {input}");
-    }
+fn fn_error_flush(_cfg: &mut Cfg) -> Val {
     let _ = stderr().flush();
     Val::default()
 }

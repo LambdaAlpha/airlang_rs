@@ -11,8 +11,8 @@ use rand::prelude::Distribution;
 
 use crate::semantics::cfg::Cfg;
 use crate::semantics::func::CompCtx;
-use crate::semantics::func::CompFn;
 use crate::semantics::func::CompFunc;
+use crate::semantics::func::CompInput;
 use crate::semantics::val::CompFuncVal;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::LinkVal;
@@ -271,7 +271,7 @@ impl Arbitrary for FuncVal {
     }
 }
 
-impl Arbitrary for CompFn {
+impl Arbitrary for CompFuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
         let ctx = if rng.random() {
@@ -279,19 +279,17 @@ impl Arbitrary for CompFn {
         } else {
             CompCtx::Free
         };
-        CompFn {
+        let input = if rng.random() {
+            CompInput::Default { name: Arbitrary::any(rng, depth), raw: rng.random() }
+        } else {
+            CompInput::Free
+        };
+        let func = CompFunc {
             prelude: Arbitrary::any(rng, depth),
             body: Arbitrary::any(rng, depth),
-            input_name: Arbitrary::any(rng, depth),
+            input,
             ctx,
-        }
-    }
-}
-
-impl Arbitrary for CompFuncVal {
-    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let depth = depth + 1;
-        let func = CompFunc { raw_input: rng.random(), fn_: Arbitrary::any(rng, depth) };
+        };
         CompFuncVal::from(func)
     }
 }

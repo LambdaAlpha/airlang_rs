@@ -5,9 +5,6 @@ use const_format::concatcp;
 use self::pattern::PatternAssign;
 use self::pattern::PatternMatch;
 use self::pattern::PatternParse;
-use super::ConstImpl;
-use super::ImplExtra;
-use super::MutImpl;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
@@ -15,9 +12,13 @@ use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Form;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::ctx::DynCtx;
+use crate::semantics::func::CtxConstInputEvalFunc;
+use crate::semantics::func::CtxConstInputFreeFunc;
+use crate::semantics::func::CtxMutInputEvalFunc;
 use crate::semantics::func::DynFunc;
 use crate::semantics::func::PrimCtx;
 use crate::semantics::func::PrimFunc;
+use crate::semantics::func::PrimInput;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Pair;
@@ -66,7 +67,7 @@ impl CfgMod for CtxLib {
 }
 
 pub fn get() -> PrimFuncVal {
-    ConstImpl { fn_: fn_get }.build(ImplExtra { raw_input: false })
+    CtxConstInputEvalFunc { fn_: fn_get }.build()
 }
 
 fn fn_get(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
@@ -77,7 +78,7 @@ fn fn_get(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
 }
 
 pub fn set() -> PrimFuncVal {
-    MutImpl { fn_: fn_set }.build(ImplExtra { raw_input: false })
+    CtxMutInputEvalFunc { fn_: fn_set }.build()
 }
 
 fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -90,11 +91,11 @@ fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn form() -> PrimFuncVal {
-    PrimFunc { raw_input: true, fn_: Rc::new(Form), ctx: PrimCtx::Const_ }.into()
+    PrimFunc { fn_: Rc::new(Form), ctx: PrimCtx::Const_, input: PrimInput::Raw }.into()
 }
 
 pub fn represent() -> PrimFuncVal {
-    MutImpl { fn_: fn_represent }.build(ImplExtra { raw_input: false })
+    CtxMutInputEvalFunc { fn_: fn_represent }.build()
 }
 
 fn fn_represent(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -114,18 +115,15 @@ fn fn_represent(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn self_() -> PrimFuncVal {
-    ConstImpl { fn_: fn_self }.build(ImplExtra { raw_input: false })
+    CtxConstInputFreeFunc { fn_: fn_self }.build()
 }
 
-fn fn_self(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
-    if !input.is_unit() {
-        return bug!(cfg, "{SELF}: expected input to be a unit, but got {input}");
-    }
+fn fn_self(_cfg: &mut Cfg, ctx: &Val) -> Val {
     ctx.clone()
 }
 
 pub fn which() -> PrimFuncVal {
-    MutImpl { fn_: fn_which }.build(ImplExtra { raw_input: false })
+    CtxMutInputEvalFunc { fn_: fn_which }.build()
 }
 
 fn fn_which(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {

@@ -2,9 +2,6 @@ use std::rc::Rc;
 
 use const_format::concatcp;
 
-use super::ConstImpl;
-use super::FreeImpl;
-use super::ImplExtra;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
@@ -13,9 +10,12 @@ use crate::cfg::repr::func::generate_func;
 use crate::cfg::repr::func::parse_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
+use crate::semantics::func::CtxConstInputFreeFunc;
+use crate::semantics::func::CtxFreeInputEvalFunc;
 use crate::semantics::func::DynFunc;
 use crate::semantics::func::PrimCtx;
 use crate::semantics::func::PrimFunc;
+use crate::semantics::func::PrimInput;
 use crate::semantics::val::FUNC;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::PrimFuncVal;
@@ -30,7 +30,8 @@ pub struct FuncLib {
     pub apply: PrimFuncVal,
     pub is_context_free: PrimFuncVal,
     pub is_context_constant: PrimFuncVal,
-    pub is_raw_input: PrimFuncVal,
+    pub is_input_free: PrimFuncVal,
+    pub is_input_raw: PrimFuncVal,
     pub is_primitive: PrimFuncVal,
     pub get_code: PrimFuncVal,
     pub get_prelude: PrimFuncVal,
@@ -41,7 +42,8 @@ pub const REPRESENT: &str = concatcp!(PREFIX_ID, FUNC, ".represent");
 pub const APPLY: &str = concatcp!(PREFIX_ID, FUNC, ".apply");
 pub const IS_CONTEXT_FREE: &str = concatcp!(PREFIX_ID, FUNC, ".is_context_free");
 pub const IS_CONTEXT_CONSTANT: &str = concatcp!(PREFIX_ID, FUNC, ".is_context_constant");
-pub const IS_RAW_INPUT: &str = concatcp!(PREFIX_ID, FUNC, ".is_raw_input");
+pub const IS_INPUT_FREE: &str = concatcp!(PREFIX_ID, FUNC, ".is_input_free");
+pub const IS_INPUT_RAW: &str = concatcp!(PREFIX_ID, FUNC, ".is_input_raw");
 pub const IS_PRIMITIVE: &str = concatcp!(PREFIX_ID, FUNC, ".is_primitive");
 pub const GET_CODE: &str = concatcp!(PREFIX_ID, FUNC, ".get_code");
 pub const GET_PRELUDE: &str = concatcp!(PREFIX_ID, FUNC, ".get_prelude");
@@ -54,7 +56,8 @@ impl Default for FuncLib {
             apply: apply(),
             is_context_free: is_context_free(),
             is_context_constant: is_context_constant(),
-            is_raw_input: is_raw_input(),
+            is_input_free: is_input_free(),
+            is_input_raw: is_input_raw(),
             is_primitive: is_primitive(),
             get_code: get_code(),
             get_prelude: get_prelude(),
@@ -69,7 +72,8 @@ impl CfgMod for FuncLib {
         extend_func(cfg, APPLY, self.apply);
         extend_func(cfg, IS_CONTEXT_FREE, self.is_context_free);
         extend_func(cfg, IS_CONTEXT_CONSTANT, self.is_context_constant);
-        extend_func(cfg, IS_RAW_INPUT, self.is_raw_input);
+        extend_func(cfg, IS_INPUT_FREE, self.is_input_free);
+        extend_func(cfg, IS_INPUT_RAW, self.is_input_raw);
         extend_func(cfg, IS_PRIMITIVE, self.is_primitive);
         extend_func(cfg, GET_CODE, self.get_code);
         extend_func(cfg, GET_PRELUDE, self.get_prelude);
@@ -77,7 +81,7 @@ impl CfgMod for FuncLib {
 }
 
 pub fn new() -> PrimFuncVal {
-    FreeImpl { fn_: fn_new }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_new }.build()
 }
 
 fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
@@ -88,7 +92,7 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn represent() -> PrimFuncVal {
-    FreeImpl { fn_: fn_represent }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_represent }.build()
 }
 
 fn fn_represent(cfg: &mut Cfg, input: Val) -> Val {
@@ -99,7 +103,7 @@ fn fn_represent(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn apply() -> PrimFuncVal {
-    PrimFunc { raw_input: false, fn_: Rc::new(Apply), ctx: PrimCtx::Mut }.into()
+    PrimFunc { fn_: Rc::new(Apply), ctx: PrimCtx::Mut, input: PrimInput::Eval }.into()
 }
 
 struct Apply;
@@ -130,90 +134,83 @@ fn func_input(cfg: &mut Cfg, input: Val) -> Result<(FuncVal, Val), Val> {
 }
 
 pub fn is_context_free() -> PrimFuncVal {
-    ConstImpl { fn_: fn_is_context_free }.build(ImplExtra { raw_input: false })
+    CtxConstInputFreeFunc { fn_: fn_is_context_free }.build()
 }
 
-fn fn_is_context_free(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+fn fn_is_context_free(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Func(func) = ctx else {
         return bug!(cfg, "{IS_CONTEXT_FREE}: expected context to be a function, but got {ctx}");
     };
-    if !input.is_unit() {
-        return bug!(cfg, "{IS_CONTEXT_FREE}: expected input to be a unit, but got {input}");
-    }
-    Val::Bit(Bit::from(func.is_free()))
+    Val::Bit(Bit::from(matches!(func.ctx(), PrimCtx::Free)))
 }
 
 pub fn is_context_constant() -> PrimFuncVal {
-    ConstImpl { fn_: fn_is_context_constant }.build(ImplExtra { raw_input: false })
+    CtxConstInputFreeFunc { fn_: fn_is_context_constant }.build()
 }
 
-fn fn_is_context_constant(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+fn fn_is_context_constant(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Func(func) = ctx else {
         return bug!(
             cfg,
             "{IS_CONTEXT_CONSTANT}: expected context to be a function, but got {ctx}"
         );
     };
-    if !input.is_unit() {
-        return bug!(cfg, "{IS_CONTEXT_CONSTANT}: expected input to be a unit, but got {input}");
-    }
-    Val::Bit(Bit::from(func.is_const()))
+    Val::Bit(Bit::from(!matches!(func.ctx(), PrimCtx::Mut)))
 }
 
-pub fn is_raw_input() -> PrimFuncVal {
-    ConstImpl { fn_: fn_is_raw_input }.build(ImplExtra { raw_input: false })
+pub fn is_input_free() -> PrimFuncVal {
+    CtxConstInputFreeFunc { fn_: fn_is_input_free }.build()
 }
 
-fn fn_is_raw_input(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+fn fn_is_input_free(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Func(func) = ctx else {
-        return bug!(cfg, "{IS_RAW_INPUT}: expected context to be a function, but got {ctx}");
+        return bug!(cfg, "{IS_INPUT_FREE}: expected context to be a function, but got {ctx}");
     };
-    if !input.is_unit() {
-        return bug!(cfg, "{IS_RAW_INPUT}: expected input to be a unit, but got {input}");
-    }
-    Val::Bit(Bit::from(func.raw_input()))
+    Val::Bit(Bit::from(matches!(func.input(), PrimInput::Free)))
+}
+
+pub fn is_input_raw() -> PrimFuncVal {
+    CtxConstInputFreeFunc { fn_: fn_is_input_raw }.build()
+}
+
+fn fn_is_input_raw(cfg: &mut Cfg, ctx: &Val) -> Val {
+    let Val::Func(func) = ctx else {
+        return bug!(cfg, "{IS_INPUT_RAW}: expected context to be a function, but got {ctx}");
+    };
+    Val::Bit(Bit::from(!matches!(func.input(), PrimInput::Eval)))
 }
 
 pub fn is_primitive() -> PrimFuncVal {
-    ConstImpl { fn_: fn_is_primitive }.build(ImplExtra { raw_input: false })
+    CtxConstInputFreeFunc { fn_: fn_is_primitive }.build()
 }
 
-fn fn_is_primitive(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+fn fn_is_primitive(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Func(func) = ctx else {
         return bug!(cfg, "{IS_PRIMITIVE}: expected context to be a function, but got {ctx}");
     };
-    if !input.is_unit() {
-        return bug!(cfg, "{IS_PRIMITIVE}: expected input to be a unit, but got {input}");
-    }
     let is_primitive = func.is_primitive();
     Val::Bit(Bit::from(is_primitive))
 }
 
 pub fn get_code() -> PrimFuncVal {
-    ConstImpl { fn_: fn_get_code }.build(ImplExtra { raw_input: false })
+    CtxConstInputFreeFunc { fn_: fn_get_code }.build()
 }
 
-fn fn_get_code(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+fn fn_get_code(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Func(func) = ctx else {
         return bug!(cfg, "{GET_CODE}: expected context to be a function, but got {ctx}");
     };
-    if !input.is_unit() {
-        return bug!(cfg, "{GET_CODE}: expected input to be a unit, but got {input}");
-    }
     generate_code(func)
 }
 
 pub fn get_prelude() -> PrimFuncVal {
-    ConstImpl { fn_: fn_get_prelude }.build(ImplExtra { raw_input: false })
+    CtxConstInputFreeFunc { fn_: fn_get_prelude }.build()
 }
 
-fn fn_get_prelude(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+fn fn_get_prelude(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Func(func) = ctx else {
         return bug!(cfg, "{GET_PRELUDE}: expected context to be a function, but got {ctx}");
     };
-    if !input.is_unit() {
-        return bug!(cfg, "{GET_PRELUDE}: expected input to be a unit, but got {input}");
-    }
     let Some(ctx) = func.prelude() else {
         return bug!(cfg, "{GET_PRELUDE}: prelude not found");
     };

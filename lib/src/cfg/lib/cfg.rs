@@ -4,10 +4,6 @@ use std::panic::catch_unwind;
 
 use const_format::concatcp;
 
-use super::ConstImpl;
-use super::FreeImpl;
-use super::ImplExtra;
-use super::MutImpl;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::CoreCfg;
@@ -16,6 +12,10 @@ use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::ctx::DynCtx;
+use crate::semantics::func::CtxConstInputFreeFunc;
+use crate::semantics::func::CtxFreeInputEvalFunc;
+use crate::semantics::func::CtxFreeInputFreeFunc;
+use crate::semantics::func::CtxMutInputRawFunc;
 use crate::semantics::func::DynFunc;
 use crate::semantics::val::CFG;
 use crate::semantics::val::PrimFuncVal;
@@ -81,7 +81,7 @@ impl CfgMod for CfgLib {
 }
 
 pub fn new() -> PrimFuncVal {
-    FreeImpl { fn_: fn_new }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_new }.build()
 }
 
 fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
@@ -97,7 +97,7 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn represent() -> PrimFuncVal {
-    FreeImpl { fn_: fn_represent }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_represent }.build()
 }
 
 fn fn_represent(cfg: &mut Cfg, input: Val) -> Val {
@@ -108,7 +108,7 @@ fn fn_represent(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn exist() -> PrimFuncVal {
-    FreeImpl { fn_: fn_exist }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_exist }.build()
 }
 
 fn fn_exist(cfg: &mut Cfg, input: Val) -> Val {
@@ -120,7 +120,7 @@ fn fn_exist(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn import() -> PrimFuncVal {
-    FreeImpl { fn_: fn_import }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_import }.build()
 }
 
 fn fn_import(cfg: &mut Cfg, input: Val) -> Val {
@@ -134,7 +134,7 @@ fn fn_import(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn export() -> PrimFuncVal {
-    FreeImpl { fn_: fn_export }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_export }.build()
 }
 
 fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
@@ -152,21 +152,18 @@ fn fn_export(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn get_length() -> PrimFuncVal {
-    ConstImpl { fn_: fn_get_length }.build(ImplExtra { raw_input: false })
+    CtxConstInputFreeFunc { fn_: fn_get_length }.build()
 }
 
-fn fn_get_length(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+fn fn_get_length(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Cfg(new_cfg) = ctx else {
         return bug!(cfg, "{GET_LENGTH}: expected context to be a config, but got {ctx}");
     };
-    if !input.is_unit() {
-        return bug!(cfg, "{GET_LENGTH}: expected input to be a unit, but got {input}");
-    }
     Val::Int(Int::from(new_cfg.len()).into())
 }
 
 pub fn with() -> PrimFuncVal {
-    MutImpl { fn_: fn_with }.build(ImplExtra { raw_input: true })
+    CtxMutInputRawFunc { fn_: fn_with }.build()
 }
 
 fn fn_with(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -189,18 +186,15 @@ fn fn_with(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 pub fn self_() -> PrimFuncVal {
-    FreeImpl { fn_: fn_self }.build(ImplExtra { raw_input: false })
+    CtxFreeInputFreeFunc { fn_: fn_self }.build()
 }
 
-fn fn_self(cfg: &mut Cfg, input: Val) -> Val {
-    if !input.is_unit() {
-        return bug!(cfg, "{SELF}: expected input to be a unit, but got {input}");
-    }
+fn fn_self(cfg: &mut Cfg) -> Val {
     Val::Cfg(cfg.clone().into())
 }
 
 pub fn where_() -> PrimFuncVal {
-    MutImpl { fn_: fn_where }.build(ImplExtra { raw_input: true })
+    CtxMutInputRawFunc { fn_: fn_where }.build()
 }
 
 fn fn_where(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {

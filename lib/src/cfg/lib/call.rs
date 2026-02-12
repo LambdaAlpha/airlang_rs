@@ -2,15 +2,14 @@ use std::mem::swap;
 
 use const_format::concatcp;
 
-use super::ConstImpl;
-use super::FreeImpl;
-use super::ImplExtra;
-use super::MutImpl;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
+use crate::semantics::func::CtxConstInputFreeFunc;
+use crate::semantics::func::CtxFreeInputEvalFunc;
+use crate::semantics::func::CtxMutInputEvalFunc;
 use crate::semantics::val::CALL;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -55,7 +54,7 @@ impl CfgMod for CallLib {
 }
 
 pub fn new() -> PrimFuncVal {
-    FreeImpl { fn_: fn_new }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_new }.build()
 }
 
 fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
@@ -67,21 +66,18 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn get_function() -> PrimFuncVal {
-    ConstImpl { fn_: fn_get_function }.build(ImplExtra { raw_input: false })
+    CtxConstInputFreeFunc { fn_: fn_get_function }.build()
 }
 
-fn fn_get_function(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+fn fn_get_function(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Call(call) = ctx else {
         return bug!(cfg, "{GET_FUNCTION}: expected context to be a call, but got {ctx}");
     };
-    if !input.is_unit() {
-        return bug!(cfg, "{GET_FUNCTION}: expected input to be a unit, but got {input}");
-    }
     call.func.clone()
 }
 
 pub fn set_function() -> PrimFuncVal {
-    MutImpl { fn_: fn_set_function }.build(ImplExtra { raw_input: false })
+    CtxMutInputEvalFunc { fn_: fn_set_function }.build()
 }
 
 fn fn_set_function(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
@@ -93,21 +89,18 @@ fn fn_set_function(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
 }
 
 pub fn get_input() -> PrimFuncVal {
-    ConstImpl { fn_: fn_get_input }.build(ImplExtra { raw_input: false })
+    CtxConstInputFreeFunc { fn_: fn_get_input }.build()
 }
 
-fn fn_get_input(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+fn fn_get_input(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Call(call) = ctx else {
         return bug!(cfg, "{GET_INPUT}: expected context to be a call, but got {ctx}");
     };
-    if !input.is_unit() {
-        return bug!(cfg, "{GET_INPUT}: expected input to be a unit, but got {input}");
-    }
     call.input.clone()
 }
 
 pub fn set_input() -> PrimFuncVal {
-    MutImpl { fn_: fn_set_input }.build(ImplExtra { raw_input: false })
+    CtxMutInputEvalFunc { fn_: fn_set_input }.build()
 }
 
 fn fn_set_input(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {

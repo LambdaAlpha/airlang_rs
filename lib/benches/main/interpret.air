@@ -3,7 +3,7 @@ _("bench interpret")
 _ do [
     .% set _ import _integer.remainder,
     .f set _ function {
-        code : .n : _ form _ do [
+        code : (. : .n) : _ form _ do [
             ..sum set 0,
             .n iterate .i : [
                 _ _try (0 == .i % 3) test [continue],
@@ -11,7 +11,6 @@ _ do [
             ],
             .sum
         ],
-        context_free : true,
         prelude : {},
     },
     _ f 100

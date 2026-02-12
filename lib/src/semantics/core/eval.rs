@@ -6,6 +6,7 @@ use crate::semantics::core::form::MapForm;
 use crate::semantics::core::form::PairForm;
 use crate::semantics::core::key::KeyEval;
 use crate::semantics::func::DynFunc;
+use crate::semantics::func::PrimInput;
 use crate::semantics::val::CallVal;
 use crate::semantics::val::CellVal;
 use crate::semantics::val::ListVal;
@@ -29,7 +30,11 @@ where Func: DynFunc<Cfg, Val, Val, Val>
             let msg = format!("eval: expected a function, but got {func}");
             return abort_by_bug_with_msg(cfg, msg.into());
         };
-        let input = if func.raw_input() { call.input } else { Eval.call(cfg, ctx, call.input) };
+        let input = if matches!(func.input(), PrimInput::Eval) {
+            Eval.call(cfg, ctx, call.input)
+        } else {
+            call.input
+        };
         if !cfg.step() {
             return Val::default();
         }

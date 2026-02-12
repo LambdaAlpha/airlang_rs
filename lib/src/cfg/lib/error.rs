@@ -1,15 +1,15 @@
 use const_format::concatcp;
 
-use super::ConstImpl;
-use super::FreeImpl;
-use super::ImplExtra;
-use super::MutImpl;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::core::abort_by_bug_with_msg;
+use crate::semantics::func::CtxConstInputFreeFunc;
+use crate::semantics::func::CtxFreeInputEvalFunc;
+use crate::semantics::func::CtxFreeInputFreeFunc;
+use crate::semantics::func::CtxMutInputFreeFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Pair;
@@ -46,19 +46,16 @@ impl CfgMod for ErrorLib {
 }
 
 pub fn abort() -> PrimFuncVal {
-    FreeImpl { fn_: fn_abort }.build(ImplExtra { raw_input: false })
+    CtxFreeInputFreeFunc { fn_: fn_abort }.build()
 }
 
-fn fn_abort(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Unit(_) = input else {
-        return bug!(cfg, "{ABORT}: expected input to be a unit, but got {input}");
-    };
+fn fn_abort(cfg: &mut Cfg) -> Val {
     cfg.abort();
     Val::default()
 }
 
 pub fn assert() -> PrimFuncVal {
-    FreeImpl { fn_: fn_assert }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_assert }.build()
 }
 
 fn fn_assert(cfg: &mut Cfg, input: Val) -> Val {
@@ -80,31 +77,25 @@ fn fn_assert(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn is_aborted() -> PrimFuncVal {
-    ConstImpl { fn_: fn_is_aborted }.build(ImplExtra { raw_input: false })
+    CtxConstInputFreeFunc { fn_: fn_is_aborted }.build()
 }
 
-fn fn_is_aborted(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+fn fn_is_aborted(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Cfg(target_cfg) = ctx else {
         return bug!(cfg, "{IS_ABORTED}: expected context to be a config, but got {ctx}");
     };
-    if !input.is_unit() {
-        return bug!(cfg, "{IS_ABORTED}: expected input to be a unit, but got {input}");
-    }
     let aborted = target_cfg.is_aborted();
     Val::Bit(aborted.into())
 }
 
 pub fn recover() -> PrimFuncVal {
-    MutImpl { fn_: fn_recover }.build(ImplExtra { raw_input: false })
+    CtxMutInputFreeFunc { fn_: fn_recover }.build()
 }
 
-fn fn_recover(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+fn fn_recover(cfg: &mut Cfg, ctx: &mut Val) -> Val {
     let Val::Cfg(target_cfg) = ctx else {
         return bug!(cfg, "{RECOVER}: expected context to be a config, but got {ctx}");
     };
-    if !input.is_unit() {
-        return bug!(cfg, "{RECOVER}: expected input to be a unit, but got {input}");
-    }
     target_cfg.recover();
     Val::default()
 }

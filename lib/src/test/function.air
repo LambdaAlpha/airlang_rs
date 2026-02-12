@@ -2,7 +2,7 @@ recursive call
 -----
 _ do [
     .f set _ function {
-        code : (__ : .i) : .i,
+        code : (. : .i) : .i,
         prelude : {},
     },
     _ f _ not true
@@ -14,7 +14,7 @@ call external func
 -----
 _ do [
     .f set _ function {
-        code : (__ : .i) : _ form _ not .i,
+        code : (. : .i) : _ form _ not .i,
         prelude : {},
     },
     _ f _ not true
@@ -26,7 +26,7 @@ call internal func
 -----
 _ do [
     .f set _ function {
-        code : (__ : .i) : _ form _ .not .i,
+        code : (. : .i) : _ form _ .not .i,
         prelude : {
             not : not
         },
@@ -40,7 +40,7 @@ call rename
 -----
 _ do [
     .f set _ function {
-        code : (__ : .a) : _ form _ .n .a,
+        code : (. : .a) : _ form _ .n .a,
         prelude : {
             n : not
         },
@@ -56,8 +56,7 @@ _ do [
     .new_link set _ import _link.new,
     .link_which set _ import _link.which,
     .f set _ function {
-        context_free : true,
-        code : __ : _ form _ do [
+        code : (. : .) : _ form _ do [
             ..i set .a link_which get : _i,
             .a link_which set : _i : .i + 1,
             .i
@@ -77,8 +76,7 @@ _ do [
     .new_link set _ import _link.new,
     .link_which set _ import _link.which,
     .f set _ data _ function {
-        context_free : true,
-        code : __ : _ form _ do [
+        code : (. : .) : _ form _ do [
             ..i set .a link_which get : _value,
             .a link_which set : _value : .i + 1,
             .i
@@ -100,7 +98,7 @@ _ do [
     .link_which set _ import _link.which,
     _a set 1,
     .f set _ function {
-        code : (.c : __) : _ form .c link_which get : _a,
+        code : (.c : .) : _ form .c link_which get : _a,
         context_constant : true,
         prelude : {},
     },
@@ -115,8 +113,7 @@ _ do [
     .link_which set _ import _link.which,
     _a set 1,
     .f set _ function {
-        code : (.c : __) : _ form .c link_which get : _a,
-        context_free : false,
+        code : (.c : .) : _ form .c link_which get : _a,
         context_constant : false,
         prelude : {},
     },
@@ -131,8 +128,7 @@ _ do [
     .link_which set _ import _link.which,
     .f set _ function {
         code : (.c : .i) : _ form .c link_which set : .i : 2,
-        context_free : false,
-                context_constant : false,
+        context_constant : false,
         prelude : {},
     },
     .a set 1,
@@ -172,7 +168,7 @@ const free
 _ do [
     .a set .,
     .f set _ function {
-        code : (__c : __) : 1,
+        code : (_c : .) : 1,
         context_constant : true,
         prelude : {},
     },
@@ -186,7 +182,7 @@ ctx name occupied
 _ do [
     .a set 1,
     .f set _ function {
-        code : (_ctx : __) : 2,
+        code : (.ctx : .) : 2,
         context_constant : true,
         prelude : {
             ctx : 3
@@ -226,9 +222,8 @@ _ do [
 
 -----
 {
-    context_free : false,
     context_constant : false,
-    raw_input : false,
+    input_raw : false,
     code : (c : i) : i,
     prelude : {}
 }
@@ -240,8 +235,8 @@ _ do [
     .function.get_code set _ import _function.get_code,
     .not_code set .not which function.get_code : .,
     .repr set {
-        context_free : true,
-        raw_input : false,
+        context_constant : true,
+        input_raw : false,
         code : not_code,
     },
     repr == _ represent not
@@ -260,9 +255,8 @@ _ do [
 ]
 -----
 {
-    context_free : false,
     context_constant : true,
-    raw_input : false,
+    input_raw : false,
     code : (_c : i) : i,
     prelude : .,
 }
@@ -274,9 +268,8 @@ _ do [
     .function.get_code set _ import _function.get_code,
     .type_code set .get_type which function.get_code : .,
     .repr set {
-        context_free : false,
         context_constant : true,
-        raw_input : false,
+        input_raw : true,
         code : type_code,
     },
     repr == _ represent get_type
@@ -289,9 +282,8 @@ repr composite
 _ do [
     .represent set _ import _function.represent,
     .repr set {
-        context_free : false,
         context_constant : true,
-        raw_input : false,
+        input_raw : false,
         code : (_ctx : .in) : .in,
         prelude : {},
     },
@@ -355,20 +347,56 @@ _ do [
 -----
 false
 =====
-is_raw_input true
+is_input_free free
 -----
 _ do [
-    .is_raw_input set _ import _function.is_raw_input,
-    .data which is_raw_input : .
+    .is_input_free set _ import _function.is_input_free,
+    .abort which is_input_free : .
 ]
 -----
 true
 =====
-is_raw_input false
+is_input_free raw
 -----
 _ do [
-    .is_raw_input set _ import _function.is_raw_input,
-    .id which is_raw_input : .
+    .is_input_free set _ import _function.is_input_free,
+    .data which is_input_free : .
+]
+-----
+false
+=====
+is_input_free eval
+-----
+_ do [
+    .is_input_free set _ import _function.is_input_free,
+    .id which is_input_free : .
+]
+-----
+false
+=====
+is_input_raw free
+-----
+_ do [
+    .is_input_raw set _ import _function.is_input_raw,
+    .abort which is_input_raw : .
+]
+-----
+true
+=====
+is_input_raw raw
+-----
+_ do [
+    .is_input_raw set _ import _function.is_input_raw,
+    .data which is_input_raw : .
+]
+-----
+true
+=====
+is_input_raw eval
+-----
+_ do [
+    .is_input_raw set _ import _function.is_input_raw,
+    .id which is_input_raw : .
 ]
 -----
 false
@@ -386,7 +414,7 @@ is_primitive composite
 -----
 _ do [
     .is_primitive set _ import _function.is_primitive,
-    .f set _ function {},
+    .f set _ function {code : (. : .) : .},
     .f which is_primitive : .
 ]
 -----
@@ -411,6 +439,7 @@ _ do [
     .any set _ import _value.any,
     .prelude set _ any .,
     .f set _ function {
+        code : (. : .) : .,
         prelude : prelude
     },
     (.f which function.get_prelude : .) == prelude
@@ -457,7 +486,7 @@ recurse
 -----
 _ do [
     .g set _ function {
-        code : .fi : _ form _ do [
+        code : (. : .fi) : _ form _ do [
             (..f : ..i) = .fi,
             (.i < 1) test [
                 0
@@ -465,7 +494,6 @@ _ do [
                 .i + .f .f .i - 1
             ]
         ],
-        context_free : true,
         prelude : {},
     },
     g g 10

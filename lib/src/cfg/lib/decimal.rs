@@ -2,13 +2,12 @@ use std::num::NonZeroU64;
 
 use const_format::concatcp;
 
-use super::FreeImpl;
-use super::ImplExtra;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
+use crate::semantics::func::CtxFreeInputEvalFunc;
 use crate::semantics::val::DECIMAL;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -125,7 +124,7 @@ fn parse_rounding_mode(key: &str) -> Option<RoundingMode> {
 }
 
 pub fn add() -> PrimFuncVal {
-    FreeImpl { fn_: fn_add }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_add }.build()
 }
 
 fn fn_add(cfg: &mut Cfg, input: Val) -> Val {
@@ -148,7 +147,7 @@ fn fn_add(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn subtract() -> PrimFuncVal {
-    FreeImpl { fn_: fn_subtract }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_subtract }.build()
 }
 
 fn fn_subtract(cfg: &mut Cfg, input: Val) -> Val {
@@ -175,7 +174,7 @@ fn fn_subtract(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn multiply() -> PrimFuncVal {
-    FreeImpl { fn_: fn_multiply }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_multiply }.build()
 }
 
 fn fn_multiply(cfg: &mut Cfg, input: Val) -> Val {
@@ -202,7 +201,7 @@ fn fn_multiply(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn divide() -> PrimFuncVal {
-    FreeImpl { fn_: fn_divide }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_divide }.build()
 }
 
 fn fn_divide(cfg: &mut Cfg, input: Val) -> Val {
@@ -229,7 +228,7 @@ fn fn_divide(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn less() -> PrimFuncVal {
-    FreeImpl { fn_: fn_less }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_less }.build()
 }
 
 fn fn_less(cfg: &mut Cfg, input: Val) -> Val {
@@ -247,7 +246,7 @@ fn fn_less(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn less_equal() -> PrimFuncVal {
-    FreeImpl { fn_: fn_less_equal }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_less_equal }.build()
 }
 
 fn fn_less_equal(cfg: &mut Cfg, input: Val) -> Val {
@@ -273,7 +272,7 @@ fn fn_less_equal(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn greater() -> PrimFuncVal {
-    FreeImpl { fn_: fn_greater }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_greater }.build()
 }
 
 fn fn_greater(cfg: &mut Cfg, input: Val) -> Val {
@@ -295,7 +294,7 @@ fn fn_greater(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn greater_equal() -> PrimFuncVal {
-    FreeImpl { fn_: fn_greater_equal }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_greater_equal }.build()
 }
 
 fn fn_greater_equal(cfg: &mut Cfg, input: Val) -> Val {
@@ -321,7 +320,7 @@ fn fn_greater_equal(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn less_greater() -> PrimFuncVal {
-    FreeImpl { fn_: fn_less_greater }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_less_greater }.build()
 }
 
 fn fn_less_greater(cfg: &mut Cfg, input: Val) -> Val {

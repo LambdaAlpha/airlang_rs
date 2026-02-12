@@ -1,11 +1,11 @@
 use derive_more::From;
 
 use crate::semantics::cfg::Cfg;
-use crate::semantics::func::CompCtx;
 use crate::semantics::func::CompFunc;
 use crate::semantics::func::DynFunc;
 use crate::semantics::func::PrimCtx;
 use crate::semantics::func::PrimFunc;
+use crate::semantics::func::PrimInput;
 use crate::semantics::val::Val;
 use crate::type_::wrap::rc_wrap;
 
@@ -29,17 +29,17 @@ impl DynFunc<Cfg, Val, Val, Val> for FuncVal {
 }
 
 impl FuncVal {
-    pub fn raw_input(&self) -> bool {
+    pub fn input(&self) -> PrimInput {
         match self {
-            FuncVal::Prim(f) => f.raw_input,
-            FuncVal::Comp(f) => f.raw_input,
+            FuncVal::Prim(f) => f.input,
+            FuncVal::Comp(f) => f.input.to_prim_input(),
         }
     }
 
-    pub fn prelude(&self) -> Option<&Val> {
+    pub fn ctx(&self) -> PrimCtx {
         match self {
-            FuncVal::Prim(_) => None,
-            FuncVal::Comp(f) => Some(&f.fn_.prelude),
+            FuncVal::Prim(f) => f.ctx,
+            FuncVal::Comp(f) => f.ctx.to_prim_ctx(),
         }
     }
 
@@ -50,20 +50,10 @@ impl FuncVal {
         }
     }
 
-    pub fn is_free(&self) -> bool {
+    pub fn prelude(&self) -> Option<&Val> {
         match self {
-            FuncVal::Prim(f) => matches!(f.ctx, PrimCtx::Free),
-            FuncVal::Comp(f) => matches!(f.fn_.ctx, CompCtx::Free),
-        }
-    }
-
-    pub fn is_const(&self) -> bool {
-        match self {
-            FuncVal::Prim(f) => !matches!(f.ctx, PrimCtx::Mut),
-            FuncVal::Comp(f) => match &f.fn_.ctx {
-                CompCtx::Free => true,
-                CompCtx::Default { const_, .. } => *const_,
-            },
+            FuncVal::Prim(_) => None,
+            FuncVal::Comp(f) => Some(&f.prelude),
         }
     }
 }

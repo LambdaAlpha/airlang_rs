@@ -2,8 +2,6 @@ use std::rc::Rc;
 
 use const_format::concatcp;
 
-use super::FreeImpl;
-use super::ImplExtra;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
@@ -11,8 +9,10 @@ use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::Id;
 use crate::semantics::core::PREFIX_ID;
+use crate::semantics::func::CtxFreeInputEvalFunc;
 use crate::semantics::func::PrimCtx;
 use crate::semantics::func::PrimFunc;
+use crate::semantics::func::PrimInput;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Cell;
@@ -62,23 +62,23 @@ impl CfgMod for LangLib {
 }
 
 pub fn data() -> PrimFuncVal {
-    PrimFunc { raw_input: true, fn_: Rc::new(Id), ctx: PrimCtx::Free }.into()
+    PrimFunc { fn_: Rc::new(Id), ctx: PrimCtx::Free, input: PrimInput::Raw }.into()
 }
 
 pub fn id() -> PrimFuncVal {
-    PrimFunc { raw_input: false, fn_: Rc::new(Id), ctx: PrimCtx::Free }.into()
+    PrimFunc { fn_: Rc::new(Id), ctx: PrimCtx::Free, input: PrimInput::Eval }.into()
 }
 
 pub fn code() -> PrimFuncVal {
-    PrimFunc { raw_input: true, fn_: Rc::new(Eval), ctx: PrimCtx::Mut }.into()
+    PrimFunc { fn_: Rc::new(Eval), ctx: PrimCtx::Mut, input: PrimInput::Raw }.into()
 }
 
 pub fn eval() -> PrimFuncVal {
-    PrimFunc { raw_input: false, fn_: Rc::new(Eval), ctx: PrimCtx::Mut }.into()
+    PrimFunc { fn_: Rc::new(Eval), ctx: PrimCtx::Mut, input: PrimInput::Eval }.into()
 }
 
 pub fn parse() -> PrimFuncVal {
-    FreeImpl { fn_: fn_parse }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_parse }.build()
 }
 
 fn fn_parse(cfg: &mut Cfg, input: Val) -> Val {
@@ -92,7 +92,7 @@ fn fn_parse(cfg: &mut Cfg, input: Val) -> Val {
 }
 
 pub fn generate() -> PrimFuncVal {
-    FreeImpl { fn_: fn_generate }.build(ImplExtra { raw_input: false })
+    CtxFreeInputEvalFunc { fn_: fn_generate }.build()
 }
 
 fn fn_generate(_cfg: &mut Cfg, input: Val) -> Val {

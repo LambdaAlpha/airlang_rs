@@ -3,6 +3,7 @@ use std::ops::DerefMut;
 
 use super::DynFunc;
 use super::PrimCtx;
+use super::PrimInput;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::ctx::DynCtx;
@@ -12,22 +13,10 @@ use crate::type_::Key;
 
 #[derive(Clone, PartialEq, Eq)]
 pub struct CompFunc {
-    pub(crate) raw_input: bool,
-    pub(crate) fn_: CompFn,
-}
-
-impl DynFunc<Cfg, Val, Val, Val> for CompFunc {
-    fn call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
-        self.fn_.call(cfg, ctx, input)
-    }
-}
-
-#[derive(Clone, PartialEq, Eq)]
-pub(crate) struct CompFn {
     pub(crate) prelude: Val,
     pub(crate) body: Val,
-    pub(crate) input_name: Key,
     pub(crate) ctx: CompCtx,
+    pub(crate) input: CompInput,
 }
 
 #[derive(Clone, PartialEq, Eq)]
@@ -36,12 +25,20 @@ pub(crate) enum CompCtx {
     Default { name: Key, const_: bool },
 }
 
-impl DynFunc<Cfg, Val, Val, Val> for CompFn {
-    // todo design support ignore context or input
+#[derive(Clone, PartialEq, Eq)]
+pub(crate) enum CompInput {
+    Free,
+    Default { name: Key, raw: bool },
+}
+
+impl DynFunc<Cfg, Val, Val, Val> for CompFunc {
     fn call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         let new_ctx = &mut self.prelude.clone();
-        if new_ctx.set(cfg, self.input_name.clone(), input).is_none() {
-            return Val::default();
+        if let CompInput::Default { name, .. } = &self.input {
+            let set_result = new_ctx.set(cfg, name.clone(), input);
+            if set_result.is_none() {
+                return Val::default();
+            }
         }
         let CompCtx::Default { name, const_ } = &self.ctx else {
             return Eval.call(cfg, new_ctx, self.body.clone());
@@ -71,6 +68,21 @@ impl CompCtx {
                 }
             },
             CompCtx::Free => PrimCtx::Free,
+        }
+    }
+}
+
+impl CompInput {
+    pub(crate) fn to_prim_input(&self) -> PrimInput {
+        match self {
+            CompInput::Default { raw, .. } => {
+                if *raw {
+                    PrimInput::Raw
+                } else {
+                    PrimInput::Eval
+                }
+            },
+            CompInput::Free => PrimInput::Free,
         }
     }
 }

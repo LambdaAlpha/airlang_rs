@@ -1,11 +1,10 @@
 use const_format::concatcp;
 
-use super::FreeImpl;
-use super::ImplExtra;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
+use crate::semantics::func::CtxFreeInputFreeFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::UNIT;
 use crate::semantics::val::Val;
@@ -31,9 +30,9 @@ impl CfgMod for UnitLib {
 }
 
 pub fn from_any() -> PrimFuncVal {
-    FreeImpl { fn_: fn_from_any }.build(ImplExtra { raw_input: false })
+    CtxFreeInputFreeFunc { fn_: fn_from_any }.build()
 }
 
-fn fn_from_any(_cfg: &mut Cfg, _input: Val) -> Val {
+fn fn_from_any(_cfg: &mut Cfg) -> Val {
     Val::Unit(Unit)
 }
