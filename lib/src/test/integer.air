@@ -86,13 +86,13 @@ true
 -----
 _ do [
     .any set _ import _value.any,
-    .config.new set _ import _config.new,
-    .link.new set _ import _link.new,
+    .config.make set _ import _config.make,
+    .link.make set _ import _link.make,
     .where set _ import _config.where,
     .is_aborted set _ import _error.is_aborted,
     .a set _ any _integer,
-    .c set _ config.new {
-        _prelude : _ link.new {
+    .c set _ config.make {
+        _prelude : _ link.make {
             a : a,
             / : /,
         },
@@ -151,13 +151,13 @@ remainder 0
 _ do [
     .% set _ import _integer.remainder,
     .any set _ import _value.any,
-    .config.new set _ import _config.new,
-    .link.new set _ import _link.new,
+    .config.make set _ import _config.make,
+    .link.make set _ import _link.make,
     .where set _ import _config.where,
     .is_aborted set _ import _error.is_aborted,
     .a set _ any _integer,
-    .c set _ config.new {
-        _prelude : _ link.new {
+    .c set _ config.make {
+        _prelude : _ link.make {
             a : a,
             % : %,
         },

@@ -279,12 +279,12 @@ set length
 -----
 _ do [
     .list.set set _ import _list.set,
-    .config.new set _ import _config.new,
-    .link.new set _ import _link.new,
+    .config.make set _ import _config.make,
+    .link.make set _ import _link.make,
     .where set _ import _config.where,
     .is_aborted set _ import _error.is_aborted,
-    .c set _ config.new {
-        _prelude : _ link.new {
+    .c set _ config.make {
+        _prelude : _ link.make {
             do : do,
             set : set,
             which : which,
@@ -347,12 +347,12 @@ get out of bound
 -----
 _ do [
     .list.get set _ import _list.get,
-    .config.new set _ import _config.new,
-    .link.new set _ import _link.new,
+    .config.make set _ import _config.make,
+    .link.make set _ import _link.make,
     .where set _ import _config.where,
     .is_aborted set _ import _error.is_aborted,
-    .c set _ config.new {
-        _prelude : _ link.new {
+    .c set _ config.make {
+        _prelude : _ link.make {
             do : do,
             set : set,
             which : which,
@@ -442,12 +442,12 @@ insert out of bound
 -----
 _ do [
     .insert set _ import _list.insert,
-    .config.new set _ import _config.new,
-    .link.new set _ import _link.new,
+    .config.make set _ import _config.make,
+    .link.make set _ import _link.make,
     .where set _ import _config.where,
     .is_aborted set _ import _error.is_aborted,
-    .c set _ config.new {
-        _prelude : _ link.new {
+    .c set _ config.make {
+        _prelude : _ link.make {
             do : do,
             set : set,
             which : which,
@@ -564,12 +564,12 @@ pop empty
 -----
 _ do [
     .pop set _ import _list.pop,
-    .config.new set _ import _config.new,
-    .link.new set _ import _link.new,
+    .config.make set _ import _config.make,
+    .link.make set _ import _link.make,
     .where set _ import _config.where,
     .is_aborted set _ import _error.is_aborted,
-    .c set _ config.new {
-        _prelude : _ link.new {
+    .c set _ config.make {
+        _prelude : _ link.make {
             do : do,
             set : set,
             which : which,
@@ -639,12 +639,12 @@ pop_many out of bound
 -----
 _ do [
     .pop_many set _ import _list.pop_many,
-    .config.new set _ import _config.new,
-    .link.new set _ import _link.new,
+    .config.make set _ import _config.make,
+    .link.make set _ import _link.make,
     .where set _ import _config.where,
     .is_aborted set _ import _error.is_aborted,
-    .c set _ config.new {
-        _prelude : _ link.new {
+    .c set _ config.make {
+        _prelude : _ link.make {
             do : do,
             set : set,
             which : which,

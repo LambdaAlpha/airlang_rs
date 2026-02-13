@@ -57,15 +57,3 @@ impl FuncVal {
         }
     }
 }
-
-impl Default for PrimFuncVal {
-    fn default() -> Self {
-        Self::from(PrimFunc::default())
-    }
-}
-
-impl Default for FuncVal {
-    fn default() -> Self {
-        Self::Prim(PrimFuncVal::default())
-    }
-}

@@ -1,11 +1,11 @@
-new repr
+make repr
 -----
 _ do [
     .any set _ import _value.any,
-    .new set _ import _config.new,
+    .make set _ import _config.make,
     .represent set _ import _config.represent,
     .c set {a : _ any ., b : _ any ., c : _ any .},
-    .c1 set _ represent _ new c,
+    .c1 set _ represent _ make c,
     c == c1
 ]
 -----
@@ -14,10 +14,10 @@ true
 get_length
 -----
 _ do [
-    .new set _ import _config.new,
+    .make set _ import _config.make,
     .get_length set _ import _config.get_length,
     .any set _ import _value.any,
-    .c set _ new {a : _ any ., b : _ any ., c : _ any .,},
+    .c set _ make {a : _ any ., b : _ any ., c : _ any .,},
     .c which get_length : .,
 ]
 -----
@@ -62,22 +62,22 @@ _ do [
 -----
 true
 =====
-self
+get_self
 -----
 _ do [
-    .new set _ import _config.new,
-    .link.new set _ import _link.new,
+    .make set _ import _config.make,
+    .link.make set _ import _link.make,
     .any set _ import _value.any,
     .where set _ import _config.where,
-    .self set _ import _config.self,
+    .get_self set _ import _config.get_self,
     .represent set _ import _config.represent,
-    .c1 set _ new {
-        _prelude : _ link.new {
-            self : self,
+    .c1 set _ make {
+        _prelude : _ link.make {
+            get_self : get_self,
         },
         a : _ any .,
     },
-    .c2 set c1 where _ self .,
+    .c2 set c1 where _ get_self .,
     .m1 set _ represent c1,
     .m2 set _ represent c2,
     m1 == m2
@@ -120,12 +120,12 @@ true
 with abort safe
 -----
 _ do [
-    .new set _ import _config.new,
-    .link.new set _ import _link.new,
+    .make set _ import _config.make,
+    .link.make set _ import _link.make,
     .where set _ import _config.where,
     .recover set _ import _error.recover,
-    .c set _ new {
-        _prelude : _ link.new {
+    .c set _ make {
+        _prelude : _ link.make {
             with : with,
             do : do,
             abort : abort,
@@ -145,12 +145,12 @@ where
 -----
 _ do [
     .any set _ import _value.any,
-    .new set _ import _config.new,
-    .link.new set _ import _link.new,
+    .make set _ import _config.make,
+    .link.make set _ import _link.make,
     .where set _ import _config.where,
     .a set _ any .,
-    .c set _ new {
-        _prelude : _ link.new {
+    .c set _ make {
+        _prelude : _ link.make {
             import : import,
         },
         _a : a,

@@ -29,7 +29,7 @@ pub const LOAD: &str = concatcp!(PREFIX_ID, BUILD, ".load");
 
 impl Default for BuildLib {
     fn default() -> Self {
-        Self { load: load() }
+        Self { load: CtxFreeInputEvalFunc { fn_: load }.build() }
     }
 }
 
@@ -40,15 +40,11 @@ impl CfgMod for BuildLib {
 }
 
 // todo rename
-// todo design
-pub fn load() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_load }.build()
-}
-
-// todo rename
 const CUR_URL_KEY: &str = "build.this_url";
 
-fn fn_load(cfg: &mut Cfg, input: Val) -> Val {
+// todo rename
+// todo design
+pub fn load(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(url) = input else {
         return bug!(cfg, "{LOAD}: expected input to be a text, but got {input}");
     };

@@ -40,13 +40,13 @@ pub const ERROR_FLUSH: &str = concatcp!(PREFIX_ID, IO, ".error_flush");
 impl Default for IoLib {
     fn default() -> Self {
         Self {
-            read_line: read_line(),
-            print: print(),
-            print_line: print_line(),
-            flush: flush(),
-            error_print: error_print(),
-            error_print_line: error_print_line(),
-            error_flush: error_flush(),
+            read_line: CtxMutInputFreeFunc { fn_: read_line }.build(),
+            print: CtxFreeInputEvalFunc { fn_: print }.build(),
+            print_line: CtxFreeInputEvalFunc { fn_: print_line }.build(),
+            flush: CtxFreeInputFreeFunc { fn_: flush }.build(),
+            error_print: CtxFreeInputEvalFunc { fn_: error_print }.build(),
+            error_print_line: CtxFreeInputEvalFunc { fn_: error_print_line }.build(),
+            error_flush: CtxFreeInputFreeFunc { fn_: error_flush }.build(),
         }
     }
 }
@@ -63,11 +63,7 @@ impl CfgMod for IoLib {
     }
 }
 
-pub fn read_line() -> PrimFuncVal {
-    CtxMutInputFreeFunc { fn_: fn_read_line }.build()
-}
-
-fn fn_read_line(cfg: &mut Cfg, ctx: &mut Val) -> Val {
+pub fn read_line(cfg: &mut Cfg, ctx: &mut Val) -> Val {
     let Val::Text(t) = ctx else {
         return bug!(cfg, "{READ_LINE}: expected context to be a text, but got {ctx}");
     };
@@ -75,11 +71,7 @@ fn fn_read_line(cfg: &mut Cfg, ctx: &mut Val) -> Val {
     Val::default()
 }
 
-pub fn print() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_print }.build()
-}
-
-fn fn_print(cfg: &mut Cfg, input: Val) -> Val {
+pub fn print(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
         return bug!(cfg, "{PRINT}: expected input to be a text, but got {input}");
     };
@@ -87,11 +79,7 @@ fn fn_print(cfg: &mut Cfg, input: Val) -> Val {
     Val::default()
 }
 
-pub fn print_line() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_print_line }.build()
-}
-
-fn fn_print_line(cfg: &mut Cfg, input: Val) -> Val {
+pub fn print_line(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
         return bug!(cfg, "{PRINT_LINE}: expected input to be a text, but got {input}");
     };
@@ -99,20 +87,12 @@ fn fn_print_line(cfg: &mut Cfg, input: Val) -> Val {
     Val::default()
 }
 
-pub fn flush() -> PrimFuncVal {
-    CtxFreeInputFreeFunc { fn_: fn_flush }.build()
-}
-
-fn fn_flush(_cfg: &mut Cfg) -> Val {
+pub fn flush(_cfg: &mut Cfg) -> Val {
     let _ = stdout().flush();
     Val::default()
 }
 
-pub fn error_print() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_error_print }.build()
-}
-
-fn fn_error_print(cfg: &mut Cfg, input: Val) -> Val {
+pub fn error_print(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
         return bug!(cfg, "{ERROR_PRINT}: expected input to be a text, but got {input}");
     };
@@ -120,11 +100,7 @@ fn fn_error_print(cfg: &mut Cfg, input: Val) -> Val {
     Val::default()
 }
 
-pub fn error_print_line() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_error_print_line }.build()
-}
-
-fn fn_error_print_line(cfg: &mut Cfg, input: Val) -> Val {
+pub fn error_print_line(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = input else {
         return bug!(cfg, "{ERROR_PRINT_LINE}: expected input to be a text, but got {input}");
     };
@@ -132,11 +108,7 @@ fn fn_error_print_line(cfg: &mut Cfg, input: Val) -> Val {
     Val::default()
 }
 
-pub fn error_flush() -> PrimFuncVal {
-    CtxFreeInputFreeFunc { fn_: fn_error_flush }.build()
-}
-
-fn fn_error_flush(_cfg: &mut Cfg) -> Val {
+pub fn error_flush(_cfg: &mut Cfg) -> Val {
     let _ = stderr().flush();
     Val::default()
 }

@@ -1,4 +1,4 @@
-new
+make
 -----
 _ do [
     .any set _ import _value.any,

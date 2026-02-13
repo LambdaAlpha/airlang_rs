@@ -33,9 +33,9 @@ pub const MEASURE_STEPS: &str = concatcp!(PREFIX_ID, RESOURCE, ".measure_steps")
 impl Default for ResourceLib {
     fn default() -> Self {
         ResourceLib {
-            get_steps: get_steps(),
-            set_steps: set_steps(),
-            measure_steps: measure_steps(),
+            get_steps: CtxFreeInputFreeFunc { fn_: get_steps }.build(),
+            set_steps: CtxFreeInputEvalFunc { fn_: set_steps }.build(),
+            measure_steps: CtxMutInputRawFunc { fn_: measure_steps }.build(),
         }
     }
 }
@@ -48,20 +48,12 @@ impl CfgMod for ResourceLib {
     }
 }
 
-pub fn get_steps() -> PrimFuncVal {
-    CtxFreeInputFreeFunc { fn_: fn_get_steps }.build()
-}
-
-fn fn_get_steps(cfg: &mut Cfg) -> Val {
+pub fn get_steps(cfg: &mut Cfg) -> Val {
     let steps = cfg.steps();
     Val::Int(Int::from(steps).into())
 }
 
-pub fn set_steps() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_set_steps }.build()
-}
-
-fn fn_set_steps(cfg: &mut Cfg, input: Val) -> Val {
+pub fn set_steps(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Int(steps) = input else {
         return bug!(cfg, "{SET_STEPS}: expected input to be an integer, but got {input}");
     };
@@ -73,11 +65,7 @@ fn fn_set_steps(cfg: &mut Cfg, input: Val) -> Val {
     Val::default()
 }
 
-pub fn measure_steps() -> PrimFuncVal {
-    CtxMutInputRawFunc { fn_: fn_measure_steps }.build()
-}
-
-fn fn_measure_steps(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn measure_steps(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let old_steps = cfg.steps();
     let output = Eval.call(cfg, ctx, input);
     let steps = old_steps - cfg.steps();

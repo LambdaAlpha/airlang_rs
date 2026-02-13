@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::bug;
-use crate::cfg::lib::func::NEW;
+use crate::cfg::lib::func::MAKE;
 use crate::cfg::utils::map_remove;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::func::CompCtx;
@@ -27,7 +27,7 @@ const INPUT_RAW: &str = "input_raw";
 
 pub(in crate::cfg) fn parse_func(cfg: &mut Cfg, input: Val) -> Option<FuncVal> {
     let Val::Map(mut map) = input else {
-        bug!(cfg, "{NEW}: expected input to be a map, but got {input}");
+        bug!(cfg, "{MAKE}: expected input to be a map, but got {input}");
         return None;
     };
     let CompCode { ctx_name, input_name, body } = parse_code(cfg, map_remove(&mut map, CODE))?;
@@ -54,7 +54,7 @@ fn parse_bit(tag: &str, cfg: &mut Cfg, val: Val) -> Option<bool> {
         Val::Unit(_) => Some(false),
         Val::Bit(bit) => Some(bit.into()),
         v => {
-            bug!(cfg, "{NEW}: expected {tag} to be a unit or a bit, but got {v}");
+            bug!(cfg, "{MAKE}: expected {tag} to be a unit or a bit, but got {v}");
             None
         },
     }
@@ -75,14 +75,14 @@ struct CompCode {
 
 fn parse_code(cfg: &mut Cfg, code: Val) -> Option<CompCode> {
     let Val::Pair(names_body) = code else {
-        bug!(cfg, "{NEW}: expected {CODE} to be a pair, but got {code}");
+        bug!(cfg, "{MAKE}: expected {CODE} to be a pair, but got {code}");
         return None;
     };
     let names_body = Pair::from(names_body);
     let ctx_input = names_body.left;
     let body = names_body.right;
     let Val::Pair(ctx_input) = ctx_input else {
-        bug!(cfg, "{NEW}: expected names to be a pair, but got {ctx_input}");
+        bug!(cfg, "{MAKE}: expected names to be a pair, but got {ctx_input}");
         return None;
     };
     let ctx = &ctx_input.left;
@@ -90,7 +90,7 @@ fn parse_code(cfg: &mut Cfg, code: Val) -> Option<CompCode> {
         Val::Key(ctx) => Some(ctx.clone()),
         Val::Unit(_) => None,
         _ => {
-            bug!(cfg, "{NEW}: expected context name to be a key or a unit, but got {ctx}");
+            bug!(cfg, "{MAKE}: expected context name to be a key or a unit, but got {ctx}");
             return None;
         },
     };
@@ -99,7 +99,7 @@ fn parse_code(cfg: &mut Cfg, code: Val) -> Option<CompCode> {
         Val::Key(input) => Some(input.clone()),
         Val::Unit(_) => None,
         _ => {
-            bug!(cfg, "{NEW}: expected input name to be a key or a unit, but got {input}");
+            bug!(cfg, "{MAKE}: expected input name to be a key or a unit, but got {input}");
             return None;
         },
     };

@@ -1,28 +1,28 @@
-new which self
+make which get_self
 -----
 _ do [
     .any set _ import _value.any,
-    .new set _ import _link.new,
+    .make set _ import _link.make,
     .which set _ import _link.which,
-    .self set _ import _context.self,
+    .get_self set _ import _context.get_self,
     .a set _ any .,
-    .l set _ new a,
-    .a1 set l which self : .,
+    .l set _ make a,
+    .a1 set l which get_self : .,
     a == a1
 ]
 -----
 true
 =====
-new_constant which self
+make_constant which get_self
 -----
 _ do [
     .any set _ import _value.any,
-    .new set _ import _link.new_constant,
+    .make set _ import _link.make_constant,
     .which set _ import _link.which,
-    .self set _ import _context.self,
+    .get_self set _ import _context.get_self,
     .a set _ any .,
-    .l set _ new a,
-    .a1 set l which self : .,
+    .l set _ make a,
+    .a1 set l which get_self : .,
     a == a1
 ]
 -----
@@ -31,9 +31,9 @@ true
 const is_constant
 -----
 _ do [
-    .new_constant set _ import _link.new_constant,
+    .make_constant set _ import _link.make_constant,
     .is_constant set _ import _link.is_constant,
-    .l set _ new_constant {},
+    .l set _ make_constant {},
     _ is_constant l,
 ]
 -----
@@ -42,9 +42,9 @@ true
 mut is_constant
 -----
 _ do [
-    .new set _ import _link.new,
+    .make set _ import _link.make,
     .is_constant set _ import _link.is_constant,
-    .l set _ new {},
+    .l set _ make {},
     _ is_constant l,
 ]
 -----
@@ -54,9 +54,9 @@ sync
 -----
 _ do [
     .any set _ import _value.any,
-    .new set _ import _link.new,
+    .make set _ import _link.make,
     .which set _ import _link.which,
-    .l set _ new {},
+    .l set _ make {},
     .l1 set l,
     .a set _ any .,
     l which set : _a : a,
@@ -70,9 +70,9 @@ leak no panic
 -----
 _ do [
     .any set _ import _value.any,
-    .new set _ import _link.new,
+    .make set _ import _link.make,
     .which set _ import _link.which,
-    .l set _ new {},
+    .l set _ make {},
     l which set : _a : l,
     .l move _,
     .
@@ -84,9 +84,9 @@ cycle recover
 -----
 _ do [
     .any set _ import _value.any,
-    .new set _ import _link.new,
+    .make set _ import _link.make,
     .which set _ import _link.which,
-    .l set _ new {},
+    .l set _ make {},
     l which set : _a : l,
     .l1 set l which move : _a,
     l == l1

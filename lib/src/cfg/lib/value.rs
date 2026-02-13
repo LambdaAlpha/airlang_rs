@@ -62,7 +62,11 @@ pub const EQUAL: &str = concatcp!(PREFIX_ID, VALUE, ".equal");
 
 impl Default for ValueLib {
     fn default() -> Self {
-        ValueLib { any: any(), get_type: get_type(), equal: equal() }
+        ValueLib {
+            any: CtxFreeInputEvalFunc { fn_: any }.build(),
+            get_type: CtxConstInputFreeFunc { fn_: get_type }.build(),
+            equal: CtxFreeInputEvalFunc { fn_: equal }.build(),
+        }
     }
 }
 
@@ -90,12 +94,7 @@ const TYPE_LINK: &str = concatcp!(PREFIX_ID, LINK);
 const TYPE_CFG: &str = concatcp!(PREFIX_ID, CFG);
 const TYPE_FUNC: &str = concatcp!(PREFIX_ID, FUNC);
 
-// todo design pick value from cfg or ctx
-pub fn any() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_any }.build()
-}
-
-fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
+pub fn any(cfg: &mut Cfg, input: Val) -> Val {
     const DEPTH: usize = 0;
     let mut rng = SmallRng::from_os_rng();
     let rng = &mut rng;
@@ -123,11 +122,7 @@ fn fn_any(cfg: &mut Cfg, input: Val) -> Val {
     }
 }
 
-pub fn get_type() -> PrimFuncVal {
-    CtxConstInputFreeFunc { fn_: fn_get_type }.build()
-}
-
-fn fn_get_type(_cfg: &mut Cfg, ctx: &Val) -> Val {
+pub fn get_type(_cfg: &mut Cfg, ctx: &Val) -> Val {
     let s = match ctx {
         Val::Unit(_) => TYPE_UNIT,
         Val::Bit(_) => TYPE_BIT,
@@ -150,11 +145,7 @@ fn fn_get_type(_cfg: &mut Cfg, ctx: &Val) -> Val {
 }
 
 // todo design
-pub fn equal() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_equal }.build()
-}
-
-fn fn_equal(cfg: &mut Cfg, input: Val) -> Val {
+pub fn equal(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{EQUAL}: expected input to be a pair, but got {input}");
     };

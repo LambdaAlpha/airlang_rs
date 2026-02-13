@@ -18,7 +18,7 @@ pub const HELP: &str = concatcp!(PREFIX_ID, REPL, ".help");
 
 impl Default for ReplLib {
     fn default() -> Self {
-        Self { help: help() }
+        Self { help: Text::from(HELP_DOC).into() }
     }
 }
 
@@ -28,11 +28,7 @@ impl CfgMod for ReplLib {
     }
 }
 
-pub fn help() -> TextVal {
-    Text::from(HELP_DOC).into()
-}
-
-const HELP_DOC: &str = r##"
+pub const HELP_DOC: &str = r##"
 keyboard shortcuts:
     Ctrl + C: exit this program
     Up/Down: switch through command history

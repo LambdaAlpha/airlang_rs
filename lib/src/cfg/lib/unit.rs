@@ -12,27 +12,23 @@ use crate::type_::Unit;
 
 #[derive(Clone)]
 pub struct UnitLib {
-    pub from_any: PrimFuncVal,
+    pub default: PrimFuncVal,
 }
 
-pub const FROM_ANY: &str = concatcp!(PREFIX_ID, UNIT, ".from_any");
+pub const DEFAULT: &str = concatcp!(PREFIX_ID, UNIT, ".default");
 
 impl Default for UnitLib {
     fn default() -> Self {
-        UnitLib { from_any: from_any() }
+        UnitLib { default: CtxFreeInputFreeFunc { fn_: default }.build() }
     }
 }
 
 impl CfgMod for UnitLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, FROM_ANY, self.from_any);
+        extend_func(cfg, DEFAULT, self.default);
     }
 }
 
-pub fn from_any() -> PrimFuncVal {
-    CtxFreeInputFreeFunc { fn_: fn_from_any }.build()
-}
-
-fn fn_from_any(_cfg: &mut Cfg) -> Val {
+pub fn default(_cfg: &mut Cfg) -> Val {
     Val::Unit(Unit)
 }

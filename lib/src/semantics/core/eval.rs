@@ -43,7 +43,7 @@ where Func: DynFunc<Cfg, Val, Val, Val>
 }
 
 #[derive(Default, Copy, Clone)]
-pub(crate) struct Eval;
+pub struct Eval;
 
 impl DynFunc<Cfg, Val, Val, Val> for Eval {
     fn call(&self, cfg: &mut Cfg, ctx: &mut Val, val: Val) -> Val {

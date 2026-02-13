@@ -35,28 +35,28 @@ _ do [
 -----
 true
 =====
-get_items new
+get_items make
 -----
 _ do [
     .any set _ import _value.any,
-    .new set _ import _map.new,
+    .make set _ import _map.make,
     .get_items set _ import _map.get_items,
     .a1 set _ any _map,
-    .a2 set _ new .a1 which get_items : .,
+    .a2 set _ make .a1 which get_items : .,
     a1 == a2
 ]
 -----
 true
 =====
-into_items new
+into_items make
 -----
 _ do [
     .any set _ import _value.any,
-    .new set _ import _map.new,
+    .make set _ import _map.make,
     .into_items set _ import _map.into_items,
     .a1 set _ any _map,
     .a2 set a1,
-    .a3 set _ new .a1 which into_items : .,
+    .a3 set _ make .a1 which into_items : .,
     (a1 == {}) and (a2 == a3)
 ]
 -----
@@ -66,11 +66,11 @@ get_keys set
 -----
 _ do [
     .any set _ import _value.any,
-    .new_set set _ import _map.new_set,
+    .make_set set _ import _map.make_set,
     .get_keys set _ import _map.get_keys,
     .set_many set _ import _map.set_many,
     .a1 set _ any _map,
-    .a2 set _ new_set .a1 which get_keys : .,
+    .a2 set _ make_set .a1 which get_keys : .,
     .a1 which set_many : a2,
     a1 == a2
 ]
@@ -81,12 +81,12 @@ into_keys set
 -----
 _ do [
     .any set _ import _value.any,
-    .new_set set _ import _map.new_set,
+    .make_set set _ import _map.make_set,
     .get_keys set _ import _map.get_keys,
     .into_keys set _ import _map.into_keys,
     .a1 set _ any _map,
-    .a2 set _ new_set .a1 which get_keys : .,
-    .a3 set _ new_set .a1 which into_keys : .,
+    .a2 set _ make_set .a1 which get_keys : .,
+    .a3 set _ make_set .a1 which into_keys : .,
     (a1 == {}) and (a2 == a3)
 ]
 -----
@@ -232,26 +232,26 @@ _ do [
 -----
 2
 =====
-get_items new 1
+get_items make 1
 -----
 _ do [
     .get_items set _ import _map.get_items,
-    .new set _ import _map.new,
+    .make set _ import _map.make,
     .m set {a : 1, b : 2},
     .i set .m which get_items : .,
-    _ new i
+    _ make i
 ]
 -----
 {a : 1, b : 2}
 =====
-get_keys new_set 1
+get_keys make_set 1
 -----
 _ do [
     .get_keys set _ import _map.get_keys,
-    .new_set set _ import _map.new_set,
+    .make_set set _ import _map.make_set,
     .m set {a : 1, b : 2},
     .k set .m which get_keys : .,
-    _ new_set k
+    _ make_set k
 ]
 -----
 {a, b}
@@ -417,11 +417,11 @@ _ do [
 -----
 {}
 =====
-new 1
+make 1
 -----
 _ do [
-    .new set _ import _map.new,
-    _ new [.a : 1, .b : 2]
+    .make set _ import _map.make,
+    _ make [.a : 1, .b : 2]
 ]
 -----
 {a : 1, b : 2}
@@ -429,17 +429,17 @@ _ do [
 map duplicate keys
 -----
 _ do [
-    .new set _ import _map.new,
-    _ new [.a : 1, .a : 2]
+    .make set _ import _map.make,
+    _ make [.a : 1, .a : 2]
 ]
 -----
 {a : 2}
 =====
-new_set duplicate keys 1
+make_set duplicate keys 1
 -----
 _ do [
-    .new_set set _ import _map.new_set,
-    _ new_set [.a, .b, .b, .c]
+    .make_set set _ import _map.make_set,
+    _ make_set [.a, .b, .b, .c]
 ]
 -----
 {a, b, c}
@@ -447,8 +447,8 @@ _ do [
 set duplicate keys 2
 -----
 _ do [
-    .new_set set _ import _map.new_set,
-    _ new_set [.a, .b, .a]
+    .make_set set _ import _map.make_set,
+    _ make_set [.a, .b, .a]
 ]
 -----
 {a, b}

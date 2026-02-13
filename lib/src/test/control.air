@@ -524,12 +524,12 @@ _ do [
 iterate integer negative
 -----
 _ do [
-    .config.new set _ import _config.new,
-    .link.new set _ import _link.new,
+    .config.make set _ import _config.make,
+    .link.make set _ import _link.make,
     .where set _ import _config.where,
     .is_aborted set _ import _error.is_aborted,
-    .c set _ config.new {
-        _prelude : _ link.new {
+    .c set _ config.make {
+        _prelude : _ link.make {
             iterate : iterate,
         },
     },
@@ -582,12 +582,12 @@ iterate map
 -----
 _ do [
     .push set _ import _list.push,
-    .new_map set _ import _map.new,
+    .make_map set _ import _map.make,
     .kv set [],
     {1 : 2, 3 : 4} iterate i : [
         .kv which push : i
     ],
-    _ new_map kv
+    _ make_map kv
 ]
 -----
 {1 : 2, 3 : 4}

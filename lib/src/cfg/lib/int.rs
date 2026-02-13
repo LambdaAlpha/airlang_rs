@@ -43,17 +43,17 @@ pub const LESS_GREATER: &str = concatcp!(PREFIX_ID, INT, ".less_greater");
 impl Default for IntLib {
     fn default() -> Self {
         IntLib {
-            add: add(),
-            subtract: subtract(),
-            multiply: multiply(),
-            divide: divide(),
-            remainder: remainder(),
-            divide_remainder: divide_remainder(),
-            less: less(),
-            less_equal: less_equal(),
-            greater: greater(),
-            greater_equal: greater_equal(),
-            less_greater: less_greater(),
+            add: CtxFreeInputEvalFunc { fn_: add }.build(),
+            subtract: CtxFreeInputEvalFunc { fn_: subtract }.build(),
+            multiply: CtxFreeInputEvalFunc { fn_: multiply }.build(),
+            divide: CtxFreeInputEvalFunc { fn_: divide }.build(),
+            remainder: CtxFreeInputEvalFunc { fn_: remainder }.build(),
+            divide_remainder: CtxFreeInputEvalFunc { fn_: divide_remainder }.build(),
+            less: CtxFreeInputEvalFunc { fn_: less }.build(),
+            less_equal: CtxFreeInputEvalFunc { fn_: less_equal }.build(),
+            greater: CtxFreeInputEvalFunc { fn_: greater }.build(),
+            greater_equal: CtxFreeInputEvalFunc { fn_: greater_equal }.build(),
+            less_greater: CtxFreeInputEvalFunc { fn_: less_greater }.build(),
         }
     }
 }
@@ -74,11 +74,7 @@ impl CfgMod for IntLib {
     }
 }
 
-pub fn add() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_add }.build()
-}
-
-fn fn_add(cfg: &mut Cfg, input: Val) -> Val {
+pub fn add(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{ADD}: expected input to be a pair, but got {input}");
     };
@@ -94,11 +90,7 @@ fn fn_add(cfg: &mut Cfg, input: Val) -> Val {
     Val::Int(i1.add(i2).into())
 }
 
-pub fn subtract() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_subtract }.build()
-}
-
-fn fn_subtract(cfg: &mut Cfg, input: Val) -> Val {
+pub fn subtract(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{SUBTRACT}: expected input to be a pair, but got {input}");
     };
@@ -116,11 +108,7 @@ fn fn_subtract(cfg: &mut Cfg, input: Val) -> Val {
     Val::Int(i1.subtract(i2).into())
 }
 
-pub fn multiply() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_multiply }.build()
-}
-
-fn fn_multiply(cfg: &mut Cfg, input: Val) -> Val {
+pub fn multiply(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{MULTIPLY}: expected input to be a pair, but got {input}");
     };
@@ -138,11 +126,7 @@ fn fn_multiply(cfg: &mut Cfg, input: Val) -> Val {
     Val::Int(i1.multiply(i2).into())
 }
 
-pub fn divide() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_divide }.build()
-}
-
-fn fn_divide(cfg: &mut Cfg, input: Val) -> Val {
+pub fn divide(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{DIVIDE}: expected input to be a pair, but got {input}");
     };
@@ -163,11 +147,7 @@ fn fn_divide(cfg: &mut Cfg, input: Val) -> Val {
     Val::Int(i.into())
 }
 
-pub fn remainder() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_remainder }.build()
-}
-
-fn fn_remainder(cfg: &mut Cfg, input: Val) -> Val {
+pub fn remainder(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{REMAINDER}: expected input to be a pair, but got {input}");
     };
@@ -189,11 +169,7 @@ fn fn_remainder(cfg: &mut Cfg, input: Val) -> Val {
     Val::Int(i.into())
 }
 
-pub fn divide_remainder() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_divide_remainder }.build()
-}
-
-fn fn_divide_remainder(cfg: &mut Cfg, input: Val) -> Val {
+pub fn divide_remainder(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{DIVIDE_REMAINDER}: expected input to be a pair, but got {input}");
     };
@@ -215,11 +191,7 @@ fn fn_divide_remainder(cfg: &mut Cfg, input: Val) -> Val {
     Val::Pair(Pair::new(Val::Int(quotient.into()), Val::Int(rem.into())).into())
 }
 
-pub fn less() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_less }.build()
-}
-
-fn fn_less(cfg: &mut Cfg, input: Val) -> Val {
+pub fn less(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{LESS}: expected input to be a pair, but got {input}");
     };
@@ -233,11 +205,7 @@ fn fn_less(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(i1.less_than(&i2))
 }
 
-pub fn less_equal() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_less_equal }.build()
-}
-
-fn fn_less_equal(cfg: &mut Cfg, input: Val) -> Val {
+pub fn less_equal(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{LESS_EQUAL}: expected input to be a pair, but got {input}");
     };
@@ -253,11 +221,7 @@ fn fn_less_equal(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(i1.less_equal(&i2))
 }
 
-pub fn greater() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_greater }.build()
-}
-
-fn fn_greater(cfg: &mut Cfg, input: Val) -> Val {
+pub fn greater(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{GREATER}: expected input to be a pair, but got {input}");
     };
@@ -272,11 +236,7 @@ fn fn_greater(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(i1.greater_than(&i2))
 }
 
-pub fn greater_equal() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_greater_equal }.build()
-}
-
-fn fn_greater_equal(cfg: &mut Cfg, input: Val) -> Val {
+pub fn greater_equal(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{GREATER_EQUAL}: expected input to be a pair, but got {input}");
     };
@@ -292,11 +252,7 @@ fn fn_greater_equal(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(i1.greater_equal(&i2))
 }
 
-pub fn less_greater() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_less_greater }.build()
-}
-
-fn fn_less_greater(cfg: &mut Cfg, input: Val) -> Val {
+pub fn less_greater(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{LESS_GREATER}: expected input to be a pair, but got {input}");
     };

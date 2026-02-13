@@ -20,7 +20,7 @@ pub const READ_TO_TEXT: &str = concatcp!(PREFIX_ID, FILE, ".read_to_text");
 
 impl Default for FileLib {
     fn default() -> Self {
-        Self { read_to_text: read_to_text() }
+        Self { read_to_text: CtxFreeInputEvalFunc { fn_: read_to_text }.build() }
     }
 }
 
@@ -30,11 +30,7 @@ impl CfgMod for FileLib {
     }
 }
 
-pub fn read_to_text() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_read_to_text }.build()
-}
-
-fn fn_read_to_text(cfg: &mut Cfg, input: Val) -> Val {
+pub fn read_to_text(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(path) = input else {
         return bug!(cfg, "{READ_TO_TEXT}: expected input to be a text, but got {input}");
     };

@@ -40,18 +40,6 @@ impl PartialEq for PrimFunc {
 
 impl Eq for PrimFunc {}
 
-impl Default for PrimFunc {
-    fn default() -> Self {
-        struct F;
-        impl DynFunc<Cfg, Val, Val, Val> for F {
-            fn call(&self, _cfg: &mut Cfg, _ctx: &mut Val, _input: Val) -> Val {
-                Val::default()
-            }
-        }
-        Self { fn_: Rc::new(F), ctx: PrimCtx::Free, input: PrimInput::Free }
-    }
-}
-
 pub struct CtxMutInputEvalFunc<F> {
     pub fn_: F,
 }

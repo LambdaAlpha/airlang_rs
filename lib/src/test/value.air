@@ -260,8 +260,8 @@ _map
 get_type link
 -----
 _ do [
-    .new_link set _ import _link.new,
-    .a set _ new_link .,
+    .make_link set _ import _link.make,
+    .a set _ make_link .,
     .a which get_type : .
 ]
 -----
@@ -359,8 +359,8 @@ true
 == link
 -----
 _ do [
-    .new_link set _ import _link.new,
-    .a set _ new_link .,
+    .make_link set _ import _link.make,
+    .a set _ make_link .,
     .b set a,
     (a == b) and _ not a == .
 ]

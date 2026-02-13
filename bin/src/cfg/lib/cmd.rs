@@ -24,7 +24,7 @@ pub const CALL: &str = concatcp!(PREFIX_ID, COMMAND, ".call");
 
 impl Default for CmdLib {
     fn default() -> Self {
-        Self { call: call() }
+        Self { call: CtxFreeInputEvalFunc { fn_: call }.build() }
     }
 }
 
@@ -37,11 +37,7 @@ impl CfgMod for CmdLib {
 // todo rename
 // todo design
 // todo impl
-pub fn call() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_call }.build()
-}
-
-fn fn_call(cfg: &mut Cfg, input: Val) -> Val {
+pub fn call(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{CALL}: expected input to be a pair, but got {input}");
     };

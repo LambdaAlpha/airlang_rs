@@ -29,7 +29,8 @@ pub struct CtxLib {
     pub set: PrimFuncVal,
     pub form: PrimFuncVal,
     pub represent: PrimFuncVal,
-    pub self_: PrimFuncVal,
+    pub get_self: PrimFuncVal,
+    // todo rename
     pub which: PrimFuncVal,
 }
 
@@ -39,18 +40,19 @@ pub const GET: &str = concatcp!(PREFIX_ID, CTX, ".get");
 pub const SET: &str = concatcp!(PREFIX_ID, CTX, ".set");
 pub const FORM: &str = concatcp!(PREFIX_ID, CTX, ".form");
 pub const REPRESENT: &str = concatcp!(PREFIX_ID, CTX, ".represent");
-pub const SELF: &str = concatcp!(PREFIX_ID, CTX, ".self");
+pub const GET_SELF: &str = concatcp!(PREFIX_ID, CTX, ".get_self");
 pub const WHICH: &str = concatcp!(PREFIX_ID, CTX, ".which");
 
 impl Default for CtxLib {
     fn default() -> Self {
         CtxLib {
-            get: get(),
-            set: set(),
-            form: form(),
-            represent: represent(),
-            self_: self_(),
-            which: which(),
+            get: CtxConstInputEvalFunc { fn_: get }.build(),
+            set: CtxMutInputEvalFunc { fn_: set }.build(),
+            form: PrimFunc { fn_: Rc::new(Form), ctx: PrimCtx::Const_, input: PrimInput::Raw }
+                .into(),
+            represent: CtxMutInputEvalFunc { fn_: represent }.build(),
+            get_self: CtxConstInputFreeFunc { fn_: get_self }.build(),
+            which: CtxMutInputEvalFunc { fn_: which }.build(),
         }
     }
 }
@@ -61,27 +63,19 @@ impl CfgMod for CtxLib {
         extend_func(cfg, SET, self.set);
         extend_func(cfg, FORM, self.form);
         extend_func(cfg, REPRESENT, self.represent);
-        extend_func(cfg, SELF, self.self_);
+        extend_func(cfg, GET_SELF, self.get_self);
         extend_func(cfg, WHICH, self.which);
     }
 }
 
-pub fn get() -> PrimFuncVal {
-    CtxConstInputEvalFunc { fn_: fn_get }.build()
-}
-
-fn fn_get(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+pub fn get(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     let Some(val) = ctx.ref_(cfg, input) else {
         return Val::default();
     };
     val.clone()
 }
 
-pub fn set() -> PrimFuncVal {
-    CtxMutInputEvalFunc { fn_: fn_set }.build()
-}
-
-fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{SET}: expected input to be a pair, but got {input}");
     };
@@ -90,15 +84,7 @@ fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-pub fn form() -> PrimFuncVal {
-    PrimFunc { fn_: Rc::new(Form), ctx: PrimCtx::Const_, input: PrimInput::Raw }.into()
-}
-
-pub fn represent() -> PrimFuncVal {
-    CtxMutInputEvalFunc { fn_: fn_represent }.build()
-}
-
-fn fn_represent(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn represent(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{REPRESENT}: expected input to be a pair, but got {input}");
     };
@@ -114,19 +100,11 @@ fn fn_represent(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-pub fn self_() -> PrimFuncVal {
-    CtxConstInputFreeFunc { fn_: fn_self }.build()
-}
-
-fn fn_self(_cfg: &mut Cfg, ctx: &Val) -> Val {
+pub fn get_self(_cfg: &mut Cfg, ctx: &Val) -> Val {
     ctx.clone()
 }
 
-pub fn which() -> PrimFuncVal {
-    CtxMutInputEvalFunc { fn_: fn_which }.build()
-}
-
-fn fn_which(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn which(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{WHICH}: expected input to be a pair, but got {input}");
     };

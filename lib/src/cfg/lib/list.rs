@@ -56,20 +56,20 @@ pub const CLEAR: &str = concatcp!(PREFIX_ID, LIST, ".clear");
 impl Default for ListLib {
     fn default() -> Self {
         ListLib {
-            get_length: get_length(),
-            set: set(),
-            set_many: set_many(),
-            get: get(),
-            get_many: get_many(),
-            insert: insert(),
-            insert_many: insert_many(),
-            remove: remove(),
-            remove_many: remove_many(),
-            push: push(),
-            push_many: push_many(),
-            pop: pop(),
-            pop_many: pop_many(),
-            clear: clear(),
+            get_length: CtxConstInputFreeFunc { fn_: get_length }.build(),
+            set: CtxMutInputEvalFunc { fn_: set }.build(),
+            set_many: CtxMutInputEvalFunc { fn_: set_many }.build(),
+            get: CtxConstInputEvalFunc { fn_: get }.build(),
+            get_many: CtxConstInputEvalFunc { fn_: get_many }.build(),
+            insert: CtxMutInputEvalFunc { fn_: insert }.build(),
+            insert_many: CtxMutInputEvalFunc { fn_: insert_many }.build(),
+            remove: CtxMutInputEvalFunc { fn_: remove }.build(),
+            remove_many: CtxMutInputEvalFunc { fn_: remove_many }.build(),
+            push: CtxMutInputEvalFunc { fn_: push }.build(),
+            push_many: CtxMutInputEvalFunc { fn_: push_many }.build(),
+            pop: CtxMutInputFreeFunc { fn_: pop }.build(),
+            pop_many: CtxMutInputEvalFunc { fn_: pop_many }.build(),
+            clear: CtxMutInputFreeFunc { fn_: clear }.build(),
         }
     }
 }
@@ -93,11 +93,7 @@ impl CfgMod for ListLib {
     }
 }
 
-pub fn get_length() -> PrimFuncVal {
-    CtxConstInputFreeFunc { fn_: fn_get_length }.build()
-}
-
-fn fn_get_length(cfg: &mut Cfg, ctx: &Val) -> Val {
+pub fn get_length(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::List(list) = ctx else {
         return bug!(cfg, "{GET_LENGTH}: expected context to be a list, but got {ctx}");
     };
@@ -105,11 +101,7 @@ fn fn_get_length(cfg: &mut Cfg, ctx: &Val) -> Val {
     Val::Int(len.into())
 }
 
-pub fn set() -> PrimFuncVal {
-    CtxMutInputEvalFunc { fn_: fn_set }.build()
-}
-
-fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         return bug!(cfg, "{SET}: expected context to be a list, but got {ctx}");
     };
@@ -129,11 +121,7 @@ fn fn_set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     value
 }
 
-pub fn set_many() -> PrimFuncVal {
-    CtxMutInputEvalFunc { fn_: fn_set_many }.build()
-}
-
-fn fn_set_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn set_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         return bug!(cfg, "{SET_MANY}: expected context to be a list, but got {ctx}");
     };
@@ -158,11 +146,7 @@ fn fn_set_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::List(ret.into())
 }
 
-pub fn get() -> PrimFuncVal {
-    CtxConstInputEvalFunc { fn_: fn_get }.build()
-}
-
-fn fn_get(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+pub fn get(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         return bug!(cfg, "{GET}: expected context to be a list, but got {ctx}");
     };
@@ -175,11 +159,7 @@ fn fn_get(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     val.clone()
 }
 
-pub fn get_many() -> PrimFuncVal {
-    CtxConstInputEvalFunc { fn_: fn_get_many }.build()
-}
-
-fn fn_get_many(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
+pub fn get_many(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         return bug!(cfg, "{GET_MANY}: expected context to be a list, but got {ctx}");
     };
@@ -198,11 +178,7 @@ fn fn_get_many(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
     Val::List(List::from(slice.to_owned()).into())
 }
 
-pub fn insert() -> PrimFuncVal {
-    CtxMutInputEvalFunc { fn_: fn_insert }.build()
-}
-
-fn fn_insert(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn insert(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         return bug!(cfg, "{INSERT}: expected context to be a list, but got {ctx}");
     };
@@ -222,11 +198,7 @@ fn fn_insert(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-pub fn insert_many() -> PrimFuncVal {
-    CtxMutInputEvalFunc { fn_: fn_insert_many }.build()
-}
-
-fn fn_insert_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn insert_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         return bug!(cfg, "{INSERT_MANY}: expected context to be a list, but got {ctx}");
     };
@@ -250,11 +222,7 @@ fn fn_insert_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-pub fn remove() -> PrimFuncVal {
-    CtxMutInputEvalFunc { fn_: fn_remove }.build()
-}
-
-fn fn_remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         return bug!(cfg, "{REMOVE}: expected context to be a list, but got {ctx}");
     };
@@ -267,11 +235,7 @@ fn fn_remove(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     list.remove(i)
 }
 
-pub fn remove_many() -> PrimFuncVal {
-    CtxMutInputEvalFunc { fn_: fn_remove_many }.build()
-}
-
-fn fn_remove_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn remove_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         return bug!(cfg, "{REMOVE_MANY}: expected context to be a list, but got {ctx}");
     };
@@ -291,11 +255,7 @@ fn fn_remove_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::List(ret.into())
 }
 
-pub fn push() -> PrimFuncVal {
-    CtxMutInputEvalFunc { fn_: fn_push }.build()
-}
-
-fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         return bug!(cfg, "{PUSH}: expected context to be a list, but got {ctx}");
     };
@@ -303,11 +263,7 @@ fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-pub fn push_many() -> PrimFuncVal {
-    CtxMutInputEvalFunc { fn_: fn_push_many }.build()
-}
-
-fn fn_push_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn push_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         return bug!(cfg, "{PUSH_MANY}: expected context to be a list, but got {ctx}");
     };
@@ -318,11 +274,7 @@ fn fn_push_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::default()
 }
 
-pub fn pop() -> PrimFuncVal {
-    CtxMutInputFreeFunc { fn_: fn_pop }.build()
-}
-
-fn fn_pop(cfg: &mut Cfg, ctx: &mut Val) -> Val {
+pub fn pop(cfg: &mut Cfg, ctx: &mut Val) -> Val {
     let Val::List(list) = ctx else {
         return bug!(cfg, "{POP}: expected context to be a list, but got {ctx}");
     };
@@ -332,11 +284,7 @@ fn fn_pop(cfg: &mut Cfg, ctx: &mut Val) -> Val {
     val
 }
 
-pub fn pop_many() -> PrimFuncVal {
-    CtxMutInputEvalFunc { fn_: fn_pop_many }.build()
-}
-
-fn fn_pop_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn pop_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::List(list) = ctx else {
         return bug!(cfg, "{POP_MANY}: expected context to be a list, but got {ctx}");
     };
@@ -356,11 +304,7 @@ fn fn_pop_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     Val::List(list.into())
 }
 
-pub fn clear() -> PrimFuncVal {
-    CtxMutInputFreeFunc { fn_: fn_clear }.build()
-}
-
-fn fn_clear(cfg: &mut Cfg, ctx: &mut Val) -> Val {
+pub fn clear(cfg: &mut Cfg, ctx: &mut Val) -> Val {
     let Val::List(list) = ctx else {
         return bug!(cfg, "{CLEAR}: expected context to be a list, but got {ctx}");
     };

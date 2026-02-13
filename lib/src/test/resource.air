@@ -34,31 +34,31 @@ _ do [
 set_steps
 -----
 _ do [
-    .new set _ import _config.new,
-    .link.new set _ import _link.new,
+    .make set _ import _config.make,
+    .link.make set _ import _link.make,
     .set_steps set _ import _resource.set_steps,
     .where set _ import _config.where,
     .is_aborted set _ import _error.is_aborted,
-    .prelude set _ link.new {
+    .prelude set _ link.make {
         do : do,
         set_steps : set_steps,
         + : +,
     },
-    .c5 set _ new {
+    .c5 set _ make {
         _prelude : prelude,
     },
     .a5 set c5 where _ do [
         _ set_steps 5,
         1 + 1
     ],
-    .c6 set _ new {
+    .c6 set _ make {
         _prelude : prelude,
     },
     .a6 set c6 where _ do [
         _ set_steps 6,
         1 + 1
     ],
-    .c7 set _ new {
+    .c7 set _ make {
         _prelude : prelude,
     },
     .a7 set c7 where _ do [

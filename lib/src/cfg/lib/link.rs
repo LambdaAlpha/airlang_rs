@@ -20,69 +20,54 @@ use crate::type_::Pair;
 // todo design
 #[derive(Clone)]
 pub struct LinkLib {
-    pub new: PrimFuncVal,
-    pub new_constant: PrimFuncVal,
+    pub make: PrimFuncVal,
+    pub make_constant: PrimFuncVal,
     pub is_constant: PrimFuncVal,
+    // todo rename
     pub which: PrimFuncVal,
 }
 
-pub const NEW: &str = concatcp!(PREFIX_ID, LINK, ".new");
-pub const NEW_CONSTANT: &str = concatcp!(PREFIX_ID, LINK, ".new_constant");
+pub const MAKE: &str = concatcp!(PREFIX_ID, LINK, ".make");
+pub const MAKE_CONSTANT: &str = concatcp!(PREFIX_ID, LINK, ".make_constant");
 pub const IS_CONSTANT: &str = concatcp!(PREFIX_ID, LINK, ".is_constant");
 pub const WHICH: &str = concatcp!(PREFIX_ID, LINK, ".which");
 
 impl Default for LinkLib {
     fn default() -> Self {
         LinkLib {
-            new: new(),
-            new_constant: new_constant(),
-            is_constant: is_constant(),
-            which: which(),
+            make: CtxFreeInputEvalFunc { fn_: make }.build(),
+            make_constant: CtxFreeInputEvalFunc { fn_: make_constant }.build(),
+            is_constant: CtxFreeInputEvalFunc { fn_: is_constant }.build(),
+            which: CtxFreeInputEvalFunc { fn_: which }.build(),
         }
     }
 }
 
 impl CfgMod for LinkLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, NEW, self.new);
-        extend_func(cfg, NEW_CONSTANT, self.new_constant);
+        extend_func(cfg, MAKE, self.make);
+        extend_func(cfg, MAKE_CONSTANT, self.make_constant);
         extend_func(cfg, IS_CONSTANT, self.is_constant);
         extend_func(cfg, WHICH, self.which);
     }
 }
 
-pub fn new() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_new }.build()
-}
-
-fn fn_new(_cfg: &mut Cfg, input: Val) -> Val {
+pub fn make(_cfg: &mut Cfg, input: Val) -> Val {
     Val::Link(LinkVal::new(input, false))
 }
 
-pub fn new_constant() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_new_constant }.build()
-}
-
-fn fn_new_constant(_cfg: &mut Cfg, input: Val) -> Val {
+pub fn make_constant(_cfg: &mut Cfg, input: Val) -> Val {
     Val::Link(LinkVal::new(input, true))
 }
 
-pub fn is_constant() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_is_constant }.build()
-}
-
-fn fn_is_constant(cfg: &mut Cfg, input: Val) -> Val {
+pub fn is_constant(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Link(link) = input else {
         return bug!(cfg, "{WHICH}: expected input to be a link, but got {input}");
     };
     Val::Bit(Bit::from(link.is_const()))
 }
 
-pub fn which() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_which }.build()
-}
-
-fn fn_which(cfg: &mut Cfg, input: Val) -> Val {
+pub fn which(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{WHICH}: expected input to be a pair, but got {input}");
     };

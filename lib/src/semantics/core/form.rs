@@ -89,7 +89,7 @@ where Value: DynFunc<Cfg, Ctx, Val, Val>
 }
 
 #[derive(Default, Copy, Clone)]
-pub(crate) struct Form;
+pub struct Form;
 
 impl DynFunc<Cfg, Val, Val, Val> for Form {
     fn call(&self, cfg: &mut Cfg, ctx: &mut Val, val: Val) -> Val {

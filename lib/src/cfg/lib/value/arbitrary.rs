@@ -263,9 +263,6 @@ impl<T: Arbitrary> Arbitrary for Box<T> {
 impl Arbitrary for FuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
-        if rng.random() {
-            return FuncVal::default();
-        }
         let func = Arbitrary::any(rng, depth);
         FuncVal::Comp(func)
     }

@@ -25,7 +25,7 @@ use crate::type_::Pair;
 
 #[derive(Clone)]
 pub struct FuncLib {
-    pub new: PrimFuncVal,
+    pub make: PrimFuncVal,
     pub represent: PrimFuncVal,
     pub apply: PrimFuncVal,
     pub is_context_free: PrimFuncVal,
@@ -37,7 +37,7 @@ pub struct FuncLib {
     pub get_prelude: PrimFuncVal,
 }
 
-pub const NEW: &str = concatcp!(PREFIX_ID, FUNC, ".new");
+pub const MAKE: &str = concatcp!(PREFIX_ID, FUNC, ".make");
 pub const REPRESENT: &str = concatcp!(PREFIX_ID, FUNC, ".represent");
 pub const APPLY: &str = concatcp!(PREFIX_ID, FUNC, ".apply");
 pub const IS_CONTEXT_FREE: &str = concatcp!(PREFIX_ID, FUNC, ".is_context_free");
@@ -51,23 +51,24 @@ pub const GET_PRELUDE: &str = concatcp!(PREFIX_ID, FUNC, ".get_prelude");
 impl Default for FuncLib {
     fn default() -> Self {
         FuncLib {
-            new: new(),
-            represent: represent(),
-            apply: apply(),
-            is_context_free: is_context_free(),
-            is_context_constant: is_context_constant(),
-            is_input_free: is_input_free(),
-            is_input_raw: is_input_raw(),
-            is_primitive: is_primitive(),
-            get_code: get_code(),
-            get_prelude: get_prelude(),
+            make: CtxFreeInputEvalFunc { fn_: make }.build(),
+            represent: CtxFreeInputEvalFunc { fn_: represent }.build(),
+            apply: PrimFunc { fn_: Rc::new(Apply), ctx: PrimCtx::Mut, input: PrimInput::Eval }
+                .into(),
+            is_context_free: CtxConstInputFreeFunc { fn_: is_context_free }.build(),
+            is_context_constant: CtxConstInputFreeFunc { fn_: is_context_constant }.build(),
+            is_input_free: CtxConstInputFreeFunc { fn_: is_input_free }.build(),
+            is_input_raw: CtxConstInputFreeFunc { fn_: is_input_raw }.build(),
+            is_primitive: CtxConstInputFreeFunc { fn_: is_primitive }.build(),
+            get_code: CtxConstInputFreeFunc { fn_: get_code }.build(),
+            get_prelude: CtxConstInputFreeFunc { fn_: get_prelude }.build(),
         }
     }
 }
 
 impl CfgMod for FuncLib {
     fn extend(self, cfg: &Cfg) {
-        extend_func(cfg, NEW, self.new);
+        extend_func(cfg, MAKE, self.make);
         extend_func(cfg, REPRESENT, self.represent);
         extend_func(cfg, APPLY, self.apply);
         extend_func(cfg, IS_CONTEXT_FREE, self.is_context_free);
@@ -80,33 +81,21 @@ impl CfgMod for FuncLib {
     }
 }
 
-pub fn new() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_new }.build()
-}
-
-fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
+pub fn make(cfg: &mut Cfg, input: Val) -> Val {
     let Some(func) = parse_func(cfg, input) else {
         return Val::default();
     };
     Val::Func(func)
 }
 
-pub fn represent() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_represent }.build()
-}
-
-fn fn_represent(cfg: &mut Cfg, input: Val) -> Val {
+pub fn represent(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Func(func) = input else {
         return bug!(cfg, "{REPRESENT}: expected input to be a function, but got {input}");
     };
     generate_func(func)
 }
 
-pub fn apply() -> PrimFuncVal {
-    PrimFunc { fn_: Rc::new(Apply), ctx: PrimCtx::Mut, input: PrimInput::Eval }.into()
-}
-
-struct Apply;
+pub struct Apply;
 
 impl DynFunc<Cfg, Val, Val, Val> for Apply {
     fn call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -130,22 +119,14 @@ fn func_input(cfg: &mut Cfg, input: Val) -> Result<(FuncVal, Val), Val> {
     Ok((func, pair.right))
 }
 
-pub fn is_context_free() -> PrimFuncVal {
-    CtxConstInputFreeFunc { fn_: fn_is_context_free }.build()
-}
-
-fn fn_is_context_free(cfg: &mut Cfg, ctx: &Val) -> Val {
+pub fn is_context_free(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Func(func) = ctx else {
         return bug!(cfg, "{IS_CONTEXT_FREE}: expected context to be a function, but got {ctx}");
     };
     Val::Bit(Bit::from(matches!(func.ctx(), PrimCtx::Free)))
 }
 
-pub fn is_context_constant() -> PrimFuncVal {
-    CtxConstInputFreeFunc { fn_: fn_is_context_constant }.build()
-}
-
-fn fn_is_context_constant(cfg: &mut Cfg, ctx: &Val) -> Val {
+pub fn is_context_constant(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Func(func) = ctx else {
         return bug!(cfg, "{IS_CONTEXT_CONSTANT}: expected context to be a function, \
             but got {ctx}");
@@ -153,33 +134,21 @@ fn fn_is_context_constant(cfg: &mut Cfg, ctx: &Val) -> Val {
     Val::Bit(Bit::from(!matches!(func.ctx(), PrimCtx::Mut)))
 }
 
-pub fn is_input_free() -> PrimFuncVal {
-    CtxConstInputFreeFunc { fn_: fn_is_input_free }.build()
-}
-
-fn fn_is_input_free(cfg: &mut Cfg, ctx: &Val) -> Val {
+pub fn is_input_free(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Func(func) = ctx else {
         return bug!(cfg, "{IS_INPUT_FREE}: expected context to be a function, but got {ctx}");
     };
     Val::Bit(Bit::from(matches!(func.input(), PrimInput::Free)))
 }
 
-pub fn is_input_raw() -> PrimFuncVal {
-    CtxConstInputFreeFunc { fn_: fn_is_input_raw }.build()
-}
-
-fn fn_is_input_raw(cfg: &mut Cfg, ctx: &Val) -> Val {
+pub fn is_input_raw(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Func(func) = ctx else {
         return bug!(cfg, "{IS_INPUT_RAW}: expected context to be a function, but got {ctx}");
     };
     Val::Bit(Bit::from(!matches!(func.input(), PrimInput::Eval)))
 }
 
-pub fn is_primitive() -> PrimFuncVal {
-    CtxConstInputFreeFunc { fn_: fn_is_primitive }.build()
-}
-
-fn fn_is_primitive(cfg: &mut Cfg, ctx: &Val) -> Val {
+pub fn is_primitive(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Func(func) = ctx else {
         return bug!(cfg, "{IS_PRIMITIVE}: expected context to be a function, but got {ctx}");
     };
@@ -187,22 +156,14 @@ fn fn_is_primitive(cfg: &mut Cfg, ctx: &Val) -> Val {
     Val::Bit(Bit::from(is_primitive))
 }
 
-pub fn get_code() -> PrimFuncVal {
-    CtxConstInputFreeFunc { fn_: fn_get_code }.build()
-}
-
-fn fn_get_code(cfg: &mut Cfg, ctx: &Val) -> Val {
+pub fn get_code(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Func(func) = ctx else {
         return bug!(cfg, "{GET_CODE}: expected context to be a function, but got {ctx}");
     };
     generate_code(func)
 }
 
-pub fn get_prelude() -> PrimFuncVal {
-    CtxConstInputFreeFunc { fn_: fn_get_prelude }.build()
-}
-
-fn fn_get_prelude(cfg: &mut Cfg, ctx: &Val) -> Val {
+pub fn get_prelude(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Func(func) = ctx else {
         return bug!(cfg, "{GET_PRELUDE}: expected context to be a function, but got {ctx}");
     };

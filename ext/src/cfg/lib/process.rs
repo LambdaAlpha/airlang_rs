@@ -28,7 +28,7 @@ pub const CALL: &str = concatcp!(PREFIX_ID, PROCESS, ".call");
 
 impl Default for ProcessLib {
     fn default() -> Self {
-        Self { call: call() }
+        Self { call: CtxFreeInputEvalFunc { fn_: call }.build() }
     }
 }
 
@@ -43,11 +43,7 @@ const ARGUMENTS: &str = "arguments";
 
 // todo design
 // todo impl
-pub fn call() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_call }.build()
-}
-
-fn fn_call(cfg: &mut Cfg, input: Val) -> Val {
+pub fn call(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Map(mut map) = input else {
         return bug!(cfg, "{CALL}: expected input to be a map, but got {input}");
     };

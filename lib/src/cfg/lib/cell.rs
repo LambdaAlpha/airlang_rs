@@ -24,7 +24,10 @@ pub const SET_VALUE: &str = concatcp!(PREFIX_ID, CELL, ".set_value");
 
 impl Default for CellLib {
     fn default() -> Self {
-        CellLib { get_value: get_value(), set_value: set_value() }
+        CellLib {
+            get_value: CtxConstInputFreeFunc { fn_: get_value }.build(),
+            set_value: CtxMutInputEvalFunc { fn_: set_value }.build(),
+        }
     }
 }
 
@@ -35,22 +38,14 @@ impl CfgMod for CellLib {
     }
 }
 
-pub fn get_value() -> PrimFuncVal {
-    CtxConstInputFreeFunc { fn_: fn_get_value }.build()
-}
-
-fn fn_get_value(cfg: &mut Cfg, ctx: &Val) -> Val {
+pub fn get_value(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Cell(cell) = ctx else {
         return bug!(cfg, "{GET_VALUE}: expected context to be a cell, but got {ctx}");
     };
     cell.value.clone()
 }
 
-pub fn set_value() -> PrimFuncVal {
-    CtxMutInputEvalFunc { fn_: fn_set_value }.build()
-}
-
-fn fn_set_value(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
+pub fn set_value(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Cell(cell) = ctx else {
         return bug!(cfg, "{SET_VALUE}: expected context to be a cell, but got {ctx}");
     };

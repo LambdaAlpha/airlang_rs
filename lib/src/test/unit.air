@@ -1,9 +1,8 @@
-from_any
+default
 -----
 _ do [
-    .any set _ import _value.any,
-    .from_any set _ import _unit.from_any,
-    _ from_any _ any .
+    .default set _ import _unit.default,
+    _ default true
 ]
 -----
 .

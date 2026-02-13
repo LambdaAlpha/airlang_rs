@@ -29,7 +29,11 @@ pub const JOIN: &str = concatcp!(PREFIX_ID, BYTE, ".join");
 
 impl Default for ByteLib {
     fn default() -> Self {
-        ByteLib { get_length: get_length(), push: push(), join: join() }
+        ByteLib {
+            get_length: CtxConstInputFreeFunc { fn_: get_length }.build(),
+            push: CtxMutInputEvalFunc { fn_: push }.build(),
+            join: CtxFreeInputEvalFunc { fn_: join }.build(),
+        }
     }
 }
 
@@ -41,11 +45,7 @@ impl CfgMod for ByteLib {
     }
 }
 
-pub fn get_length() -> PrimFuncVal {
-    CtxConstInputFreeFunc { fn_: fn_get_length }.build()
-}
-
-fn fn_get_length(cfg: &mut Cfg, ctx: &Val) -> Val {
+pub fn get_length(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Byte(byte) = ctx else {
         return bug!(cfg, "{GET_LENGTH}: expected context to be a byte, but got {ctx}");
     };
@@ -53,11 +53,7 @@ fn fn_get_length(cfg: &mut Cfg, ctx: &Val) -> Val {
     Val::Int(len.into())
 }
 
-pub fn push() -> PrimFuncVal {
-    CtxMutInputEvalFunc { fn_: fn_push }.build()
-}
-
-fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Byte(byte) = ctx else {
         return bug!(cfg, "{PUSH}: expected context to be a byte, but got {ctx}");
     };
@@ -69,11 +65,7 @@ fn fn_push(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 // todo design
-pub fn join() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_join }.build()
-}
-
-fn fn_join(cfg: &mut Cfg, input: Val) -> Val {
+pub fn join(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{JOIN}: expected input to be a pair, but got {input}");
     };

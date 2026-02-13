@@ -53,12 +53,12 @@ pub const ITERATE: &str = concatcp!(PREFIX_ID, CTRL, ".iterate");
 impl Default for CtrlLib {
     fn default() -> Self {
         CtrlLib {
-            do_: do_(),
-            test: test(),
-            switch: switch(),
-            match_: match_(),
-            loop_: loop_(),
-            iterate: iterate(),
+            do_: CtxMutInputRawFunc { fn_: do_ }.build(),
+            test: CtxMutInputRawFunc { fn_: test }.build(),
+            switch: CtxMutInputRawFunc { fn_: switch }.build(),
+            match_: CtxMutInputRawFunc { fn_: match_ }.build(),
+            loop_: CtxMutInputRawFunc { fn_: loop_ }.build(),
+            iterate: CtxMutInputRawFunc { fn_: iterate }.build(),
         }
     }
 }
@@ -144,22 +144,14 @@ impl Statement {
     }
 }
 
-pub fn do_() -> PrimFuncVal {
-    CtxMutInputRawFunc { fn_: fn_do }.build()
-}
-
-fn fn_do(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn do_(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Ok(block) = Block::parse(DO, cfg, input) else {
         return Val::default();
     };
     block.flow(DO, cfg, ctx).unwrap_or_default()
 }
 
-pub fn test() -> PrimFuncVal {
-    CtxMutInputRawFunc { fn_: fn_test }.build()
-}
-
-fn fn_test(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn test(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Ok(test) = Test::parse(cfg, input) else {
         return Val::default();
     };
@@ -208,11 +200,7 @@ impl Test {
     }
 }
 
-pub fn switch() -> PrimFuncVal {
-    CtxMutInputRawFunc { fn_: fn_switch }.build()
-}
-
-fn fn_switch(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn switch(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Ok(switch) = Switch::parse(cfg, input) else {
         return Val::default();
     };
@@ -273,11 +261,7 @@ impl Switch {
     }
 }
 
-pub fn match_() -> PrimFuncVal {
-    CtxMutInputRawFunc { fn_: fn_match }.build()
-}
-
-fn fn_match(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn match_(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Ok(match_) = Match::parse(cfg, input) else {
         return Val::default();
     };
@@ -341,11 +325,7 @@ impl Match {
     }
 }
 
-pub fn loop_() -> PrimFuncVal {
-    CtxMutInputRawFunc { fn_: fn_loop }.build()
-}
-
-fn fn_loop(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn loop_(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Ok(loop_) = Loop::parse(cfg, input) else {
         return Val::default();
     };
@@ -394,11 +374,7 @@ impl Loop {
     }
 }
 
-pub fn iterate() -> PrimFuncVal {
-    CtxMutInputRawFunc { fn_: fn_iterate }.build()
-}
-
-fn fn_iterate(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn iterate(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Ok(iterate) = Iterate::parse(cfg, input) else {
         return Val::default();
     };

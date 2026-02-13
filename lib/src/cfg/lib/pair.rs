@@ -29,10 +29,10 @@ pub const SET_RIGHT: &str = concatcp!(PREFIX_ID, PAIR, ".set_right");
 impl Default for PairLib {
     fn default() -> Self {
         PairLib {
-            get_left: get_left(),
-            set_left: set_left(),
-            get_right: get_right(),
-            set_right: set_right(),
+            get_left: CtxConstInputFreeFunc { fn_: get_left }.build(),
+            set_left: CtxMutInputEvalFunc { fn_: set_left }.build(),
+            get_right: CtxConstInputFreeFunc { fn_: get_right }.build(),
+            set_right: CtxMutInputEvalFunc { fn_: set_right }.build(),
         }
     }
 }
@@ -46,22 +46,14 @@ impl CfgMod for PairLib {
     }
 }
 
-pub fn get_left() -> PrimFuncVal {
-    CtxConstInputFreeFunc { fn_: fn_get_left }.build()
-}
-
-fn fn_get_left(cfg: &mut Cfg, ctx: &Val) -> Val {
+pub fn get_left(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Pair(pair) = ctx else {
         return bug!(cfg, "{GET_LEFT}: expected context to be a pair, but got {ctx}");
     };
     pair.left.clone()
 }
 
-pub fn set_left() -> PrimFuncVal {
-    CtxMutInputEvalFunc { fn_: fn_set_left }.build()
-}
-
-fn fn_set_left(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
+pub fn set_left(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Pair(pair) = ctx else {
         return bug!(cfg, "{SET_LEFT}: expected context to be a pair, but got {ctx}");
     };
@@ -69,22 +61,14 @@ fn fn_set_left(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     input
 }
 
-pub fn get_right() -> PrimFuncVal {
-    CtxConstInputFreeFunc { fn_: fn_get_right }.build()
-}
-
-fn fn_get_right(cfg: &mut Cfg, ctx: &Val) -> Val {
+pub fn get_right(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Pair(pair) = ctx else {
         return bug!(cfg, "{GET_RIGHT}: expected context to be a pair, but got {ctx}");
     };
     pair.right.clone()
 }
 
-pub fn set_right() -> PrimFuncVal {
-    CtxMutInputEvalFunc { fn_: fn_set_right }.build()
-}
-
-fn fn_set_right(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
+pub fn set_right(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Pair(pair) = ctx else {
         return bug!(cfg, "{SET_RIGHT}: expected context to be a pair, but got {ctx}");
     };

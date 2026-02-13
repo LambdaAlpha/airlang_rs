@@ -1,5 +1,4 @@
 use crate::cfg::lib::CoreLib;
-use crate::semantics::val::FuncVal;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Key;
@@ -103,7 +102,7 @@ impl CorePrelude {
             decimal_greater_equal: lib.decimal.greater_equal.clone(),
             decimal_less_greater: lib.decimal.less_greater.clone(),
 
-            call: lib.call.new.clone(),
+            call: lib.call.make.clone(),
 
             move_: lib.map.move_.clone(),
 
@@ -112,7 +111,7 @@ impl CorePrelude {
             export: lib.cfg.export.clone(),
             with: lib.cfg.with.clone(),
 
-            function: lib.func.new.clone(),
+            function: lib.func.make.clone(),
             apply: lib.func.apply.clone(),
 
             get: lib.ctx.get.clone(),
@@ -208,9 +207,7 @@ impl Prelude for CorePrelude {
     }
 }
 
-pub fn map_put_func<V: Clone + Into<FuncVal>>(
-    map: &mut Map<Key, Val>, name: &'static str, val: &V,
-) {
+pub fn map_put_func(map: &mut Map<Key, Val>, name: &'static str, val: &PrimFuncVal) {
     let name = Key::from_str_unchecked(name);
     let v = map.insert(name, Val::Func(val.clone().into()));
     assert!(v.is_none(), "names of preludes should be unique");

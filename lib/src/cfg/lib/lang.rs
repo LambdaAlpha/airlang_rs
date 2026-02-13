@@ -40,12 +40,12 @@ pub const GENERATE: &str = concatcp!(PREFIX_ID, LANGUAGE, ".syntax.generate");
 impl Default for LangLib {
     fn default() -> Self {
         LangLib {
-            data: data(),
-            id: id(),
-            code: code(),
-            eval: eval(),
-            parse: parse(),
-            generate: generate(),
+            data: PrimFunc { fn_: Rc::new(Id), ctx: PrimCtx::Free, input: PrimInput::Raw }.into(),
+            id: PrimFunc { fn_: Rc::new(Id), ctx: PrimCtx::Free, input: PrimInput::Eval }.into(),
+            code: PrimFunc { fn_: Rc::new(Eval), ctx: PrimCtx::Mut, input: PrimInput::Raw }.into(),
+            eval: PrimFunc { fn_: Rc::new(Eval), ctx: PrimCtx::Mut, input: PrimInput::Eval }.into(),
+            parse: CtxFreeInputEvalFunc { fn_: parse }.build(),
+            generate: CtxFreeInputEvalFunc { fn_: generate }.build(),
         }
     }
 }
@@ -61,27 +61,7 @@ impl CfgMod for LangLib {
     }
 }
 
-pub fn data() -> PrimFuncVal {
-    PrimFunc { fn_: Rc::new(Id), ctx: PrimCtx::Free, input: PrimInput::Raw }.into()
-}
-
-pub fn id() -> PrimFuncVal {
-    PrimFunc { fn_: Rc::new(Id), ctx: PrimCtx::Free, input: PrimInput::Eval }.into()
-}
-
-pub fn code() -> PrimFuncVal {
-    PrimFunc { fn_: Rc::new(Eval), ctx: PrimCtx::Mut, input: PrimInput::Raw }.into()
-}
-
-pub fn eval() -> PrimFuncVal {
-    PrimFunc { fn_: Rc::new(Eval), ctx: PrimCtx::Mut, input: PrimInput::Eval }.into()
-}
-
-pub fn parse() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_parse }.build()
-}
-
-fn fn_parse(cfg: &mut Cfg, input: Val) -> Val {
+pub fn parse(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(input) = input else {
         return bug!(cfg, "{PARSE}: expected input to be a text, but got {input}");
     };
@@ -91,11 +71,7 @@ fn fn_parse(cfg: &mut Cfg, input: Val) -> Val {
     Val::Cell(Cell::new(val).into())
 }
 
-pub fn generate() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_generate }.build()
-}
-
-fn fn_generate(_cfg: &mut Cfg, input: Val) -> Val {
+pub fn generate(_cfg: &mut Cfg, input: Val) -> Val {
     let str = format!("{input:#}");
     Val::Text(Text::from(str).into())
 }

@@ -44,15 +44,15 @@ pub const LESS_GREATER: &str = concatcp!(PREFIX_ID, DECIMAL, ".less_greater");
 impl Default for DecimalLib {
     fn default() -> Self {
         DecimalLib {
-            add: add(),
-            subtract: subtract(),
-            multiply: multiply(),
-            divide: divide(),
-            less: less(),
-            less_equal: less_equal(),
-            greater: greater(),
-            greater_equal: greater_equal(),
-            less_greater: less_greater(),
+            add: CtxFreeInputEvalFunc { fn_: add }.build(),
+            subtract: CtxFreeInputEvalFunc { fn_: subtract }.build(),
+            multiply: CtxFreeInputEvalFunc { fn_: multiply }.build(),
+            divide: CtxFreeInputEvalFunc { fn_: divide }.build(),
+            less: CtxFreeInputEvalFunc { fn_: less }.build(),
+            less_equal: CtxFreeInputEvalFunc { fn_: less_equal }.build(),
+            greater: CtxFreeInputEvalFunc { fn_: greater }.build(),
+            greater_equal: CtxFreeInputEvalFunc { fn_: greater_equal }.build(),
+            less_greater: CtxFreeInputEvalFunc { fn_: less_greater }.build(),
         }
     }
 }
@@ -121,11 +121,7 @@ fn parse_rounding_mode(key: &str) -> Option<RoundingMode> {
     Some(mode)
 }
 
-pub fn add() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_add }.build()
-}
-
-fn fn_add(cfg: &mut Cfg, input: Val) -> Val {
+pub fn add(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{ADD}: expected input to be a pair, but got {input}");
     };
@@ -144,11 +140,7 @@ fn fn_add(cfg: &mut Cfg, input: Val) -> Val {
     Val::Decimal(d1.add(d2, config).into())
 }
 
-pub fn subtract() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_subtract }.build()
-}
-
-fn fn_subtract(cfg: &mut Cfg, input: Val) -> Val {
+pub fn subtract(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{SUBTRACT}: expected input to be a pair, but got {input}");
     };
@@ -168,11 +160,7 @@ fn fn_subtract(cfg: &mut Cfg, input: Val) -> Val {
     Val::Decimal(d1.subtract(d2, config).into())
 }
 
-pub fn multiply() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_multiply }.build()
-}
-
-fn fn_multiply(cfg: &mut Cfg, input: Val) -> Val {
+pub fn multiply(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{MULTIPLY}: expected input to be a pair, but got {input}");
     };
@@ -192,11 +180,7 @@ fn fn_multiply(cfg: &mut Cfg, input: Val) -> Val {
     Val::Decimal(d1.multiply(d2, config).into())
 }
 
-pub fn divide() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_divide }.build()
-}
-
-fn fn_divide(cfg: &mut Cfg, input: Val) -> Val {
+pub fn divide(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{DIVIDE}: expected input to be a pair, but got {input}");
     };
@@ -219,11 +203,7 @@ fn fn_divide(cfg: &mut Cfg, input: Val) -> Val {
     Val::Decimal(d.into())
 }
 
-pub fn less() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_less }.build()
-}
-
-fn fn_less(cfg: &mut Cfg, input: Val) -> Val {
+pub fn less(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{LESS}: expected input to be a pair, but got {input}");
     };
@@ -237,11 +217,7 @@ fn fn_less(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(d1.less_than(&d2))
 }
 
-pub fn less_equal() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_less_equal }.build()
-}
-
-fn fn_less_equal(cfg: &mut Cfg, input: Val) -> Val {
+pub fn less_equal(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{LESS_EQUAL}: expected input to be a pair, but got {input}");
     };
@@ -257,11 +233,7 @@ fn fn_less_equal(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(d1.less_equal(&d2))
 }
 
-pub fn greater() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_greater }.build()
-}
-
-fn fn_greater(cfg: &mut Cfg, input: Val) -> Val {
+pub fn greater(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{GREATER}: expected input to be a pair, but got {input}");
     };
@@ -276,11 +248,7 @@ fn fn_greater(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(d1.greater_than(&d2))
 }
 
-pub fn greater_equal() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_greater_equal }.build()
-}
-
-fn fn_greater_equal(cfg: &mut Cfg, input: Val) -> Val {
+pub fn greater_equal(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{GREATER_EQUAL}: expected input to be a pair, but got {input}");
     };
@@ -296,11 +264,7 @@ fn fn_greater_equal(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(d1.greater_equal(&d2))
 }
 
-pub fn less_greater() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_less_greater }.build()
-}
-
-fn fn_less_greater(cfg: &mut Cfg, input: Val) -> Val {
+pub fn less_greater(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{LESS_GREATER}: expected input to be a pair, but got {input}");
     };

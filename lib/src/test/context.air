@@ -39,7 +39,7 @@ _ do [
 -----
 2
 =====
-set self
+set get_self
 -----
 _ do [
     .a set 1,
@@ -144,12 +144,12 @@ _ do [
 = destruct list more pattern
 -----
 _ do [
-    .config.new set _ import _config.new,
-    .link.new set _ import _link.new,
+    .config.make set _ import _config.make,
+    .link.make set _ import _link.make,
     .where set _ import _config.where,
     .is_aborted set _ import _error.is_aborted,
-    .c set _ config.new {
-        _prelude : _ link.new {
+    .c set _ config.make {
+        _prelude : _ link.make {
             = : =,
         },
     },
@@ -288,34 +288,34 @@ _ do [
 -----
 1
 =====
-which self
+which get_self
 -----
 _ do [
-    .self set _ import _context.self,
+    .get_self set _ import _context.get_self,
     .u set 1,
-    .u which self : .
+    .u which get_self : .
 ]
 -----
 1
 =====
-self
+get_self
 -----
 _ do [
-    .self set _ import _context.self,
+    .get_self set _ import _context.get_self,
     _a set 1,
-    .b set _ self .,
+    .b set _ get_self .,
     .b which get : _a
 ]
 -----
 1
 =====
-self non-sync
+get_self non-sync
 -----
 _ do [
     .any set _ import _value.any,
-    .self set _ import _context.self,
+    .get_self set _ import _context.get_self,
     .contain set _ import _map.contain,
-    .a set _ self .,
+    .a set _ get_self .,
     _b set _ any .,
     .a which contain : _b
 ]

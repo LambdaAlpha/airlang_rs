@@ -27,7 +27,13 @@ pub const IMPLY: &str = concatcp!(PREFIX_ID, BIT, ".imply");
 
 impl Default for BitLib {
     fn default() -> Self {
-        BitLib { not: not(), and: and(), or: or(), xor: xor(), imply: imply() }
+        BitLib {
+            not: CtxFreeInputEvalFunc { fn_: not }.build(),
+            and: CtxFreeInputEvalFunc { fn_: and }.build(),
+            or: CtxFreeInputEvalFunc { fn_: or }.build(),
+            xor: CtxFreeInputEvalFunc { fn_: xor }.build(),
+            imply: CtxFreeInputEvalFunc { fn_: imply }.build(),
+        }
     }
 }
 
@@ -41,22 +47,14 @@ impl CfgMod for BitLib {
     }
 }
 
-pub fn not() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_not }.build()
-}
-
-fn fn_not(cfg: &mut Cfg, input: Val) -> Val {
+pub fn not(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Bit(b) = input else {
         return bug!(cfg, "{NOT}: expected input to be a bit, but got {input}");
     };
     Val::Bit(b.not())
 }
 
-pub fn and() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_and }.build()
-}
-
-fn fn_and(cfg: &mut Cfg, input: Val) -> Val {
+pub fn and(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{AND}: expected input to be a pair, but got {input}");
     };
@@ -69,11 +67,7 @@ fn fn_and(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(left.and(right))
 }
 
-pub fn or() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_or }.build()
-}
-
-fn fn_or(cfg: &mut Cfg, input: Val) -> Val {
+pub fn or(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{OR}: expected input to be a pair, but got {input}");
     };
@@ -86,11 +80,7 @@ fn fn_or(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(left.or(right))
 }
 
-pub fn xor() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_xor }.build()
-}
-
-fn fn_xor(cfg: &mut Cfg, input: Val) -> Val {
+pub fn xor(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{XOR}: expected input to be a pair, but got {input}");
     };
@@ -103,11 +93,7 @@ fn fn_xor(cfg: &mut Cfg, input: Val) -> Val {
     Val::Bit(left.xor(right))
 }
 
-pub fn imply() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_imply }.build()
-}
-
-fn fn_imply(cfg: &mut Cfg, input: Val) -> Val {
+pub fn imply(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{IMPLY}: expected input to be a pair, but got {input}");
     };

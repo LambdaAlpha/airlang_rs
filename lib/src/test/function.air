@@ -53,7 +53,7 @@ true
 stateful
 -----
 _ do [
-    .new_link set _ import _link.new,
+    .make_link set _ import _link.make,
     .link_which set _ import _link.which,
     .f set _ function {
         code : (. : .) : _ form _ do [
@@ -62,7 +62,7 @@ _ do [
             .i
         ],
         prelude : {
-            a : _ new_link {_i : 0}
+            a : _ make_link {_i : 0}
         },
     },
     [_ f ., _ f ., _ f .]
@@ -73,7 +73,7 @@ _ do [
 multiple stateful
 -----
 _ do [
-    .new_link set _ import _link.new,
+    .make_link set _ import _link.make,
     .link_which set _ import _link.which,
     .f set _ data _ function {
         code : (. : .) : _ form _ do [
@@ -82,7 +82,7 @@ _ do [
             .i
         ],
         prelude : {
-            a : _ new_link .(0)
+            a : _ make_link .(0)
         },
     },
     .f1 set _ eval f,
@@ -142,8 +142,8 @@ const mutate fail
 -----
 _ do [
     .link_which set _ import _link.which,
-    .config.new set _ import _config.new,
-    .link.new set _ import _link.new,
+    .config.make set _ import _config.make,
+    .link.make set _ import _link.make,
     .where set _ import _config.where,
     .is_aborted set _ import _error.is_aborted,
     .f set _ function {
@@ -151,8 +151,8 @@ _ do [
         context_constant : true,
         prelude : {},
     },
-    .c set _ config.new {
-        _prelude : _ link.new {
+    .c set _ config.make {
+        _prelude : _ link.make {
             f : f,
             a : 1,
         },

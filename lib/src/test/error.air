@@ -1,12 +1,12 @@
 abort
 -----
 _ do [
-    .config.new set _ import _config.new,
-    .link.new set _ import _link.new,
+    .config.make set _ import _config.make,
+    .link.make set _ import _link.make,
     .where set _ import _config.where,
     .is_aborted set _ import _error.is_aborted,
-    .cfg set _ config.new {
-        _prelude : _ link.new {
+    .cfg set _ config.make {
+        _prelude : _ link.make {
             do : do,
             abort : abort,
         },
@@ -24,12 +24,12 @@ true
 abort is_aborted
 -----
 _ do [
-    .cfg_new set _ import _config.new,
-    .link.new set _ import _link.new,
+    .cfg_make set _ import _config.make,
+    .link.make set _ import _link.make,
     .where set _ import _config.where,
     .is_aborted set _ import _error.is_aborted,
-    .cfg set _ cfg_new {
-        _prelude : _ link.new {
+    .cfg set _ cfg_make {
+        _prelude : _ link.make {
             abort : abort,
         },
     },
@@ -42,12 +42,12 @@ true
 assert false
 -----
 _ do [
-    .cfg_new set _ import _config.new,
-    .link.new set _ import _link.new,
+    .cfg_make set _ import _config.make,
+    .link.make set _ import _link.make,
     .where set _ import _config.where,
     .is_aborted set _ import _error.is_aborted,
-    .cfg set _ cfg_new {
-        _prelude : _ link.new {
+    .cfg set _ cfg_make {
+        _prelude : _ link.make {
             assert : assert,
         },
     },
@@ -60,12 +60,12 @@ true
 assert true
 -----
 _ do [
-    .cfg_new set _ import _config.new,
-    .link.new set _ import _link.new,
+    .cfg_make set _ import _config.make,
+    .link.make set _ import _link.make,
     .where set _ import _config.where,
     .is_aborted set _ import _error.is_aborted,
-    .cfg set _ cfg_new {
-        _prelude : _ link.new {
+    .cfg set _ cfg_make {
+        _prelude : _ link.make {
             assert : assert,
         },
     },
@@ -78,13 +78,13 @@ false
 recover
 -----
 _ do [
-    .cfg_new set _ import _config.new,
-    .link.new set _ import _link.new,
+    .cfg_make set _ import _config.make,
+    .link.make set _ import _link.make,
     .where set _ import _config.where,
     .is_aborted set _ import _error.is_aborted,
     .recover set _ import _error.recover,
-    .cfg set _ cfg_new {
-        _prelude : _ link.new {
+    .cfg set _ cfg_make {
+        _prelude : _ link.make {
             abort : abort,
         },
     },

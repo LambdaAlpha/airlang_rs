@@ -32,7 +32,12 @@ pub const RECOVER: &str = concatcp!(PREFIX_ID, ERROR, ".recover");
 
 impl Default for ErrorLib {
     fn default() -> Self {
-        ErrorLib { abort: abort(), assert: assert(), is_aborted: is_aborted(), recover: recover() }
+        ErrorLib {
+            abort: CtxFreeInputFreeFunc { fn_: abort }.build(),
+            assert: CtxFreeInputEvalFunc { fn_: assert }.build(),
+            is_aborted: CtxConstInputFreeFunc { fn_: is_aborted }.build(),
+            recover: CtxMutInputFreeFunc { fn_: recover }.build(),
+        }
     }
 }
 
@@ -45,20 +50,12 @@ impl CfgMod for ErrorLib {
     }
 }
 
-pub fn abort() -> PrimFuncVal {
-    CtxFreeInputFreeFunc { fn_: fn_abort }.build()
-}
-
-fn fn_abort(cfg: &mut Cfg) -> Val {
+pub fn abort(cfg: &mut Cfg) -> Val {
     cfg.abort();
     Val::default()
 }
 
-pub fn assert() -> PrimFuncVal {
-    CtxFreeInputEvalFunc { fn_: fn_assert }.build()
-}
-
-fn fn_assert(cfg: &mut Cfg, input: Val) -> Val {
+pub fn assert(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{ASSERT}: expected input to be a pair, but got {input}");
     };
@@ -76,11 +73,7 @@ fn fn_assert(cfg: &mut Cfg, input: Val) -> Val {
     Val::default()
 }
 
-pub fn is_aborted() -> PrimFuncVal {
-    CtxConstInputFreeFunc { fn_: fn_is_aborted }.build()
-}
-
-fn fn_is_aborted(cfg: &mut Cfg, ctx: &Val) -> Val {
+pub fn is_aborted(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Cfg(target_cfg) = ctx else {
         return bug!(cfg, "{IS_ABORTED}: expected context to be a config, but got {ctx}");
     };
@@ -88,11 +81,7 @@ fn fn_is_aborted(cfg: &mut Cfg, ctx: &Val) -> Val {
     Val::Bit(aborted.into())
 }
 
-pub fn recover() -> PrimFuncVal {
-    CtxMutInputFreeFunc { fn_: fn_recover }.build()
-}
-
-fn fn_recover(cfg: &mut Cfg, ctx: &mut Val) -> Val {
+pub fn recover(cfg: &mut Cfg, ctx: &mut Val) -> Val {
     let Val::Cfg(target_cfg) = ctx else {
         return bug!(cfg, "{RECOVER}: expected context to be a config, but got {ctx}");
     };

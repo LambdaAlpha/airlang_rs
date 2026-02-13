@@ -5,8 +5,8 @@ use crate::bug;
 use crate::cfg::prelude::CorePrelude;
 use crate::cfg::prelude::prelude_repr;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::val::FuncVal;
 use crate::semantics::val::LinkVal;
+use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Key;
 use crate::type_::Map;
@@ -67,7 +67,7 @@ pub fn extend(cfg: &Cfg, key: &str, val: impl Into<Val>) {
     cfg.extend_scope(Key::from_str_unchecked(key), val.into());
 }
 
-pub fn extend_func(cfg: &Cfg, key: &str, val: impl Into<FuncVal>) {
+pub fn extend_func(cfg: &Cfg, key: &str, val: PrimFuncVal) {
     cfg.extend_scope(Key::from_str_unchecked(key), Val::Func(val.into()));
 }
 
