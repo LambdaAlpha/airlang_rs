@@ -114,10 +114,8 @@ impl Block {
                 Val::Cell(cell) => return Some(Cell::from(cell).value),
                 Val::Unit(_) => {},
                 output => {
-                    bug!(
-                        cfg,
-                        "{tag}: expected body of {TRY} to be a cell or unit, but got {output:?}"
-                    );
+                    bug!(cfg, "{tag}: expected body of {TRY} to be a cell or unit, \
+                        but got {output:?}");
                     return None;
                 },
             }
@@ -242,11 +240,8 @@ impl Switch {
             Val::Pair(pair) => {
                 let pair = Pair::from(pair);
                 let Val::Map(map) = pair.left else {
-                    return Err(bug!(
-                        cfg,
-                        "{SWITCH}: expected input.right.left to be a map, but got {}",
-                        pair.left
-                    ));
+                    return Err(bug!(cfg, "{SWITCH}: expected input.right.left to be a map, \
+                        but got {}", pair.left));
                 };
                 let map = Self::parse_block_map(cfg, map)?;
                 let default = Some(Block::parse(SWITCH, cfg, pair.right)?);
@@ -302,11 +297,8 @@ impl Match {
         let pair = Pair::from(pair);
         let val = pair.left;
         let Val::List(list) = pair.right else {
-            return Err(bug!(
-                cfg,
-                "{MATCH}: expected input.right to be a list, but got {}",
-                pair.right
-            ));
+            return Err(bug!(cfg, "{MATCH}: expected input.right to be a list, \
+                but got {}", pair.right));
         };
         let arms = Self::parse_arms(cfg, list)?;
         Ok(Self { val, arms })
@@ -392,10 +384,8 @@ impl Loop {
                 Val::Cell(cell) => return Cell::from(cell).value,
                 Val::Unit(_) => {},
                 output => {
-                    bug!(
-                        cfg,
-                        "{LOOP}: expected return value of body to be a cell or unit, but got {output:?}"
-                    );
+                    bug!(cfg, "{LOOP}: expected return value of body to be a cell or unit, \
+                        but got {output:?}");
                     return Val::default();
                 },
             }
@@ -429,19 +419,13 @@ impl Iterate {
         let pair = Pair::from(pair);
         let val = pair.left;
         let Val::Pair(name_body) = pair.right else {
-            return Err(bug!(
-                cfg,
-                "{ITERATE}: expected input.right to be a pair, but got {}",
-                pair.right
-            ));
+            return Err(bug!(cfg, "{ITERATE}: expected input.right to be a pair, \
+                but got {}", pair.right));
         };
         let name_body = Pair::from(name_body);
         let Val::Key(name) = name_body.left else {
-            return Err(bug!(
-                cfg,
-                "{ITERATE}: expected input.right.left to be a key, but got {}",
-                name_body.left
-            ));
+            return Err(bug!(cfg, "{ITERATE}: expected input.right.left to be a key, \
+                but got {}", name_body.left));
         };
         let body = Block::parse(ITERATE, cfg, name_body.right)?;
         Ok(Self { val, name, body })
@@ -453,10 +437,8 @@ impl Iterate {
             Val::Int(i) => {
                 let i = Int::from(i);
                 if i.is_negative() {
-                    return bug!(
-                        cfg,
-                        "{ITERATE}: expected integer to be non-negative, but got {i}"
-                    );
+                    return bug!(cfg, "{ITERATE}: expected integer to be non-negative, \
+                        but got {i}");
                 }
                 let Some(i) = i.to_u128() else {
                     return bug!(cfg, "{ITERATE}: unable to iterate {i}");
@@ -524,10 +506,8 @@ where ValIter: Iterator<Item = Val> {
             Val::Cell(cell) => return Cell::from(cell).value,
             Val::Unit(_) => {},
             output => {
-                bug!(
-                    cfg,
-                    "{ITERATE}: expected return value of body to be a cell or unit, but got {output:?}"
-                );
+                bug!(cfg, "{ITERATE}: expected return value of body to be a cell or unit, \
+                    but got {output:?}");
                 return Val::default();
             },
         }

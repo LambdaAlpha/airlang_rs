@@ -136,11 +136,8 @@ fn fn_which(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     };
     let func_input = Pair::from(func_input);
     let Val::Func(func) = func_input.left else {
-        return bug!(
-            cfg,
-            "{WHICH}: expected input.right.left to be a function, but got {}",
-            func_input.left
-        );
+        return bug!(cfg, "{WHICH}: expected input.right.left to be a function, \
+            but got {}", func_input.left);
     };
     let Some(ctx) = ctx.ref_mut(cfg, pair.left) else {
         return Val::default();

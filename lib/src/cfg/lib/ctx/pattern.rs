@@ -189,11 +189,8 @@ impl PatternMatch<Val> for List<Pattern> {
         };
         if val.len() < self.len() {
             if force {
-                bug!(
-                    cfg,
-                    "{tag}: expected length of list to be at least {}, but got {val}",
-                    self.len()
-                );
+                bug!(cfg, "{tag}: expected length of list to be at least {}, \
+                    but got {val}", self.len());
             }
             return false;
         }
@@ -310,11 +307,8 @@ impl PatternAssign<Val, Val> for List<Pattern> {
             return None;
         };
         if val.len() < self.len() {
-            bug!(
-                cfg,
-                "{tag}: expected length of list to be at least {}, but got {val}",
-                self.len()
-            );
+            bug!(cfg, "{tag}: expected length of list to be at least {}, \
+                but got {val}", self.len());
             return None;
         }
         let mut val_iter = List::from(val).into_iter();

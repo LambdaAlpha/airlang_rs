@@ -89,10 +89,8 @@ fn decimal_config(tag: &str, cfg: &mut Cfg) -> Option<DecimalConfig> {
         return None;
     };
     let Val::Int(precision) = precision else {
-        bug!(
-            cfg,
-            "{tag}: expected config {ROUNDING_PRECISION} to be an integer, but got {precision}"
-        );
+        bug!(cfg, "{tag}: expected config {ROUNDING_PRECISION} to be an integer, \
+            but got {precision}");
         return None;
     };
     let precision: u64 = precision.unwrap().unwrap().try_into().ok()?;
@@ -159,11 +157,8 @@ fn fn_subtract(cfg: &mut Cfg, input: Val) -> Val {
         return bug!(cfg, "{SUBTRACT}: expected input.left to be a decimal, but got {}", pair.left);
     };
     let Val::Decimal(d2) = pair.right else {
-        return bug!(
-            cfg,
-            "{SUBTRACT}: expected input.right to be a decimal, but got {}",
-            pair.right
-        );
+        return bug!(cfg, "{SUBTRACT}: expected input.right to be a decimal, \
+            but got {}", pair.right);
     };
     let Some(config) = decimal_config(SUBTRACT, cfg) else {
         return Val::default();
@@ -186,11 +181,8 @@ fn fn_multiply(cfg: &mut Cfg, input: Val) -> Val {
         return bug!(cfg, "{MULTIPLY}: expected input.left to be a decimal, but got {}", pair.left);
     };
     let Val::Decimal(d2) = pair.right else {
-        return bug!(
-            cfg,
-            "{MULTIPLY}: expected input.right to be a decimal, but got {}",
-            pair.right
-        );
+        return bug!(cfg, "{MULTIPLY}: expected input.right to be a decimal, \
+            but got {}", pair.right);
     };
     let Some(config) = decimal_config(MULTIPLY, cfg) else {
         return Val::default();
@@ -255,18 +247,12 @@ fn fn_less_equal(cfg: &mut Cfg, input: Val) -> Val {
     };
     let pair = Pair::from(pair);
     let Val::Decimal(d1) = pair.left else {
-        return bug!(
-            cfg,
-            "{LESS_EQUAL}: expected input.left to be a decimal, but got {}",
-            pair.left
-        );
+        return bug!(cfg, "{LESS_EQUAL}: expected input.left to be a decimal, \
+            but got {}", pair.left);
     };
     let Val::Decimal(d2) = pair.right else {
-        return bug!(
-            cfg,
-            "{LESS_EQUAL}: expected input.right to be a decimal, but got {}",
-            pair.right
-        );
+        return bug!(cfg, "{LESS_EQUAL}: expected input.right to be a decimal, \
+            but got {}", pair.right);
     };
     Val::Bit(d1.less_equal(&d2))
 }
@@ -284,11 +270,8 @@ fn fn_greater(cfg: &mut Cfg, input: Val) -> Val {
         return bug!(cfg, "{GREATER}: expected input.left to be a decimal, but got {}", pair.left);
     };
     let Val::Decimal(d2) = pair.right else {
-        return bug!(
-            cfg,
-            "{GREATER}: expected input.right to be a decimal, but got {}",
-            pair.right
-        );
+        return bug!(cfg, "{GREATER}: expected input.right to be a decimal, \
+            but got {}", pair.right);
     };
     Val::Bit(d1.greater_than(&d2))
 }
@@ -303,18 +286,12 @@ fn fn_greater_equal(cfg: &mut Cfg, input: Val) -> Val {
     };
     let pair = Pair::from(pair);
     let Val::Decimal(d1) = pair.left else {
-        return bug!(
-            cfg,
-            "{GREATER_EQUAL}: expected input.left to be a decimal, but got {}",
-            pair.left
-        );
+        return bug!(cfg, "{GREATER_EQUAL}: expected input.left to be a decimal, \
+            but got {}", pair.left);
     };
     let Val::Decimal(d2) = pair.right else {
-        return bug!(
-            cfg,
-            "{GREATER_EQUAL}: expected input.right to be a decimal, but got {}",
-            pair.right
-        );
+        return bug!(cfg, "{GREATER_EQUAL}: expected input.right to be a decimal, \
+            but got {}", pair.right);
     };
     Val::Bit(d1.greater_equal(&d2))
 }
@@ -329,18 +306,12 @@ fn fn_less_greater(cfg: &mut Cfg, input: Val) -> Val {
     };
     let pair = Pair::from(pair);
     let Val::Decimal(d1) = pair.left else {
-        return bug!(
-            cfg,
-            "{LESS_GREATER}: expected input.left to be a decimal, but got {}",
-            pair.left
-        );
+        return bug!(cfg, "{LESS_GREATER}: expected input.left to be a decimal, \
+            but got {}", pair.left);
     };
     let Val::Decimal(d2) = pair.right else {
-        return bug!(
-            cfg,
-            "{LESS_GREATER}: expected input.right to be a decimal, but got {}",
-            pair.right
-        );
+        return bug!(cfg, "{LESS_GREATER}: expected input.right to be a decimal, \
+            but got {}", pair.right);
     };
     Val::Bit(d1.less_greater(&d2))
 }

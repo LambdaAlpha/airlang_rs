@@ -95,18 +95,13 @@ fn fn_which(cfg: &mut Cfg, input: Val) -> Val {
     };
     let func_input = Pair::from(func_input);
     let Val::Func(func) = func_input.left else {
-        return bug!(
-            cfg,
-            "{WHICH}: expected input.right.left to be a function, but got {}",
-            func_input.left
-        );
+        return bug!(cfg, "{WHICH}: expected input.right.left to be a function, \
+            but got {}", func_input.left);
     };
     // todo design support control flow
     if link.is_const() && matches!(func.ctx(), PrimCtx::Mut) {
-        return bug!(
-            cfg,
-            "{WHICH}: expected input.right.left to be a context-constant function, but got {func}"
-        );
+        return bug!(cfg, "{WHICH}: expected input.right.left to be a context-constant function, 、\
+            but got {func}");
     }
     let Ok(mut ctx) = link.try_borrow_mut() else {
         return bug!(cfg, "{WHICH}: link is in use");

@@ -60,10 +60,8 @@ fn fn_from_text(cfg: &mut Cfg, input: Val) -> Val {
     };
     let is_key = t.chars().all(Key::is_key);
     if !is_key {
-        return bug!(
-            cfg,
-            "{FROM_TEXT}: expected every character of input text should be a key, but got {t}"
-        );
+        return bug!(cfg, "{FROM_TEXT}: expected every character of input text should be a key, \
+            but got {t}");
     }
     let key = Key::from_str_unchecked(t.deref());
     Val::Key(key)

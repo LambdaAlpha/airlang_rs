@@ -146,11 +146,8 @@ fn fn_set_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return Val::default();
     };
     let Val::List(values) = index_value.right else {
-        return bug!(
-            cfg,
-            "{SET_MANY}: expected input.right to be a list, but got {}",
-            index_value.right
-        );
+        return bug!(cfg, "{SET_MANY}: expected input.right to be a list, \
+            but got {}", index_value.right);
     };
     let values = List::from(values);
     let end = i + values.len();
@@ -242,11 +239,8 @@ fn fn_insert_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return Val::default();
     };
     let Val::List(values) = index_value.right else {
-        return bug!(
-            cfg,
-            "{INSERT_MANY}: expected input.right to be a list, but got {}",
-            index_value.right
-        );
+        return bug!(cfg, "{INSERT_MANY}: expected input.right to be a list, \
+            but got {}", index_value.right);
     };
     let values = List::from(values);
     if i > list.len() {

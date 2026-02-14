@@ -137,7 +137,8 @@ fn fn_new(cfg: &mut Cfg, input: Val) -> Val {
         };
         let pair = Pair::from(pair);
         let Val::Key(key) = pair.left else {
-            return bug!(cfg, "{NEW}: expected input.item.left to be a key, but got {}", pair.left);
+            return bug!(cfg, "{NEW}: expected input.item.left to be a key, \
+                but got {}", pair.left);
         };
         map.insert(key, pair.right);
     }

@@ -124,11 +124,8 @@ fn func_input(cfg: &mut Cfg, input: Val) -> Result<(FuncVal, Val), Val> {
     };
     let pair = Pair::from(pair);
     let Val::Func(func) = pair.left else {
-        return Err(bug!(
-            cfg,
-            "{APPLY}: expected input.left to be a function, but got {}",
-            pair.left
-        ));
+        return Err(bug!(cfg, "{APPLY}: expected input.left to be a function, \
+            but got {}", pair.left));
     };
     Ok((func, pair.right))
 }
@@ -150,10 +147,8 @@ pub fn is_context_constant() -> PrimFuncVal {
 
 fn fn_is_context_constant(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Func(func) = ctx else {
-        return bug!(
-            cfg,
-            "{IS_CONTEXT_CONSTANT}: expected context to be a function, but got {ctx}"
-        );
+        return bug!(cfg, "{IS_CONTEXT_CONSTANT}: expected context to be a function, \
+            but got {ctx}");
     };
     Val::Bit(Bit::from(!matches!(func.ctx(), PrimCtx::Mut)))
 }

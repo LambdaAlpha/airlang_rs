@@ -9,10 +9,12 @@ format_macro_bodies = true
 format_code_in_doc_comments = true
 format_strings = false
 wrap_comments = false
+skip_macro_invocations = ["bug"]
 
 # basic
 newline_style = "Unix"
 hard_tabs = false
+max_width = 100
 use_small_heuristics = "Max"
 
 # reorder
