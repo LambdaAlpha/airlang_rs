@@ -33,13 +33,13 @@ pub(in crate::cfg) fn parse_func(cfg: &mut Cfg, input: Val) -> Option<FuncVal> {
     let CompCode { ctx_name, input_name, body } = parse_code(cfg, map_remove(&mut map, CODE))?;
     let prelude = map_remove(&mut map, PRELUDE);
     let ctx = if let Some(name) = ctx_name {
-        let const_ = parse_bit(CTX_CONST, cfg, map_remove(&mut map, CTX_CONST))?;
+        let const_ = parse_bit(cfg, CTX_CONST, map_remove(&mut map, CTX_CONST))?;
         CompCtx::Default { name, const_ }
     } else {
         CompCtx::Free
     };
     let input = if let Some(name) = input_name {
-        let raw = parse_bit(INPUT_RAW, cfg, map_remove(&mut map, INPUT_RAW))?;
+        let raw = parse_bit(cfg, INPUT_RAW, map_remove(&mut map, INPUT_RAW))?;
         CompInput::Default { name, raw }
     } else {
         CompInput::Free
@@ -49,7 +49,7 @@ pub(in crate::cfg) fn parse_func(cfg: &mut Cfg, input: Val) -> Option<FuncVal> {
     Some(func)
 }
 
-fn parse_bit(tag: &str, cfg: &mut Cfg, val: Val) -> Option<bool> {
+fn parse_bit(cfg: &mut Cfg, tag: &str, val: Val) -> Option<bool> {
     match val {
         Val::Unit(_) => Some(false),
         Val::Bit(bit) => Some(bit.into()),

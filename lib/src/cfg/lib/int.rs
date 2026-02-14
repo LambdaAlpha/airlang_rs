@@ -75,195 +75,107 @@ impl CfgMod for IntLib {
 }
 
 pub fn add(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return bug!(cfg, "{ADD}: expected input to be a pair, but got {input}");
+    let Some((i1, i2)) = int_pair(cfg, ADD, input) else {
+        return Val::default();
     };
-    let pair = Pair::from(pair);
-    let Val::Int(i1) = pair.left else {
-        return bug!(cfg, "{ADD}: expected input.left to be an integer, but got {}", pair.left);
-    };
-    let Val::Int(i2) = pair.right else {
-        return bug!(cfg, "{ADD}: expected input.right to be an integer, but got {}", pair.right);
-    };
-    let i1 = Int::from(i1);
-    let i2 = Int::from(i2);
     Val::Int(i1.add(i2).into())
 }
 
 pub fn subtract(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return bug!(cfg, "{SUBTRACT}: expected input to be a pair, but got {input}");
+    let Some((i1, i2)) = int_pair(cfg, SUBTRACT, input) else {
+        return Val::default();
     };
-    let pair = Pair::from(pair);
-    let Val::Int(i1) = pair.left else {
-        return bug!(cfg, "{SUBTRACT}: expected input.left to be an integer, \
-            but got {}", pair.left);
-    };
-    let Val::Int(i2) = pair.right else {
-        return bug!(cfg, "{SUBTRACT}: expected input.right to be an integer, \
-            but got {}", pair.right);
-    };
-    let i1 = Int::from(i1);
-    let i2 = Int::from(i2);
     Val::Int(i1.subtract(i2).into())
 }
 
 pub fn multiply(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return bug!(cfg, "{MULTIPLY}: expected input to be a pair, but got {input}");
+    let Some((i1, i2)) = int_pair(cfg, MULTIPLY, input) else {
+        return Val::default();
     };
-    let pair = Pair::from(pair);
-    let Val::Int(i1) = pair.left else {
-        return bug!(cfg, "{MULTIPLY}: expected input.left to be an integer, \
-            but got {}", pair.left);
-    };
-    let Val::Int(i2) = pair.right else {
-        return bug!(cfg, "{MULTIPLY}: expected input.right to be an integer, \
-            but got {}", pair.right);
-    };
-    let i1 = Int::from(i1);
-    let i2 = Int::from(i2);
     Val::Int(i1.multiply(i2).into())
 }
 
 pub fn divide(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return bug!(cfg, "{DIVIDE}: expected input to be a pair, but got {input}");
-    };
-    let pair = Pair::from(pair);
-    let Val::Int(i1) = pair.left else {
-        return bug!(cfg, "{DIVIDE}: expected input.left to be an integer, but got {}", pair.left);
-    };
-    let Val::Int(i2) = pair.right else {
-        return bug!(cfg, "{DIVIDE}: expected input.right to be an integer, \
-            but got {}", pair.right);
+    let Some((i1, i2)) = int_pair(cfg, DIVIDE, input) else {
+        return Val::default();
     };
     if i2.is_zero() {
         return bug!(cfg, "{DIVIDE}: expected input.right to be non-zero");
     }
-    let i1 = Int::from(i1);
-    let i2 = Int::from(i2);
     let i = i1.divide(i2);
     Val::Int(i.into())
 }
 
 pub fn remainder(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return bug!(cfg, "{REMAINDER}: expected input to be a pair, but got {input}");
-    };
-    let pair = Pair::from(pair);
-    let Val::Int(i1) = pair.left else {
-        return bug!(cfg, "{REMAINDER}: expected input.left to be an integer, \
-            but got {}", pair.left);
-    };
-    let Val::Int(i2) = pair.right else {
-        return bug!(cfg, "{REMAINDER}: expected input.right to be an integer, \
-            but got {}", pair.right);
+    let Some((i1, i2)) = int_pair(cfg, REMAINDER, input) else {
+        return Val::default();
     };
     if i2.is_zero() {
         return bug!(cfg, "{REMAINDER}: expected input.right to be non-zero");
     }
-    let i1 = Int::from(i1);
-    let i2 = Int::from(i2);
     let i = i1.remainder(i2);
     Val::Int(i.into())
 }
 
 pub fn divide_remainder(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return bug!(cfg, "{DIVIDE_REMAINDER}: expected input to be a pair, but got {input}");
-    };
-    let pair = Pair::from(pair);
-    let Val::Int(i1) = pair.left else {
-        return bug!(cfg, "{DIVIDE_REMAINDER}: expected input.left to be an integer, \
-            but got {}", pair.left);
-    };
-    let Val::Int(i2) = pair.right else {
-        return bug!(cfg, "{DIVIDE_REMAINDER}: expected input.right to be an integer, \
-            but got {}", pair.right);
+    let Some((i1, i2)) = int_pair(cfg, DIVIDE_REMAINDER, input) else {
+        return Val::default();
     };
     if i2.is_zero() {
         return bug!(cfg, "{DIVIDE_REMAINDER}: expected input.right to be non-zero");
     }
-    let i1 = Int::from(i1);
-    let i2 = Int::from(i2);
     let (quotient, rem) = i1.divide_remainder(i2);
     Val::Pair(Pair::new(Val::Int(quotient.into()), Val::Int(rem.into())).into())
 }
 
 pub fn less(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return bug!(cfg, "{LESS}: expected input to be a pair, but got {input}");
+    let Some((i1, i2)) = int_pair(cfg, LESS, input) else {
+        return Val::default();
     };
-    let pair = Pair::from(pair);
-    let Val::Int(i1) = pair.left else {
-        return bug!(cfg, "{LESS}: expected input.left to be an integer, but got {}", pair.left);
-    };
-    let Val::Int(i2) = pair.right else {
-        return bug!(cfg, "{LESS}: expected input.right to be an integer, but got {}", pair.right);
-    };
-    Val::Bit(i1.less_than(&i2))
+    Val::Bit(i1.less(&i2))
 }
 
 pub fn less_equal(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return bug!(cfg, "{LESS_EQUAL}: expected input to be a pair, but got {input}");
-    };
-    let pair = Pair::from(pair);
-    let Val::Int(i1) = pair.left else {
-        return bug!(cfg, "{LESS_EQUAL}: expected input.left to be an integer, \
-            but got {}", pair.left);
-    };
-    let Val::Int(i2) = pair.right else {
-        return bug!(cfg, "{LESS_EQUAL}: expected input.right to be an integer, \
-            but got {}", pair.right);
+    let Some((i1, i2)) = int_pair(cfg, LESS_EQUAL, input) else {
+        return Val::default();
     };
     Val::Bit(i1.less_equal(&i2))
 }
 
 pub fn greater(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return bug!(cfg, "{GREATER}: expected input to be a pair, but got {input}");
+    let Some((i1, i2)) = int_pair(cfg, GREATER, input) else {
+        return Val::default();
     };
-    let pair = Pair::from(pair);
-    let Val::Int(i1) = pair.left else {
-        return bug!(cfg, "{GREATER}: expected input.left to be an integer, but got {}", pair.left);
-    };
-    let Val::Int(i2) = pair.right else {
-        return bug!(cfg, "{GREATER}: expected input.right to be an integer, \
-            but got {}", pair.right);
-    };
-    Val::Bit(i1.greater_than(&i2))
+    Val::Bit(i1.greater(&i2))
 }
 
 pub fn greater_equal(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return bug!(cfg, "{GREATER_EQUAL}: expected input to be a pair, but got {input}");
-    };
-    let pair = Pair::from(pair);
-    let Val::Int(i1) = pair.left else {
-        return bug!(cfg, "{GREATER_EQUAL}: expected input.left to be an integer, \
-            but got {}", pair.left);
-    };
-    let Val::Int(i2) = pair.right else {
-        return bug!(cfg, "{GREATER_EQUAL}: expected input.right to be an integer, \
-            but got {}", pair.right);
+    let Some((i1, i2)) = int_pair(cfg, GREATER_EQUAL, input) else {
+        return Val::default();
     };
     Val::Bit(i1.greater_equal(&i2))
 }
 
 pub fn less_greater(cfg: &mut Cfg, input: Val) -> Val {
+    let Some((i1, i2)) = int_pair(cfg, LESS_GREATER, input) else {
+        return Val::default();
+    };
+    Val::Bit(i1.less_greater(&i2))
+}
+
+fn int_pair(cfg: &mut Cfg, tag: &str, input: Val) -> Option<(Int, Int)> {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{LESS_GREATER}: expected input to be a pair, but got {input}");
+        bug!(cfg, "{tag}: expected input to be a pair, but got {input}");
+        return None;
     };
     let pair = Pair::from(pair);
     let Val::Int(i1) = pair.left else {
-        return bug!(cfg, "{LESS_GREATER}: expected input.left to be an integer, \
-            but got {}", pair.left);
+        bug!(cfg, "{tag}: expected input.left to be an integer, but got {}", pair.left);
+        return None;
     };
     let Val::Int(i2) = pair.right else {
-        return bug!(cfg, "{LESS_GREATER}: expected input.right to be an integer, \
-            but got {}", pair.right);
+        bug!(cfg, "{tag}: expected input.right to be an integer, but got {}", pair.right);
+        return None;
     };
-    Val::Bit(i1.less_greater(&i2))
+    Some((i1.into(), i2.into()))
 }

@@ -81,7 +81,7 @@ impl Decimal {
         Decimal(output)
     }
 
-    pub fn less_than(&self, other: &Decimal) -> Bit {
+    pub fn less(&self, other: &Decimal) -> Bit {
         Bit::from(self.0 < other.0)
     }
 
@@ -89,7 +89,7 @@ impl Decimal {
         Bit::from(self.0 <= other.0)
     }
 
-    pub fn greater_than(&self, other: &Decimal) -> Bit {
+    pub fn greater(&self, other: &Decimal) -> Bit {
         Bit::from(self.0 > other.0)
     }
 

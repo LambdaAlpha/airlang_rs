@@ -26,48 +26,49 @@ impl Int {
         self.0
     }
 
-    pub(crate) fn add(self, other: Int) -> Int {
+    #[expect(clippy::should_implement_trait)]
+    pub fn add(self, other: Int) -> Int {
         Int(self.0.add(other.0))
     }
 
-    pub(crate) fn subtract(self, other: Int) -> Int {
+    pub fn subtract(self, other: Int) -> Int {
         Int(self.0.sub(other.0))
     }
 
-    pub(crate) fn multiply(self, other: Int) -> Int {
+    pub fn multiply(self, other: Int) -> Int {
         Int(self.0.mul(other.0))
     }
 
-    pub(crate) fn divide(self, other: Int) -> Int {
+    pub fn divide(self, other: Int) -> Int {
         Int(self.0.div(other.0))
     }
 
-    pub(crate) fn remainder(self, other: Int) -> Int {
+    pub fn remainder(self, other: Int) -> Int {
         Int(self.0.rem(other.0))
     }
 
-    pub(crate) fn divide_remainder(self, other: Int) -> (Int, Int) {
+    pub fn divide_remainder(self, other: Int) -> (Int, Int) {
         let (quotient, rem) = self.0.div_rem(&other.0);
         (Int(quotient), Int(rem))
     }
 
-    pub(crate) fn less_than(&self, other: &Int) -> Bit {
+    pub fn less(&self, other: &Int) -> Bit {
         Bit::from(self.0.lt(&other.0))
     }
 
-    pub(crate) fn less_equal(&self, other: &Int) -> Bit {
+    pub fn less_equal(&self, other: &Int) -> Bit {
         Bit::from(self.0.le(&other.0))
     }
 
-    pub(crate) fn greater_than(&self, other: &Int) -> Bit {
+    pub fn greater(&self, other: &Int) -> Bit {
         Bit::from(self.0.gt(&other.0))
     }
 
-    pub(crate) fn greater_equal(&self, other: &Int) -> Bit {
+    pub fn greater_equal(&self, other: &Int) -> Bit {
         Bit::from(self.0.ge(&other.0))
     }
 
-    pub(crate) fn less_greater(&self, other: &Int) -> Bit {
+    pub fn less_greater(&self, other: &Int) -> Bit {
         Bit::from(self.0.ne(&other.0))
     }
 }

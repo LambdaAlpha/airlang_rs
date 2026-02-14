@@ -88,19 +88,19 @@ struct Statement {
 }
 
 impl Block {
-    fn parse(tag: &str, cfg: &mut Cfg, val: Val) -> Result<Self, Val> {
+    fn parse(cfg: &mut Cfg, tag: &str, val: Val) -> Result<Self, Val> {
         let Val::List(list) = val else {
             return Err(bug!(cfg, "{tag}: expected block to be a list, but got {val}"));
         };
         let list = List::from(list);
         let mut statements = Vec::with_capacity(list.len());
         for statement in list {
-            statements.push(Statement::parse(tag, cfg, statement)?);
+            statements.push(Statement::parse(cfg, tag, statement)?);
         }
         Ok(Block { statements })
     }
 
-    fn flow(self, tag: &str, cfg: &mut Cfg, ctx: &mut Val) -> Option<Val> {
+    fn flow(self, cfg: &mut Cfg, tag: &str, ctx: &mut Val) -> Option<Val> {
         let mut output = Val::default();
         for statement in self.statements {
             if cfg.is_aborted() {
@@ -125,7 +125,7 @@ impl Block {
 }
 
 impl Statement {
-    fn parse(tag: &str, cfg: &mut Cfg, val: Val) -> Result<Self, Val> {
+    fn parse(cfg: &mut Cfg, tag: &str, val: Val) -> Result<Self, Val> {
         let try_ = false;
         let Val::Call(call) = val else {
             return Ok(Statement { try_, body: val });
@@ -145,10 +145,10 @@ impl Statement {
 }
 
 pub fn do_(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
-    let Ok(block) = Block::parse(DO, cfg, input) else {
+    let Ok(block) = Block::parse(cfg, DO, input) else {
         return Val::default();
     };
-    block.flow(DO, cfg, ctx).unwrap_or_default()
+    block.flow(cfg, DO, ctx).unwrap_or_default()
 }
 
 pub fn test(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -174,12 +174,12 @@ impl Test {
         match pair.right {
             Val::Pair(branches) => {
                 let branches = Pair::from(branches);
-                let body = Block::parse(TEST, cfg, branches.left)?;
-                let default = Block::parse(TEST, cfg, branches.right)?;
+                let body = Block::parse(cfg, TEST, branches.left)?;
+                let default = Block::parse(cfg, TEST, branches.right)?;
                 Ok(Test { condition, body, default: Some(default) })
             },
             body => {
-                let body = Block::parse(TEST, cfg, body)?;
+                let body = Block::parse(cfg, TEST, body)?;
                 Ok(Test { condition, body, default: None })
             },
         }
@@ -191,12 +191,12 @@ impl Test {
             return bug!(cfg, "{TEST}: expected condition to be a bit, but got {condition}");
         };
         if *b {
-            return self.body.flow(TEST, cfg, ctx).unwrap_or_default();
+            return self.body.flow(cfg, TEST, ctx).unwrap_or_default();
         }
         let Some(default) = self.default else {
             return Val::default();
         };
-        default.flow(TEST, cfg, ctx).unwrap_or_default()
+        default.flow(cfg, TEST, ctx).unwrap_or_default()
     }
 }
 
@@ -232,7 +232,7 @@ impl Switch {
                         but got {}", pair.left));
                 };
                 let map = Self::parse_block_map(cfg, map)?;
-                let default = Some(Block::parse(SWITCH, cfg, pair.right)?);
+                let default = Some(Block::parse(cfg, SWITCH, pair.right)?);
                 Ok(Self { val, map, default })
             },
             v => {
@@ -244,7 +244,7 @@ impl Switch {
     fn parse_block_map(cfg: &mut Cfg, map: MapVal) -> Result<HashMap<Key, Block>, Val> {
         let mut block_map = HashMap::<Key, Block>::new();
         for (k, v) in Map::from(map) {
-            block_map.insert(k, Block::parse(SWITCH, cfg, v)?);
+            block_map.insert(k, Block::parse(cfg, SWITCH, v)?);
         }
         Ok(block_map)
     }
@@ -257,7 +257,7 @@ impl Switch {
         let Some(body) = self.map.remove(&key).or(self.default) else {
             return Val::default();
         };
-        body.flow(SWITCH, cfg, ctx).unwrap_or_default()
+        body.flow(cfg, SWITCH, ctx).unwrap_or_default()
     }
 }
 
@@ -295,7 +295,7 @@ impl Match {
                 return Err(bug!(cfg, "{MATCH}: expected arm to be a pair, but got {arm}"));
             };
             let pair = Pair::from(pair);
-            let block = Block::parse(MATCH, cfg, pair.right)?;
+            let block = Block::parse(cfg, MATCH, pair.right)?;
             arms.push((pair.left, block));
         }
         Ok(arms)
@@ -319,7 +319,7 @@ impl Match {
             if result.is_none() {
                 return Val::default();
             }
-            return block.flow(MATCH, cfg, ctx).unwrap_or_default();
+            return block.flow(cfg, MATCH, ctx).unwrap_or_default();
         }
         Val::default()
     }
@@ -344,7 +344,7 @@ impl Loop {
         };
         let pair = Pair::from(pair);
         let condition = pair.left;
-        let body = Block::parse(LOOP, cfg, pair.right)?;
+        let body = Block::parse(cfg, LOOP, pair.right)?;
         Ok(Self { condition, body })
     }
 
@@ -357,7 +357,7 @@ impl Loop {
             if !*bit {
                 break;
             }
-            let Some(output) = self.body.clone().flow(LOOP, cfg, ctx) else {
+            let Some(output) = self.body.clone().flow(cfg, LOOP, ctx) else {
                 return Val::default();
             };
             match output {
@@ -403,7 +403,7 @@ impl Iterate {
             return Err(bug!(cfg, "{ITERATE}: expected input.right.left to be a key, \
                 but got {}", name_body.left));
         };
-        let body = Block::parse(ITERATE, cfg, name_body.right)?;
+        let body = Block::parse(cfg, ITERATE, name_body.right)?;
         Ok(Self { val, name, body })
     }
 
@@ -475,7 +475,7 @@ where ValIter: Iterator<Item = Val> {
         if ctx.set(cfg, name.clone(), val).is_none() {
             return Val::default();
         }
-        let Some(output) = body.clone().flow(ITERATE, cfg, ctx) else {
+        let Some(output) = body.clone().flow(cfg, ITERATE, ctx) else {
             return Val::default();
         };
         match output {
