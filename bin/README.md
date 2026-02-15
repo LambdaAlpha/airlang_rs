@@ -155,7 +155,7 @@ First, the evaluation rules for keys are as follows:
 Second, the evaluation rule for calls is `_ f i` ➔ `o`, with the following steps:
 
 1. `eval(f)` ➔ `vf`
-2. `if vf.raw_input then i else eval(i)` ➔ `vi`
+2. `if vf.eval_input then eval(i) else i` ➔ `vi`
 3. `vf(vi)` ➔ `o`
 
 Third, the evaluation rules for cells, pairs, lists, and maps are as follows:

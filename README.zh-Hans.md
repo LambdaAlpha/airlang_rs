@@ -154,7 +154,7 @@ Air 的求值规则非常简洁，只有四条规则。
 第二，调用的求值规则为 `_ f i` ➔ `o`，步骤如下：
 
 1. `eval(f)` ➔ `vf`
-2. `if vf.raw_input then i else eval(i)` ➔ `vi`
+2. `if vf.eval_input then eval(i) else i` ➔ `vi`
 3. `vf(vi)` ➔ `o`
 
 第三，单元格，配对，列表，映射的求值规则如下：
