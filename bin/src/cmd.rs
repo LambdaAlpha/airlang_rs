@@ -2,7 +2,10 @@ use std::env::args;
 use std::io::stderr;
 use std::io::stdout;
 
-use airlang::Air;
+use airlang::cfg::CoreCfg;
+use airlang::semantics::core::Eval;
+use airlang::semantics::func::DynFunc;
+use airlang::semantics::val::Val;
 use airlang::syntax::parse;
 use airlang::type_::Text;
 
@@ -23,10 +26,11 @@ pub fn main() -> std::io::Result<()> {
 pub fn interpret_file(path: &str) -> std::io::Result<()> {
     use std::io::Write;
     let source = generate_load(path);
-    let mut air = Air::new(BinCfg2::generate()).unwrap();
-    match parse(&source) {
+    let mut cfg = BinCfg2::generate();
+    let mut ctx = CoreCfg::prelude(&mut cfg, "interpret_file").unwrap();
+    match parse::<Val>(&source) {
         Ok(val) => {
-            let output = air.interpret(val);
+            let output = Eval.call(&mut cfg, &mut ctx, val);
             let mut lock = stdout().lock();
             writeln!(lock, "{output:#}")
         },

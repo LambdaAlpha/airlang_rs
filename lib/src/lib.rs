@@ -1,13 +1,8 @@
-pub use self::pub_::*;
-
 // https://github.com/rust-lang/rustfmt/issues/4070
 #[macro_export]
 macro_rules! _____ {
     () => {};
 }
-
-// use cfg2, cfg, semantics, syntax, type, trait
-mod pub_;
 
 // use cfg, semantics, syntax, type, trait
 pub mod cfg2;

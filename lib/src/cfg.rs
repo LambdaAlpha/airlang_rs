@@ -1,15 +1,17 @@
-use std::ops::Deref;
+use std::panic::AssertUnwindSafe;
+use std::panic::catch_unwind;
 
 use self::lib::CoreLib;
 use crate::bug;
 use crate::cfg::prelude::CorePrelude;
 use crate::cfg::prelude::prelude_repr;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::Eval;
+use crate::semantics::func::DynFunc;
 use crate::semantics::val::LinkVal;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Key;
-use crate::type_::Map;
 
 pub trait CfgMod {
     fn extend(self, cfg: &mut Cfg);
@@ -41,7 +43,7 @@ impl CfgMod for CoreCfg {
 impl CoreCfg {
     pub const PRELUDE: &str = "_prelude";
 
-    pub fn prelude(cfg: &mut Cfg, tag: &str) -> Option<Map<Key, Val>> {
+    pub fn prelude(cfg: &mut Cfg, tag: &str) -> Option<Val> {
         let prelude = cfg.import(Key::from_str_unchecked(Self::PRELUDE));
         let Some(prelude) = prelude else {
             bug!(cfg, "{tag}: value not found for key {} in config", Self::PRELUDE);
@@ -56,11 +58,29 @@ impl CoreCfg {
             bug!(cfg, "{tag}: link is in use");
             return None;
         };
-        let Val::Map(prelude) = prelude.deref().clone() else {
-            bug!(cfg, "{tag}: expected {} to be a link of a map", Self::PRELUDE);
-            return None;
+        Some(prelude.clone())
+    }
+
+    pub fn eval_with_prelude(cfg: &mut Cfg, tag: &str, input: Val) -> Val {
+        let Some(mut ctx) = Self::prelude(cfg, tag) else {
+            return Val::default();
         };
-        Some(Map::from(prelude))
+        // unwind safety:
+        // ctx is local variable
+        // cfg is aborted
+        let result = catch_unwind(AssertUnwindSafe(|| Eval.call(cfg, &mut ctx, input)));
+        match result {
+            Ok(output) => output,
+            Err(err) => {
+                if let Some(err) = err.downcast_ref::<String>() {
+                    bug!(cfg, "{tag}: panic by {err}")
+                } else if let Some(err) = err.downcast_ref::<&str>() {
+                    bug!(cfg, "{tag}: panic by {err}")
+                } else {
+                    bug!(cfg, "{tag}: panic")
+                }
+            },
+        }
     }
 }
 

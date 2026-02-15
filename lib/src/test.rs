@@ -5,9 +5,11 @@ use airlang_dev::init_logger;
 use log::error;
 use log::trace;
 
-use crate::Air;
+use crate::cfg::CoreCfg;
 use crate::cfg2::CoreCfg2;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::Eval;
+use crate::semantics::func::DynFunc;
 use crate::semantics::val::Val;
 use crate::syntax::parse;
 use crate::type_::Key;
@@ -34,21 +36,24 @@ pub(crate) fn parse_test_file<'a, const N: usize>(
 
 fn test(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     init_logger();
-    let air = Air::new(CoreCfg2::generate()).unwrap();
-    test_interpret(air, input, file_name)
+    let mut cfg = CoreCfg2::generate();
+    let ctx = CoreCfg::prelude(&mut cfg, "test").unwrap();
+    test_interpret(cfg, ctx, input, file_name)
 }
 
-fn test_interpret(air: Air, input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
-    let backup = air;
+fn test_interpret(cfg: Cfg, ctx: Val, input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
+    let backup_cfg = cfg;
+    let backup_ctx = ctx;
     for [title, i, o] in parse_test_file::<3>(input, file_name) {
-        let mut air = backup.clone();
-        let src = parse(i).map_err(|e| {
+        let src: Val = parse(i).map_err(|e| {
             eprintln!("file {file_name} case ({title}): input ({i}) parse failed\n{e}");
             e
         })?;
         trace!("file {file_name} case ({title})");
-        let ret = air.interpret(src);
-        log_abort(air.cfg_mut());
+        let mut cfg = backup_cfg.clone();
+        let mut ctx = backup_ctx.clone();
+        let ret = Eval.call(&mut cfg, &mut ctx, src);
+        log_abort(&cfg);
         let ret_expected = parse(o).map_err(|e| {
             eprintln!("file {file_name} case ({title}): output ({o}) parse failed\n{e}");
             e
@@ -60,12 +65,10 @@ fn test_interpret(air: Air, input: &str, file_name: &str) -> Result<(), Box<dyn 
         };
         if show_env {
             assert_eq!(
-                ret,
-                ret_expected,
+                ret, ret_expected,
                 "file {file_name} case({title}) input({i}): expect({o}) != real({ret:#})\n\
                 current ctx:\n{:#}\ncurrent cfg:\n{:#}",
-                air.ctx(),
-                air.cfg()
+                ctx, cfg
             );
         } else {
             assert_eq!(

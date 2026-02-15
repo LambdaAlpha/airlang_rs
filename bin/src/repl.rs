@@ -6,8 +6,10 @@ use std::io::Write;
 use std::io::stdin;
 use std::mem::take;
 
-use airlang::Air;
+use airlang::cfg::CoreCfg;
 use airlang::semantics::cfg::Cfg;
+use airlang::semantics::core::Eval;
+use airlang::semantics::func::DynFunc;
 use airlang::semantics::val::Val;
 use airlang::syntax::parse;
 use airlang::type_::Key;
@@ -52,7 +54,8 @@ impl<T: Write + IsTerminal> ReplTerminal for T {}
 
 // todo impl soft wrap
 pub struct Repl<T: ReplTerminal> {
-    air: Air,
+    cfg: Cfg,
+    ctx: Val,
     terminal: Terminal<T>,
     is_raw_mode_enabled: bool,
 
@@ -82,10 +85,12 @@ enum CtrlFlow {
 
 impl<T: ReplTerminal> Repl<T> {
     pub fn new(out: T) -> Self {
-        let air = Air::new(BinCfg2::generate()).unwrap();
+        let mut cfg = BinCfg2::generate();
+        let ctx = CoreCfg::prelude(&mut cfg, "repl").unwrap();
         let terminal = Terminal(out);
         Self {
-            air,
+            cfg,
+            ctx,
             terminal,
             is_raw_mode_enabled: false,
             multiline_mode: false,
@@ -407,8 +412,8 @@ impl<T: ReplTerminal> Repl<T> {
     fn eval(&mut self, input: &str) -> Result<()> {
         match parse::<Val>(input) {
             Ok(input) => {
-                let output = self.air.interpret(input);
-                if self.air.cfg().is_aborted() {
+                let output = Eval.call(&mut self.cfg, &mut self.ctx, input);
+                if self.cfg.is_aborted() {
                     self.print_abort()?;
                     self.recover();
                     Ok(())
@@ -421,8 +426,8 @@ impl<T: ReplTerminal> Repl<T> {
     }
 
     fn print_abort(&mut self) -> Result<()> {
-        let type_ = self.air.cfg().import(Key::from_str_unchecked(Cfg::ABORT_TYPE));
-        let msg = self.air.cfg().import(Key::from_str_unchecked(Cfg::ABORT_MSG));
+        let type_ = self.cfg.import(Key::from_str_unchecked(Cfg::ABORT_TYPE));
+        let msg = self.cfg.import(Key::from_str_unchecked(Cfg::ABORT_MSG));
         match (type_, msg) {
             (Some(type_), Some(msg)) => self.terminal.eprint(format!("aborted by {type_}: {msg}")),
             (None, Some(msg)) => self.terminal.eprint(format!("aborted: {msg}")),
@@ -432,10 +437,9 @@ impl<T: ReplTerminal> Repl<T> {
     }
 
     fn recover(&mut self) {
-        let cfg = self.air.cfg_mut();
-        cfg.remove(&Key::from_str_unchecked(Cfg::ABORT_TYPE));
-        cfg.remove(&Key::from_str_unchecked(Cfg::ABORT_MSG));
-        cfg.recover();
+        self.cfg.remove(&Key::from_str_unchecked(Cfg::ABORT_TYPE));
+        self.cfg.remove(&Key::from_str_unchecked(Cfg::ABORT_MSG));
+        self.cfg.recover();
     }
 
     const TITLE: &'static str = "🜁 Air";
@@ -444,8 +448,8 @@ impl<T: ReplTerminal> Repl<T> {
         self.terminal.queue(SetTitle(Self::TITLE))?;
         self.terminal.print(Self::TITLE)?;
         self.terminal.print(" ")?;
-        match parse(include_str!("air/version.air")) {
-            Ok(repr) => match self.air.interpret(repr) {
+        match parse::<Val>(include_str!("air/version.air")) {
+            Ok(repr) => match Eval.call(&mut self.cfg, &mut self.ctx, repr) {
                 Val::Text(text) => self.terminal.print(&***text),
                 _ => self.terminal.eprint("unknown version"),
             },

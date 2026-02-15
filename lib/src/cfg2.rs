@@ -18,8 +18,8 @@ impl CoreCfg2 {
     }
 
     pub fn extend(cfg: &mut Cfg) {
-        let ctx = CoreCfg::prelude(cfg, "stage 2").expect("prelude should be ready");
-        let ctx = &mut Val::Map(ctx.into());
+        let mut ctx = CoreCfg::prelude(cfg, "stage 2").expect("prelude should be ready");
+        let ctx = &mut ctx;
 
         Self::run(cfg, ctx, include_str!("air/first.air"), "/first");
 

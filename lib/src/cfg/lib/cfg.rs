@@ -1,7 +1,3 @@
-use std::ops::Deref;
-use std::panic::AssertUnwindSafe;
-use std::panic::catch_unwind;
-
 use const_format::concatcp;
 
 use crate::bug;
@@ -22,7 +18,6 @@ use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::Int;
-use crate::type_::Key;
 use crate::type_::Map;
 use crate::type_::Pair;
 
@@ -174,33 +169,5 @@ pub fn where_(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Cfg(new_cfg) = ctx else {
         return bug!(cfg, "{WHERE}: expected context to be a config, but got {ctx}");
     };
-    let prelude = new_cfg.import(Key::from_str_unchecked(CoreCfg::PRELUDE));
-    let Some(prelude) = prelude else {
-        return bug!(cfg, "{WHERE}: value not found for key {} in config", CoreCfg::PRELUDE);
-    };
-    let Val::Link(prelude) = prelude else {
-        return bug!(cfg, "{WHERE}: expected {} to be a link, but got {prelude}", CoreCfg::PRELUDE);
-    };
-    let prelude = prelude.clone();
-    let Ok(prelude) = prelude.try_borrow() else {
-        return bug!(cfg, "{WHERE}: link is in use");
-    };
-    let mut new_ctx = prelude.deref().clone();
-    // unwind safety:
-    // new_ctx is local variable
-    // new_cfg is aborted
-    let result =
-        catch_unwind(AssertUnwindSafe(|| Eval.call(&mut **new_cfg, &mut new_ctx, pair.right)));
-    match result {
-        Ok(output) => output,
-        Err(err) => {
-            if let Some(err) = err.downcast_ref::<String>() {
-                bug!(new_cfg, "{WHERE}: panic by {err}")
-            } else if let Some(err) = err.downcast_ref::<&str>() {
-                bug!(new_cfg, "{WHERE}: panic by {err}")
-            } else {
-                bug!(new_cfg, "{WHERE}: panic")
-            }
-        },
-    }
+    CoreCfg::eval_with_prelude(new_cfg, WHERE, pair.right)
 }

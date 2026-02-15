@@ -1,7 +1,9 @@
 use std::error::Error;
 use std::fmt::Write;
 
-use airlang::Air;
+use airlang::cfg::CoreCfg;
+use airlang::semantics::core::Eval;
+use airlang::semantics::func::DynFunc;
 use airlang::semantics::val::Val;
 use airlang::syntax::parse;
 use airlang::type_::Bit;
@@ -29,9 +31,10 @@ fn test_build_load_bom() -> Result<(), Box<dyn Error>> {
 fn test_build_load(path: &str, expect: Val) -> Result<(), Box<dyn Error>> {
     init_logger();
     let src = generate_load(path);
-    let src = parse(&src)?;
-    let mut air = Air::new(StdCfg2::generate()).unwrap();
-    let output = air.interpret(src);
+    let src: Val = parse(&src)?;
+    let mut cfg = StdCfg2::generate();
+    let mut ctx = CoreCfg::prelude(&mut cfg, "test_build_load").unwrap();
+    let output = Eval.call(&mut cfg, &mut ctx, src);
     assert_eq!(output, expect);
     Ok(())
 }

@@ -3,9 +3,9 @@ use std::fs::File;
 use std::io::Read;
 use std::path::Path;
 
-use airlang::Air;
 use airlang::bug;
 use airlang::cfg::CfgMod;
+use airlang::cfg::CoreCfg;
 use airlang::cfg::extend_func;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_ID;
@@ -67,15 +67,11 @@ fn load_from_url(cfg: &mut Cfg, cur_url: Option<String>, url: String) -> Val {
     let Ok(val) = parse(content) else {
         return Val::Key(Key::from_str_unchecked("_parse_error"));
     };
-
-    let Some(mut mod_air) = Air::new(cfg.clone()) else {
-        return Val::default();
-    };
     let cur_url_key = Key::from_str_unchecked(CUR_URL_KEY);
-    mod_air.cfg_mut().insert(cur_url_key.clone(), Val::Text(Text::from(url).into()));
-    let output = mod_air.interpret(val);
+    cfg.insert(cur_url_key.clone(), Val::Text(Text::from(url).into()));
+    let output = CoreCfg::eval_with_prelude(cfg, LOAD, val);
     if let Some(cur_url) = cur_url {
-        mod_air.cfg_mut().insert(cur_url_key, Val::Text(Text::from(cur_url).into()));
+        cfg.insert(cur_url_key, Val::Text(Text::from(cur_url).into()));
     }
     Val::Cell(Cell::new(output).into())
 }
