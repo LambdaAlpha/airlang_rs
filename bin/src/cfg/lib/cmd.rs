@@ -29,7 +29,7 @@ impl Default for CmdLib {
 }
 
 impl CfgMod for CmdLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, CALL, self.call);
     }
 }

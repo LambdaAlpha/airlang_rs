@@ -42,7 +42,7 @@ impl Default for KeyLib {
 }
 
 impl CfgMod for KeyLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, FROM_TEXT, self.from_text);
         extend_func(cfg, INTO_TEXT, self.into_text);
         extend_func(cfg, GET_LENGTH, self.get_length);

@@ -25,7 +25,7 @@ impl Default for FileLib {
 }
 
 impl CfgMod for FileLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, READ_TO_TEXT, self.read_to_text);
     }
 }

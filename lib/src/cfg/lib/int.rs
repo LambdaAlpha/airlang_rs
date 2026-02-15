@@ -59,7 +59,7 @@ impl Default for IntLib {
 }
 
 impl CfgMod for IntLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, ADD, self.add);
         extend_func(cfg, SUBTRACT, self.subtract);
         extend_func(cfg, MULTIPLY, self.multiply);

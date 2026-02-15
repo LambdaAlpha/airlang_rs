@@ -58,7 +58,7 @@ impl Default for CtxLib {
 }
 
 impl CfgMod for CtxLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, GET, self.get);
         extend_func(cfg, SET, self.set);
         extend_func(cfg, FORM, self.form);

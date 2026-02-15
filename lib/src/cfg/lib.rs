@@ -48,7 +48,7 @@ pub struct CoreLib {
 }
 
 impl CfgMod for CoreLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         self.unit.extend(cfg);
         self.bit.extend(cfg);
         self.key.extend(cfg);

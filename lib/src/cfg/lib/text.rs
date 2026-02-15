@@ -44,7 +44,7 @@ impl Default for TextLib {
 }
 
 impl CfgMod for TextLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, FROM_UTF8, self.from_utf8);
         extend_func(cfg, INTO_UTF8, self.into_utf8);
         extend_func(cfg, GET_LENGTH, self.get_length);

@@ -236,13 +236,8 @@ impl Arbitrary for LinkVal {
 
 impl Arbitrary for Cfg {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
-        let len = any_len_weighted(rng, depth);
         let depth = depth + 1;
-        let cfg = Cfg::default();
-        for _ in 0 .. len {
-            cfg.extend_scope(Key::any(rng, depth), Val::any(rng, depth));
-        }
-        cfg
+        Cfg::from(Map::any(rng, depth))
     }
 }
 

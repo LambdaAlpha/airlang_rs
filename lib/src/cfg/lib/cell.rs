@@ -32,7 +32,7 @@ impl Default for CellLib {
 }
 
 impl CfgMod for CellLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, GET_VALUE, self.get_value);
         extend_func(cfg, SET_VALUE, self.set_value);
     }

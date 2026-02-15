@@ -71,7 +71,7 @@ impl Default for ValueLib {
 }
 
 impl CfgMod for ValueLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, ANY, self.any);
         extend_func(cfg, GET_TYPE, self.get_type);
         extend_func(cfg, EQUAL, self.equal);

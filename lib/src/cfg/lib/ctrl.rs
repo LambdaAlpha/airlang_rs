@@ -64,7 +64,7 @@ impl Default for CtrlLib {
 }
 
 impl CfgMod for CtrlLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, DO, self.do_);
         extend_func(cfg, TEST, self.test);
         extend_func(cfg, SWITCH, self.switch);

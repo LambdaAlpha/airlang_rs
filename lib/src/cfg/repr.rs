@@ -109,7 +109,7 @@ impl Debug for LinkVal {
 
 impl Display for Cfg {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let repr = Val::Map(self.snapshot().into());
+        let repr = Val::Map(Map::clone(self).into());
         let tag = key(concatcp!(PREFIX_ID, CFG));
         let call = Call::new(tag, repr);
         Display::fmt(&call, f)

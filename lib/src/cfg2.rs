@@ -12,7 +12,7 @@ pub struct CoreCfg2;
 impl CoreCfg2 {
     pub fn generate() -> Cfg {
         let mut cfg = Cfg::default();
-        CoreCfg::default().extend(&cfg);
+        CoreCfg::default().extend(&mut cfg);
         Self::extend(&mut cfg);
         cfg
     }

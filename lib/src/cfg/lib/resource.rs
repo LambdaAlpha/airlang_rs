@@ -41,7 +41,7 @@ impl Default for ResourceLib {
 }
 
 impl CfgMod for ResourceLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, GET_STEPS, self.get_steps);
         extend_func(cfg, SET_STEPS, self.set_steps);
         extend_func(cfg, MEASURE_STEPS, self.measure_steps);

@@ -9,7 +9,7 @@ pub struct StdCfg2;
 impl StdCfg2 {
     pub fn generate() -> Cfg {
         let mut cfg = Cfg::default();
-        StdCfg::default().extend(&cfg);
+        StdCfg::default().extend(&mut cfg);
         Self::extend(&mut cfg);
         cfg
     }

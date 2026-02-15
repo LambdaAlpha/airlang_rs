@@ -17,7 +17,7 @@ pub struct StdLib {
 }
 
 impl CfgMod for StdLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         self.io.extend(cfg);
         self.file.extend(cfg);
         self.process.extend(cfg);

@@ -24,7 +24,7 @@ impl Default for UnitLib {
 }
 
 impl CfgMod for UnitLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, DEFAULT, self.default);
     }
 }

@@ -38,7 +38,7 @@ impl Default for BitLib {
 }
 
 impl CfgMod for BitLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, NOT, self.not);
         extend_func(cfg, AND, self.and);
         extend_func(cfg, OR, self.or);

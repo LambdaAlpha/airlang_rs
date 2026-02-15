@@ -25,12 +25,12 @@ impl Default for BinCfg {
 }
 
 impl CfgMod for BinCfg {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         self.lib.extend(cfg);
         let prelude = prelude_repr(self.prelude);
         info!("bin prelude len {}", prelude.len());
         let prelude = Val::Link(LinkVal::new(Val::Map(prelude.into()), false));
-        cfg.extend_scope(Key::from_str_unchecked(CoreCfg::PRELUDE), prelude);
+        cfg.extend(Key::from_str_unchecked(CoreCfg::PRELUDE), prelude);
     }
 }
 

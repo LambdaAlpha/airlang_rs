@@ -1,6 +1,7 @@
 use std::num::NonZeroU64;
 
 use const_format::concatcp;
+use num_bigint::BigInt;
 
 use crate::bug;
 use crate::cfg::CfgMod;
@@ -58,7 +59,7 @@ impl Default for DecimalLib {
 }
 
 impl CfgMod for DecimalLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, ADD, self.add);
         extend_func(cfg, SUBTRACT, self.subtract);
         extend_func(cfg, MULTIPLY, self.multiply);
@@ -83,7 +84,7 @@ fn decimal_config(cfg: &mut Cfg, tag: &str) -> Option<DecimalConfig> {
         bug!(cfg, "{tag}: expected config {ROUNDING_MODE} to be a key, but got {mode}");
         return None;
     };
-    let mode = parse_rounding_mode(&mode)?;
+    let mode = parse_rounding_mode(mode)?;
     let Some(precision) = cfg.import(Key::from_str_unchecked(ROUNDING_PRECISION)) else {
         bug!(cfg, "{tag}: config {ROUNDING_PRECISION} not found");
         return None;
@@ -93,8 +94,15 @@ fn decimal_config(cfg: &mut Cfg, tag: &str) -> Option<DecimalConfig> {
             but got {precision}");
         return None;
     };
-    let precision: u64 = precision.unwrap().unwrap().try_into().ok()?;
-    let precision = NonZeroU64::new(precision)?;
+    let precision: &BigInt = precision;
+    let Ok(precision) = precision.try_into() else {
+        bug!(cfg, "{tag}: precision is too large to be supported, got {precision}");
+        return None;
+    };
+    let Some(precision) = NonZeroU64::new(precision) else {
+        bug!(cfg, "{tag}: precision should be positive, but got 0");
+        return None;
+    };
     let config = DecimalConfig::new(precision, mode);
     Some(config)
 }

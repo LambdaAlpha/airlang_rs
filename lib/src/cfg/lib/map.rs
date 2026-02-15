@@ -97,7 +97,7 @@ impl Default for MapLib {
 }
 
 impl CfgMod for MapLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, MAKE, self.make);
         extend_func(cfg, MAKE_SET, self.make_set);
         extend_func(cfg, GET_LENGTH, self.get_length);

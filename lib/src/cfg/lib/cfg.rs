@@ -68,7 +68,7 @@ impl Default for CfgLib {
 }
 
 impl CfgMod for CfgLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, MAKE, self.make);
         extend_func(cfg, REPRESENT, self.represent);
         extend_func(cfg, EXIST, self.exist);
@@ -85,26 +85,21 @@ pub fn make(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Map(map) = input else {
         return bug!(cfg, "{MAKE}: expected input to be a map, but got {input}");
     };
-    let new_cfg = Cfg::default();
-    let map = Map::from(map);
-    for (k, v) in map {
-        new_cfg.extend_scope(k, v);
-    }
-    Val::Cfg(new_cfg.into())
+    Val::Cfg(Cfg::from(Map::from(map)).into())
 }
 
 pub fn represent(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Cfg(new_cfg) = input else {
         return bug!(cfg, "{REPRESENT}: expected input to be a config, but got {input}");
     };
-    Val::Map(new_cfg.snapshot().into())
+    Val::Map(Map::from(Cfg::from(new_cfg)).into())
 }
 
 pub fn exist(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Key(name) = input else {
         return bug!(cfg, "{EXIST}: expected input to be a key, but got {input}");
     };
-    let exist = cfg.exist(name);
+    let exist = cfg.contains_key(&name);
     Val::Bit(Bit::from(exist))
 }
 
@@ -112,10 +107,10 @@ pub fn import(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Key(name) = input else {
         return bug!(cfg, "{IMPORT}: expected input to be a key, but got {input}");
     };
-    let Some(value) = cfg.import(name.clone()) else {
+    let Some(value) = cfg.get(&name) else {
         return bug!(cfg, "{IMPORT}: value not found for key {name} in config");
     };
-    value
+    value.clone()
 }
 
 pub fn export(cfg: &mut Cfg, input: Val) -> Val {
@@ -126,9 +121,10 @@ pub fn export(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Key(name) = pair.left else {
         return bug!(cfg, "{EXPORT}: expected input.left to be a key, but got {}", pair.left);
     };
-    if cfg.export(name.clone(), pair.right).is_none() {
+    if cfg.contains_key(&name) {
         return bug!(cfg, "{EXPORT}: already bound to value for key {name} in config");
     }
+    cfg.insert(name, pair.right);
     Val::default()
 }
 
@@ -148,13 +144,18 @@ pub fn with(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Map(map) = map else {
         return bug!(cfg, "{WITH}: expected input.left to be a map, but got {map}");
     };
-    cfg.begin_scope();
-    let map = Map::from(map);
-    for (k, v) in map {
-        cfg.extend_scope(k, v);
+    let mut backup = Map::with_capacity(map.len());
+    for (k, v) in Map::from(map) {
+        backup.insert(k.clone(), cfg.insert(k, v));
     }
     let output = Eval.call(cfg, ctx, pair.right);
-    cfg.end_scope();
+    for (k, v) in backup {
+        if let Some(v) = v {
+            cfg.insert(k, v);
+        } else {
+            cfg.remove(&k);
+        }
+    }
     output
 }
 
@@ -180,6 +181,7 @@ pub fn where_(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Link(prelude) = prelude else {
         return bug!(cfg, "{WHERE}: expected {} to be a link, but got {prelude}", CoreCfg::PRELUDE);
     };
+    let prelude = prelude.clone();
     let Ok(prelude) = prelude.try_borrow() else {
         return bug!(cfg, "{WHERE}: link is in use");
     };

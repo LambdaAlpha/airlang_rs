@@ -67,7 +67,7 @@ impl Default for FuncLib {
 }
 
 impl CfgMod for FuncLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, MAKE, self.make);
         extend_func(cfg, REPRESENT, self.represent);
         extend_func(cfg, APPLY, self.apply);

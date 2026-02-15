@@ -75,7 +75,7 @@ impl Default for ListLib {
 }
 
 impl CfgMod for ListLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, GET_LENGTH, self.get_length);
         extend_func(cfg, SET, self.set);
         extend_func(cfg, SET_MANY, self.set_many);

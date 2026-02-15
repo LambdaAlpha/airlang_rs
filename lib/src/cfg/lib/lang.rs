@@ -51,7 +51,7 @@ impl Default for LangLib {
 }
 
 impl CfgMod for LangLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, DATA, self.data);
         extend_func(cfg, ID, self.id);
         extend_func(cfg, CODE, self.code);

@@ -38,7 +38,7 @@ impl Default for PairLib {
 }
 
 impl CfgMod for PairLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, GET_LEFT, self.get_left);
         extend_func(cfg, SET_LEFT, self.set_left);
         extend_func(cfg, GET_RIGHT, self.get_right);

@@ -44,7 +44,7 @@ impl Default for LinkLib {
 }
 
 impl CfgMod for LinkLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, MAKE, self.make);
         extend_func(cfg, MAKE_CONSTANT, self.make_constant);
         extend_func(cfg, IS_CONSTANT, self.is_constant);

@@ -13,7 +13,7 @@ pub struct BinLib {
 }
 
 impl CfgMod for BinLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         self.repl.extend(cfg);
         self.cmd.extend(cfg);
         self.std.extend(cfg);

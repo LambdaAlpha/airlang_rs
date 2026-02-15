@@ -33,7 +33,7 @@ impl Default for ProcessLib {
 }
 
 impl CfgMod for ProcessLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, CALL, self.call);
     }
 }

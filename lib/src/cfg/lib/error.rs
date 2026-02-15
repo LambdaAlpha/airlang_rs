@@ -42,7 +42,7 @@ impl Default for ErrorLib {
 }
 
 impl CfgMod for ErrorLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, ABORT, self.abort);
         extend_func(cfg, ASSERT, self.assert);
         extend_func(cfg, IS_ABORTED, self.is_aborted);

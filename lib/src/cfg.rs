@@ -12,7 +12,7 @@ use crate::type_::Key;
 use crate::type_::Map;
 
 pub trait CfgMod {
-    fn extend(self, cfg: &Cfg);
+    fn extend(self, cfg: &mut Cfg);
 }
 
 #[derive(Clone)]
@@ -30,11 +30,11 @@ impl Default for CoreCfg {
 }
 
 impl CfgMod for CoreCfg {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         self.lib.extend(cfg);
         let prelude = prelude_repr(self.prelude);
         let prelude = Val::Link(LinkVal::new(Val::Map(prelude.into()), false));
-        cfg.extend_scope(Key::from_str_unchecked(Self::PRELUDE), prelude);
+        cfg.extend(Key::from_str_unchecked(Self::PRELUDE), prelude);
     }
 }
 
@@ -51,6 +51,7 @@ impl CoreCfg {
             bug!(cfg, "{tag}: expected {} to be a link, but got {prelude}", Self::PRELUDE);
             return None;
         };
+        let prelude = prelude.clone();
         let Ok(prelude) = prelude.try_borrow() else {
             bug!(cfg, "{tag}: link is in use");
             return None;
@@ -63,12 +64,12 @@ impl CoreCfg {
     }
 }
 
-pub fn extend(cfg: &Cfg, key: &str, val: impl Into<Val>) {
-    cfg.extend_scope(Key::from_str_unchecked(key), val.into());
+pub fn extend(cfg: &mut Cfg, key: &str, val: impl Into<Val>) {
+    cfg.extend(Key::from_str_unchecked(key), val.into());
 }
 
-pub fn extend_func(cfg: &Cfg, key: &str, val: PrimFuncVal) {
-    cfg.extend_scope(Key::from_str_unchecked(key), Val::Func(val.into()));
+pub fn extend_func(cfg: &mut Cfg, key: &str, val: PrimFuncVal) {
+    cfg.extend(Key::from_str_unchecked(key), Val::Func(val.into()));
 }
 
 pub mod lib;

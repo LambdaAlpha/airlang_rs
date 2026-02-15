@@ -38,7 +38,7 @@ impl Default for ByteLib {
 }
 
 impl CfgMod for ByteLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, GET_LENGTH, self.get_length);
         extend_func(cfg, PUSH, self.push);
         extend_func(cfg, JOIN, self.join);

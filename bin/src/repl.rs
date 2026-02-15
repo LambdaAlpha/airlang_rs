@@ -433,8 +433,8 @@ impl<T: ReplTerminal> Repl<T> {
 
     fn recover(&mut self) {
         let cfg = self.air.cfg_mut();
-        cfg.remove(Key::from_str_unchecked(Cfg::ABORT_TYPE));
-        cfg.remove(Key::from_str_unchecked(Cfg::ABORT_MSG));
+        cfg.remove(&Key::from_str_unchecked(Cfg::ABORT_TYPE));
+        cfg.remove(&Key::from_str_unchecked(Cfg::ABORT_MSG));
         cfg.recover();
     }
 

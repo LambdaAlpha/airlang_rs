@@ -23,8 +23,8 @@ impl Default for ReplLib {
 }
 
 impl CfgMod for ReplLib {
-    fn extend(self, cfg: &Cfg) {
-        cfg.extend_scope(Key::from_str_unchecked(HELP), Val::Text(self.help));
+    fn extend(self, cfg: &mut Cfg) {
+        cfg.extend(Key::from_str_unchecked(HELP), Val::Text(self.help));
     }
 }
 

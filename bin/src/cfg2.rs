@@ -9,7 +9,7 @@ pub struct BinCfg2;
 impl BinCfg2 {
     pub fn generate() -> Cfg {
         let mut cfg = Cfg::default();
-        BinCfg::default().extend(&cfg);
+        BinCfg::default().extend(&mut cfg);
         Self::extend(&mut cfg);
         cfg
     }

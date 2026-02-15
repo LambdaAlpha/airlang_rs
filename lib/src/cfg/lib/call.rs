@@ -44,7 +44,7 @@ impl Default for CallLib {
 }
 
 impl CfgMod for CallLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, MAKE, self.make);
         extend_func(cfg, GET_FUNCTION, self.get_function);
         extend_func(cfg, SET_FUNCTION, self.set_function);

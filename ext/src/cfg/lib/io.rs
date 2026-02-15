@@ -52,7 +52,7 @@ impl Default for IoLib {
 }
 
 impl CfgMod for IoLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, READ_LINE, self.read_line);
         extend_func(cfg, PRINT, self.print);
         extend_func(cfg, PRINT_LINE, self.print_line);

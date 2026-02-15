@@ -34,7 +34,7 @@ impl Default for BuildLib {
 }
 
 impl CfgMod for BuildLib {
-    fn extend(self, cfg: &Cfg) {
+    fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, LOAD, self.load);
     }
 }
@@ -53,10 +53,10 @@ pub fn load(cfg: &mut Cfg, input: Val) -> Val {
     let cur_url = get_cur_url(cfg, cur_url_key);
     let new_url =
         cur_url.as_ref().and_then(|cur_url| join_url(cur_url, &url)).unwrap_or(String::from(url));
-    load_from_url(cfg, new_url)
+    load_from_url(cfg, cur_url, new_url)
 }
 
-fn load_from_url(cfg: &mut Cfg, url: String) -> Val {
+fn load_from_url(cfg: &mut Cfg, cur_url: Option<String>, url: String) -> Val {
     let mut buffer = String::new();
     let content = match read_to_string(&url, &mut buffer) {
         Ok(content) => content,
@@ -72,9 +72,11 @@ fn load_from_url(cfg: &mut Cfg, url: String) -> Val {
         return Val::default();
     };
     let cur_url_key = Key::from_str_unchecked(CUR_URL_KEY);
-    mod_air.cfg_mut().begin_scope();
-    mod_air.cfg_mut().extend_scope(cur_url_key, Val::Text(Text::from(url).into()));
+    mod_air.cfg_mut().insert(cur_url_key.clone(), Val::Text(Text::from(url).into()));
     let output = mod_air.interpret(val);
+    if let Some(cur_url) = cur_url {
+        mod_air.cfg_mut().insert(cur_url_key, Val::Text(Text::from(cur_url).into()));
+    }
     Val::Cell(Cell::new(output).into())
 }
 
@@ -88,7 +90,7 @@ fn read_to_string<'a>(url: &str, buffer: &'a mut String) -> std::io::Result<&'a 
 
 fn get_cur_url(cfg: &Cfg, key: Key) -> Option<String> {
     if let Some(val) = cfg.import(key) {
-        return if let Val::Text(url) = val { Some((**url).clone()) } else { None };
+        return if let Val::Text(url) = val { Some(String::clone(url)) } else { None };
     }
     let Ok(cur_dir) = current_dir() else {
         return None;
