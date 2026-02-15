@@ -4,7 +4,6 @@ use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::func::DynFunc;
 use crate::semantics::val::Val;
-use crate::syntax::parse;
 use crate::type_::Key;
 
 pub struct CoreCfg2;
@@ -47,7 +46,7 @@ impl CoreCfg2 {
     }
 
     pub fn run(cfg: &mut Cfg, ctx: &mut Val, source: &str, path: &str) -> Val {
-        let input: Val = match parse(source) {
+        let input: Val = match source.parse() {
             Ok(input) => input,
             Err(_) => panic!("stage 2: failed to parse {path}"),
         };

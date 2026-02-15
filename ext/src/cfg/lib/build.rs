@@ -12,7 +12,6 @@ use airlang::semantics::core::PREFIX_ID;
 use airlang::semantics::func::CtxFreeInputEvalFunc;
 use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
-use airlang::syntax::parse;
 use airlang::type_::Cell;
 use airlang::type_::Key;
 use airlang::type_::Text;
@@ -64,7 +63,7 @@ fn load_from_url(cfg: &mut Cfg, cur_url: Option<String>, url: String) -> Val {
             return Val::Key(Key::from_str_unchecked("_read_error"));
         },
     };
-    let Ok(val) = parse(content) else {
+    let Ok(val) = content.parse() else {
         return Val::Key(Key::from_str_unchecked("_parse_error"));
     };
     let cur_url_key = Key::from_str_unchecked(CUR_URL_KEY);

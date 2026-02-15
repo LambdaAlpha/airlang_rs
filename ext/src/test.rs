@@ -5,7 +5,6 @@ use airlang::cfg::CoreCfg;
 use airlang::semantics::core::Eval;
 use airlang::semantics::func::DynFunc;
 use airlang::semantics::val::Val;
-use airlang::syntax::parse;
 use airlang::type_::Bit;
 use airlang::type_::Cell;
 use airlang::type_::Int;
@@ -31,7 +30,7 @@ fn test_build_load_bom() -> Result<(), Box<dyn Error>> {
 fn test_build_load(path: &str, expect: Val) -> Result<(), Box<dyn Error>> {
     init_logger();
     let src = generate_load(path);
-    let src: Val = parse(&src)?;
+    let src: Val = src.parse()?;
     let mut cfg = StdCfg2::generate();
     let mut ctx = CoreCfg::prelude(&mut cfg, "test_build_load").unwrap();
     let output = Eval.call(&mut cfg, &mut ctx, src);

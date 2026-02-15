@@ -11,7 +11,6 @@ use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::func::DynFunc;
 use crate::semantics::val::Val;
-use crate::syntax::parse;
 use crate::type_::Key;
 
 const MAIN_DELIMITER: &str = "\n=====\n";
@@ -45,7 +44,7 @@ fn test_interpret(cfg: Cfg, ctx: Val, input: &str, file_name: &str) -> Result<()
     let backup_cfg = cfg;
     let backup_ctx = ctx;
     for [title, i, o] in parse_test_file::<3>(input, file_name) {
-        let src: Val = parse(i).map_err(|e| {
+        let src: Val = i.parse().map_err(|e| {
             eprintln!("file {file_name} case ({title}): input ({i}) parse failed\n{e}");
             e
         })?;
@@ -54,7 +53,7 @@ fn test_interpret(cfg: Cfg, ctx: Val, input: &str, file_name: &str) -> Result<()
         let mut ctx = backup_ctx.clone();
         let ret = Eval.call(&mut cfg, &mut ctx, src);
         log_abort(&cfg);
-        let ret_expected = parse(o).map_err(|e| {
+        let ret_expected = o.parse().map_err(|e| {
             eprintln!("file {file_name} case ({title}): output ({o}) parse failed\n{e}");
             e
         })?;

@@ -5,7 +5,6 @@ use airlang::cfg2::CoreCfg2;
 use airlang::semantics::core::Eval;
 use airlang::semantics::func::DynFunc;
 use airlang::semantics::val::Val;
-use airlang::syntax::parse;
 use criterion::BatchSize;
 use criterion::Criterion;
 
@@ -20,7 +19,7 @@ fn bench_interpret(c: &mut Criterion) {
         let mut cfg = CoreCfg2::generate();
         let mut ctx = CoreCfg::prelude(&mut cfg, "bench_interpret").unwrap();
         let s = include_str!("interpret.air");
-        let src_val: Val = parse(s).expect("parse failed");
+        let src_val: Val = s.parse().expect("parse failed");
         b.iter_batched(
             || src_val.clone(),
             |val| Eval.call(&mut cfg, &mut ctx, black_box(val)),
@@ -32,14 +31,14 @@ fn bench_interpret(c: &mut Criterion) {
 fn bench_parse(c: &mut Criterion) {
     c.bench_function("parse", |b| {
         let s = include_str!("parse.air");
-        b.iter(|| parse::<Val>(black_box(s)));
+        b.iter(|| black_box(s).parse::<Val>());
     });
 }
 
 fn bench_generate(c: &mut Criterion) {
     c.bench_function("generate", |b| {
         let s = include_str!("generate.air");
-        let repr: Val = parse(s).expect("parse failed");
+        let repr: Val = s.parse().expect("parse failed");
         b.iter(|| {
             let _ = format!("{:#}", black_box(&repr));
         });

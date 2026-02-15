@@ -6,7 +6,6 @@ use airlang::cfg::CoreCfg;
 use airlang::semantics::core::Eval;
 use airlang::semantics::func::DynFunc;
 use airlang::semantics::val::Val;
-use airlang::syntax::parse;
 use airlang::type_::Text;
 
 use crate::cfg2::BinCfg2;
@@ -28,7 +27,7 @@ pub fn interpret_file(path: &str) -> std::io::Result<()> {
     let source = generate_load(path);
     let mut cfg = BinCfg2::generate();
     let mut ctx = CoreCfg::prelude(&mut cfg, "interpret_file").unwrap();
-    match parse::<Val>(&source) {
+    match source.parse::<Val>() {
         Ok(val) => {
             let output = Eval.call(&mut cfg, &mut ctx, val);
             let mut lock = stdout().lock();

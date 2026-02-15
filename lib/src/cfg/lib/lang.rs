@@ -65,7 +65,7 @@ pub fn parse(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(input) = input else {
         return bug!(cfg, "{PARSE}: expected input to be a text, but got {input}");
     };
-    let Ok(val) = crate::syntax::parse(&input) else {
+    let Ok(val) = input.parse() else {
         return Val::default();
     };
     Val::Cell(Cell::new(val).into())

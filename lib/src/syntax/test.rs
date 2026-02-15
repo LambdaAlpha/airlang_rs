@@ -5,7 +5,6 @@ use bigdecimal::BigDecimal;
 use num_bigint::BigInt;
 use num_traits::Num;
 
-use super::parse;
 use super::repr::CellRepr;
 use super::repr::PairRepr;
 use super::repr::Repr;
@@ -89,7 +88,7 @@ fn test_parse(
     }
     for [title, s] in cases {
         let expected_repr = expected.next().unwrap();
-        let real_repr: Repr = parse(s).map_err(|e| {
+        let real_repr: Repr = s.parse().map_err(|e| {
             eprintln!("file {file_name} case ({title}) src({s}): parse failed\n{e}");
             e
         })?;
@@ -103,7 +102,7 @@ fn test_parse(
 
 fn test_generate(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     for [title, s] in parse_test_file::<2>(src, file_name) {
-        let repr: Repr = parse(s).map_err(|e| {
+        let repr: Repr = s.parse().map_err(|e| {
             eprintln!("file {file_name} case ({title}) src({s}): parse failed\n{e}");
             e
         })?;
@@ -126,7 +125,7 @@ fn test_generate(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
             format!("{repr:>#?}"),
         ];
         for repr_str in fmt_list {
-            let new_repr = parse(&repr_str).map_err(|e| {
+            let new_repr = repr_str.parse().map_err(|e| {
                 eprintln!(
                     "file {file_name} case ({title}) src({s}): parse error with generated string ({repr_str})!\n{e}"
                 );
@@ -144,7 +143,7 @@ fn test_generate(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
 fn test_parse_illegal(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     for [title, s] in parse_test_file::<2>(src, file_name) {
         assert!(
-            parse::<Repr>(s).is_err(),
+            s.parse::<Repr>().is_err(),
             "file {file_name} case ({title}) src({s}): shouldn't parse"
         );
     }
@@ -153,11 +152,11 @@ fn test_parse_illegal(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> 
 
 fn test_parse_bad(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     for [title, i1, i2] in parse_test_file::<3>(src, file_name) {
-        let i1 = parse::<Repr>(i1).map_err(|e| {
+        let i1 = i1.parse::<Repr>().map_err(|e| {
             eprintln!("file {file_name} case ({title}): ({i1}) parse failed\n{e}");
             e
         })?;
-        let i2 = parse::<Repr>(i2).map_err(|e| {
+        let i2 = i2.parse::<Repr>().map_err(|e| {
             eprintln!("file {file_name} case ({title}): ({i2}) parse failed\n{e}");
             e
         })?;

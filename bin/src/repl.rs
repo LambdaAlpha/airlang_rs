@@ -11,7 +11,6 @@ use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::Eval;
 use airlang::semantics::func::DynFunc;
 use airlang::semantics::val::Val;
-use airlang::syntax::parse;
 use airlang::type_::Key;
 use crossterm::Command;
 use crossterm::ExecutableCommand;
@@ -410,7 +409,7 @@ impl<T: ReplTerminal> Repl<T> {
     }
 
     fn eval(&mut self, input: &str) -> Result<()> {
-        match parse::<Val>(input) {
+        match input.parse::<Val>() {
             Ok(input) => {
                 let output = Eval.call(&mut self.cfg, &mut self.ctx, input);
                 if self.cfg.is_aborted() {
@@ -448,7 +447,7 @@ impl<T: ReplTerminal> Repl<T> {
         self.terminal.queue(SetTitle(Self::TITLE))?;
         self.terminal.print(Self::TITLE)?;
         self.terminal.print(" ")?;
-        match parse::<Val>(include_str!("air/version.air")) {
+        match include_str!("air/version.air").parse::<Val>() {
             Ok(repr) => match Eval.call(&mut self.cfg, &mut self.ctx, repr) {
                 Val::Text(text) => self.terminal.print(&***text),
                 _ => self.terminal.eprint("unknown version"),
