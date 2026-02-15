@@ -4,6 +4,7 @@ use std::hash::Hash;
 use bigdecimal::BigDecimal;
 use num_bigint::BigInt;
 use rand::Rng;
+use rand::RngExt;
 use rand::distr::SampleString;
 use rand::distr::StandardUniform;
 use rand::distr::weighted::WeightedIndex;
@@ -144,7 +145,7 @@ impl Arbitrary for Byte {
     fn any<R: Rng + ?Sized>(rng: &mut R, _depth: usize) -> Self {
         let len = any_len(rng);
         let mut byte = vec![0u8; len];
-        rng.fill(&mut *byte);
+        rng.fill(&mut byte);
         Byte::from(byte)
     }
 }

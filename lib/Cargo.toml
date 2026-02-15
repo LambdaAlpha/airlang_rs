@@ -50,9 +50,9 @@ version = "0.7"
 
 # val generation
 [dependencies.rand]
-version = "0.9"
+version = "0.10"
 default-features = false
-features = ["small_rng", "alloc", "os_rng"]
+features = ["alloc"]
 
 # const str
 [dependencies.const_format]

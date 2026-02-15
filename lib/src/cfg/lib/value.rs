@@ -1,3 +1,7 @@
+use std::time::Duration;
+use std::time::SystemTime;
+use std::time::UNIX_EPOCH;
+
 use const_format::concatcp;
 
 pub use self::arbitrary::Arbitrary;
@@ -96,7 +100,10 @@ const TYPE_FUNC: &str = concatcp!(PREFIX_ID, FUNC);
 
 pub fn any(cfg: &mut Cfg, input: Val) -> Val {
     const DEPTH: usize = 0;
-    let mut rng = SmallRng::from_os_rng();
+    let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or(Duration::ZERO);
+    let mut bytes32: [u8; 32] = [0; 32];
+    bytes32[.. 16].copy_from_slice(&timestamp.as_nanos().to_be_bytes());
+    let mut rng = SmallRng::from_seed(bytes32);
     let rng = &mut rng;
     match input {
         Val::Unit(_) => Val::any(rng, DEPTH),
