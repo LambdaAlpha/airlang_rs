@@ -1,20 +1,20 @@
 use airlang::cfg::CfgMod;
-use airlang::cfg2::CoreCfg2;
+use airlang::cfg::comp::BaseCompCfg;
 use airlang::semantics::cfg::Cfg;
 
-use crate::cfg::StdCfg;
+use crate::cfg::prim::ExtPrimCfg;
 
-pub struct StdCfg2;
+pub struct ExtCompCfg;
 
-impl StdCfg2 {
+impl ExtCompCfg {
     pub fn generate() -> Cfg {
         let mut cfg = Cfg::default();
-        StdCfg::default().extend(&mut cfg);
+        ExtPrimCfg::default().extend(&mut cfg);
         Self::extend(&mut cfg);
         cfg
     }
 
     pub fn extend(cfg: &mut Cfg) {
-        CoreCfg2::extend(cfg);
+        BaseCompCfg::extend(cfg);
     }
 }

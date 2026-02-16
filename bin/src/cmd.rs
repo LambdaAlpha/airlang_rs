@@ -2,13 +2,13 @@ use std::env::args;
 use std::io::stderr;
 use std::io::stdout;
 
-use airlang::cfg::CoreCfg;
+use airlang::cfg::prelude;
 use airlang::semantics::core::Eval;
 use airlang::semantics::func::DynFunc;
 use airlang::semantics::val::Val;
 use airlang::type_::Text;
 
-use crate::cfg2::BinCfg2;
+use crate::cfg::comp::BinCompCfg;
 use crate::repl::Repl;
 
 pub fn main() -> std::io::Result<()> {
@@ -25,8 +25,8 @@ pub fn main() -> std::io::Result<()> {
 pub fn interpret_file(path: &str) -> std::io::Result<()> {
     use std::io::Write;
     let source = generate_load(path);
-    let mut cfg = BinCfg2::generate();
-    let mut ctx = CoreCfg::prelude(&mut cfg, "interpret_file").unwrap();
+    let mut cfg = BinCompCfg::generate();
+    let mut ctx = prelude(&mut cfg);
     match source.parse::<Val>() {
         Ok(val) => {
             let output = Eval.call(&mut cfg, &mut ctx, val);

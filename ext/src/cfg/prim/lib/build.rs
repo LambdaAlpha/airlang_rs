@@ -5,7 +5,7 @@ use std::path::Path;
 
 use airlang::bug;
 use airlang::cfg::CfgMod;
-use airlang::cfg::CoreCfg;
+use airlang::cfg::eval_with_prelude;
 use airlang::cfg::extend_func;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_ID;
@@ -68,7 +68,7 @@ fn load_from_url(cfg: &mut Cfg, cur_url: Option<String>, url: String) -> Val {
     };
     let cur_url_key = Key::from_str_unchecked(CUR_URL_KEY);
     cfg.insert(cur_url_key.clone(), Val::Text(Text::from(url).into()));
-    let output = CoreCfg::eval_with_prelude(cfg, LOAD, val);
+    let output = eval_with_prelude(cfg, LOAD, val);
     if let Some(cur_url) = cur_url {
         cfg.insert(cur_url_key, Val::Text(Text::from(cur_url).into()));
     }

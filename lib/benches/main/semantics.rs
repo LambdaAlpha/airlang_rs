@@ -1,7 +1,7 @@
 use std::hint::black_box;
 
-use airlang::cfg::CoreCfg;
-use airlang::cfg2::CoreCfg2;
+use airlang::cfg::comp::BaseCompCfg;
+use airlang::cfg::prelude;
 use airlang::semantics::core::Eval;
 use airlang::semantics::func::DynFunc;
 use airlang::semantics::val::Val;
@@ -16,8 +16,8 @@ pub fn bench_semantics(c: &mut Criterion) {
 
 fn bench_interpret(c: &mut Criterion) {
     c.bench_function("interpret", |b| {
-        let mut cfg = CoreCfg2::generate();
-        let mut ctx = CoreCfg::prelude(&mut cfg, "bench_interpret").unwrap();
+        let mut cfg = BaseCompCfg::generate();
+        let mut ctx = prelude(&mut cfg);
         let s = include_str!("interpret.air");
         let src_val: Val = s.parse().expect("parse failed");
         b.iter_batched(

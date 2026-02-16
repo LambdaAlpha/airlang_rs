@@ -1,7 +1,7 @@
 use std::error::Error;
 
-use airlang::cfg::CoreCfg;
-use airlang::cfg2::CoreCfg2;
+use airlang::cfg::comp::BaseCompCfg;
+use airlang::cfg::prelude;
 use airlang::semantics::core::Eval;
 use airlang::semantics::func::DynFunc;
 use airlang::semantics::val::Val;
@@ -9,8 +9,8 @@ use airlang::type_::Int;
 
 #[test]
 fn test_interpret() -> Result<(), Box<dyn Error>> {
-    let mut cfg = CoreCfg2::generate();
-    let mut ctx = CoreCfg::prelude(&mut cfg, "bench_interpret").unwrap();
+    let mut cfg = BaseCompCfg::generate();
+    let mut ctx = prelude(&mut cfg);
     let s = include_str!("../../../benches/main/interpret.air");
     let src_val: Val = s.parse()?;
     let output = Eval.call(&mut cfg, &mut ctx, src_val);

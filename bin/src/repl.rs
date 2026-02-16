@@ -6,7 +6,7 @@ use std::io::Write;
 use std::io::stdin;
 use std::mem::take;
 
-use airlang::cfg::CoreCfg;
+use airlang::cfg::prelude;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::Eval;
 use airlang::semantics::func::DynFunc;
@@ -45,7 +45,7 @@ use crossterm::terminal::enable_raw_mode;
 use crossterm::terminal::is_raw_mode_enabled;
 use crossterm::terminal::size;
 
-use crate::cfg2::BinCfg2;
+use crate::cfg::comp::BinCompCfg;
 
 pub trait ReplTerminal: Write + IsTerminal {}
 
@@ -84,8 +84,8 @@ enum CtrlFlow {
 
 impl<T: ReplTerminal> Repl<T> {
     pub fn new(out: T) -> Self {
-        let mut cfg = BinCfg2::generate();
-        let ctx = CoreCfg::prelude(&mut cfg, "repl").unwrap();
+        let mut cfg = BinCompCfg::generate();
+        let ctx = prelude(&mut cfg);
         let terminal = Terminal(out);
         Self {
             cfg,

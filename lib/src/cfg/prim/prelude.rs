@@ -1,11 +1,11 @@
-use crate::cfg::lib::CoreLib;
+use crate::cfg::prim::lib::BasePrimLib;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Key;
 use crate::type_::Map;
 
 #[derive(Clone)]
-pub struct CorePrelude {
+pub struct BasePrimPrelude {
     pub not: PrimFuncVal,
     pub and: PrimFuncVal,
     pub or: PrimFuncVal,
@@ -73,8 +73,8 @@ pub trait Prelude {
     fn extend(&self, map: &mut Map<Key, Val>);
 }
 
-impl CorePrelude {
-    pub fn new(lib: &CoreLib) -> Self {
+impl BasePrimPrelude {
+    pub fn new(lib: &BasePrimLib) -> Self {
         Self {
             not: lib.bit.not.clone(),
             and: lib.bit.and.clone(),
@@ -141,7 +141,7 @@ impl CorePrelude {
     }
 }
 
-impl Prelude for CorePrelude {
+impl Prelude for BasePrimPrelude {
     fn extend(&self, map: &mut Map<Key, Val>) {
         map_put_func(map, "not", &self.not);
         map_put_func(map, "and", &self.and);

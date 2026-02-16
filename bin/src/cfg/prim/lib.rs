@@ -1,22 +1,22 @@
 use airlang::cfg::CfgMod;
 use airlang::semantics::cfg::Cfg;
-use airlang_ext::cfg::lib::StdLib;
+use airlang_ext::cfg::prim::lib::ExtPrimLib;
 
 use self::cmd::CmdLib;
 use self::repl::ReplLib;
 
 #[derive(Default, Clone)]
-pub struct BinLib {
+pub struct BinPrimLib {
     pub repl: ReplLib,
     pub cmd: CmdLib,
-    pub std: StdLib,
+    pub ext: ExtPrimLib,
 }
 
-impl CfgMod for BinLib {
+impl CfgMod for BinPrimLib {
     fn extend(self, cfg: &mut Cfg) {
         self.repl.extend(cfg);
         self.cmd.extend(cfg);
-        self.std.extend(cfg);
+        self.ext.extend(cfg);
     }
 }
 

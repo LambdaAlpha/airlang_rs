@@ -23,7 +23,7 @@ use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
 
 #[derive(Default, Clone)]
-pub struct CoreLib {
+pub struct BasePrimLib {
     pub unit: UnitLib,
     pub bit: BitLib,
     pub key: KeyLib,
@@ -47,7 +47,7 @@ pub struct CoreLib {
     pub lang: LangLib,
 }
 
-impl CfgMod for CoreLib {
+impl CfgMod for BasePrimLib {
     fn extend(self, cfg: &mut Cfg) {
         self.unit.extend(cfg);
         self.bit.extend(cfg);

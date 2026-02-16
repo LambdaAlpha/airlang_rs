@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::bug;
-use crate::cfg::lib::func::MAKE;
+use crate::cfg::prim::lib::func::MAKE;
 use crate::cfg::utils::map_remove;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::func::CompCtx;

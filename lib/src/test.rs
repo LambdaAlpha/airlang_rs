@@ -5,8 +5,8 @@ use airlang_dev::init_logger;
 use log::error;
 use log::trace;
 
-use crate::cfg::CoreCfg;
-use crate::cfg2::CoreCfg2;
+use crate::cfg::comp::BaseCompCfg;
+use crate::cfg::prelude;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::func::DynFunc;
@@ -35,8 +35,8 @@ pub(crate) fn parse_test_file<'a, const N: usize>(
 
 fn test(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     init_logger();
-    let mut cfg = CoreCfg2::generate();
-    let ctx = CoreCfg::prelude(&mut cfg, "test").unwrap();
+    let mut cfg = BaseCompCfg::generate();
+    let ctx = prelude(&mut cfg);
     test_interpret(cfg, ctx, input, file_name)
 }
 

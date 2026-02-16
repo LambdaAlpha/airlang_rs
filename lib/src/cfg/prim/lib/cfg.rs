@@ -2,7 +2,7 @@ use const_format::concatcp;
 
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::CoreCfg;
+use crate::cfg::eval_with_prelude;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
@@ -169,5 +169,5 @@ pub fn where_(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Cfg(new_cfg) = ctx else {
         return bug!(cfg, "{WHERE}: expected context to be a config, but got {ctx}");
     };
-    CoreCfg::eval_with_prelude(new_cfg, WHERE, pair.right)
+    eval_with_prelude(new_cfg, WHERE, pair.right)
 }

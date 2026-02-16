@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::fmt::Write;
 
-use airlang::cfg::CoreCfg;
+use airlang::cfg::prelude;
 use airlang::semantics::core::Eval;
 use airlang::semantics::func::DynFunc;
 use airlang::semantics::val::Val;
@@ -11,7 +11,7 @@ use airlang::type_::Int;
 use airlang::type_::Text;
 use airlang_dev::init_logger;
 
-use crate::cfg2::StdCfg2;
+use crate::cfg::comp::ExtCompCfg;
 
 #[test]
 fn test_build_load_nest() -> Result<(), Box<dyn Error>> {
@@ -31,8 +31,8 @@ fn test_build_load(path: &str, expect: Val) -> Result<(), Box<dyn Error>> {
     init_logger();
     let src = generate_load(path);
     let src: Val = src.parse()?;
-    let mut cfg = StdCfg2::generate();
-    let mut ctx = CoreCfg::prelude(&mut cfg, "test_build_load").unwrap();
+    let mut cfg = ExtCompCfg::generate();
+    let mut ctx = prelude(&mut cfg);
     let output = Eval.call(&mut cfg, &mut ctx, src);
     assert_eq!(output, expect);
     Ok(())

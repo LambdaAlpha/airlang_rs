@@ -6,6 +6,4 @@ mod repl;
 
 mod cmd;
 
-mod cfg2;
-
 mod cfg;
