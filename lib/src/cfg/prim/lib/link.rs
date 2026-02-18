@@ -23,6 +23,7 @@ pub struct LinkLib {
     pub make: PrimFuncVal,
     pub make_constant: PrimFuncVal,
     pub is_constant: PrimFuncVal,
+    pub is_available: PrimFuncVal,
     // todo rename
     pub which: PrimFuncVal,
 }
@@ -30,6 +31,7 @@ pub struct LinkLib {
 pub const MAKE: &str = concatcp!(PREFIX_ID, LINK, ".make");
 pub const MAKE_CONSTANT: &str = concatcp!(PREFIX_ID, LINK, ".make_constant");
 pub const IS_CONSTANT: &str = concatcp!(PREFIX_ID, LINK, ".is_constant");
+pub const IS_AVAILABLE: &str = concatcp!(PREFIX_ID, LINK, ".is_available");
 pub const WHICH: &str = concatcp!(PREFIX_ID, LINK, ".which");
 
 impl Default for LinkLib {
@@ -38,6 +40,7 @@ impl Default for LinkLib {
             make: CtxFreeInputEvalFunc { fn_: make }.build(),
             make_constant: CtxFreeInputEvalFunc { fn_: make_constant }.build(),
             is_constant: CtxFreeInputEvalFunc { fn_: is_constant }.build(),
+            is_available: CtxFreeInputEvalFunc { fn_: is_available }.build(),
             which: CtxFreeInputEvalFunc { fn_: which }.build(),
         }
     }
@@ -48,6 +51,7 @@ impl CfgMod for LinkLib {
         extend_func(cfg, MAKE, self.make);
         extend_func(cfg, MAKE_CONSTANT, self.make_constant);
         extend_func(cfg, IS_CONSTANT, self.is_constant);
+        extend_func(cfg, IS_AVAILABLE, self.is_available);
         extend_func(cfg, WHICH, self.which);
     }
 }
@@ -62,9 +66,17 @@ pub fn make_constant(_cfg: &mut Cfg, input: Val) -> Val {
 
 pub fn is_constant(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Link(link) = input else {
-        return bug!(cfg, "{WHICH}: expected input to be a link, but got {input}");
+        return bug!(cfg, "{IS_CONSTANT}: expected input to be a link, but got {input}");
     };
     Val::Bit(Bit::from(link.is_const()))
+}
+
+pub fn is_available(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Link(link) = input else {
+        return bug!(cfg, "{IS_AVAILABLE}: expected input to be a link, but got {input}");
+    };
+    let available = link.try_borrow().is_ok();
+    Val::Bit(Bit::from(available))
 }
 
 pub fn which(cfg: &mut Cfg, input: Val) -> Val {
@@ -85,11 +97,11 @@ pub fn which(cfg: &mut Cfg, input: Val) -> Val {
     };
     // todo design support control flow
     if link.is_const() && matches!(func.ctx(), PrimCtx::Mut) {
-        return bug!(cfg, "{WHICH}: expected input.right.left to be a context-constant function, 、\
+        return bug!(cfg, "{WHICH}: expected input.right.left to be a context-constant function, \
             but got {func}");
     }
     let Ok(mut ctx) = link.try_borrow_mut() else {
-        return bug!(cfg, "{WHICH}: link is in use");
+        return bug!(cfg, "{WHICH}: link is not available");
     };
     func.call(cfg, ctx.deref_mut(), func_input.right)
 }

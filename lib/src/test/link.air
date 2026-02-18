@@ -50,6 +50,29 @@ _ do [
 -----
 false
 =====
+is_available true
+-----
+_ do [
+    .make set _ import _link.make,
+    .is_available set _ import _link.is_available,
+    .l set _ make {},
+    _ is_available l,
+]
+-----
+true
+=====
+is_available false
+-----
+_ do [
+    .make set _ import _link.make,
+    .is_available set _ import _link.is_available,
+    .which set _ import _link.which,
+    .l set _ make {},
+    l which is_available : l,
+]
+-----
+false
+=====
 sync
 -----
 _ do [

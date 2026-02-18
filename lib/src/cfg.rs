@@ -33,7 +33,7 @@ pub fn prelude(cfg: &mut Cfg) -> Val {
     };
     let prelude = prelude.clone();
     let Ok(prelude) = prelude.try_borrow() else {
-        panic!("link is in use");
+        panic!("link is not available");
     };
     prelude.clone()
 }
@@ -50,7 +50,7 @@ pub fn opt_prelude(cfg: &mut Cfg, tag: &str) -> Option<Val> {
     };
     let prelude = prelude.clone();
     let Ok(prelude) = prelude.try_borrow() else {
-        bug!(cfg, "{tag}: link is in use");
+        bug!(cfg, "{tag}: link is not available");
         return None;
     };
     Some(prelude.clone())

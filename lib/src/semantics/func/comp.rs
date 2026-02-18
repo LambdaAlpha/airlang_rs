@@ -50,9 +50,9 @@ impl DynFunc<Cfg, Val, Val, Val> for CompFunc {
             }
             Eval.call(cfg, new_ctx, self.body.clone())
         };
-        let mut new_ctx =
+        let mut ctx_updated =
             ctx_link.try_borrow_mut().expect("ctx link should not be borrowed after eval");
-        *ctx = take(new_ctx.deref_mut());
+        *ctx = take(ctx_updated.deref_mut());
         output
     }
 }
