@@ -272,7 +272,7 @@ fn compose_left<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
         };
         void.parse_next(i)?;
         let right = input.parse_next(i)?;
-        let mut left = compose_infix(i, left, middle, right)?;
+        let mut left = compose_infix(left, middle, right);
         loop {
             let Some(middle) = opt_func.parse_next(i)? else {
                 return Ok(left);
@@ -304,7 +304,7 @@ fn compose_right_recursive<'a, T: ParseRepr>(
 ) -> ModalResult<T> {
     let right = input_token(ctx).parse_next(i)?;
     let Some(middle2) = opt_func_token(ctx).parse_next(i)? else {
-        return compose_infix(i, left, middle, right);
+        return Ok(compose_infix(left, middle, right));
     };
     void(ctx).parse_next(i)?;
     let right = compose_right_recursive(ctx, i, right, middle2)?;
@@ -328,17 +328,15 @@ fn opt_func_token<'a, T: ParseRepr>(
 }
 
 fn compose_infix<'a, T: ParseRepr>(
-    i: &mut &'a str, left: InputToken<'a, T>, func: FuncToken<T>, right: InputToken<'a, T>,
-) -> ModalResult<T> {
+    left: InputToken<'a, T>, func: FuncToken<T>, right: InputToken<'a, T>,
+) -> T {
     let input = match (left, right) {
         (InputToken::Default(left), InputToken::Default(right)) => T::from(Pair::new(left, right)),
         (InputToken::Default(left), InputToken::Empty(_)) => left,
         (InputToken::Empty(_), InputToken::Default(right)) => right,
-        (InputToken::Empty(_), InputToken::Empty(checkpoint)) => {
-            return reset_expect(i, checkpoint, concatcp!("at most one ", EMPTY));
-        },
+        (InputToken::Empty(_), InputToken::Empty(_)) => T::from(Unit),
     };
-    Ok(compose_func_input(func, input))
+    compose_func_input(func, input)
 }
 
 fn compose_func_input<T: ParseRepr>(func: FuncToken<T>, input: T) -> T {
