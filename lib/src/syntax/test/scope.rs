@@ -25,5 +25,7 @@ pub fn expected() -> Vec<Repr> {
         infix_call(key("a"), key("b"), infix_call(key("c"), key("d"), key("e"))),
         list(vec![infix_call(key("a"), key("b"), infix_call(key("c"), key("d"), key("e")))]),
         map(vec![("a", infix_call(key("b"), key("c"), infix_call(key("d"), key("e"), key("f"))))]),
+        key("a"),
+        key("a"),
     ]
 }

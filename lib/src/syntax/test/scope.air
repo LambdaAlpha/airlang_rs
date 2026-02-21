@@ -53,3 +53,11 @@ right ctx + list
 right ctx + map
 -----
 >({a : b c d e f})
+=====
+preceded space
+-----
+( a)
+=====
+terminated space
+-----
+(a )
