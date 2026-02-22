@@ -60,6 +60,11 @@ macro_rules! rc_wrap {
             pub(crate) fn unwrap(self) -> ::std::rc::Rc<$value> {
                 self.0
             }
+
+            #[allow(dead_code)]
+            pub(crate) fn unwrap_ref(&self) -> &::std::rc::Rc<$value> {
+                &self.0
+            }
         }
 
         impl ::std::convert::From<$value> for $name {

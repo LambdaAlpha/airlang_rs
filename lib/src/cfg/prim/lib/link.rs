@@ -15,6 +15,7 @@ use crate::semantics::val::LinkVal;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
+use crate::type_::Key;
 use crate::type_::Pair;
 
 // todo design
@@ -24,6 +25,7 @@ pub struct LinkLib {
     pub make_constant: PrimFuncVal,
     pub is_constant: PrimFuncVal,
     pub is_available: PrimFuncVal,
+    pub get_id: PrimFuncVal,
     // todo rename
     pub which: PrimFuncVal,
 }
@@ -32,6 +34,7 @@ pub const MAKE: &str = concatcp!(PREFIX_ID, LINK, ".make");
 pub const MAKE_CONSTANT: &str = concatcp!(PREFIX_ID, LINK, ".make_constant");
 pub const IS_CONSTANT: &str = concatcp!(PREFIX_ID, LINK, ".is_constant");
 pub const IS_AVAILABLE: &str = concatcp!(PREFIX_ID, LINK, ".is_available");
+pub const GET_ID: &str = concatcp!(PREFIX_ID, LINK, ".get_id");
 pub const WHICH: &str = concatcp!(PREFIX_ID, LINK, ".which");
 
 impl Default for LinkLib {
@@ -41,6 +44,7 @@ impl Default for LinkLib {
             make_constant: CtxFreeInputEvalFunc { fn_: make_constant }.build(),
             is_constant: CtxFreeInputEvalFunc { fn_: is_constant }.build(),
             is_available: CtxFreeInputEvalFunc { fn_: is_available }.build(),
+            get_id: CtxFreeInputEvalFunc { fn_: get_id }.build(),
             which: CtxFreeInputEvalFunc { fn_: which }.build(),
         }
     }
@@ -52,6 +56,7 @@ impl CfgMod for LinkLib {
         extend_func(cfg, MAKE_CONSTANT, self.make_constant);
         extend_func(cfg, IS_CONSTANT, self.is_constant);
         extend_func(cfg, IS_AVAILABLE, self.is_available);
+        extend_func(cfg, GET_ID, self.get_id);
         extend_func(cfg, WHICH, self.which);
     }
 }
@@ -77,6 +82,15 @@ pub fn is_available(cfg: &mut Cfg, input: Val) -> Val {
     };
     let available = link.try_borrow().is_ok();
     Val::Bit(Bit::from(available))
+}
+
+pub fn get_id(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Link(link) = input else {
+        return bug!(cfg, "{GET_ID}: expected input to be a link, but got {input}");
+    };
+    let id = link.ptr_addr();
+    let id = Key::from_string_unchecked(format!("{id:x}"));
+    Val::Key(id)
 }
 
 pub fn which(cfg: &mut Cfg, input: Val) -> Val {

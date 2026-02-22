@@ -21,6 +21,7 @@ use crate::semantics::val::FuncVal;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
+use crate::type_::Key;
 use crate::type_::Pair;
 
 #[derive(Clone)]
@@ -35,6 +36,7 @@ pub struct FuncLib {
     pub is_primitive: PrimFuncVal,
     pub get_code: PrimFuncVal,
     pub get_prelude: PrimFuncVal,
+    pub get_id: PrimFuncVal,
 }
 
 pub const MAKE: &str = concatcp!(PREFIX_ID, FUNC, ".make");
@@ -47,6 +49,7 @@ pub const IS_INPUT_RAW: &str = concatcp!(PREFIX_ID, FUNC, ".is_input_raw");
 pub const IS_PRIMITIVE: &str = concatcp!(PREFIX_ID, FUNC, ".is_primitive");
 pub const GET_CODE: &str = concatcp!(PREFIX_ID, FUNC, ".get_code");
 pub const GET_PRELUDE: &str = concatcp!(PREFIX_ID, FUNC, ".get_prelude");
+pub const GET_ID: &str = concatcp!(PREFIX_ID, FUNC, ".get_id");
 
 impl Default for FuncLib {
     fn default() -> Self {
@@ -62,6 +65,7 @@ impl Default for FuncLib {
             is_primitive: CtxConstInputFreeFunc { fn_: is_primitive }.build(),
             get_code: CtxConstInputFreeFunc { fn_: get_code }.build(),
             get_prelude: CtxConstInputFreeFunc { fn_: get_prelude }.build(),
+            get_id: CtxConstInputFreeFunc { fn_: get_id }.build(),
         }
     }
 }
@@ -78,6 +82,7 @@ impl CfgMod for FuncLib {
         extend_func(cfg, IS_PRIMITIVE, self.is_primitive);
         extend_func(cfg, GET_CODE, self.get_code);
         extend_func(cfg, GET_PRELUDE, self.get_prelude);
+        extend_func(cfg, GET_ID, self.get_id);
     }
 }
 
@@ -171,4 +176,16 @@ pub fn get_prelude(cfg: &mut Cfg, ctx: &Val) -> Val {
         return bug!(cfg, "{GET_PRELUDE}: prelude not found");
     };
     ctx.clone()
+}
+
+pub fn get_id(cfg: &mut Cfg, ctx: &Val) -> Val {
+    let Val::Func(func) = ctx else {
+        return bug!(cfg, "{GET_ID}: expected context to be a function, but got {ctx}");
+    };
+    let id = match func {
+        FuncVal::Prim(f) => Rc::as_ptr(f.unwrap_ref()).addr(),
+        FuncVal::Comp(f) => Rc::as_ptr(f.unwrap_ref()).addr(),
+    };
+    let id = Key::from_string_unchecked(format!("{id:x}"));
+    Val::Key(id)
 }

@@ -73,6 +73,24 @@ _ do [
 -----
 false
 =====
+get_id
+-----
+_ do [
+    .any set _ import _value.any,
+    .make set _ import _link.make,
+    .get_id set _ import _link.get_id,
+    .l1 set _ make {},
+    .l2 set l1,
+    .l3 set _ make {},
+    .id_l1 set _ get_id l1,
+    .id_l2 set _ get_id l2,
+    .id_l3 set _ get_id l3,
+    .id_type set .id_l1 which get_type : .,
+    (id_type == _key) and (id_l1 == id_l2) and _ not id_l1 == id_l3
+]
+-----
+true
+=====
 sync
 -----
 _ do [

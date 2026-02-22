@@ -447,6 +447,54 @@ _ do [
 -----
 true
 =====
+get_id ==
+-----
+_ do [
+    .get_id set _ import _function.get_id,
+    .any set _ import _value.any,
+    .f1 set _ any _function,
+    .f2 set _ any _function,
+    .id_f1 set .f1 which get_id : .,
+    .id_f2 set .f2 which get_id : .,
+    (f1 == f2) == (id_f1 == id_f2)
+]
+-----
+true
+=====
+get_id primitive
+-----
+_ do [
+    .get_id set _ import _function.get_id,
+    .id_not set .not which get_id : .,
+    _key == .id_not which get_type : .,
+]
+-----
+true
+=====
+get_id composite
+-----
+_ do [
+    .get_id set _ import _function.get_id,
+    .any set _ import _value.any,
+    .prelude set _ any .,
+    .f set _ function {
+        code : (. : .) : .,
+        prelude : prelude
+    },
+    .g set f,
+    .h set _ function {
+        code : (. : .) : .,
+        prelude : prelude
+    },
+    .id_f set .f which get_id : .,
+    .id_g set .g which get_id : .,
+    .id_h set .h which get_id : .,
+    .id_type set .id_f which get_type : .,
+    (id_type == _key) and (id_f == id_g) and _ not id_f == id_h
+]
+-----
+true
+=====
 apply free
 -----
 _ do [
