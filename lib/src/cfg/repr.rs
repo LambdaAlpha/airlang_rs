@@ -94,7 +94,9 @@ impl FmtRepr for Val {
 
 impl Display for LinkVal {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let repr = Val::Int(Int::from(self.ptr_addr()).into());
+        let id = self.ptr_addr();
+        let id = Key::from_string_unchecked(format!("{id:x}"));
+        let repr = Val::Key(id);
         let tag = key(concatcp!(PREFIX_ID, LINK));
         let call = Call::new(tag, repr);
         Display::fmt(&call, f)
