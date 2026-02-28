@@ -178,6 +178,7 @@ pub fn get_prelude(cfg: &mut Cfg, ctx: &Val) -> Val {
     ctx.clone()
 }
 
+// todo design id for structural equality
 pub fn get_id(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Func(func) = ctx else {
         return bug!(cfg, "{GET_ID}: expected context to be a function, but got {ctx}");

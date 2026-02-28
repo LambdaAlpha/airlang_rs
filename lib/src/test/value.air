@@ -356,7 +356,7 @@ true
 -----
 true
 =====
-== link
+== link true
 -----
 _ do [
     .make_link set _ import _link.make,
@@ -366,6 +366,17 @@ _ do [
 ]
 -----
 true
+=====
+== link false
+-----
+_ do [
+    .make_link set _ import _link.make,
+    .a set _ make_link .,
+    .b set _ make_link .,
+    (a == b) and _ not a == .
+]
+-----
+false
 =====
 == function
 -----

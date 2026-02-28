@@ -9,7 +9,7 @@ use derive_more::From;
 
 use crate::semantics::val::Val;
 
-#[derive(Clone, PartialEq, Eq, From)]
+#[derive(Clone, From)]
 pub struct LinkVal {
     cell: Rc<RefCell<Val>>,
     const_: bool,
@@ -36,3 +36,11 @@ impl LinkVal {
         self.cell.try_borrow_mut()
     }
 }
+
+impl PartialEq for LinkVal {
+    fn eq(&self, other: &LinkVal) -> bool {
+        Rc::ptr_eq(&self.cell, &other.cell) && self.const_ == other.const_
+    }
+}
+
+impl Eq for LinkVal {}
