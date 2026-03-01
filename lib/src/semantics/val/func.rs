@@ -1,3 +1,4 @@
+use derive_more::Deref;
 use derive_more::From;
 
 use crate::semantics::cfg::Cfg;
@@ -8,6 +9,7 @@ use crate::semantics::func::PrimFunc;
 use crate::semantics::func::PrimInput;
 use crate::semantics::val::Val;
 use crate::type_::wrap::rc_wrap;
+use crate::utils::memory::leak_const;
 
 #[derive(Clone, PartialEq, Eq, From)]
 pub enum FuncVal {
@@ -15,7 +17,20 @@ pub enum FuncVal {
     Comp(CompFuncVal),
 }
 
-rc_wrap!(pub PrimFuncVal(PrimFunc));
+#[derive(Copy, Clone, PartialEq, Eq, Deref)]
+pub struct PrimFuncVal(&'static PrimFunc);
+
+impl From<PrimFunc> for PrimFuncVal {
+    fn from(val: PrimFunc) -> Self {
+        Self(leak_const(val))
+    }
+}
+
+impl PrimFuncVal {
+    pub(crate) fn unwrap(self) -> &'static PrimFunc {
+        self.0
+    }
+}
 
 rc_wrap!(pub CompFuncVal(CompFunc));
 

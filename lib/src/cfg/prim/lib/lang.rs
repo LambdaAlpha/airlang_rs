@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use const_format::concatcp;
 
 use crate::bug;
@@ -17,6 +15,7 @@ use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Cell;
 use crate::type_::Text;
+use crate::utils::memory::leak_const;
 
 #[derive(Clone)]
 pub struct LangLib {
@@ -40,10 +39,13 @@ pub const GENERATE: &str = concatcp!(PREFIX_ID, LANGUAGE, ".syntax.generate");
 impl Default for LangLib {
     fn default() -> Self {
         LangLib {
-            data: PrimFunc { fn_: Rc::new(Id), ctx: PrimCtx::Free, input: PrimInput::Raw }.into(),
-            id: PrimFunc { fn_: Rc::new(Id), ctx: PrimCtx::Free, input: PrimInput::Eval }.into(),
-            code: PrimFunc { fn_: Rc::new(Eval), ctx: PrimCtx::Mut, input: PrimInput::Raw }.into(),
-            eval: PrimFunc { fn_: Rc::new(Eval), ctx: PrimCtx::Mut, input: PrimInput::Eval }.into(),
+            data: PrimFunc { fn_: leak_const(Id), ctx: PrimCtx::Free, input: PrimInput::Raw }
+                .into(),
+            id: PrimFunc { fn_: leak_const(Id), ctx: PrimCtx::Free, input: PrimInput::Eval }.into(),
+            code: PrimFunc { fn_: leak_const(Eval), ctx: PrimCtx::Mut, input: PrimInput::Raw }
+                .into(),
+            eval: PrimFunc { fn_: leak_const(Eval), ctx: PrimCtx::Mut, input: PrimInput::Eval }
+                .into(),
             parse: CtxFreeInputEvalFunc { fn_: parse }.build(),
             generate: CtxFreeInputEvalFunc { fn_: generate }.build(),
         }

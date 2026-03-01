@@ -23,6 +23,7 @@ use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::Key;
 use crate::type_::Pair;
+use crate::utils::memory::leak_const;
 
 #[derive(Clone)]
 pub struct FuncLib {
@@ -56,7 +57,7 @@ impl Default for FuncLib {
         FuncLib {
             make: CtxFreeInputEvalFunc { fn_: make }.build(),
             represent: CtxFreeInputEvalFunc { fn_: represent }.build(),
-            apply: PrimFunc { fn_: Rc::new(Apply), ctx: PrimCtx::Mut, input: PrimInput::Eval }
+            apply: PrimFunc { fn_: leak_const(Apply), ctx: PrimCtx::Mut, input: PrimInput::Eval }
                 .into(),
             is_context_free: CtxConstInputFreeFunc { fn_: is_context_free }.build(),
             is_context_constant: CtxConstInputFreeFunc { fn_: is_context_constant }.build(),
@@ -184,7 +185,7 @@ pub fn get_id(cfg: &mut Cfg, ctx: &Val) -> Val {
         return bug!(cfg, "{GET_ID}: expected context to be a function, but got {ctx}");
     };
     let id = match func {
-        FuncVal::Prim(f) => Rc::as_ptr(f.unwrap_ref()).addr(),
+        FuncVal::Prim(f) => (f.unwrap() as *const PrimFunc).addr(),
         FuncVal::Comp(f) => Rc::as_ptr(f.unwrap_ref()).addr(),
     };
     let id = Key::from_string_unchecked(format!("{id:x}"));

@@ -18,11 +18,7 @@ pub struct BinPrimPrelude {
 
 impl BinPrimPrelude {
     pub fn new(lib: &BinPrimLib) -> Self {
-        Self {
-            ext: ExtPrimPrelude::new(&lib.ext),
-            help: lib.repl.help.clone(),
-            call: lib.cmd.call.clone(),
-        }
+        Self { ext: ExtPrimPrelude::new(&lib.ext), help: lib.repl.help.clone(), call: lib.cmd.call }
     }
 }
 
@@ -30,6 +26,6 @@ impl Prelude for BinPrimPrelude {
     fn extend(&self, map: &mut Map<Key, Val>) {
         self.ext.extend(map);
         let _ = map.insert(Key::from_str_unchecked("help"), Val::Text(self.help.clone()));
-        map_put_func(map, ";", &self.call);
+        map_put_func(map, ";", self.call);
     }
 }

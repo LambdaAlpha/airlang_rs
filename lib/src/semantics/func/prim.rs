@@ -1,13 +1,12 @@
-use std::rc::Rc;
-
 use crate::semantics::cfg::Cfg;
 use crate::semantics::func::DynFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
+use crate::utils::memory::leak_const;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct PrimFunc {
-    pub(crate) fn_: Rc<dyn DynFunc<Cfg, Val, Val, Val>>,
+    pub(crate) fn_: &'static dyn DynFunc<Cfg, Val, Val, Val>,
     pub(crate) ctx: PrimCtx,
     pub(crate) input: PrimInput,
 }
@@ -34,7 +33,7 @@ impl DynFunc<Cfg, Val, Val, Val> for PrimFunc {
 
 impl PartialEq for PrimFunc {
     fn eq(&self, other: &PrimFunc) -> bool {
-        Rc::ptr_eq(&self.fn_, &other.fn_) && self.ctx == other.ctx && self.input == other.input
+        std::ptr::eq(&self.fn_, &other.fn_) && self.ctx == other.ctx && self.input == other.input
     }
 }
 
@@ -56,7 +55,7 @@ impl<F> CtxMutInputEvalFunc<F>
 where F: Fn(&mut Cfg, &mut Val, Val) -> Val + 'static
 {
     pub fn build(self) -> PrimFuncVal {
-        PrimFunc { fn_: Rc::new(self), ctx: PrimCtx::Mut, input: PrimInput::Eval }.into()
+        PrimFunc { fn_: leak_const(self), ctx: PrimCtx::Mut, input: PrimInput::Eval }.into()
     }
 }
 
@@ -76,7 +75,7 @@ impl<F> CtxMutInputRawFunc<F>
 where F: Fn(&mut Cfg, &mut Val, Val) -> Val + 'static
 {
     pub fn build(self) -> PrimFuncVal {
-        PrimFunc { fn_: Rc::new(self), ctx: PrimCtx::Mut, input: PrimInput::Raw }.into()
+        PrimFunc { fn_: leak_const(self), ctx: PrimCtx::Mut, input: PrimInput::Raw }.into()
     }
 }
 
@@ -96,7 +95,7 @@ impl<F> CtxMutInputFreeFunc<F>
 where F: Fn(&mut Cfg, &mut Val) -> Val + 'static
 {
     pub fn build(self) -> PrimFuncVal {
-        PrimFunc { fn_: Rc::new(self), ctx: PrimCtx::Mut, input: PrimInput::Free }.into()
+        PrimFunc { fn_: leak_const(self), ctx: PrimCtx::Mut, input: PrimInput::Free }.into()
     }
 }
 
@@ -116,7 +115,7 @@ impl<F> CtxConstInputEvalFunc<F>
 where F: Fn(&mut Cfg, &Val, Val) -> Val + 'static
 {
     pub fn build(self) -> PrimFuncVal {
-        PrimFunc { fn_: Rc::new(self), ctx: PrimCtx::Const_, input: PrimInput::Eval }.into()
+        PrimFunc { fn_: leak_const(self), ctx: PrimCtx::Const_, input: PrimInput::Eval }.into()
     }
 }
 
@@ -136,7 +135,7 @@ impl<F> CtxConstInputRawFunc<F>
 where F: Fn(&mut Cfg, &Val, Val) -> Val + 'static
 {
     pub fn build(self) -> PrimFuncVal {
-        PrimFunc { fn_: Rc::new(self), ctx: PrimCtx::Const_, input: PrimInput::Raw }.into()
+        PrimFunc { fn_: leak_const(self), ctx: PrimCtx::Const_, input: PrimInput::Raw }.into()
     }
 }
 
@@ -156,7 +155,7 @@ impl<F> CtxConstInputFreeFunc<F>
 where F: Fn(&mut Cfg, &Val) -> Val + 'static
 {
     pub fn build(self) -> PrimFuncVal {
-        PrimFunc { fn_: Rc::new(self), ctx: PrimCtx::Const_, input: PrimInput::Free }.into()
+        PrimFunc { fn_: leak_const(self), ctx: PrimCtx::Const_, input: PrimInput::Free }.into()
     }
 }
 
@@ -176,7 +175,7 @@ impl<F> CtxFreeInputEvalFunc<F>
 where F: Fn(&mut Cfg, Val) -> Val + 'static
 {
     pub fn build(self) -> PrimFuncVal {
-        PrimFunc { fn_: Rc::new(self), ctx: PrimCtx::Free, input: PrimInput::Eval }.into()
+        PrimFunc { fn_: leak_const(self), ctx: PrimCtx::Free, input: PrimInput::Eval }.into()
     }
 }
 
@@ -196,7 +195,7 @@ impl<F> CtxFreeInputRawFunc<F>
 where F: Fn(&mut Cfg, Val) -> Val + 'static
 {
     pub fn build(self) -> PrimFuncVal {
-        PrimFunc { fn_: Rc::new(self), ctx: PrimCtx::Free, input: PrimInput::Raw }.into()
+        PrimFunc { fn_: leak_const(self), ctx: PrimCtx::Free, input: PrimInput::Raw }.into()
     }
 }
 
@@ -216,6 +215,6 @@ impl<F> CtxFreeInputFreeFunc<F>
 where F: Fn(&mut Cfg) -> Val + 'static
 {
     pub fn build(self) -> PrimFuncVal {
-        PrimFunc { fn_: Rc::new(self), ctx: PrimCtx::Free, input: PrimInput::Free }.into()
+        PrimFunc { fn_: leak_const(self), ctx: PrimCtx::Free, input: PrimInput::Free }.into()
     }
 }

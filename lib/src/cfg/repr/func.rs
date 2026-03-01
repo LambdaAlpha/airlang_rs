@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::bug;
 use crate::cfg::prim::lib::func::MAKE;
 use crate::cfg::utils::map_remove;
@@ -7,6 +5,7 @@ use crate::semantics::cfg::Cfg;
 use crate::semantics::func::CompCtx;
 use crate::semantics::func::CompFunc;
 use crate::semantics::func::CompInput;
+use crate::semantics::func::DynFunc;
 use crate::semantics::func::PrimCtx;
 use crate::semantics::func::PrimInput;
 use crate::semantics::val::CompFuncVal;
@@ -113,9 +112,8 @@ pub(in crate::cfg) fn generate_code(func: &FuncVal) -> Val {
     }
 }
 
-fn prim_code<T: ?Sized>(fn_: &Rc<T>) -> Val {
-    let ptr = Rc::as_ptr(fn_).addr();
-    let int = Int::from(ptr);
+fn prim_code(fn_: *const dyn DynFunc<Cfg, Val, Val, Val>) -> Val {
+    let int = Int::from(fn_.addr());
     Val::Int(int.into())
 }
 

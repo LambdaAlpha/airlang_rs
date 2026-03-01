@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use const_format::concatcp;
 
 use self::pattern::PatternAssign;
@@ -22,6 +20,7 @@ use crate::semantics::func::PrimInput;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Pair;
+use crate::utils::memory::leak_const;
 
 #[derive(Clone)]
 pub struct CtxLib {
@@ -48,7 +47,7 @@ impl Default for CtxLib {
         CtxLib {
             get: CtxConstInputEvalFunc { fn_: get }.build(),
             set: CtxMutInputEvalFunc { fn_: set }.build(),
-            form: PrimFunc { fn_: Rc::new(Form), ctx: PrimCtx::Const_, input: PrimInput::Raw }
+            form: PrimFunc { fn_: leak_const(Form), ctx: PrimCtx::Const_, input: PrimInput::Raw }
                 .into(),
             represent: CtxMutInputEvalFunc { fn_: represent }.build(),
             get_self: CtxConstInputFreeFunc { fn_: get_self }.build(),

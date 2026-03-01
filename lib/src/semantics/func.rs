@@ -24,7 +24,7 @@ pub trait DynFunc<Cfg, Ctx, I, O> {
 }
 
 impl<Cfg, Ctx, I, O, T> DynFunc<Cfg, Ctx, I, O> for &T
-where T: DynFunc<Cfg, Ctx, I, O>
+where T: ?Sized + DynFunc<Cfg, Ctx, I, O>
 {
     fn call(&self, cfg: &mut Cfg, ctx: &mut Ctx, input: I) -> O {
         (**self).call(cfg, ctx, input)
