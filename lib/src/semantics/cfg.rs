@@ -9,6 +9,7 @@ use crate::semantics::val::Val;
 use crate::type_::Key;
 use crate::type_::Map;
 use crate::type_::Text;
+use crate::utils::hint::cold_path;
 
 // todo design invariant
 #[derive(Clone, PartialEq, Eq, Deref, DerefMut)]
@@ -51,9 +52,11 @@ impl Cfg {
     #[inline(always)]
     pub fn step(&mut self) -> bool {
         if self.aborted {
+            cold_path();
             return false;
         }
         if self.steps == 0 {
+            cold_path();
             self.export(
                 Key::from_str_unchecked(Self::ABORT_TYPE),
                 Val::Key(Key::from_str_unchecked(Self::ABORT_TYPE_STEPS)),
@@ -81,6 +84,7 @@ impl Cfg {
         self.steps
     }
 
+    #[cold]
     pub fn abort(&mut self) {
         self.aborted = true;
     }
