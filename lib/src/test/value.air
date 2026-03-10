@@ -99,16 +99,6 @@ _ do [
 -----
 _pair
 =====
-any call
------
-_ do [
-    .any set _ import _value.any,
-    .c set _ any _call,
-    .c which get_type : .
-]
------
-_call
-=====
 any list
 -----
 _ do [
@@ -128,6 +118,26 @@ _ do [
 ]
 -----
 _map
+=====
+any quote
+-----
+_ do [
+    .any set _ import _value.any,
+    .q set _ any _quote,
+    .q which get_type : .
+]
+-----
+_quote
+=====
+any call
+-----
+_ do [
+    .any set _ import _value.any,
+    .c set _ any _call,
+    .c which get_type : .
+]
+-----
+_call
 =====
 any link
 -----
@@ -230,15 +240,6 @@ _ do [
 -----
 _pair
 =====
-get_type call
------
-_ do [
-    .a set _ data _ f a,
-    .a which get_type : .
-]
------
-_call
-=====
 get_type list
 -----
 _ do [
@@ -256,6 +257,24 @@ _ do [
 ]
 -----
 _map
+=====
+get_type quote
+-----
+_ do [
+    .a set _ data _(a),
+    .a which get_type : .
+]
+-----
+_quote
+=====
+get_type call
+-----
+_ do [
+    .a set _ data _ f a,
+    .a which get_type : .
+]
+-----
+_call
 =====
 get_type link
 -----
@@ -338,12 +357,6 @@ true
 -----
 true
 =====
-== call
------
-(_ data _ 1 2) == (_ data _ 1 2)
------
-true
-=====
 == list
 -----
 [1, 2] == [1, 2]
@@ -353,6 +366,18 @@ true
 == map
 -----
 {} == {}
+-----
+true
+=====
+== quote
+-----
+(_ data _(1)) == (_ data _(1))
+-----
+true
+=====
+== call
+-----
+(_ data _ 1 2) == (_ data _ 1 2)
 -----
 true
 =====

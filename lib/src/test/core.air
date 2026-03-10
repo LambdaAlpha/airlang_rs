@@ -86,15 +86,6 @@ _ do [
 -----
 [1, 2]
 =====
-call ref
------
-_ do [
-    .c set _ data _ func input,
-    .c which eval : _ form [_ get _function, _ get _input]
-]
------
-[func, input]
-=====
 list ref
 -----
 _ do [
@@ -112,6 +103,24 @@ _ do [
 ]
 -----
 [1, 2]
+=====
+quote ref
+-----
+_ do [
+    .c set _(_(1)),
+    .c which get : _source
+]
+-----
+1
+=====
+call ref
+-----
+_ do [
+    .c set _ data _ func input,
+    .c which eval : _ form [_ get _function, _ get _input]
+]
+-----
+[func, input]
 =====
 cell eval
 -----
@@ -137,7 +146,19 @@ map eval
 -----
 {a : false}
 =====
-call recursive
+quote eval key
+-----
+_(a)
+-----
+a
+=====
+quote eval call
+-----
+_(_ not true)
+-----
+_ not true
+=====
+call eval recursive
 -----
 _ not _ not true
 -----
@@ -169,24 +190,6 @@ _ do [
 ]
 -----
 2
-=====
-call ctx func
------
-_ do [
-    .c set _ data _ func input,
-    .c which get : _function
-]
------
-func
-=====
-call ctx input
------
-_ do [
-    .c set _ data _ func input,
-    .c which get : _input
-]
------
-input
 =====
 list ctx index
 -----
@@ -223,3 +226,30 @@ _ do [
 ]
 -----
 1
+=====
+quote ctx source
+-----
+_ do [
+    .c set _(_(1)),
+    .c which get : _source
+]
+-----
+1
+=====
+call ctx func
+-----
+_ do [
+    .c set _ data _ func input,
+    .c which get : _function
+]
+-----
+func
+=====
+call ctx input
+-----
+_ do [
+    .c set _ data _ func input,
+    .c which get : _input
+]
+-----
+input

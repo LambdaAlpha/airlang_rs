@@ -7,6 +7,7 @@ use num_traits::Num;
 
 use super::repr::CellRepr;
 use super::repr::PairRepr;
+use super::repr::QuoteRepr;
 use super::repr::Repr;
 use crate::test::parse_test_file;
 use crate::type_::Bit;
@@ -60,6 +61,18 @@ fn pair(left: Repr, right: Repr) -> Repr {
     Repr::Pair(Box::new(PairRepr::new(left, right)))
 }
 
+fn list(v: Vec<Repr>) -> Repr {
+    Repr::List(v.into())
+}
+
+fn map(v: Vec<(&str, Repr)>) -> Repr {
+    Repr::Map(Map::from_iter(v.into_iter().map(|(k, v)| (Key::from_str_unchecked(k), v))))
+}
+
+fn quote(value: Repr) -> Repr {
+    Repr::Quote(Box::new(QuoteRepr::new(value)))
+}
+
 fn call(func: Repr, input: Repr) -> Repr {
     let call = Call { func, input };
     Repr::Call(Box::new(call))
@@ -68,14 +81,6 @@ fn call(func: Repr, input: Repr) -> Repr {
 fn infix_call(left: Repr, middle: Repr, right: Repr) -> Repr {
     let call = Call { func: middle, input: Repr::Pair(Box::new(Pair::new(left, right))) };
     Repr::Call(Box::new(call))
-}
-
-fn list(v: Vec<Repr>) -> Repr {
-    Repr::List(v.into())
-}
-
-fn map(v: Vec<(&str, Repr)>) -> Repr {
-    Repr::Map(Map::from_iter(v.into_iter().map(|(k, v)| (Key::from_str_unchecked(k), v))))
 }
 
 fn test_parse(
@@ -256,16 +261,6 @@ fn test_generate_pair() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_parse_call() -> Result<(), Box<dyn Error>> {
-    test_parse(include_str!("test/call.air"), "test/call.air", call::expected)
-}
-
-#[test]
-fn test_generate_call() -> Result<(), Box<dyn Error>> {
-    test_generate(include_str!("test/call.air"), "test/call.air")
-}
-
-#[test]
 fn test_parse_list() -> Result<(), Box<dyn Error>> {
     test_parse(include_str!("test/list.air"), "test/list.air", list::expected)
 }
@@ -283,6 +278,26 @@ fn test_parse_map() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_generate_map() -> Result<(), Box<dyn Error>> {
     test_generate(include_str!("test/map.air"), "test/map.air")
+}
+
+#[test]
+fn test_parse_quote() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/quote.air"), "test/quote.air", quote::expected)
+}
+
+#[test]
+fn test_generate_quote() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/quote.air"), "test/quote.air")
+}
+
+#[test]
+fn test_parse_call() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/call.air"), "test/call.air", call::expected)
+}
+
+#[test]
+fn test_generate_call() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/call.air"), "test/call.air")
 }
 
 #[test]
@@ -330,6 +345,8 @@ mod decimal;
 mod byte;
 
 mod cell;
+
+mod quote;
 
 mod pair;
 

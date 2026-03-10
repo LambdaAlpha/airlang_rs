@@ -30,6 +30,7 @@ use crate::semantics::val::LinkVal;
 use crate::semantics::val::MAP;
 use crate::semantics::val::PAIR;
 use crate::semantics::val::PrimFuncVal;
+use crate::semantics::val::QUOTE;
 use crate::semantics::val::TEXT;
 use crate::semantics::val::UNIT;
 use crate::semantics::val::Val;
@@ -43,6 +44,7 @@ use crate::type_::Key;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
+use crate::type_::Quote;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -87,9 +89,10 @@ const TYPE_DECIMAL: &str = concatcp!(PREFIX_ID, DECIMAL);
 const TYPE_BYTE: &str = concatcp!(PREFIX_ID, BYTE);
 const TYPE_CELL: &str = concatcp!(PREFIX_ID, CELL);
 const TYPE_PAIR: &str = concatcp!(PREFIX_ID, PAIR);
-const TYPE_CALL: &str = concatcp!(PREFIX_ID, CALL);
 const TYPE_LIST: &str = concatcp!(PREFIX_ID, LIST);
 const TYPE_MAP: &str = concatcp!(PREFIX_ID, MAP);
+const TYPE_QUOTE: &str = concatcp!(PREFIX_ID, QUOTE);
+const TYPE_CALL: &str = concatcp!(PREFIX_ID, CALL);
 const TYPE_LINK: &str = concatcp!(PREFIX_ID, LINK);
 const TYPE_CFG: &str = concatcp!(PREFIX_ID, CFG);
 const TYPE_FUNC: &str = concatcp!(PREFIX_ID, FUNC);
@@ -110,9 +113,10 @@ pub fn any(cfg: &mut Cfg, input: Val) -> Val {
             TYPE_BYTE => Val::Byte(Byte::any(rng, DEPTH).into()),
             TYPE_CELL => Val::Cell(Cell::<Val>::any(rng, DEPTH).into()),
             TYPE_PAIR => Val::Pair(Pair::<Val, Val>::any(rng, DEPTH).into()),
-            TYPE_CALL => Val::Call(Call::<Val, Val>::any(rng, DEPTH).into()),
             TYPE_LIST => Val::List(List::<Val>::any(rng, DEPTH).into()),
             TYPE_MAP => Val::Map(Map::<Key, Val>::any(rng, DEPTH).into()),
+            TYPE_QUOTE => Val::Quote(Quote::<Val>::any(rng, DEPTH).into()),
+            TYPE_CALL => Val::Call(Call::<Val, Val>::any(rng, DEPTH).into()),
             TYPE_LINK => Val::Link(LinkVal::any(rng, DEPTH)),
             TYPE_CFG => Val::Cfg(Cfg::any(rng, DEPTH).into()),
             TYPE_FUNC => Val::Func(FuncVal::any(rng, DEPTH)),
@@ -133,9 +137,10 @@ pub fn get_type(_cfg: &mut Cfg, ctx: &Val) -> Val {
         Val::Byte(_) => TYPE_BYTE,
         Val::Cell(_) => TYPE_CELL,
         Val::Pair(_) => TYPE_PAIR,
-        Val::Call(_) => TYPE_CALL,
         Val::List(_) => TYPE_LIST,
         Val::Map(_) => TYPE_MAP,
+        Val::Quote(_) => TYPE_QUOTE,
+        Val::Call(_) => TYPE_CALL,
         Val::Link(_) => TYPE_LINK,
         Val::Cfg(_) => TYPE_CFG,
         Val::Func(_) => TYPE_FUNC,

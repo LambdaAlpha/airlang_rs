@@ -33,9 +33,10 @@ impl BaseCompCfg {
         Self::run(cfg, ctx, include_str!("../air/lib/byte.air"), "/lib/byte");
         Self::run(cfg, ctx, include_str!("../air/lib/cell.air"), "/lib/cell");
         Self::run(cfg, ctx, include_str!("../air/lib/pair.air"), "/lib/pair");
-        Self::run(cfg, ctx, include_str!("../air/lib/call.air"), "/lib/call");
         Self::run(cfg, ctx, include_str!("../air/lib/list.air"), "/lib/list");
         Self::run(cfg, ctx, include_str!("../air/lib/map.air"), "lib/map");
+        Self::run(cfg, ctx, include_str!("../air/lib/quote.air"), "/lib/quote");
+        Self::run(cfg, ctx, include_str!("../air/lib/call.air"), "/lib/call");
         Self::run(cfg, ctx, include_str!("../air/lib/link.air"), "/lib/link");
         Self::run(cfg, ctx, include_str!("../air/lib/config.air"), "/lib/config");
         Self::run(cfg, ctx, include_str!("../air/lib/function.air"), "/lib/function");

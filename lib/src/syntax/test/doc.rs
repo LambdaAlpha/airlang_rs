@@ -10,6 +10,7 @@ use crate::syntax::test::key;
 use crate::syntax::test::list;
 use crate::syntax::test::map;
 use crate::syntax::test::pair;
+use crate::syntax::test::quote;
 use crate::syntax::test::text;
 use crate::syntax::test::unit;
 
@@ -59,6 +60,14 @@ pub(super) fn expected() -> Vec<Repr> {
         map(vec![("a", int("1", 10)), ("b", int("2", 10)), ("c", int("3", 10))]),
         map(vec![("a", int("1", 10)), ("b", bit(true)), ("c", key(" "))]),
         map(vec![("a", unit()), ("b", unit()), ("c", unit())]),
+        quote(key("v")),
+        quote(key("key")),
+        quote(text("text")),
+        quote(list(vec![key("l"), key("i"), key("s"), key("t")])),
+        quote(map(vec![("a", key("map"))])),
+        quote(bit(true)),
+        quote(key("quote")),
+        quote(quote(list(vec![quote(map(vec![("a", quote(text("")))]))]))),
         call(key("not"), bit(true)),
         infix_call(int("1", 10), key("+"), int("1", 10)),
         infix_call(key("a"), key("and"), infix_call(key("b"), key("or"), key("c"))),

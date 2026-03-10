@@ -12,7 +12,7 @@
 
 ### Minimalist Syntax
 
-Air's syntax is extremely concise. It only includes comments and 12 data types, with no semantic-specific syntax for control flows, functions, types, modules, etc. Its rules are very simple, using prefixes to avoid ambiguity, and it has only 5 keywords (`_`, `.`, `:`, `true`, `false`). This makes it highly suitable for configuration or data interchange.
+Air's syntax is extremely concise. It only includes comments and 13 data types, with no semantic-specific syntax for control flows, functions, types, modules, etc. Its rules are very simple, using prefixes to avoid ambiguity, and it has only 5 keywords (`_`, `.`, `:`, `true`, `false`). This makes it highly suitable for configuration or data interchange.
 
 **comment**
 
@@ -138,6 +138,20 @@ a : b : c
 {a, b, c}
 ```
 
+**quote**
+
+- `_(v)`
+- `_'key'`
+- `_"text"`
+- `_[l, i, s, t]`
+- `_{a : map}`
+
+```air
+_(true)
+_('quote')
+_(_[_{a : _""}])
+```
+
 **call**
 
 - `_ function input`
@@ -152,7 +166,7 @@ a and b or c
 
 ### Minimalist Semantics
 
-Air's evaluation rules are very concise, consisting of only four rules.
+Air's evaluation rules are very concise, consisting of only five rules.
 
 First, the evaluation rules for keys are as follows:
 
@@ -160,20 +174,22 @@ First, the evaluation rules for keys are as follows:
 2. `.a` ➔ `a`
 3. `:a` or `a` ➔ `v`, where `v` is the value bound to key `a` in the context
 
-Second, the evaluation rule for calls is `_ f i` ➔ `o`, with the following steps:
+Second, the evaluation rule for quotes is `_(v)` ➔ `v`.
+
+Third, the evaluation rule for calls is `_ f i` ➔ `o`, with the following steps:
 
 1. `eval(f)` ➔ `vf`
 2. `if vf.eval_input then eval(i) else i` ➔ `vi`
 3. `vf(vi)` ➔ `o`
 
-Third, the evaluation rules for cells, pairs, lists, and maps are as follows:
+Fourth, the evaluation rules for cells, pairs, lists, and maps are as follows:
 
 - `.(v)` ➔ `.(eval(v))`
 - `v1 : v2` ➔ `eval(v1) : eval(v2)`
 - `[v1, v2, ..., vn]` ➔ `[eval(v1), eval(v2), ..., eval(vn)]`
 - `{k1 : v1, k2 : v2, ..., kn : vn}` ➔ `{k1 : eval(v1), k2 : eval(v2), kn : eval(vn)}`
 
-Fourth, the evaluation rule for other values is `v` ➔ `v`.
+Fifth, the evaluation rule for other values is `v` ➔ `v`.
 
 ### Context
 

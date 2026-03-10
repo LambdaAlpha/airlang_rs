@@ -1,0 +1,47 @@
+quote key
+-----
+_''
+=====
+quote text
+-----
+_""
+=====
+quote list
+-----
+_[]
+=====
+quote map
+-----
+_{}
+=====
+quote unit
+-----
+_(.)
+=====
+quote recursive
+-----
+_(_(a))
+=====
+quote pair
+-----
+_(a : b)
+=====
+quote scope list
+-----
+_([a, b])
+=====
+quote scope map
+-----
+_({a : b})
+=====
+pair quote
+-----
+a : _(b)
+=====
+list quote
+-----
+[_(a)]
+=====
+map quote
+-----
+{a : _(b)}

@@ -15,6 +15,7 @@ use self::link::LinkLib;
 use self::list::ListLib;
 use self::map::MapLib;
 use self::pair::PairLib;
+use self::quote::QuoteLib;
 use self::resource::ResourceLib;
 use self::text::TextLib;
 use self::unit::UnitLib;
@@ -33,9 +34,10 @@ pub struct BasePrimLib {
     pub byte: ByteLib,
     pub cell: CellLib,
     pub pair: PairLib,
-    pub call: CallLib,
     pub list: ListLib,
     pub map: MapLib,
+    pub quote: QuoteLib,
+    pub call: CallLib,
     pub link: LinkLib,
     pub cfg: CfgLib,
     pub func: FuncLib,
@@ -58,9 +60,10 @@ impl CfgMod for BasePrimLib {
         self.byte.extend(cfg);
         self.cell.extend(cfg);
         self.pair.extend(cfg);
-        self.call.extend(cfg);
         self.list.extend(cfg);
         self.map.extend(cfg);
+        self.quote.extend(cfg);
+        self.call.extend(cfg);
         self.link.extend(cfg);
         self.cfg.extend(cfg);
         self.func.extend(cfg);
@@ -91,11 +94,13 @@ pub mod cell;
 
 pub mod pair;
 
-pub mod call;
-
 pub mod list;
 
 pub mod map;
+
+pub mod quote;
+
+pub mod call;
 
 pub mod link;
 

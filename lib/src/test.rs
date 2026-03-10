@@ -139,11 +139,6 @@ fn test_pair() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_call() -> Result<(), Box<dyn Error>> {
-    test(include_str!("test/call.air"), "test/call.air")
-}
-
-#[test]
 fn test_list() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/list.air"), "test/list.air")
 }
@@ -151,6 +146,16 @@ fn test_list() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_map() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/map.air"), "test/map.air")
+}
+
+#[test]
+fn test_quote() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/quote.air"), "test/quote.air")
+}
+
+#[test]
+fn test_call() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/call.air"), "test/call.air")
 }
 
 #[test]

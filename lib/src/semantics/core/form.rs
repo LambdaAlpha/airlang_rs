@@ -8,6 +8,7 @@ use crate::semantics::val::CellVal;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::PairVal;
+use crate::semantics::val::QuoteVal;
 use crate::semantics::val::Val;
 use crate::type_::Key;
 
@@ -21,6 +22,19 @@ where Value: DynFunc<Cfg, Ctx, Val, Val>
     fn call(&self, cfg: &mut Cfg, ctx: &mut Ctx, mut cell: CellVal) -> CellVal {
         cell.value = self.value.call(cfg, ctx, take(&mut cell.value));
         cell
+    }
+}
+
+pub(crate) struct QuoteForm<'a, Value> {
+    pub(crate) source: &'a Value,
+}
+
+impl<'a, Value, Ctx> DynFunc<Cfg, Ctx, QuoteVal, QuoteVal> for QuoteForm<'a, Value>
+where Value: DynFunc<Cfg, Ctx, Val, Val>
+{
+    fn call(&self, cfg: &mut Cfg, ctx: &mut Ctx, mut quote: QuoteVal) -> QuoteVal {
+        quote.source = self.source.call(cfg, ctx, take(&mut quote.source));
+        quote
     }
 }
 
@@ -100,9 +114,10 @@ impl DynFunc<Cfg, Val, Val, Val> for Form {
             Val::Key(key) => self.call(cfg, ctx, key),
             Val::Cell(cell) => Val::Cell(self.call(cfg, ctx, cell)),
             Val::Pair(pair) => Val::Pair(self.call(cfg, ctx, pair)),
-            Val::Call(call) => Val::Call(self.call(cfg, ctx, call)),
             Val::List(list) => Val::List(self.call(cfg, ctx, list)),
             Val::Map(map) => Val::Map(self.call(cfg, ctx, map)),
+            Val::Quote(quote) => Val::Quote(self.call(cfg, ctx, quote)),
+            Val::Call(call) => Val::Call(self.call(cfg, ctx, call)),
             v => v,
         }
     }
@@ -117,6 +132,12 @@ impl DynFunc<Cfg, Val, Key, Val> for Form {
 impl DynFunc<Cfg, Val, CellVal, CellVal> for Form {
     fn call(&self, cfg: &mut Cfg, ctx: &mut Val, cell: CellVal) -> CellVal {
         CellForm { value: self }.call(cfg, ctx, cell)
+    }
+}
+
+impl DynFunc<Cfg, Val, QuoteVal, QuoteVal> for Form {
+    fn call(&self, cfg: &mut Cfg, ctx: &mut Val, quote: QuoteVal) -> QuoteVal {
+        QuoteForm { source: self }.call(cfg, ctx, quote)
     }
 }
 

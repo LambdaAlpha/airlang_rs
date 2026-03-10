@@ -11,6 +11,7 @@ pub use self::key::Key;
 pub use self::list::List;
 pub use self::map::Map;
 pub use self::pair::Pair;
+pub use self::quote::Quote;
 pub use self::text::Text;
 pub use self::unit::Unit;
 
@@ -36,8 +37,10 @@ mod pair;
 
 mod either;
 
-mod call;
-
 mod list;
 
 mod map;
+
+mod quote;
+
+mod call;

@@ -67,6 +67,7 @@ use crate::type_::Key;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
+use crate::type_::Quote;
 use crate::type_::Text;
 use crate::type_::Unit;
 use crate::utils::conversion::bin_str_to_vec_u8;
@@ -81,6 +82,7 @@ pub trait ParseRepr:
     + From<Decimal>
     + From<Byte>
     + From<Cell<Self>>
+    + From<Quote<Self>>
     + From<Pair<Self, Self>>
     + From<Call<Self, Self>>
     + From<List<Self>>
@@ -169,7 +171,7 @@ macro_rules! impl_parse_repr_for_comment {
 }
 
 impl_parse_repr_for_comment!(Unit Bit Key Text Int Decimal Byte);
-impl_parse_repr_for_comment!(Cell<C> Pair<C, C> Call<C, C> List<C> Map<Key, C>);
+impl_parse_repr_for_comment!(Cell<C> Quote<C> Pair<C, C> Call<C, C> List<C> Map<Key, C>);
 impl ParseRepr for C {}
 
 fn delimited_cut<'a, T, F>(left: char, f: F, right: char) -> impl Parser<&'a str, T, E>
@@ -240,6 +242,7 @@ fn prefix<'a, T: ParseRepr>(prefix: &str, ctx: ParseCtx) -> impl Parser<&'a str,
                 MAP_LEFT => raw_map(ctx).parse_next(i),
                 _ => fail.context(label("prefix token")).parse_next(i),
             },
+            EMPTY => quote(ctx).parse_next(i),
             UNIT => cell(ctx).parse_next(i),
             INT => int.map(T::from).parse_next(i),
             DECIMAL => decimal.map(T::from).parse_next(i),
@@ -406,6 +409,12 @@ fn reset_expect<'a, T>(
 ) -> ModalResult<T> {
     i.reset(&checkpoint);
     Err(cut_expect_desc(expect))
+}
+
+fn quote<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
+    let quote = alt((scope(ctx), key.map(T::from), text.map(T::from), list(ctx), map(ctx)))
+        .map(|v| T::from(Quote::new(v)));
+    quote.context(label("quote"))
 }
 
 fn cell<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {

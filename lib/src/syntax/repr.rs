@@ -21,6 +21,7 @@ use crate::type_::Key;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
+use crate::type_::Quote;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -38,21 +39,24 @@ pub enum Repr {
 
     Cell(Box<CellRepr>),
     Pair(Box<PairRepr>),
-    Call(Box<CallRepr>),
-
     List(ListRepr),
     Map(MapRepr),
+
+    Quote(Box<QuoteRepr>),
+    Call(Box<CallRepr>),
 }
 
 pub type CellRepr = Cell<Repr>;
 
 pub type PairRepr = Pair<Repr, Repr>;
 
-pub type CallRepr = Call<Repr, Repr>;
-
 pub type ListRepr = List<Repr>;
 
 pub type MapRepr = Map<Key, Repr>;
+
+pub type QuoteRepr = Quote<Repr>;
+
+pub type CallRepr = Call<Repr, Repr>;
 
 impl Default for Repr {
     fn default() -> Self {
@@ -69,6 +73,12 @@ impl From<CellRepr> for Repr {
 impl From<PairRepr> for Repr {
     fn from(pair: PairRepr) -> Self {
         Repr::Pair(Box::new(pair))
+    }
+}
+
+impl From<QuoteRepr> for Repr {
+    fn from(quote: QuoteRepr) -> Self {
+        Repr::Quote(Box::new(quote))
     }
 }
 
@@ -111,9 +121,10 @@ impl FmtRepr for Repr {
             Repr::Byte(byte) => <Byte as Display>::fmt(byte, f),
             Repr::Cell(cell) => <CellRepr as FmtRepr>::fmt(cell, ctx, f),
             Repr::Pair(pair) => <PairRepr as FmtRepr>::fmt(pair, ctx, f),
-            Repr::Call(call) => <CallRepr as FmtRepr>::fmt(call, ctx, f),
             Repr::List(list) => <ListRepr as FmtRepr>::fmt(list, ctx, f),
             Repr::Map(map) => <MapRepr as FmtRepr>::fmt(map, ctx, f),
+            Repr::Quote(quote) => <QuoteRepr as FmtRepr>::fmt(quote, ctx, f),
+            Repr::Call(call) => <CallRepr as FmtRepr>::fmt(call, ctx, f),
         }
     }
 

@@ -32,6 +32,7 @@ use crate::type_::Key;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
+use crate::type_::Quote;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -68,9 +69,10 @@ impl FmtRepr for Val {
             Val::Byte(byte) => <Byte as Display>::fmt(byte, f),
             Val::Cell(cell) => <Cell<Val> as FmtRepr>::fmt(cell, ctx, f),
             Val::Pair(pair) => <Pair<Val, Val> as FmtRepr>::fmt(pair, ctx, f),
-            Val::Call(call) => <Call<Val, Val> as FmtRepr>::fmt(call, ctx, f),
             Val::List(list) => <List<Val> as FmtRepr>::fmt(list, ctx, f),
             Val::Map(map) => <Map<Key, Val> as FmtRepr>::fmt(map, ctx, f),
+            Val::Quote(quote) => <Quote<Val> as FmtRepr>::fmt(quote, ctx, f),
+            Val::Call(call) => <Call<Val, Val> as FmtRepr>::fmt(call, ctx, f),
             Val::Link(link) => <LinkVal as Display>::fmt(link, f),
             Val::Cfg(cfg) => <Cfg as Display>::fmt(cfg, f),
             Val::Func(func) => <FuncVal as Display>::fmt(func, f),

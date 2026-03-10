@@ -43,6 +43,7 @@ use crate::type_::Key;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
+use crate::type_::Quote;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -354,6 +355,27 @@ impl<T: FmtRepr> FmtRepr for Cell<T> {
         f.write_str(UNIT)?;
         f.write_char(SCOPE_LEFT)?;
         self.value.fmt(ctx, f)?;
+        f.write_char(SCOPE_RIGHT)
+    }
+}
+
+impl<T: FmtRepr> Display for Quote<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        FmtRepr::fmt(self, FmtCtx::default(), f)
+    }
+}
+
+impl<T: FmtRepr> Debug for Quote<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        FmtRepr::fmt(self, FmtCtx::default(), f)
+    }
+}
+
+impl<T: FmtRepr> FmtRepr for Quote<T> {
+    fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(EMPTY)?;
+        f.write_char(SCOPE_LEFT)?;
+        self.source.fmt(ctx, f)?;
         f.write_char(SCOPE_RIGHT)
     }
 }

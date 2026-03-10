@@ -171,6 +171,38 @@ map set
 -----
 {a, b, c}
 =====
+quote scope
+-----
+_(v)
+=====
+quote key
+-----
+_'key'
+=====
+quote text
+-----
+_"text"
+=====
+quote list
+-----
+_[l, i, s, t]
+=====
+quote map
+-----
+_{a : map}
+=====
+quote bit
+-----
+_(true)
+=====
+quote scope key
+-----
+_('quote')
+=====
+quote quote
+-----
+_(_[_{a : _""}])
+=====
 call one input
 -----
 _ not true

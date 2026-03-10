@@ -7,6 +7,7 @@ use crate::semantics::val::CellVal;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::PairVal;
+use crate::semantics::val::QuoteVal;
 use crate::semantics::val::Val;
 use crate::type_::Call;
 use crate::type_::Cell;
@@ -14,15 +15,17 @@ use crate::type_::Key;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
+use crate::type_::Quote;
 
 pub(in crate::cfg) enum Pattern {
     Any(Key),
     Val(Val),
     Cell(Box<Cell<Pattern>>),
     Pair(Box<Pair<Pattern, Pattern>>),
-    Call(Box<Call<Pattern, Pattern>>),
     List(List<Pattern>),
     Map(Map<Key, Pattern>),
+    Quote(Box<Quote<Pattern>>),
+    Call(Box<Call<Pattern, Pattern>>),
 }
 
 pub(in crate::cfg) trait PatternParse {
@@ -37,6 +40,7 @@ impl PatternParse for Val {
             Val::Pair(pair) => pair.parse(cfg, tag),
             Val::List(list) => list.parse(cfg, tag),
             Val::Map(map) => map.parse(cfg, tag),
+            Val::Quote(quote) => quote.parse(cfg, tag),
             Val::Call(call) => call.parse(cfg, tag),
             val => Some(Pattern::Val(val)),
         }
@@ -62,6 +66,14 @@ impl PatternParse for CellVal {
         let cell = Cell::from(self);
         let value = cell.value.parse(cfg, tag)?;
         Some(Pattern::Cell(Box::new(Cell::new(value))))
+    }
+}
+
+impl PatternParse for QuoteVal {
+    fn parse(self, cfg: &mut Cfg, tag: &str) -> Option<Pattern> {
+        let quote = Quote::from(self);
+        let source = quote.source.parse(cfg, tag)?;
+        Some(Pattern::Quote(Box::new(Quote::new(source))))
     }
 }
 
@@ -116,9 +128,10 @@ impl PatternMatch<Val> for Pattern {
             Pattern::Val(expected) => expected.match_(cfg, force, tag, val),
             Pattern::Cell(cell) => cell.match_(cfg, force, tag, val),
             Pattern::Pair(pair) => pair.match_(cfg, force, tag, val),
-            Pattern::Call(call) => call.match_(cfg, force, tag, val),
             Pattern::List(list) => list.match_(cfg, force, tag, val),
             Pattern::Map(map) => map.match_(cfg, force, tag, val),
+            Pattern::Quote(quote) => quote.match_(cfg, force, tag, val),
+            Pattern::Call(call) => call.match_(cfg, force, tag, val),
         }
     }
 }
@@ -148,6 +161,18 @@ impl PatternMatch<Val> for Cell<Pattern> {
             return false;
         };
         self.value.match_(cfg, force, tag, &val.value)
+    }
+}
+
+impl PatternMatch<Val> for Quote<Pattern> {
+    fn match_(&self, cfg: &mut Cfg, force: bool, tag: &str, val: &Val) -> bool {
+        let Val::Quote(val) = val else {
+            if force {
+                bug!(cfg, "{tag}: expected a quote, but got {val}");
+            }
+            return false;
+        };
+        self.source.match_(cfg, force, tag, &val.source)
     }
 }
 
@@ -239,9 +264,10 @@ impl PatternAssign<Val, Val> for Pattern {
             Pattern::Val(expected) => expected.assign(cfg, tag, ctx, val),
             Pattern::Cell(cell) => cell.assign(cfg, tag, ctx, val),
             Pattern::Pair(pair) => pair.assign(cfg, tag, ctx, val),
-            Pattern::Call(call) => call.assign(cfg, tag, ctx, val),
             Pattern::List(list) => list.assign(cfg, tag, ctx, val),
             Pattern::Map(map) => map.assign(cfg, tag, ctx, val),
+            Pattern::Quote(quote) => quote.assign(cfg, tag, ctx, val),
+            Pattern::Call(call) => call.assign(cfg, tag, ctx, val),
         }
     }
 }
@@ -270,6 +296,18 @@ impl PatternAssign<Val, Val> for Cell<Pattern> {
         };
         let val = Cell::from(val);
         self.value.assign(cfg, tag, ctx, val.value)?;
+        Some(())
+    }
+}
+
+impl PatternAssign<Val, Val> for Quote<Pattern> {
+    fn assign(self, cfg: &mut Cfg, tag: &str, ctx: &mut Val, val: Val) -> Option<()> {
+        let Val::Quote(val) = val else {
+            bug!(cfg, "{tag}: expected a quote, but got {val}");
+            return None;
+        };
+        let val = Quote::from(val);
+        self.source.assign(cfg, tag, ctx, val.source)?;
         Some(())
     }
 }

@@ -29,6 +29,7 @@ use crate::type_::Key;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
+use crate::type_::Quote;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -49,9 +50,10 @@ impl Arbitrary for Val {
             weight, // byte
             1,      // cell
             1,      // pair
-            1,      // call
             1,      // list
             1,      // map
+            1,      // quote
+            1,      // call
             1,      // link
             1,      // cfg
             1,      // func
@@ -69,12 +71,13 @@ impl Arbitrary for Val {
             6 => Val::Byte(Byte::any(rng, depth).into()),
             7 => Val::Cell(Cell::<Val>::any(rng, depth).into()),
             8 => Val::Pair(Pair::<Val, Val>::any(rng, depth).into()),
-            9 => Val::Call(Call::<Val, Val>::any(rng, depth).into()),
-            10 => Val::List(List::<Val>::any(rng, depth).into()),
-            11 => Val::Map(Map::<Key, Val>::any(rng, depth).into()),
-            12 => Val::Link(LinkVal::any(rng, depth)),
-            13 => Val::Cfg(Cfg::any(rng, depth).into()),
-            14 => Val::Func(FuncVal::any(rng, depth)),
+            9 => Val::List(List::<Val>::any(rng, depth).into()),
+            10 => Val::Map(Map::<Key, Val>::any(rng, depth).into()),
+            11 => Val::Quote(Quote::<Val>::any(rng, depth).into()),
+            12 => Val::Call(Call::<Val, Val>::any(rng, depth).into()),
+            13 => Val::Link(LinkVal::any(rng, depth)),
+            14 => Val::Cfg(Cfg::any(rng, depth).into()),
+            15 => Val::Func(FuncVal::any(rng, depth)),
             _ => unreachable!(),
         }
     }
@@ -156,6 +159,15 @@ where Value: Arbitrary
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
         Cell::new(Value::any(rng, depth))
+    }
+}
+
+impl<Value> Arbitrary for Quote<Value>
+where Value: Arbitrary
+{
+    fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
+        let depth = depth + 1;
+        Quote::new(Value::any(rng, depth))
     }
 }
 

@@ -1,0 +1,39 @@
+get
+-----
+_ do [
+    .any set _ import _value.any,
+    .get_source set _ import _quote.get_source,
+    .v set _ any .,
+    .c set _ form _(v),
+    v == .c which get_source : .
+]
+-----
+true
+=====
+set get
+-----
+_ do [
+    .any set _ import _value.any,
+    .get_source set _ import _quote.get_source,
+    .set_source set _ import _quote.set_source,
+    .c set _ any _quote,
+    .v set _ any .,
+    .c which set_source : v,
+    .v1 set .c which get_source : .,
+    v == v1
+]
+-----
+true
+=====
+set return
+-----
+_ do [
+    .any set _ import _value.any,
+    .set_source set _ import _quote.set_source,
+    .v1 set _ any .,
+    .c set _ form _(v1),
+    .v2 set .c which set_source : _ any .,
+    v1 == v2
+]
+-----
+true

@@ -12,9 +12,20 @@ use crate::semantics::val::CellVal;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::PairVal;
+use crate::semantics::val::QuoteVal;
 use crate::semantics::val::Val;
 use crate::type_::Call;
 use crate::type_::Key;
+use crate::type_::Quote;
+
+pub(crate) struct QuoteEval;
+
+impl DynFunc<Cfg, Val, QuoteVal, Val> for QuoteEval {
+    fn call(&self, _cfg: &mut Cfg, _ctx: &mut Val, quote: QuoteVal) -> Val {
+        let quote = Quote::from(quote);
+        quote.source
+    }
+}
 
 pub(crate) struct CallEval<'a, Func> {
     pub(crate) func: &'a Func,
@@ -54,9 +65,10 @@ impl DynFunc<Cfg, Val, Val, Val> for Eval {
             Val::Key(key) => self.call(cfg, ctx, key),
             Val::Cell(cell) => self.call(cfg, ctx, cell),
             Val::Pair(pair) => self.call(cfg, ctx, pair),
-            Val::Call(call) => self.call(cfg, ctx, call),
             Val::List(list) => self.call(cfg, ctx, list),
             Val::Map(map) => self.call(cfg, ctx, map),
+            Val::Quote(quote) => self.call(cfg, ctx, quote),
+            Val::Call(call) => self.call(cfg, ctx, call),
             v => v,
         }
     }
@@ -80,12 +92,6 @@ impl DynFunc<Cfg, Val, PairVal, Val> for Eval {
     }
 }
 
-impl DynFunc<Cfg, Val, CallVal, Val> for Eval {
-    fn call(&self, cfg: &mut Cfg, ctx: &mut Val, call: CallVal) -> Val {
-        CallEval { func: self }.call(cfg, ctx, call)
-    }
-}
-
 impl DynFunc<Cfg, Val, ListVal, Val> for Eval {
     fn call(&self, cfg: &mut Cfg, ctx: &mut Val, list: ListVal) -> Val {
         Val::List(ListForm { item: self }.call(cfg, ctx, list))
@@ -95,5 +101,17 @@ impl DynFunc<Cfg, Val, ListVal, Val> for Eval {
 impl DynFunc<Cfg, Val, MapVal, Val> for Eval {
     fn call(&self, cfg: &mut Cfg, ctx: &mut Val, map: MapVal) -> Val {
         Val::Map(MapForm { value: self }.call(cfg, ctx, map))
+    }
+}
+
+impl DynFunc<Cfg, Val, QuoteVal, Val> for Eval {
+    fn call(&self, cfg: &mut Cfg, ctx: &mut Val, quote: QuoteVal) -> Val {
+        QuoteEval.call(cfg, ctx, quote)
+    }
+}
+
+impl DynFunc<Cfg, Val, CallVal, Val> for Eval {
+    fn call(&self, cfg: &mut Cfg, ctx: &mut Val, call: CallVal) -> Val {
+        CallEval { func: self }.call(cfg, ctx, call)
     }
 }

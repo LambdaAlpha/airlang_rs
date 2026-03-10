@@ -11,6 +11,7 @@ pub use self::link::LinkVal;
 pub use self::list::ListVal;
 pub use self::map::MapVal;
 pub use self::pair::PairVal;
+pub use self::quote::QuoteVal;
 pub use self::text::TextVal;
 
 _____!();
@@ -30,6 +31,7 @@ use crate::type_::Key;
 use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
+use crate::type_::Quote;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -53,10 +55,11 @@ pub enum Val {
 
     Cell(CellVal),
     Pair(PairVal),
-    Call(CallVal),
-
     List(ListVal),
     Map(MapVal),
+
+    Quote(QuoteVal),
+    Call(CallVal),
 
     Link(LinkVal),
     Cfg(CfgVal),
@@ -74,9 +77,10 @@ pub(crate) const DECIMAL: &str = "decimal";
 pub(crate) const BYTE: &str = "byte";
 pub(crate) const CELL: &str = "cell";
 pub(crate) const PAIR: &str = "pair";
-pub(crate) const CALL: &str = "call";
 pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
+pub(crate) const QUOTE: &str = "quote";
+pub(crate) const CALL: &str = "call";
 pub(crate) const LINK: &str = "link";
 pub(crate) const CFG: &str = "config";
 pub(crate) const FUNC: &str = "function";
@@ -123,12 +127,6 @@ impl From<Pair<Val, Val>> for Val {
     }
 }
 
-impl From<Call<Val, Val>> for Val {
-    fn from(value: Call<Val, Val>) -> Self {
-        Val::Call(CallVal::from(value))
-    }
-}
-
 impl From<List<Val>> for Val {
     fn from(value: List<Val>) -> Self {
         Val::List(ListVal::from(value))
@@ -138,6 +136,18 @@ impl From<List<Val>> for Val {
 impl From<Map<Key, Val>> for Val {
     fn from(value: Map<Key, Val>) -> Self {
         Val::Map(MapVal::from(value))
+    }
+}
+
+impl From<Quote<Val>> for Val {
+    fn from(value: Quote<Val>) -> Self {
+        Val::Quote(QuoteVal::from(value))
+    }
+}
+
+impl From<Call<Val, Val>> for Val {
+    fn from(value: Call<Val, Val>) -> Self {
+        Val::Call(CallVal::from(value))
     }
 }
 
@@ -153,11 +163,13 @@ mod cell;
 
 mod pair;
 
-mod call;
-
 mod list;
 
 mod map;
+
+mod quote;
+
+mod call;
 
 mod link;
 
