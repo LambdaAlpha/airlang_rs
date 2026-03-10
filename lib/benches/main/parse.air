@@ -1,4 +1,4 @@
-_("bench parse")
+!("bench parse")
 
 _ do [
     .x set 42,

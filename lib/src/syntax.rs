@@ -33,6 +33,7 @@ pub(crate) const FALSE: &str = "false";
 // } keywords
 
 // prefixes {
+pub(crate) const COMMENT: &str = "!";
 pub(crate) const LEFT: &str = "<";
 pub(crate) const RIGHT: &str = ">";
 pub(crate) const COMPACT: &str = "#";

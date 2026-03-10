@@ -384,8 +384,8 @@ illegal unicode
 =====
 comment in unicode
 -----
-"^u(_(a) 123)"
+"^u(!(a) 123)"
 =====
 comment unpaired
 -----
-_([) a
+!([) a

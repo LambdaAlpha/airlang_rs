@@ -34,6 +34,7 @@ use winnow::token::take_until;
 use winnow::token::take_while;
 
 use super::BYTE;
+use super::COMMENT;
 use super::COMPACT;
 use super::DECIMAL;
 use super::Direction;
@@ -140,7 +141,7 @@ fn void<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
 
 fn comment<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
     let comment_tokens = repeat(0 .., comment_token(ctx));
-    let f = preceded(EMPTY, delimited_cut(SCOPE_LEFT, comment_tokens, SCOPE_RIGHT));
+    let f = preceded(COMMENT, delimited_cut(SCOPE_LEFT, comment_tokens, SCOPE_RIGHT));
     f.context(label("comment"))
 }
 

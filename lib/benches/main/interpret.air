@@ -1,4 +1,4 @@
-_("bench interpret")
+!("bench interpret")
 
 _ do [
     .% set _ import _integer.remainder,

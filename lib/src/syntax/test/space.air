@@ -18,59 +18,59 @@ a b c
 =====
 leading comment
 -----
-_("") a
+!("") a
 =====
 leading comment no space
 -----
-_("")a
+!("")a
 =====
 leading space comment
 -----
- _("") a
+ !("") a
 =====
 trailing comment
 -----
-a _("")
+a !("")
 =====
 trailing comment space
 -----
-a _("")
+a !("")
 
 =====
 leading and trailing comment
 -----
-_("") a _("")
+!("") a !("")
 =====
 sequence comment
 -----
-_("") _("") a _("") _("")
+!("") !("") a !("") !("")
 =====
 comment between tokens
 -----
-a _("") b _("") c
+a !("") b !("") c
 =====
 multiline comment
 -----
-_("
+!("
 |(
 |)") a
 =====
 complex comment
 -----
-_(f ; [1, 2, 3]) a
+!(f ; [1, 2, 3]) a
 =====
 list item comment
 -----
-[a, _(b, c, ) d]
+[a, !(b, c, ) d]
 =====
 map item comment
 -----
-{a : b, _(c : d, )}
+{a : b, !(c : d, )}
 =====
 comment in comment
 -----
-_(_(a) b) c
+!(!(a) b) c
 =====
 empty comment
 -----
-_() a
+!() a
