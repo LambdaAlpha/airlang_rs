@@ -6,8 +6,8 @@ use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxFreeInputEvalFunc;
-use crate::semantics::func::CtxMutInputEvalFunc;
+use crate::semantics::func::CtxFreeInputAwareFunc;
+use crate::semantics::func::CtxMutInputAwareFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::TEXT;
 use crate::semantics::val::Val;
@@ -34,11 +34,11 @@ pub const JOIN: &str = concatcp!(PREFIX_ID, TEXT, ".join");
 impl Default for TextLib {
     fn default() -> Self {
         TextLib {
-            from_utf8: CtxFreeInputEvalFunc { fn_: from_utf8 }.build(),
-            into_utf8: CtxFreeInputEvalFunc { fn_: into_utf8 }.build(),
+            from_utf8: CtxFreeInputAwareFunc { fn_: from_utf8 }.build(),
+            into_utf8: CtxFreeInputAwareFunc { fn_: into_utf8 }.build(),
             get_length: CtxConstInputFreeFunc { fn_: get_length }.build(),
-            push: CtxMutInputEvalFunc { fn_: push }.build(),
-            join: CtxFreeInputEvalFunc { fn_: join }.build(),
+            push: CtxMutInputAwareFunc { fn_: push }.build(),
+            join: CtxFreeInputAwareFunc { fn_: join }.build(),
         }
     }
 }

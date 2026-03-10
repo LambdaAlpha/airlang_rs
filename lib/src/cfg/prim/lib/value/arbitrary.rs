@@ -280,12 +280,12 @@ impl Arbitrary for CompFuncVal {
     fn any<R: Rng + ?Sized>(rng: &mut R, depth: usize) -> Self {
         let depth = depth + 1;
         let ctx = if rng.random() {
-            CompCtx::Default { name: Arbitrary::any(rng, depth), const_: rng.random() }
+            CompCtx::Aware { name: Arbitrary::any(rng, depth), const_: rng.random() }
         } else {
             CompCtx::Free
         };
         let input = if rng.random() {
-            CompInput::Default { name: Arbitrary::any(rng, depth), raw: rng.random() }
+            CompInput::Aware { name: Arbitrary::any(rng, depth) }
         } else {
             CompInput::Free
         };

@@ -1,11 +1,11 @@
 make
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .f set _ any .,
     .i set _ any .,
     .c1 set f call i,
-    .c2 set _ form _ f i,
+    .c2 set _ form _(_ f i),
     c1 == c2
 ]
 -----
@@ -13,13 +13,13 @@ true
 =====
 get
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .get_function set _ import _call.get_function,
     .get_input set _ import _call.get_input,
     .f set _ any .,
     .i set _ any .,
-    .c set _ form _ f i,
+    .c set _ form _(_ f i),
     (f == .c which get_function : .) and (i == .c which get_input : .)
 ]
 -----
@@ -27,7 +27,7 @@ true
 =====
 set get
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .get_function set _ import _call.get_function,
     .get_input set _ import _call.get_input,
@@ -45,13 +45,13 @@ true
 =====
 set return
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .set_function set _ import _call.set_function,
     .set_input set _ import _call.set_input,
     .f1 set _ any .,
     .i1 set _ any .,
-    .c set _ form _ f1 i1,
+    .c set _ form _(_ f1 i1),
     .f2 set .c which set_function : _ any .,
     .i2 set .c which set_input : _ any .,
     (f1 == f2) and (i1 == i2)

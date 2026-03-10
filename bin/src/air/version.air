@@ -1,4 +1,4 @@
-_ do [
+_ do _[
     .version set _ import _language.version,
     .generate set _ import _language.syntax.generate,
     .join set _ import _text.join,

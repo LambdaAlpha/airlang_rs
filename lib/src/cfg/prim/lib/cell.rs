@@ -8,7 +8,7 @@ use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxMutInputEvalFunc;
+use crate::semantics::func::CtxMutInputAwareFunc;
 use crate::semantics::val::CELL;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -26,7 +26,7 @@ impl Default for CellLib {
     fn default() -> Self {
         CellLib {
             get_value: CtxConstInputFreeFunc { fn_: get_value }.build(),
-            set_value: CtxMutInputEvalFunc { fn_: set_value }.build(),
+            set_value: CtxMutInputAwareFunc { fn_: set_value }.build(),
         }
     }
 }

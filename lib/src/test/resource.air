@@ -1,17 +1,17 @@
 get_steps
 -----
-_ do [
+_ do _[
     .get_steps set _ import _resource.get_steps,
     .s1 set _ get_steps .,
     .s2 set _ get_steps .,
     s1 - s2
 ]
 -----
-8
+9
 =====
 measure_steps 1
 -----
-_ do [
+_ do _[
     .measure_steps set _ import _resource.measure_steps,
     (.v : .s) = _ measure_steps true,
     s
@@ -21,11 +21,11 @@ _ do [
 =====
 measure_steps ref + form + call
 -----
-_ do [
+_ do _[
     .measure_steps set _ import _resource.measure_steps,
     .a set true,
     .b set false,
-    (.v : .s) = _ measure_steps a and b,
+    (.v : .s) = _ measure_steps _(a and b),
     s
 ]
 -----
@@ -33,7 +33,7 @@ _ do [
 =====
 set_steps
 -----
-_ do [
+_ do _[
     .make set _ import _config.make,
     .link.make set _ import _link.make,
     .set_steps set _ import _resource.set_steps,
@@ -47,24 +47,24 @@ _ do [
     .c5 set _ make {
         _prelude : prelude,
     },
-    .a5 set c5 where _ do [
+    .a5 set .c5 where _(_ do _[
         _ set_steps 5,
         1 + 1
-    ],
+    ]),
     .c6 set _ make {
         _prelude : prelude,
     },
-    .a6 set c6 where _ do [
+    .a6 set .c6 where _(_ do _[
         _ set_steps 6,
         1 + 1
-    ],
+    ]),
     .c7 set _ make {
         _prelude : prelude,
     },
-    .a7 set c7 where _ do [
+    .a7 set .c7 where _(_ do _[
         _ set_steps 7,
         1 + 1
-    ],
+    ]),
     (.c5 which is_aborted : .) and (a6 == 2) and (a7 == 2)
 ]
 -----

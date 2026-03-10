@@ -1,13 +1,10 @@
 pub use self::comp::CompFunc;
-pub use self::prim::CtxConstInputEvalFunc;
+pub use self::prim::CtxConstInputAwareFunc;
 pub use self::prim::CtxConstInputFreeFunc;
-pub use self::prim::CtxConstInputRawFunc;
-pub use self::prim::CtxFreeInputEvalFunc;
+pub use self::prim::CtxFreeInputAwareFunc;
 pub use self::prim::CtxFreeInputFreeFunc;
-pub use self::prim::CtxFreeInputRawFunc;
-pub use self::prim::CtxMutInputEvalFunc;
+pub use self::prim::CtxMutInputAwareFunc;
 pub use self::prim::CtxMutInputFreeFunc;
-pub use self::prim::CtxMutInputRawFunc;
 pub use self::prim::PrimCtx;
 pub use self::prim::PrimFunc;
 pub use self::prim::PrimInput;

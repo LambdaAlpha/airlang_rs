@@ -13,7 +13,7 @@ use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxFreeInputEvalFunc;
+use crate::semantics::func::CtxFreeInputAwareFunc;
 use crate::semantics::val::BIT;
 use crate::semantics::val::BYTE;
 use crate::semantics::val::CALL;
@@ -65,9 +65,9 @@ pub const EQUAL: &str = concatcp!(PREFIX_ID, VALUE, ".equal");
 impl Default for ValueLib {
     fn default() -> Self {
         ValueLib {
-            any: CtxFreeInputEvalFunc { fn_: any }.build(),
+            any: CtxFreeInputAwareFunc { fn_: any }.build(),
             get_type: CtxConstInputFreeFunc { fn_: get_type }.build(),
-            equal: CtxFreeInputEvalFunc { fn_: equal }.build(),
+            equal: CtxFreeInputAwareFunc { fn_: equal }.build(),
         }
     }
 }

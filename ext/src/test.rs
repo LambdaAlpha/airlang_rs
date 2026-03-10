@@ -43,7 +43,7 @@ fn generate_load(path: &str) -> String {
     let mut path_prefix = String::new();
     write!(&mut path_prefix, "{:-}", Text::from(env!("CARGO_MANIFEST_DIR"))).unwrap();
     format!(
-        "_ do [\
+        "_ do _[\
             .load set _ import _build.load,\
             _ load \"{path_prefix}{path}\"\
         ]"

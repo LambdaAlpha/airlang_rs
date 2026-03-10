@@ -8,8 +8,8 @@ use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxFreeInputEvalFunc;
-use crate::semantics::func::CtxMutInputEvalFunc;
+use crate::semantics::func::CtxFreeInputAwareFunc;
+use crate::semantics::func::CtxMutInputAwareFunc;
 use crate::semantics::val::CALL;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -34,11 +34,11 @@ pub const SET_INPUT: &str = concatcp!(PREFIX_ID, CALL, ".set_input");
 impl Default for CallLib {
     fn default() -> Self {
         CallLib {
-            make: CtxFreeInputEvalFunc { fn_: make }.build(),
+            make: CtxFreeInputAwareFunc { fn_: make }.build(),
             get_function: CtxConstInputFreeFunc { fn_: get_function }.build(),
-            set_function: CtxMutInputEvalFunc { fn_: set_function }.build(),
+            set_function: CtxMutInputAwareFunc { fn_: set_function }.build(),
             get_input: CtxConstInputFreeFunc { fn_: get_input }.build(),
-            set_input: CtxMutInputEvalFunc { fn_: set_input }.build(),
+            set_input: CtxMutInputAwareFunc { fn_: set_input }.build(),
         }
     }
 }

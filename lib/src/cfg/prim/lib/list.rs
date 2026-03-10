@@ -8,9 +8,9 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
-use crate::semantics::func::CtxConstInputEvalFunc;
+use crate::semantics::func::CtxConstInputAwareFunc;
 use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxMutInputEvalFunc;
+use crate::semantics::func::CtxMutInputAwareFunc;
 use crate::semantics::func::CtxMutInputFreeFunc;
 use crate::semantics::val::LIST;
 use crate::semantics::val::PrimFuncVal;
@@ -57,18 +57,18 @@ impl Default for ListLib {
     fn default() -> Self {
         ListLib {
             get_length: CtxConstInputFreeFunc { fn_: get_length }.build(),
-            set: CtxMutInputEvalFunc { fn_: set }.build(),
-            set_many: CtxMutInputEvalFunc { fn_: set_many }.build(),
-            get: CtxConstInputEvalFunc { fn_: get }.build(),
-            get_many: CtxConstInputEvalFunc { fn_: get_many }.build(),
-            insert: CtxMutInputEvalFunc { fn_: insert }.build(),
-            insert_many: CtxMutInputEvalFunc { fn_: insert_many }.build(),
-            remove: CtxMutInputEvalFunc { fn_: remove }.build(),
-            remove_many: CtxMutInputEvalFunc { fn_: remove_many }.build(),
-            push: CtxMutInputEvalFunc { fn_: push }.build(),
-            push_many: CtxMutInputEvalFunc { fn_: push_many }.build(),
+            set: CtxMutInputAwareFunc { fn_: set }.build(),
+            set_many: CtxMutInputAwareFunc { fn_: set_many }.build(),
+            get: CtxConstInputAwareFunc { fn_: get }.build(),
+            get_many: CtxConstInputAwareFunc { fn_: get_many }.build(),
+            insert: CtxMutInputAwareFunc { fn_: insert }.build(),
+            insert_many: CtxMutInputAwareFunc { fn_: insert_many }.build(),
+            remove: CtxMutInputAwareFunc { fn_: remove }.build(),
+            remove_many: CtxMutInputAwareFunc { fn_: remove_many }.build(),
+            push: CtxMutInputAwareFunc { fn_: push }.build(),
+            push_many: CtxMutInputAwareFunc { fn_: push_many }.build(),
             pop: CtxMutInputFreeFunc { fn_: pop }.build(),
-            pop_many: CtxMutInputEvalFunc { fn_: pop_many }.build(),
+            pop_many: CtxMutInputAwareFunc { fn_: pop_many }.build(),
             clear: CtxMutInputFreeFunc { fn_: clear }.build(),
         }
     }

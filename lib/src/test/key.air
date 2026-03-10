@@ -1,6 +1,6 @@
 get_length join
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .get_length set _ import _key.get_length,
     .join set _ import _key.join,
@@ -17,7 +17,7 @@ true
 =====
 get_length empty
 -----
-_ do [
+_ do _[
     .get_length set _ import _key.get_length,
     .empty which get_length : .
 ]
@@ -26,7 +26,7 @@ _ do [
 =====
 get_length else
 -----
-_ do [
+_ do _[
     .get_length set _ import _key.get_length,
     .s set _a,
     .s which get_length : .
@@ -36,7 +36,7 @@ _ do [
 =====
 join empty
 -----
-_ do [
+_ do _[
     .join set _ import _key.join,
     empty join [.a, .b]
 ]
@@ -45,7 +45,7 @@ ab
 =====
 join no key
 -----
-_ do [
+_ do _[
     .join set _ import _key.join,
     empty join []
 ]
@@ -54,7 +54,7 @@ _ do [
 =====
 join else
 -----
-_ do [
+_ do _[
     .join set _ import _key.join,
     .. join [.a, .b]
 ]
@@ -63,7 +63,7 @@ a.b
 =====
 into_text from_text
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .from_text set _ import _key.from_text,
     .into_text set _ import _key.into_text,
@@ -76,7 +76,7 @@ true
 =====
 from_text empty
 -----
-_ do [
+_ do _[
     .from_text set _ import _key.from_text,
     _ from_text ""
 ]
@@ -85,7 +85,7 @@ _ do [
 =====
 from_text trivial
 -----
-_ do [
+_ do _[
     .from_text set _ import _key.from_text,
     _ from_text "hello_world!"
 ]
@@ -94,7 +94,7 @@ hello_world!
 =====
 from_text special
 -----
-_ do [
+_ do _[
     .from_text set _ import _key.from_text,
     _ from_text "{}"
 ]
@@ -103,7 +103,7 @@ _ do [
 =====
 into_text empty
 -----
-_ do [
+_ do _[
     .into_text set _ import _key.into_text,
     _ into_text empty
 ]
@@ -112,7 +112,7 @@ _ do [
 =====
 into_text trivial
 -----
-_ do [
+_ do _[
     .into_text set _ import _key.into_text,
     _ into_text .hello_world!
 ]

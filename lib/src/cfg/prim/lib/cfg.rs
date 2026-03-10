@@ -9,9 +9,9 @@ use crate::semantics::core::Eval;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxFreeInputEvalFunc;
+use crate::semantics::func::CtxFreeInputAwareFunc;
 use crate::semantics::func::CtxFreeInputFreeFunc;
-use crate::semantics::func::CtxMutInputRawFunc;
+use crate::semantics::func::CtxMutInputAwareFunc;
 use crate::semantics::func::DynFunc;
 use crate::semantics::val::CFG;
 use crate::semantics::val::PrimFuncVal;
@@ -49,15 +49,15 @@ pub const WHERE: &str = concatcp!(PREFIX_ID, CFG, ".where");
 impl Default for CfgLib {
     fn default() -> Self {
         CfgLib {
-            make: CtxFreeInputEvalFunc { fn_: make }.build(),
-            represent: CtxFreeInputEvalFunc { fn_: represent }.build(),
-            exist: CtxFreeInputEvalFunc { fn_: exist }.build(),
-            import: CtxFreeInputEvalFunc { fn_: import }.build(),
-            export: CtxFreeInputEvalFunc { fn_: export }.build(),
+            make: CtxFreeInputAwareFunc { fn_: make }.build(),
+            represent: CtxFreeInputAwareFunc { fn_: represent }.build(),
+            exist: CtxFreeInputAwareFunc { fn_: exist }.build(),
+            import: CtxFreeInputAwareFunc { fn_: import }.build(),
+            export: CtxFreeInputAwareFunc { fn_: export }.build(),
             get_length: CtxConstInputFreeFunc { fn_: get_length }.build(),
-            with: CtxMutInputRawFunc { fn_: with }.build(),
+            with: CtxMutInputAwareFunc { fn_: with }.build(),
             get_self: CtxFreeInputFreeFunc { fn_: get_self }.build(),
-            where_: CtxMutInputRawFunc { fn_: where_ }.build(),
+            where_: CtxMutInputAwareFunc { fn_: where_ }.build(),
         }
     }
 }
@@ -135,7 +135,7 @@ pub fn with(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         return bug!(cfg, "{WITH}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
-    let map = Eval.call(cfg, ctx, pair.left);
+    let map = pair.left;
     let Val::Map(map) = map else {
         return bug!(cfg, "{WITH}: expected input.left to be a map, but got {map}");
     };

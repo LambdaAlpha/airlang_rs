@@ -10,9 +10,9 @@ use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Form;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::ctx::DynCtx;
-use crate::semantics::func::CtxConstInputEvalFunc;
+use crate::semantics::func::CtxConstInputAwareFunc;
 use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxMutInputEvalFunc;
+use crate::semantics::func::CtxMutInputAwareFunc;
 use crate::semantics::func::DynFunc;
 use crate::semantics::func::PrimCtx;
 use crate::semantics::func::PrimFunc;
@@ -45,13 +45,13 @@ pub const WHICH: &str = concatcp!(PREFIX_ID, CTX, ".which");
 impl Default for CtxLib {
     fn default() -> Self {
         CtxLib {
-            get: CtxConstInputEvalFunc { fn_: get }.build(),
-            set: CtxMutInputEvalFunc { fn_: set }.build(),
-            form: PrimFunc { fn_: leak_const(Form), ctx: PrimCtx::Const_, input: PrimInput::Raw }
+            get: CtxConstInputAwareFunc { fn_: get }.build(),
+            set: CtxMutInputAwareFunc { fn_: set }.build(),
+            form: PrimFunc { fn_: leak_const(Form), ctx: PrimCtx::Const_, input: PrimInput::Aware }
                 .into(),
-            represent: CtxMutInputEvalFunc { fn_: represent }.build(),
+            represent: CtxMutInputAwareFunc { fn_: represent }.build(),
             get_self: CtxConstInputFreeFunc { fn_: get_self }.build(),
-            which: CtxMutInputEvalFunc { fn_: which }.build(),
+            which: CtxMutInputAwareFunc { fn_: which }.build(),
         }
     }
 }

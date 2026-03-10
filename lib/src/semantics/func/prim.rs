@@ -21,8 +21,7 @@ pub enum PrimCtx {
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub enum PrimInput {
     Free,
-    Raw,
-    Eval,
+    Aware,
 }
 
 impl DynFunc<Cfg, Val, Val, Val> for PrimFunc {
@@ -39,11 +38,11 @@ impl PartialEq for PrimFunc {
 
 impl Eq for PrimFunc {}
 
-pub struct CtxMutInputEvalFunc<F> {
+pub struct CtxMutInputAwareFunc<F> {
     pub fn_: F,
 }
 
-impl<F> DynFunc<Cfg, Val, Val, Val> for CtxMutInputEvalFunc<F>
+impl<F> DynFunc<Cfg, Val, Val, Val> for CtxMutInputAwareFunc<F>
 where F: Fn(&mut Cfg, &mut Val, Val) -> Val + 'static
 {
     fn call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -51,31 +50,11 @@ where F: Fn(&mut Cfg, &mut Val, Val) -> Val + 'static
     }
 }
 
-impl<F> CtxMutInputEvalFunc<F>
+impl<F> CtxMutInputAwareFunc<F>
 where F: Fn(&mut Cfg, &mut Val, Val) -> Val + 'static
 {
     pub fn build(self) -> PrimFuncVal {
-        PrimFunc { fn_: leak_const(self), ctx: PrimCtx::Mut, input: PrimInput::Eval }.into()
-    }
-}
-
-pub struct CtxMutInputRawFunc<F> {
-    pub fn_: F,
-}
-
-impl<F> DynFunc<Cfg, Val, Val, Val> for CtxMutInputRawFunc<F>
-where F: Fn(&mut Cfg, &mut Val, Val) -> Val + 'static
-{
-    fn call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
-        (self.fn_)(cfg, ctx, input)
-    }
-}
-
-impl<F> CtxMutInputRawFunc<F>
-where F: Fn(&mut Cfg, &mut Val, Val) -> Val + 'static
-{
-    pub fn build(self) -> PrimFuncVal {
-        PrimFunc { fn_: leak_const(self), ctx: PrimCtx::Mut, input: PrimInput::Raw }.into()
+        PrimFunc { fn_: leak_const(self), ctx: PrimCtx::Mut, input: PrimInput::Aware }.into()
     }
 }
 
@@ -99,11 +78,11 @@ where F: Fn(&mut Cfg, &mut Val) -> Val + 'static
     }
 }
 
-pub struct CtxConstInputEvalFunc<F> {
+pub struct CtxConstInputAwareFunc<F> {
     pub fn_: F,
 }
 
-impl<F> DynFunc<Cfg, Val, Val, Val> for CtxConstInputEvalFunc<F>
+impl<F> DynFunc<Cfg, Val, Val, Val> for CtxConstInputAwareFunc<F>
 where F: Fn(&mut Cfg, &Val, Val) -> Val + 'static
 {
     fn call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -111,31 +90,11 @@ where F: Fn(&mut Cfg, &Val, Val) -> Val + 'static
     }
 }
 
-impl<F> CtxConstInputEvalFunc<F>
+impl<F> CtxConstInputAwareFunc<F>
 where F: Fn(&mut Cfg, &Val, Val) -> Val + 'static
 {
     pub fn build(self) -> PrimFuncVal {
-        PrimFunc { fn_: leak_const(self), ctx: PrimCtx::Const_, input: PrimInput::Eval }.into()
-    }
-}
-
-pub struct CtxConstInputRawFunc<F> {
-    pub fn_: F,
-}
-
-impl<F> DynFunc<Cfg, Val, Val, Val> for CtxConstInputRawFunc<F>
-where F: Fn(&mut Cfg, &Val, Val) -> Val + 'static
-{
-    fn call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
-        (self.fn_)(cfg, ctx, input)
-    }
-}
-
-impl<F> CtxConstInputRawFunc<F>
-where F: Fn(&mut Cfg, &Val, Val) -> Val + 'static
-{
-    pub fn build(self) -> PrimFuncVal {
-        PrimFunc { fn_: leak_const(self), ctx: PrimCtx::Const_, input: PrimInput::Raw }.into()
+        PrimFunc { fn_: leak_const(self), ctx: PrimCtx::Const_, input: PrimInput::Aware }.into()
     }
 }
 
@@ -159,11 +118,11 @@ where F: Fn(&mut Cfg, &Val) -> Val + 'static
     }
 }
 
-pub struct CtxFreeInputEvalFunc<F> {
+pub struct CtxFreeInputAwareFunc<F> {
     pub fn_: F,
 }
 
-impl<F> DynFunc<Cfg, Val, Val, Val> for CtxFreeInputEvalFunc<F>
+impl<F> DynFunc<Cfg, Val, Val, Val> for CtxFreeInputAwareFunc<F>
 where F: Fn(&mut Cfg, Val) -> Val + 'static
 {
     fn call(&self, cfg: &mut Cfg, _ctx: &mut Val, input: Val) -> Val {
@@ -171,31 +130,11 @@ where F: Fn(&mut Cfg, Val) -> Val + 'static
     }
 }
 
-impl<F> CtxFreeInputEvalFunc<F>
+impl<F> CtxFreeInputAwareFunc<F>
 where F: Fn(&mut Cfg, Val) -> Val + 'static
 {
     pub fn build(self) -> PrimFuncVal {
-        PrimFunc { fn_: leak_const(self), ctx: PrimCtx::Free, input: PrimInput::Eval }.into()
-    }
-}
-
-pub struct CtxFreeInputRawFunc<F> {
-    pub fn_: F,
-}
-
-impl<F> DynFunc<Cfg, Val, Val, Val> for CtxFreeInputRawFunc<F>
-where F: Fn(&mut Cfg, Val) -> Val + 'static
-{
-    fn call(&self, cfg: &mut Cfg, _ctx: &mut Val, input: Val) -> Val {
-        (self.fn_)(cfg, input)
-    }
-}
-
-impl<F> CtxFreeInputRawFunc<F>
-where F: Fn(&mut Cfg, Val) -> Val + 'static
-{
-    pub fn build(self) -> PrimFuncVal {
-        PrimFunc { fn_: leak_const(self), ctx: PrimCtx::Free, input: PrimInput::Raw }.into()
+        PrimFunc { fn_: leak_const(self), ctx: PrimCtx::Free, input: PrimInput::Aware }.into()
     }
 }
 

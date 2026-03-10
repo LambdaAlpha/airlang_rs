@@ -5,7 +5,7 @@ use airlang::cfg::CfgMod;
 use airlang::cfg::extend_func;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_ID;
-use airlang::semantics::func::CtxFreeInputEvalFunc;
+use airlang::semantics::func::CtxFreeInputAwareFunc;
 use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::List;
@@ -24,7 +24,7 @@ pub const CALL: &str = concatcp!(PREFIX_ID, COMMAND, ".call");
 
 impl Default for CmdLib {
     fn default() -> Self {
-        Self { call: CtxFreeInputEvalFunc { fn_: call }.build() }
+        Self { call: CtxFreeInputAwareFunc { fn_: call }.build() }
     }
 }
 

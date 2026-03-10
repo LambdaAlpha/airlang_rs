@@ -1,6 +1,6 @@
 get_length push
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .get_length set _ import _byte.get_length,
     .push set _ import _byte.push,
@@ -15,7 +15,7 @@ true
 =====
 get_length join
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .get_length set _ import _byte.get_length,
     .join set _ import _byte.join,
@@ -32,7 +32,7 @@ true
 =====
 get_length empty
 -----
-_ do [
+_ do _[
     .get_length set _ import _byte.get_length,
     .b set byte'',
     .b which get_length : .
@@ -42,7 +42,7 @@ _ do [
 =====
 get_length else
 -----
-_ do [
+_ do _[
     .get_length set _ import _byte.get_length,
     .b set byte'ff',
     .b which get_length : .
@@ -52,7 +52,7 @@ _ do [
 =====
 push join
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .push set _ import _byte.push,
     .join set _ import _byte.join,
@@ -68,7 +68,7 @@ true
 =====
 push
 -----
-_ do [
+_ do _[
     .push set _ import _byte.push,
     .a set byte'00',
     .b set byte'1122',
@@ -80,7 +80,7 @@ byte'001122'
 =====
 join empty
 -----
-_ do [
+_ do _[
     .join set _ import _byte.join,
     byte'' join [byte'1234', byte'56']
 ]
@@ -89,7 +89,7 @@ byte'123456'
 =====
 join non empty
 -----
-_ do [
+_ do _[
     .join set _ import _byte.join,
     .a set byte'1234',
     .b set byte'5678',
@@ -101,7 +101,7 @@ byte'12340000567800009abc'
 =====
 join no byte
 -----
-_ do [
+_ do _[
     .join set _ import _byte.join,
     byte'' join []
 ]
@@ -110,7 +110,7 @@ byte''
 =====
 join else
 -----
-_ do [
+_ do _[
     .join set _ import _byte.join,
     byte'00' join [byte'1111', byte'22']
 ]

@@ -1,6 +1,6 @@
 default
 -----
-_ do [
+_ do _[
     .default set _ import _unit.default,
     _ default true
 ]

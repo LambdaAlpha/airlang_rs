@@ -8,7 +8,7 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
-use crate::semantics::func::CtxFreeInputEvalFunc;
+use crate::semantics::func::CtxFreeInputAwareFunc;
 use crate::semantics::val::DECIMAL;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -45,15 +45,15 @@ pub const LESS_GREATER: &str = concatcp!(PREFIX_ID, DECIMAL, ".less_greater");
 impl Default for DecimalLib {
     fn default() -> Self {
         DecimalLib {
-            add: CtxFreeInputEvalFunc { fn_: add }.build(),
-            subtract: CtxFreeInputEvalFunc { fn_: subtract }.build(),
-            multiply: CtxFreeInputEvalFunc { fn_: multiply }.build(),
-            divide: CtxFreeInputEvalFunc { fn_: divide }.build(),
-            less: CtxFreeInputEvalFunc { fn_: less }.build(),
-            less_equal: CtxFreeInputEvalFunc { fn_: less_equal }.build(),
-            greater: CtxFreeInputEvalFunc { fn_: greater }.build(),
-            greater_equal: CtxFreeInputEvalFunc { fn_: greater_equal }.build(),
-            less_greater: CtxFreeInputEvalFunc { fn_: less_greater }.build(),
+            add: CtxFreeInputAwareFunc { fn_: add }.build(),
+            subtract: CtxFreeInputAwareFunc { fn_: subtract }.build(),
+            multiply: CtxFreeInputAwareFunc { fn_: multiply }.build(),
+            divide: CtxFreeInputAwareFunc { fn_: divide }.build(),
+            less: CtxFreeInputAwareFunc { fn_: less }.build(),
+            less_equal: CtxFreeInputAwareFunc { fn_: less_equal }.build(),
+            greater: CtxFreeInputAwareFunc { fn_: greater }.build(),
+            greater_equal: CtxFreeInputAwareFunc { fn_: greater_equal }.build(),
+            less_greater: CtxFreeInputAwareFunc { fn_: less_greater }.build(),
         }
     }
 }
@@ -72,8 +72,8 @@ impl CfgMod for DecimalLib {
     }
 }
 
-pub const ROUNDING_MODE: &str = "_decimal.rounding.mode";
-pub const ROUNDING_PRECISION: &str = "_decimal.rounding.precision";
+pub const ROUNDING_MODE: &str = concatcp!(PREFIX_ID, DECIMAL, ".rounding.mode");
+pub const ROUNDING_PRECISION: &str = concatcp!(PREFIX_ID, DECIMAL, ".rounding.precision");
 
 fn decimal_config(cfg: &mut Cfg, tag: &str) -> Option<DecimalConfig> {
     let Some(mode) = cfg.import(Key::from_str_unchecked(ROUNDING_MODE)) else {

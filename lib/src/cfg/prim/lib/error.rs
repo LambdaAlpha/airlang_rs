@@ -7,7 +7,7 @@ use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::core::abort_by_bug_with_msg;
 use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxFreeInputEvalFunc;
+use crate::semantics::func::CtxFreeInputAwareFunc;
 use crate::semantics::func::CtxFreeInputFreeFunc;
 use crate::semantics::func::CtxMutInputFreeFunc;
 use crate::semantics::val::PrimFuncVal;
@@ -34,7 +34,7 @@ impl Default for ErrorLib {
     fn default() -> Self {
         ErrorLib {
             abort: CtxFreeInputFreeFunc { fn_: abort }.build(),
-            assert: CtxFreeInputEvalFunc { fn_: assert }.build(),
+            assert: CtxFreeInputAwareFunc { fn_: assert }.build(),
             is_aborted: CtxConstInputFreeFunc { fn_: is_aborted }.build(),
             recover: CtxMutInputFreeFunc { fn_: recover }.build(),
         }

@@ -24,7 +24,7 @@ _ do [
 =====
 do recursive 1
 -----
-_ do [
+_ do _[
     _ do [
         1,
         2
@@ -36,7 +36,7 @@ _ do [
 =====
 do recursive 2
 -----
-_ do [
+_ do _[
     1,
     _ do [
         2,
@@ -48,7 +48,7 @@ _ do [
 =====
 do try return
 -----
-_ do [
+_ do _[
     1,
     2,
     _ _try .(3),
@@ -59,7 +59,7 @@ _ do [
 =====
 do try continue
 -----
-_ do [
+_ do _[
     1,
     2,
     _ _try .,
@@ -70,9 +70,9 @@ _ do [
 =====
 do try scope 1
 -----
-_ do [
+_ do _[
     1,
-    _ do [
+    _ do _[
         2,
         _ _try .(3),
         4
@@ -84,9 +84,9 @@ _ do [
 =====
 do try scope 2
 -----
-_ do [
+_ do _[
     1,
-    .a set _ do [
+    .a set _ do _[
         2,
         _ _try .(3),
         4
@@ -98,7 +98,7 @@ _ do [
 =====
 do try eval
 -----
-_ do [
+_ do _[
     .b set 2,
     _ _try .(b - 1),
     b + 1
@@ -134,11 +134,11 @@ true test [1]
 =====
 test conditional eval
 -----
-_ do [
+_ do _[
     .a set 1,
     true test [
         1
-    ] : [
+    ] : _[
         .a set 2
     ],
     a
@@ -158,7 +158,7 @@ true test [
 =====
 test try return
 -----
-true test [
+true test _[
     1,
     _ _try .(2),
     3
@@ -179,7 +179,7 @@ true test [
 =====
 switch key
 -----
-.a switch {
+.a switch _{
     a : [_ not true],
     b : [1]
 }
@@ -189,15 +189,15 @@ false
 switch default
 -----
 .a switch {
-} : [.b]
+} : _[.b]
 -----
 b
 =====
 switch not eval
 -----
-_ do [
+_ do _[
     .a set 0,
-    .b switch {
+    .b switch _{
         c : [.a set 1],
         d : [.a set 2]
     },
@@ -208,7 +208,7 @@ _ do [
 =====
 switch block
 -----
-.a switch {
+.a switch _{
     a : [.b set 2, b]
 }
 -----
@@ -216,7 +216,7 @@ switch block
 =====
 match pattern
 -----
-[1, 2, 3] match [
+[1, 2, 3] match _[
     [.a, .b, .c] : [a + b + c]
 ]
 -----
@@ -224,9 +224,9 @@ match pattern
 =====
 match order
 -----
-_ do [
+_ do _[
     .exist set _ import _map.contain,
-    [1, 2, 3] match [
+    [1, 2, 3] match _[
         [2, .a, .b] : [.x set 1],
         [1, .c, .d] : [.y set 1],
         [.e, 2, .f] : [.z set 1],
@@ -248,7 +248,7 @@ _ do [
 =====
 match eval
 -----
-_ do [
+_ do _[
     .a set 1,
     a match [
         1 : [1 + 2],
@@ -261,7 +261,8 @@ _ do [
 match exist
 -----
 1 match [
-    1 : [2], 2 : [3]
+    1 : [2],
+    2 : [3],
 ]
 -----
 2
@@ -278,9 +279,9 @@ match default
 =====
 match conditional eval exist
 -----
-_ do [
+_ do _[
     .exist set _ import _map.contain,
-    1 match [
+    1 match _[
         1 : [.a set 1],
         2 : [.b set 2],
         __ : [.c set 3]
@@ -292,9 +293,9 @@ _ do [
 =====
 match conditional eval default
 -----
-_ do [
+_ do _[
     .exist set _ import _map.contain,
-    3 match [
+    3 match _[
         1 : [.a set 1],
         2 : [.b set 2],
         __ : [.c set 3]
@@ -306,9 +307,9 @@ _ do [
 =====
 match key
 -----
-_ do [
+_ do _[
     .a set .a,
-    a match [
+    a match _[
         .*a : [1],
         .*b : [2]
     ]
@@ -318,7 +319,7 @@ _ do [
 =====
 match try return
 -----
-1 match [
+1 match _[
     1 : [
         2,
         _ _try .(3),
@@ -355,9 +356,9 @@ true match [
 =====
 loop false
 -----
-_ do [
+_ do _[
     .a set 1,
-    false loop [
+    false loop _[
         .a set 2
     ],
     a
@@ -367,10 +368,10 @@ _ do [
 =====
 loop multiple
 -----
-_ do [
+_ do _[
     .a set 0,
     .b set 0,
-    (a < 100) loop [
+    _(a < 100) loop _[
         .a set a + 17,
         .b set b + 1
     ],
@@ -381,13 +382,13 @@ _ do [
 =====
 loop test
 -----
-_ do [
+_ do _[
     .a set 42,
     .b set 24,
-    (a <> b) loop [
-        (a > b) test [
+    _(a <> b) loop _[
+        (a > b) test _[
             .a set a - b
-        ] : [
+        ] : _[
             .b set b - a
         ]
     ],
@@ -398,12 +399,12 @@ _ do [
 =====
 loop continue
 -----
-_ do [
+_ do _[
     .a set 0,
     .b set 0,
-    (b < 5) loop [
+    _(b < 5) loop _[
         .b set b + 1,
-        _ _try (b == 2) test [continue],
+        _ _try (b == 2) test _[continue],
         .a set a + b,
     ],
     a
@@ -413,11 +414,11 @@ _ do [
 =====
 loop return
 -----
-_ do [
+_ do _[
     .a set 0,
     .b set 0,
-    (b < 5) loop [
-        _ _try (a > 5) test [.(.(a))],
+    _(b < 5) loop _[
+        _ _try (a > 5) test _[.(.(a))],
         .b set b + 1,
         .a set a + b,
     ]
@@ -427,9 +428,9 @@ _ do [
 =====
 iterate list
 -----
-_ do [
+_ do _[
     .sum set 0,
-    [1, 2, 3, 4, 5] iterate i : [
+    [1, 2, 3, 4, 5] iterate .i : _[
         .sum set sum + i
     ],
     sum
@@ -439,9 +440,9 @@ _ do [
 =====
 iterate empty list
 -----
-_ do [
+_ do _[
     .sum set 0,
-    [] iterate i : [
+    [] iterate .i : _[
         .sum set sum + i
     ],
     sum
@@ -451,7 +452,7 @@ _ do [
 =====
 iterate return 1
 -----
-[1, 2, 3, 4, 5] iterate i : [
+[1, 2, 3, 4, 5] iterate .i : _[
     _ _try (i == 3) test [.(.(true))]
 ]
 -----
@@ -459,9 +460,9 @@ true
 =====
 iterate return 2
 -----
-_ do [
-    [1, 2, 3, 4, 5] iterate i : [
-        _ _try (i == 3) test [break],
+_ do _[
+    [1, 2, 3, 4, 5] iterate .i : _[
+        _ _try (i == 3) test _[break],
         .a set i
     ],
     a
@@ -471,12 +472,12 @@ _ do [
 =====
 iterate continue
 -----
-_ do [
+_ do _[
     .a set 0,
     .b set 0,
-    [1, 2, 3, 4, 5] iterate i : [
+    [1, 2, 3, 4, 5] iterate .i : _[
         .a set a + i,
-        _ _try (i == 3) test [continue],
+        _ _try (i == 3) test _[continue],
         .b set b + i
     ],
     a : b
@@ -486,10 +487,10 @@ _ do [
 =====
 iterate list map
 -----
-_ do [
+_ do _[
     .push set _ import _list.push,
     .a set [],
-    [1, 2, 3, 4, 5] iterate i : [
+    [1, 2, 3, 4, 5] iterate .i : _[
         .a which push : i + 1
     ],
     a
@@ -499,9 +500,9 @@ _ do [
 =====
 iterate integer
 -----
-_ do [
+_ do _[
     .sum set 0,
-    10 iterate i : [
+    10 iterate .i : _[
         .sum set sum + i
     ],
     sum
@@ -511,9 +512,9 @@ _ do [
 =====
 iterate integer 0
 -----
-_ do [
+_ do _[
     .sum set 0,
-    0 iterate i : [
+    0 iterate .i : _[
         .sum set sum + i
     ],
     sum
@@ -523,7 +524,7 @@ _ do [
 =====
 iterate integer negative
 -----
-_ do [
+_ do _[
     .config.make set _ import _config.make,
     .link.make set _ import _link.make,
     .where set _ import _config.where,
@@ -533,7 +534,7 @@ _ do [
             iterate : iterate,
         },
     },
-    c where 0-1 iterate i : [],
+    .c where _(0-1 iterate .i : []),
     .c which is_aborted : .,
 ]
 -----
@@ -541,10 +542,10 @@ true
 =====
 iterate byte
 -----
-_ do [
+_ do _[
     .push set _ import _list.push,
     .b set [],
-    byte'1122334455' iterate i : [
+    byte'1122334455' iterate .i : _[
         .b which push : i
     ],
     b
@@ -554,10 +555,10 @@ _ do [
 =====
 iterate key
 -----
-_ do [
+_ do _[
     .push set _ import _list.push,
     .s set [],
-    .abc iterate i : [
+    .abc iterate .i : _[
         .s which push : i
     ],
     s
@@ -567,10 +568,10 @@ _ do [
 =====
 iterate text
 -----
-_ do [
+_ do _[
     .push set _ import _list.push,
     .t set [],
-    "hello" iterate i : [
+    "hello" iterate .i : _[
         .t which push : i
     ],
     t
@@ -580,11 +581,11 @@ _ do [
 =====
 iterate map
 -----
-_ do [
+_ do _[
     .push set _ import _list.push,
     .make_map set _ import _map.make,
     .kv set [],
-    {1 : 2, 3 : 4} iterate i : [
+    {1 : 2, 3 : 4} iterate .i : _[
         .kv which push : i
     ],
     _ make_map kv

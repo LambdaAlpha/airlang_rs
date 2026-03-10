@@ -1,4 +1,4 @@
-_ do [
+_ do _[
     .prelude set _ import _prelude,
     .link_which set _ import _link.which,
     

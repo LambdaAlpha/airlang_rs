@@ -1,6 +1,6 @@
 get
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .get_value set _ import _cell.get_value,
     .v set _ any .,
@@ -12,7 +12,7 @@ true
 =====
 set get
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .get_value set _ import _cell.get_value,
     .set_value set _ import _cell.set_value,
@@ -27,7 +27,7 @@ true
 =====
 set return
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .set_value set _ import _cell.set_value,
     .v1 set _ any .,

@@ -8,9 +8,9 @@ use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::PREFIX_ID;
-use crate::semantics::func::CtxFreeInputEvalFunc;
+use crate::semantics::func::CtxFreeInputAwareFunc;
 use crate::semantics::func::CtxFreeInputFreeFunc;
-use crate::semantics::func::CtxMutInputRawFunc;
+use crate::semantics::func::CtxMutInputAwareFunc;
 use crate::semantics::func::DynFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -34,8 +34,8 @@ impl Default for ResourceLib {
     fn default() -> Self {
         ResourceLib {
             get_steps: CtxFreeInputFreeFunc { fn_: get_steps }.build(),
-            set_steps: CtxFreeInputEvalFunc { fn_: set_steps }.build(),
-            measure_steps: CtxMutInputRawFunc { fn_: measure_steps }.build(),
+            set_steps: CtxFreeInputAwareFunc { fn_: set_steps }.build(),
+            measure_steps: CtxMutInputAwareFunc { fn_: measure_steps }.build(),
         }
     }
 }

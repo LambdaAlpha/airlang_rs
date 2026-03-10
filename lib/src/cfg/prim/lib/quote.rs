@@ -8,7 +8,7 @@ use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxMutInputEvalFunc;
+use crate::semantics::func::CtxMutInputAwareFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::QUOTE;
 use crate::semantics::val::Val;
@@ -26,7 +26,7 @@ impl Default for QuoteLib {
     fn default() -> Self {
         QuoteLib {
             get_source: CtxConstInputFreeFunc { fn_: get_source }.build(),
-            set_source: CtxMutInputEvalFunc { fn_: set_source }.build(),
+            set_source: CtxMutInputAwareFunc { fn_: set_source }.build(),
         }
     }
 }

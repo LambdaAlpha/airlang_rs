@@ -30,8 +30,8 @@ false
 =====
 and not short-circuit
 -----
-_ do [
-    false and _ do [
+_ do _[
+    false and _ do _[
         .a set 1,
         true
     ],
@@ -60,8 +60,8 @@ true
 =====
 or not short-circuit
 -----
-_ do [
-    true or _ do [
+_ do _[
+    true or _ do _[
         .a set 1,
         false
     ],

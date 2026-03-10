@@ -7,7 +7,6 @@ use crate::semantics::func::CompFunc;
 use crate::semantics::func::CompInput;
 use crate::semantics::func::DynFunc;
 use crate::semantics::func::PrimCtx;
-use crate::semantics::func::PrimInput;
 use crate::semantics::val::CompFuncVal;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::PrimFuncVal;
@@ -22,7 +21,6 @@ use crate::type_::Pair;
 const CODE: &str = "code";
 const PRELUDE: &str = "prelude";
 const CTX_CONST: &str = "context_constant";
-const INPUT_RAW: &str = "input_raw";
 
 pub(in crate::cfg) fn parse_func(cfg: &mut Cfg, input: Val) -> Option<FuncVal> {
     let Val::Map(mut map) = input else {
@@ -33,16 +31,12 @@ pub(in crate::cfg) fn parse_func(cfg: &mut Cfg, input: Val) -> Option<FuncVal> {
     let prelude = map_remove(&mut map, PRELUDE);
     let ctx = if let Some(name) = ctx_name {
         let const_ = parse_bit(cfg, CTX_CONST, map_remove(&mut map, CTX_CONST))?;
-        CompCtx::Default { name, const_ }
+        CompCtx::Aware { name, const_ }
     } else {
         CompCtx::Free
     };
-    let input = if let Some(name) = input_name {
-        let raw = parse_bit(cfg, INPUT_RAW, map_remove(&mut map, INPUT_RAW))?;
-        CompInput::Default { name, raw }
-    } else {
-        CompInput::Free
-    };
+    let input =
+        if let Some(name) = input_name { CompInput::Aware { name } } else { CompInput::Free };
     let func = CompFunc { prelude, body, ctx, input };
     let func = FuncVal::Comp(CompFuncVal::from(func));
     Some(func)
@@ -120,34 +114,29 @@ fn prim_code(fn_: *const dyn DynFunc<Cfg, Val, Val, Val>) -> Val {
 fn comp_code(comp: &CompFunc) -> Val {
     let ctx = match &comp.ctx {
         CompCtx::Free => Val::default(),
-        CompCtx::Default { name, .. } => Val::Key(name.clone()),
+        CompCtx::Aware { name, .. } => Val::Key(name.clone()),
     };
     let input = match &comp.input {
         CompInput::Free => Val::default(),
-        CompInput::Default { name, .. } => Val::Key(name.clone()),
+        CompInput::Aware { name, .. } => Val::Key(name.clone()),
     };
     let names = Val::Pair(Pair::new(ctx, input).into());
     Val::Pair(Pair::new(names, comp.body.clone()).into())
 }
 
 fn generate_prim(f: PrimFuncVal) -> Val {
-    prim(PrimRepr { common: CommonRepr { ctx: f.ctx, input: f.input, code: prim_code(&f.fn_) } })
+    prim(PrimRepr { common: CommonRepr { ctx: f.ctx, code: prim_code(&f.fn_) } })
 }
 
 fn generate_comp(f: CompFuncVal) -> Val {
     comp(CompRepr {
-        common: CommonRepr {
-            ctx: f.ctx.to_prim_ctx(),
-            input: f.input.to_prim_input(),
-            code: comp_code(&f),
-        },
+        common: CommonRepr { ctx: f.ctx.to_prim_ctx(), code: comp_code(&f) },
         prelude: f.prelude.clone(),
     })
 }
 
 struct CommonRepr {
     ctx: PrimCtx,
-    input: PrimInput,
     code: Val,
 }
 
@@ -155,8 +144,6 @@ fn generate_common(repr: &mut Map<Key, Val>, common: CommonRepr) {
     repr.insert(Key::from_str_unchecked(CODE), common.code);
     let const_ = !matches!(common.ctx, PrimCtx::Mut);
     repr.insert(Key::from_str_unchecked(CTX_CONST), Val::Bit(Bit::from(const_)));
-    let raw = !matches!(common.input, PrimInput::Eval);
-    repr.insert(Key::from_str_unchecked(INPUT_RAW), Val::Bit(Bit::from(raw)));
 }
 
 struct PrimRepr {

@@ -179,7 +179,7 @@ Second, the evaluation rule for quotes is `_(v)` ➔ `v`.
 Third, the evaluation rule for calls is `_ f i` ➔ `o`, with the following steps:
 
 1. `eval(f)` ➔ `vf`
-2. `if vf.eval_input then eval(i) else i` ➔ `vi`
+2. `eval(i)` ➔ `vi`
 3. `vf(vi)` ➔ `o`
 
 Fourth, the evaluation rules for cells, pairs, lists, and maps are as follows:
@@ -196,9 +196,9 @@ Fifth, the evaluation rule for other values is `v` ➔ `v`.
 The context is the local information environment during execution. In core semantics, the context can be accessed via keys, and functions also support sensing or updating the context. Variables in the context can be read via the `get` function, updated via the `set` function, or specified via the `which` function. Based on this capability of functions, we implement various control flow functions, including sequential execution `do`, conditional execution `test`, pattern matching `match`, loops `loop`, iteration `iterate`, etc. The most commonly used and essential core functions are provided in the initial context.
 
 ```air
-_ do [
+_ do _[
     .sum set 0,
-    100 iterate i : [
+    100 iterate .i : _[
         .sum set sum + i
     ],
     sum
@@ -210,7 +210,7 @@ _ do [
 Configuration is the global information environment during execution. Through mechanisms like append-only and scoped override, it balances flexibility and predictability. Configuration items can be imported via the `import` function, exported via the `export` function, or locally overridden via the `with` function. We will implement features like module management, testing frameworks, and error handling based on the configuration mechanism, and provide native functions and standard libraries in the initial configuration.
 
 ```air
-_ do [
+_ do _[
     .push set _ import _list.push,
     _list.add export push,
     _list.append export push,
@@ -222,7 +222,7 @@ _ do [
 Resources are scarce, consumable entities required during execution, with the most critical being execution time and storage space. Available execution steps can be read via `get_steps`, measured via `measure_steps`, or limited via `set_steps`. We will gradually build a resource management framework around these basic capabilities to provide essential foundational support for the development of resource-sensitive applications such as artificial intelligence.
 
 ```air
-_ do [
+_ do _[
     .set_steps set _ import _resource.set_steps,
     _ set_steps 100,
     true loop []

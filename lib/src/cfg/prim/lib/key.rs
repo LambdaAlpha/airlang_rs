@@ -8,7 +8,7 @@ use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxFreeInputEvalFunc;
+use crate::semantics::func::CtxFreeInputAwareFunc;
 use crate::semantics::val::KEY;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -33,10 +33,10 @@ pub const JOIN: &str = concatcp!(PREFIX_ID, KEY, ".join");
 impl Default for KeyLib {
     fn default() -> Self {
         KeyLib {
-            from_text: CtxFreeInputEvalFunc { fn_: from_text }.build(),
-            into_text: CtxFreeInputEvalFunc { fn_: into_text }.build(),
+            from_text: CtxFreeInputAwareFunc { fn_: from_text }.build(),
+            into_text: CtxFreeInputAwareFunc { fn_: into_text }.build(),
             get_length: CtxConstInputFreeFunc { fn_: get_length }.build(),
-            join: CtxFreeInputEvalFunc { fn_: join }.build(),
+            join: CtxFreeInputAwareFunc { fn_: join }.build(),
         }
     }
 }

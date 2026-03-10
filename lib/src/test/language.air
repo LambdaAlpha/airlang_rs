@@ -1,6 +1,6 @@
 parse generate
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .parse set _ import _language.syntax.parse,
     .generate set _ import _language.syntax.generate,
@@ -9,25 +9,25 @@ _ do [
     .atom set [_unit, _bit, _key, _text, _integer, _decimal, _byte],
     .i set 3 + (_ any _integer) % 4,
     .a set _ any .atom which get : i,
-    (_ any _bit) loop [
-        (_ any _bit) test [
+    _(_ any _bit) loop _[
+        (_ any _bit) test _[
             .i set 3 + (_ any _integer) % 4,
             .b set _ any .atom which get : i,
             .i set (4 + (_ any _integer) % 4) % 4,
-            .a set (_ any _bit) test [a : b] : [_ form _ a b],
-        ] : [
-            (_ any _bit) test [
+            .a set (_ any _bit) test _[a : b] : _[_ form _(_ a b)],
+        ] : _[
+            (_ any _bit) test _[
                 .i set 3 + (_ any _integer) % 4,
                 .b set _ any .atom which get : i,
                 .a set [a, b],
-            ] : [
+            ] : _[
                 .i set 3 + (_ any _integer) % 4,
                 .b set _ any .atom which get : i,
                 .a set {a : b},
             ]
         ]
     ],
-    .repr = _ generate a,
+    .repr set _ generate a,
     .(.a1) = _ parse repr,
     a == a1
 ]
@@ -36,7 +36,7 @@ true
 =====
 parse
 -----
-_ do [
+_ do _[
     .parse set _ import _language.syntax.parse,
     _ parse "[1, 2]"
 ]
@@ -45,7 +45,7 @@ _ do [
 =====
 parse no eval
 -----
-_ do [
+_ do _[
     .parse set _ import _language.syntax.parse,
     .a set 1,
     _ parse "a"
@@ -55,7 +55,7 @@ _ do [
 =====
 parse text
 -----
-_ do [
+_ do _[
     .parse set _ import _language.syntax.parse,
     _ parse "^'1^'"
 ]
@@ -64,7 +64,7 @@ _ do [
 =====
 generate text
 -----
-_ do [
+_ do _[
     .generate set _ import _language.syntax.generate,
     _ generate "1"
 ]

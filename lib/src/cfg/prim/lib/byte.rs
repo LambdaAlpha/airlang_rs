@@ -6,8 +6,8 @@ use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxFreeInputEvalFunc;
-use crate::semantics::func::CtxMutInputEvalFunc;
+use crate::semantics::func::CtxFreeInputAwareFunc;
+use crate::semantics::func::CtxMutInputAwareFunc;
 use crate::semantics::val::BYTE;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -31,8 +31,8 @@ impl Default for ByteLib {
     fn default() -> Self {
         ByteLib {
             get_length: CtxConstInputFreeFunc { fn_: get_length }.build(),
-            push: CtxMutInputEvalFunc { fn_: push }.build(),
-            join: CtxFreeInputEvalFunc { fn_: join }.build(),
+            push: CtxMutInputAwareFunc { fn_: push }.build(),
+            join: CtxFreeInputAwareFunc { fn_: join }.build(),
         }
     }
 }

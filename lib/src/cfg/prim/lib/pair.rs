@@ -8,7 +8,7 @@ use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxMutInputEvalFunc;
+use crate::semantics::func::CtxMutInputAwareFunc;
 use crate::semantics::val::PAIR;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -30,9 +30,9 @@ impl Default for PairLib {
     fn default() -> Self {
         PairLib {
             get_left: CtxConstInputFreeFunc { fn_: get_left }.build(),
-            set_left: CtxMutInputEvalFunc { fn_: set_left }.build(),
+            set_left: CtxMutInputAwareFunc { fn_: set_left }.build(),
             get_right: CtxConstInputFreeFunc { fn_: get_right }.build(),
-            set_right: CtxMutInputEvalFunc { fn_: set_right }.build(),
+            set_right: CtxMutInputAwareFunc { fn_: set_right }.build(),
         }
     }
 }

@@ -1,16 +1,16 @@
 !("bench interpret")
 
-_ do [
+_ do _[
     .% set _ import _integer.remainder,
     .f set _ function {
-        code : (. : .n) : _ form _ do [
+        code : (. : .n) : _ form _(_ do _[
             ..sum set 0,
-            .n iterate .i : [
-                _ _try (0 == .i % 3) test [continue],
+            .n iterate ..i : _[
+                _ _try (0 == .i % 3) test _[continue],
                 ..sum set .sum + .i,
             ],
             .sum
-        ],
+        ]),
         prelude : {},
     },
     _ f 100

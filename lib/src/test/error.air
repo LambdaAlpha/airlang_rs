@@ -1,6 +1,6 @@
 abort
 -----
-_ do [
+_ do _[
     .config.make set _ import _config.make,
     .link.make set _ import _link.make,
     .where set _ import _config.where,
@@ -11,10 +11,10 @@ _ do [
             abort : abort,
         },
     },
-    .a set cfg where _ do [
+    .a set .cfg where _(_ do _[
         _ abort .,
         1
-    ],
+    ]),
     .b set .cfg which is_aborted : .,
     b and a == .
 ]
@@ -23,7 +23,7 @@ true
 =====
 abort is_aborted
 -----
-_ do [
+_ do _[
     .cfg_make set _ import _config.make,
     .link.make set _ import _link.make,
     .where set _ import _config.where,
@@ -33,7 +33,7 @@ _ do [
             abort : abort,
         },
     },
-    cfg where _ abort .,
+    .cfg where _(_ abort .),
     .cfg which is_aborted : .,
 ]
 -----
@@ -41,7 +41,7 @@ true
 =====
 assert false
 -----
-_ do [
+_ do _[
     .cfg_make set _ import _config.make,
     .link.make set _ import _link.make,
     .where set _ import _config.where,
@@ -51,7 +51,7 @@ _ do [
             assert : assert,
         },
     },
-    cfg where false assert "not a bug",
+    .cfg where _(false assert "not a bug"),
     .cfg which is_aborted : .,
 ]
 -----
@@ -59,7 +59,7 @@ true
 =====
 assert true
 -----
-_ do [
+_ do _[
     .cfg_make set _ import _config.make,
     .link.make set _ import _link.make,
     .where set _ import _config.where,
@@ -69,7 +69,7 @@ _ do [
             assert : assert,
         },
     },
-    cfg where true assert "is a bug",
+    .cfg where _(true assert "is a bug"),
     .cfg which is_aborted : .,
 ]
 -----
@@ -77,7 +77,7 @@ false
 =====
 recover
 -----
-_ do [
+_ do _[
     .cfg_make set _ import _config.make,
     .link.make set _ import _link.make,
     .where set _ import _config.where,
@@ -88,7 +88,7 @@ _ do [
             abort : abort,
         },
     },
-    cfg where _ abort .,
+    .cfg where _(_ abort .),
     .a1 set .cfg which is_aborted : .,
     .cfg which recover : .,
     .a2 set .cfg which is_aborted : .,

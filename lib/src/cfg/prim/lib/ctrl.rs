@@ -15,12 +15,13 @@ use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::PREFIX_ID;
 use crate::semantics::ctx::DynCtx;
-use crate::semantics::func::CtxMutInputRawFunc;
+use crate::semantics::func::CtxMutInputAwareFunc;
 use crate::semantics::func::DynFunc;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
+use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
 use crate::type_::Cell;
@@ -53,12 +54,12 @@ pub const ITERATE: &str = concatcp!(PREFIX_ID, CTRL, ".iterate");
 impl Default for CtrlLib {
     fn default() -> Self {
         CtrlLib {
-            do_: CtxMutInputRawFunc { fn_: do_ }.build(),
-            test: CtxMutInputRawFunc { fn_: test }.build(),
-            switch: CtxMutInputRawFunc { fn_: switch }.build(),
-            match_: CtxMutInputRawFunc { fn_: match_ }.build(),
-            loop_: CtxMutInputRawFunc { fn_: loop_ }.build(),
-            iterate: CtxMutInputRawFunc { fn_: iterate }.build(),
+            do_: CtxMutInputAwareFunc { fn_: do_ }.build(),
+            test: CtxMutInputAwareFunc { fn_: test }.build(),
+            switch: CtxMutInputAwareFunc { fn_: switch }.build(),
+            match_: CtxMutInputAwareFunc { fn_: match_ }.build(),
+            loop_: CtxMutInputAwareFunc { fn_: loop_ }.build(),
+            iterate: CtxMutInputAwareFunc { fn_: iterate }.build(),
         }
     }
 }
@@ -159,7 +160,7 @@ pub fn test(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 struct Test {
-    condition: Val,
+    condition: Bit,
     body: Block,
     default: Option<Block>,
 }
@@ -171,6 +172,9 @@ impl Test {
         };
         let pair = Pair::from(pair);
         let condition = pair.left;
+        let Val::Bit(condition) = condition else {
+            return Err(bug!(cfg, "{TEST}: expected condition to be a bit, but got {condition}"));
+        };
         match pair.right {
             Val::Pair(branches) => {
                 let branches = Pair::from(branches);
@@ -186,11 +190,7 @@ impl Test {
     }
 
     fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
-        let condition = Eval.call(cfg, ctx, self.condition);
-        let Val::Bit(b) = condition else {
-            return bug!(cfg, "{TEST}: expected condition to be a bit, but got {condition}");
-        };
-        if *b {
+        if *self.condition {
             return self.body.flow(cfg, TEST, ctx).unwrap_or_default();
         }
         let Some(default) = self.default else {
@@ -208,7 +208,7 @@ pub fn switch(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 }
 
 struct Switch {
-    val: Val,
+    val: Key,
     map: HashMap<Key, Block>,
     default: Option<Block>,
 }
@@ -220,6 +220,9 @@ impl Switch {
         };
         let pair = Pair::from(pair);
         let val = pair.left;
+        let Val::Key(val) = val else {
+            return Err(bug!(cfg, "{SWITCH}: expected input.left to be a key, but got {val}"));
+        };
         match pair.right {
             Val::Map(map) => {
                 let map = Self::parse_block_map(cfg, map)?;
@@ -250,11 +253,7 @@ impl Switch {
     }
 
     fn eval(mut self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
-        let val = Eval.call(cfg, ctx, self.val);
-        let Val::Key(key) = val else {
-            return bug!(cfg, "{SWITCH}: expected input.left to be a key, but got {val}");
-        };
-        let Some(body) = self.map.remove(&key).or(self.default) else {
+        let Some(body) = self.map.remove(&self.val).or(self.default) else {
             return Val::default();
         };
         body.flow(cfg, SWITCH, ctx).unwrap_or_default()
@@ -302,7 +301,6 @@ impl Match {
     }
 
     fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
-        let val = Eval.call(cfg, ctx, self.val);
         for (pattern, block) in self.arms {
             if cfg.is_aborted() {
                 return Val::default();
@@ -311,11 +309,11 @@ impl Match {
             let Some(pattern) = pattern.parse(cfg, MATCH) else {
                 return Val::default();
             };
-            if !pattern.match_(cfg, false, MATCH, &val) {
+            if !pattern.match_(cfg, false, MATCH, &self.val) {
                 continue;
             }
             // todo design
-            let result = pattern.assign(cfg, MATCH, ctx, val);
+            let result = pattern.assign(cfg, MATCH, ctx, self.val);
             if result.is_none() {
                 return Val::default();
             }
@@ -408,8 +406,7 @@ impl Iterate {
     }
 
     fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
-        let val = Eval.call(cfg, ctx, self.val);
-        match val {
+        match self.val {
             Val::Int(i) => {
                 let i = Int::from(i);
                 if i.is_negative() {

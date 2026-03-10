@@ -1,10 +1,10 @@
 get
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .get_source set _ import _quote.get_source,
     .v set _ any .,
-    .c set _ form _(v),
+    .c set _ form _(_(v)),
     v == .c which get_source : .
 ]
 -----
@@ -12,7 +12,7 @@ true
 =====
 set get
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .get_source set _ import _quote.get_source,
     .set_source set _ import _quote.set_source,
@@ -27,11 +27,11 @@ true
 =====
 set return
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .set_source set _ import _quote.set_source,
     .v1 set _ any .,
-    .c set _ form _(v1),
+    .c set _ form _(_(v1)),
     .v2 set .c which set_source : _ any .,
     v1 == v2
 ]

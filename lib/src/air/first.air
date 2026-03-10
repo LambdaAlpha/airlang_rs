@@ -1,4 +1,4 @@
-_ do [
+_ do _[
     .return set .(.),
     .continue set .(.),
     .break set .(.(.)),

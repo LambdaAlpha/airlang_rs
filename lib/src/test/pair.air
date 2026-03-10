@@ -1,6 +1,6 @@
 get
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .get_left set _ import _pair.get_left,
     .get_right set _ import _pair.get_right,
@@ -14,7 +14,7 @@ true
 =====
 set get
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .get_left set _ import _pair.get_left,
     .get_right set _ import _pair.get_right,
@@ -34,7 +34,7 @@ true
 =====
 set return
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .set_left set _ import _pair.set_left,
     .set_right set _ import _pair.set_right,

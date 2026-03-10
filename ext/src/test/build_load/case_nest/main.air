@@ -1,4 +1,4 @@
-_ do [
+_ do _[
     .load set _ import _build.load,
     .(.a) = _ load "a/a.air",
     .(.b) = _ load "a/b/b.air",

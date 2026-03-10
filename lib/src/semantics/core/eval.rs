@@ -6,7 +6,6 @@ use crate::semantics::core::form::MapForm;
 use crate::semantics::core::form::PairForm;
 use crate::semantics::core::key::KeyEval;
 use crate::semantics::func::DynFunc;
-use crate::semantics::func::PrimInput;
 use crate::semantics::val::CallVal;
 use crate::semantics::val::CellVal;
 use crate::semantics::val::ListVal;
@@ -27,12 +26,15 @@ impl DynFunc<Cfg, Val, QuoteVal, Val> for QuoteEval {
     }
 }
 
-pub(crate) struct CallEval<'a, Func> {
+pub(crate) struct CallEval<'a, Func, Input> {
     pub(crate) func: &'a Func,
+    pub(crate) input: &'a Input,
 }
 
-impl<'a, Func> DynFunc<Cfg, Val, CallVal, Val> for CallEval<'a, Func>
-where Func: DynFunc<Cfg, Val, Val, Val>
+impl<'a, Func, Input> DynFunc<Cfg, Val, CallVal, Val> for CallEval<'a, Func, Input>
+where
+    Func: DynFunc<Cfg, Val, Val, Val>,
+    Input: DynFunc<Cfg, Val, Val, Val>,
 {
     fn call(&self, cfg: &mut Cfg, ctx: &mut Val, call: CallVal) -> Val {
         let call = Call::from(call);
@@ -41,11 +43,7 @@ where Func: DynFunc<Cfg, Val, Val, Val>
             let msg = format!("eval: expected a function, but got {func}");
             return abort_by_bug_with_msg(cfg, msg.into());
         };
-        let input = if matches!(func.input(), PrimInput::Eval) {
-            Eval.call(cfg, ctx, call.input)
-        } else {
-            call.input
-        };
+        let input = self.input.call(cfg, ctx, call.input);
         if !cfg.step() {
             return Val::default();
         }
@@ -112,6 +110,6 @@ impl DynFunc<Cfg, Val, QuoteVal, Val> for Eval {
 
 impl DynFunc<Cfg, Val, CallVal, Val> for Eval {
     fn call(&self, cfg: &mut Cfg, ctx: &mut Val, call: CallVal) -> Val {
-        CallEval { func: self }.call(cfg, ctx, call)
+        CallEval { func: self, input: self }.call(cfg, ctx, call)
     }
 }

@@ -24,7 +24,7 @@
 =====
 / 0
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .config.make set _ import _config.make,
     .link.make set _ import _link.make,
@@ -37,7 +37,7 @@ _ do [
             /. : /.,
         },
     },
-    c where a /. 0.,
+    .c where _(a /. 0.),
     .c which is_aborted : .,
 ]
 -----
@@ -45,164 +45,194 @@ true
 =====
 precision
 -----
-_ do [
+_ do _[
     {
         _decimal.rounding.precision : 10,
-    } with 987654321. /. 13579.
+    } with _(
+        987654321. /. 13579.
+    )
 ]
 -----
 72733.95103
 =====
 rounding mode infinity 1
 -----
-_ do [
+_ do _[
     {
         _decimal.rounding.precision : 10,
         _decimal.rounding.mode : _infinity,
-    } with 987654321. /. 13579.
+    } with _(
+        987654321. /. 13579.
+    )
 ]
 -----
 72733.95103
 =====
 rounding mode infinity 2
 -----
-_ do [
+_ do _[
     {
         _decimal.rounding.precision : 10,
         _decimal.rounding.mode : _infinity,
-    } with 987654321. /. 0-13579.
+    } with _(
+        987654321. /. 0-13579.
+    )
 ]
 -----
 0-72733.95103
 =====
 rounding mode zero 1
 -----
-_ do [
+_ do _[
     {
         _decimal.rounding.precision : 10,
         _decimal.rounding.mode : _zero,
-    } with 987654321. /. 13579.
+    } with _(
+        987654321. /. 13579.
+    )
 ]
 -----
 72733.95102
 =====
 rounding mode zero 2
 -----
-_ do [
+_ do _[
     {
         _decimal.rounding.precision : 10,
         _decimal.rounding.mode : _zero,
-    } with 987654321. /. 0-13579.
+    } with _(
+        987654321. /. 0-13579.
+    )
 ]
 -----
 0-72733.95102
 =====
 rounding mode positive 1
 -----
-_ do [
+_ do _[
     {
         _decimal.rounding.precision : 10,
         _decimal.rounding.mode : _positive,
-    } with 987654321. /. 13579.
+    } with _(
+        987654321. /. 13579.
+    )
 ]
 -----
 72733.95103
 =====
 rounding mode positive 2
 -----
-_ do [
+_ do _[
     {
         _decimal.rounding.precision : 10,
         _decimal.rounding.mode : _positive,
-    } with 987654321. /. 0-13579.
+    } with _(
+        987654321. /. 0-13579.
+    )
 ]
 -----
 0-72733.95102
 =====
 rounding mode negative 1
 -----
-_ do [
+_ do _[
     {
         _decimal.rounding.precision : 10,
         _decimal.rounding.mode : _negative,
-    } with 987654321. /. 13579.
+    } with _(
+        987654321. /. 13579.
+    )
 ]
 -----
 72733.95102
 =====
 rounding mode negative 2
 -----
-_ do [
+_ do _[
     {
         _decimal.rounding.precision : 10,
         _decimal.rounding.mode : _negative,
-    } with 987654321. /. 0-13579.
+    } with _(
+        987654321. /. 0-13579.
+    )
 ]
 -----
 0-72733.95103
 =====
 rounding mode half infinity 1
 -----
-_ do [
+_ do _[
     {
         _decimal.rounding.precision : 10,
         _decimal.rounding.mode : _half_infinity,
-    } with 281366922235. /. 230.
+    } with _(
+        281366922235. /. 230.
+    )
 ]
 -----
 1223334445.
 =====
 rounding mode half infinity 2
 -----
-_ do [
+_ do _[
     {
         _decimal.rounding.precision : 10,
         _decimal.rounding.mode : _half_infinity,
-    } with 281366922235. /. 0-230.
+    } with _(
+        281366922235. /. 0-230.
+    )
 ]
 -----
 0-1223334445.
 =====
 rounding mode half zero 1
 -----
-_ do [
+_ do _[
     {
         _decimal.rounding.precision : 10,
         _decimal.rounding.mode : _half_zero,
-    } with 281366922235. /. 230.
+    } with _(
+        281366922235. /. 230.
+    )
 ]
 -----
 1223334444.
 =====
 rounding mode half zero 2
 -----
-_ do [
+_ do _[
     {
         _decimal.rounding.precision : 10,
         _decimal.rounding.mode : _half_zero,
-    } with 281366922235. /. 0-230.
+    } with _(
+        281366922235. /. 0-230.
+    )
 ]
 -----
 0-1223334444.
 =====
 rounding mode half even 1
 -----
-_ do [
+_ do _[
     {
         _decimal.rounding.precision : 10,
         _decimal.rounding.mode : _half_even,
-    } with 281366922235. /. 230.
+    } with _(
+        281366922235. /. 230.
+    )
 ]
 -----
 1223334444.
 =====
 rounding mode half even 2
 -----
-_ do [
+_ do _[
     {
         _decimal.rounding.precision : 10,
         _decimal.rounding.mode : _half_even,
-    } with 281366922465. /. 230.
+    } with _(
+        281366922465. /. 230.
+    )
 ]
 -----
 1223334446.

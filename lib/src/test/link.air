@@ -1,6 +1,6 @@
 make which get_self
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .make set _ import _link.make,
     .which set _ import _link.which,
@@ -15,7 +15,7 @@ true
 =====
 make_constant which get_self
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .make set _ import _link.make_constant,
     .which set _ import _link.which,
@@ -30,7 +30,7 @@ true
 =====
 const is_constant
 -----
-_ do [
+_ do _[
     .make_constant set _ import _link.make_constant,
     .is_constant set _ import _link.is_constant,
     .l set _ make_constant {},
@@ -41,7 +41,7 @@ true
 =====
 mut is_constant
 -----
-_ do [
+_ do _[
     .make set _ import _link.make,
     .is_constant set _ import _link.is_constant,
     .l set _ make {},
@@ -52,7 +52,7 @@ false
 =====
 is_available true
 -----
-_ do [
+_ do _[
     .make set _ import _link.make,
     .is_available set _ import _link.is_available,
     .l set _ make {},
@@ -63,7 +63,7 @@ true
 =====
 is_available false
 -----
-_ do [
+_ do _[
     .make set _ import _link.make,
     .is_available set _ import _link.is_available,
     .which set _ import _link.which,
@@ -75,7 +75,7 @@ false
 =====
 get_id
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .make set _ import _link.make,
     .get_id set _ import _link.get_id,
@@ -93,7 +93,7 @@ true
 =====
 sync
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .make set _ import _link.make,
     .which set _ import _link.which,
@@ -109,7 +109,7 @@ true
 =====
 leak no panic
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .make set _ import _link.make,
     .which set _ import _link.which,
@@ -123,7 +123,7 @@ _ do [
 =====
 cycle recover
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .make set _ import _link.make,
     .which set _ import _link.which,

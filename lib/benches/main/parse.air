@@ -1,12 +1,12 @@
 !("bench parse")
 
-_ do [
+_ do _[
     .x set 42,
     .y set 24,
-    (x <> y) loop [
-        (x > y) test [
+    _(x <> y) loop _[
+        (x > y) test _[
             .x set x - y
-        ] : [
+        ] : _[
             .y set y - x
         ]
     ],

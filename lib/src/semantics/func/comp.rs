@@ -22,25 +22,25 @@ pub struct CompFunc {
 #[derive(Clone, PartialEq, Eq)]
 pub(crate) enum CompCtx {
     Free,
-    Default { name: Key, const_: bool },
+    Aware { name: Key, const_: bool },
 }
 
 #[derive(Clone, PartialEq, Eq)]
 pub(crate) enum CompInput {
     Free,
-    Default { name: Key, raw: bool },
+    Aware { name: Key },
 }
 
 impl DynFunc<Cfg, Val, Val, Val> for CompFunc {
     fn call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         let new_ctx = &mut self.prelude.clone();
-        if let CompInput::Default { name, .. } = &self.input {
+        if let CompInput::Aware { name, .. } = &self.input {
             let set_result = new_ctx.set(cfg, name.clone(), input);
             if set_result.is_none() {
                 return Val::default();
             }
         }
-        let CompCtx::Default { name, const_ } = &self.ctx else {
+        let CompCtx::Aware { name, const_ } = &self.ctx else {
             return Eval.call(cfg, new_ctx, self.body.clone());
         };
         let ctx_link = LinkVal::new(take(ctx), *const_);
@@ -60,7 +60,7 @@ impl DynFunc<Cfg, Val, Val, Val> for CompFunc {
 impl CompCtx {
     pub(crate) fn to_prim_ctx(&self) -> PrimCtx {
         match self {
-            CompCtx::Default { const_, .. } => {
+            CompCtx::Aware { const_, .. } => {
                 if *const_ {
                     PrimCtx::Const_
                 } else {
@@ -75,13 +75,7 @@ impl CompCtx {
 impl CompInput {
     pub(crate) fn to_prim_input(&self) -> PrimInput {
         match self {
-            CompInput::Default { raw, .. } => {
-                if *raw {
-                    PrimInput::Raw
-                } else {
-                    PrimInput::Eval
-                }
-            },
+            CompInput::Aware { .. } => PrimInput::Aware,
             CompInput::Free => PrimInput::Free,
         }
     }

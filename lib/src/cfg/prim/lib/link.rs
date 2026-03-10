@@ -7,7 +7,7 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
-use crate::semantics::func::CtxFreeInputEvalFunc;
+use crate::semantics::func::CtxFreeInputAwareFunc;
 use crate::semantics::func::DynFunc;
 use crate::semantics::func::PrimCtx;
 use crate::semantics::val::LINK;
@@ -40,12 +40,12 @@ pub const WHICH: &str = concatcp!(PREFIX_ID, LINK, ".which");
 impl Default for LinkLib {
     fn default() -> Self {
         LinkLib {
-            make: CtxFreeInputEvalFunc { fn_: make }.build(),
-            make_constant: CtxFreeInputEvalFunc { fn_: make_constant }.build(),
-            is_constant: CtxFreeInputEvalFunc { fn_: is_constant }.build(),
-            is_available: CtxFreeInputEvalFunc { fn_: is_available }.build(),
-            get_id: CtxFreeInputEvalFunc { fn_: get_id }.build(),
-            which: CtxFreeInputEvalFunc { fn_: which }.build(),
+            make: CtxFreeInputAwareFunc { fn_: make }.build(),
+            make_constant: CtxFreeInputAwareFunc { fn_: make_constant }.build(),
+            is_constant: CtxFreeInputAwareFunc { fn_: is_constant }.build(),
+            is_available: CtxFreeInputAwareFunc { fn_: is_available }.build(),
+            get_id: CtxFreeInputAwareFunc { fn_: get_id }.build(),
+            which: CtxFreeInputAwareFunc { fn_: which }.build(),
         }
     }
 }

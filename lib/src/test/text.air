@@ -1,6 +1,6 @@
 length push
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .get_length set _ import _text.get_length,
     .push set _ import _text.push,
@@ -15,7 +15,7 @@ true
 =====
 get_length join
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .get_length set _ import _text.get_length,
     .join set _ import _text.join,
@@ -32,7 +32,7 @@ true
 =====
 get_length empty
 -----
-_ do [
+_ do _[
     .get_length set _ import _text.get_length,
     .t set "",
     .t which get_length : .
@@ -42,7 +42,7 @@ _ do [
 =====
 get_length else
 -----
-_ do [
+_ do _[
     .get_length set _ import _text.get_length,
     .t set "1",
     .t which get_length : .
@@ -52,7 +52,7 @@ _ do [
 =====
 push join
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .push set _ import _text.push,
     .join set _ import _text.join,
@@ -68,7 +68,7 @@ true
 =====
 push
 -----
-_ do [
+_ do _[
     .push set _ import _text.push,
     .a set "hello",
     .b set "world",
@@ -81,7 +81,7 @@ _ do [
 =====
 join empty
 -----
-_ do [
+_ do _[
     .join set _ import _text.join,
     "" join ["1", "2"]
 ]
@@ -90,7 +90,7 @@ _ do [
 =====
 join no text
 -----
-_ do [
+_ do _[
     .join set _ import _text.join,
     "" join []
 ]
@@ -99,7 +99,7 @@ _ do [
 =====
 join else
 -----
-_ do [
+_ do _[
     .join set _ import _text.join,
     "." join ["1", "2"]
 ]
@@ -108,7 +108,7 @@ _ do [
 =====
 into_utf8 from_utf8
 -----
-_ do [
+_ do _[
     .any set _ import _value.any,
     .from_utf8 set _ import _text.from_utf8,
     .into_utf8 set _ import _text.into_utf8,
@@ -121,7 +121,7 @@ true
 =====
 into_utf8
 -----
-_ do [
+_ do _[
     .into_utf8 set _ import _text.into_utf8,
     _ into_utf8 "abc"
 ]
@@ -130,7 +130,7 @@ byte'616263'
 =====
 from_utf8
 -----
-_ do [
+_ do _[
     .from_utf8 set _ import _text.from_utf8,
     _ from_utf8 byte'616263'
 ]

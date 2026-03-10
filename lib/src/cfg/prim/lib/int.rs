@@ -6,7 +6,7 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_ID;
-use crate::semantics::func::CtxFreeInputEvalFunc;
+use crate::semantics::func::CtxFreeInputAwareFunc;
 use crate::semantics::val::INT;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -43,17 +43,17 @@ pub const LESS_GREATER: &str = concatcp!(PREFIX_ID, INT, ".less_greater");
 impl Default for IntLib {
     fn default() -> Self {
         IntLib {
-            add: CtxFreeInputEvalFunc { fn_: add }.build(),
-            subtract: CtxFreeInputEvalFunc { fn_: subtract }.build(),
-            multiply: CtxFreeInputEvalFunc { fn_: multiply }.build(),
-            divide: CtxFreeInputEvalFunc { fn_: divide }.build(),
-            remainder: CtxFreeInputEvalFunc { fn_: remainder }.build(),
-            divide_remainder: CtxFreeInputEvalFunc { fn_: divide_remainder }.build(),
-            less: CtxFreeInputEvalFunc { fn_: less }.build(),
-            less_equal: CtxFreeInputEvalFunc { fn_: less_equal }.build(),
-            greater: CtxFreeInputEvalFunc { fn_: greater }.build(),
-            greater_equal: CtxFreeInputEvalFunc { fn_: greater_equal }.build(),
-            less_greater: CtxFreeInputEvalFunc { fn_: less_greater }.build(),
+            add: CtxFreeInputAwareFunc { fn_: add }.build(),
+            subtract: CtxFreeInputAwareFunc { fn_: subtract }.build(),
+            multiply: CtxFreeInputAwareFunc { fn_: multiply }.build(),
+            divide: CtxFreeInputAwareFunc { fn_: divide }.build(),
+            remainder: CtxFreeInputAwareFunc { fn_: remainder }.build(),
+            divide_remainder: CtxFreeInputAwareFunc { fn_: divide_remainder }.build(),
+            less: CtxFreeInputAwareFunc { fn_: less }.build(),
+            less_equal: CtxFreeInputAwareFunc { fn_: less_equal }.build(),
+            greater: CtxFreeInputAwareFunc { fn_: greater }.build(),
+            greater_equal: CtxFreeInputAwareFunc { fn_: greater_equal }.build(),
+            less_greater: CtxFreeInputAwareFunc { fn_: less_greater }.build(),
         }
     }
 }

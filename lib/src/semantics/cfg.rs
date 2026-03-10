@@ -22,8 +22,8 @@ pub struct Cfg {
 }
 
 impl Cfg {
-    pub const ABORT_TYPE: &str = "_error.abort.type";
-    pub const ABORT_MSG: &str = "_error.abort.message";
+    pub const ABORT_TYPE: &str = concatcp!(PREFIX_ID, "error.abort.type");
+    pub const ABORT_MSG: &str = concatcp!(PREFIX_ID, "error.abort.message");
 
     pub const ABORT_TYPE_STEPS: &str = concatcp!(PREFIX_ID, "steps");
     pub const ABORT_TYPE_BUG: &str = concatcp!(PREFIX_ID, "bug");

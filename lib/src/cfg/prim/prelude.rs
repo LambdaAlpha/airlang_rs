@@ -42,7 +42,6 @@ pub struct BasePrimPrelude {
     pub with: PrimFuncVal,
 
     pub function: PrimFuncVal,
-    pub apply: PrimFuncVal,
 
     pub get: PrimFuncVal,
     pub set: PrimFuncVal,
@@ -63,9 +62,6 @@ pub struct BasePrimPrelude {
     pub abort: PrimFuncVal,
     pub assert: PrimFuncVal,
 
-    pub data: PrimFuncVal,
-    pub id: PrimFuncVal,
-    pub code: PrimFuncVal,
     pub eval: PrimFuncVal,
 }
 
@@ -112,7 +108,6 @@ impl BasePrimPrelude {
             with: lib.cfg.with,
 
             function: lib.func.make,
-            apply: lib.func.apply,
 
             get: lib.ctx.get,
             set: lib.ctx.set,
@@ -133,9 +128,6 @@ impl BasePrimPrelude {
             abort: lib.error.abort,
             assert: lib.error.assert,
 
-            data: lib.lang.data,
-            id: lib.lang.id,
-            code: lib.lang.code,
             eval: lib.lang.eval,
         }
     }
@@ -179,7 +171,6 @@ impl Prelude for BasePrimPrelude {
         map_put_func(map, "with", self.with);
 
         map_put_func(map, "function", self.function);
-        map_put_func(map, "apply", self.apply);
 
         map_put_func(map, "get", self.get);
         map_put_func(map, "set", self.set);
@@ -200,9 +191,6 @@ impl Prelude for BasePrimPrelude {
         map_put_func(map, "abort", self.abort);
         map_put_func(map, "assert", self.assert);
 
-        map_put_func(map, "data", self.data);
-        map_put_func(map, "id", self.id);
-        map_put_func(map, "code", self.code);
         map_put_func(map, "eval", self.eval);
     }
 }

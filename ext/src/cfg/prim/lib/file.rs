@@ -3,7 +3,7 @@ use airlang::cfg::CfgMod;
 use airlang::cfg::extend_func;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_ID;
-use airlang::semantics::func::CtxFreeInputEvalFunc;
+use airlang::semantics::func::CtxFreeInputAwareFunc;
 use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Text;
@@ -20,7 +20,7 @@ pub const READ_TO_TEXT: &str = concatcp!(PREFIX_ID, FILE, ".read_to_text");
 
 impl Default for FileLib {
     fn default() -> Self {
-        Self { read_to_text: CtxFreeInputEvalFunc { fn_: read_to_text }.build() }
+        Self { read_to_text: CtxFreeInputAwareFunc { fn_: read_to_text }.build() }
     }
 }
 

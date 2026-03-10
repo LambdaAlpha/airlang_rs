@@ -8,7 +8,7 @@ use airlang::cfg::CfgMod;
 use airlang::cfg::extend_func;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_ID;
-use airlang::semantics::func::CtxFreeInputEvalFunc;
+use airlang::semantics::func::CtxFreeInputAwareFunc;
 use airlang::semantics::func::CtxFreeInputFreeFunc;
 use airlang::semantics::func::CtxMutInputFreeFunc;
 use airlang::semantics::val::PrimFuncVal;
@@ -41,11 +41,11 @@ impl Default for IoLib {
     fn default() -> Self {
         Self {
             read_line: CtxMutInputFreeFunc { fn_: read_line }.build(),
-            print: CtxFreeInputEvalFunc { fn_: print }.build(),
-            print_line: CtxFreeInputEvalFunc { fn_: print_line }.build(),
+            print: CtxFreeInputAwareFunc { fn_: print }.build(),
+            print_line: CtxFreeInputAwareFunc { fn_: print_line }.build(),
             flush: CtxFreeInputFreeFunc { fn_: flush }.build(),
-            error_print: CtxFreeInputEvalFunc { fn_: error_print }.build(),
-            error_print_line: CtxFreeInputEvalFunc { fn_: error_print_line }.build(),
+            error_print: CtxFreeInputAwareFunc { fn_: error_print }.build(),
+            error_print_line: CtxFreeInputAwareFunc { fn_: error_print_line }.build(),
             error_flush: CtxFreeInputFreeFunc { fn_: error_flush }.build(),
         }
     }

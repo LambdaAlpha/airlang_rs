@@ -1,3 +1,3 @@
-_ do [
-    .empty set _ data '',
+_ do _[
+    .empty set _'',
 ]
