@@ -348,7 +348,7 @@ map duplicate keys
 =====
 raw map duplicate keys
 -----
-_{a 2 a 3}
+#{a 2 a 3}
 =====
 map concat
 -----
@@ -360,7 +360,7 @@ map list concat
 =====
 raw map odd
 -----
-_{a b c}
+#{a b c}
 =====
 scope concat
 -----

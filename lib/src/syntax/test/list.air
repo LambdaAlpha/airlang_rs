@@ -4,7 +4,7 @@ empty
 =====
 raw empty
 -----
-_[]
+#[]
 =====
 one
 -----
@@ -12,7 +12,7 @@ one
 =====
 raw one
 -----
-_[a]
+#[a]
 =====
 one trailing comma
 -----
@@ -24,11 +24,11 @@ two
 =====
 raw two
 -----
-_[a b]
+#[a b]
 =====
 raw two non-atomic
 -----
-_[(a : b) c]
+#[(a : b) c]
 =====
 two trailing comma
 -----
@@ -40,4 +40,4 @@ recursive
 =====
 sequence
 -----
-_[[] []]
+#[[] []]

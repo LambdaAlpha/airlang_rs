@@ -35,6 +35,7 @@ pub(crate) const FALSE: &str = "false";
 // prefixes {
 pub(crate) const LEFT: &str = "<";
 pub(crate) const RIGHT: &str = ">";
+pub(crate) const COMPACT: &str = "#";
 
 pub(crate) const INT: &str = "integer";
 pub(crate) const DECIMAL: &str = "decimal";
