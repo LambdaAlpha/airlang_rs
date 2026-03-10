@@ -15,6 +15,12 @@ use crate::syntax::test::unit;
 
 pub(super) fn expected() -> Vec<Repr> {
     vec![
+        unit(),
+        unit(),
+        unit(),
+        unit(),
+        unit(),
+        unit(),
         list(vec![int("1", 10), int("4", 10)]),
         map(vec![("a", int("2", 10))]),
         key("key"),

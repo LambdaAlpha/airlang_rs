@@ -16,10 +16,14 @@ Air's syntax is extremely concise. It only includes comments and 12 data types, 
 
 **comment**
 
-`!(t1 t2 ... tn)`
+- `!(t1 t2 ... tn)`
+- `!'key'`
+- `!"text"`
+- `![l, i, s, t]`
+- `!{a : map}`
 
 ```air
-!("comment")
+!"comment"
 [1, !(2, 3,) 4]
 {a : !(1, b :) 2}
 ```

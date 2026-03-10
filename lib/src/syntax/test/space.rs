@@ -17,12 +17,16 @@ pub(super) fn expected() -> Vec<Repr> {
         key("a"),
         key("a"),
         key("a"),
+        key("a"),
+        key("a"),
+        key("a"),
+        key("a"),
+        key("a"),
         infix_call(key("a"), key("b"), key("c")),
         key("a"),
         key("a"),
         list(vec![key("a"), key("d")]),
         map(vec![("a", key("b"))]),
         key("c"),
-        key("a"),
     ]
 }

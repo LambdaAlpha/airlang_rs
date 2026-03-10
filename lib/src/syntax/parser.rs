@@ -141,7 +141,10 @@ fn void<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
 
 fn comment<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
     let comment_tokens = repeat(0 .., comment_token(ctx));
-    let f = preceded(COMMENT, delimited_cut(SCOPE_LEFT, comment_tokens, SCOPE_RIGHT));
+    let scope = delimited_cut(SCOPE_LEFT, comment_tokens, SCOPE_RIGHT);
+    let comment =
+        alt((scope, key.void(), text.void(), list::<C>(ctx).void(), map::<C>(ctx).void()));
+    let f = preceded(COMMENT, comment);
     f.context(label("comment"))
 }
 

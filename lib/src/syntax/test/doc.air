@@ -1,3 +1,27 @@
+comment scope
+-----
+!(t1 t2 ... tn) .
+=====
+comment key .
+-----
+!'key' .
+=====
+comment text
+-----
+!"text" .
+=====
+comment list
+-----
+![l, i, s, t] .
+=====
+comment map
+-----
+!{a : map} .
+=====
+comment text example
+-----
+!"comment" .
+=====
 comment list item
 -----
 [1, !(2, 3,) 4]

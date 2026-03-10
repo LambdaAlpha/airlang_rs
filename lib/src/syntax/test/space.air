@@ -16,38 +16,58 @@ space between tokens
 -----
 a b c
 =====
+empty comment
+-----
+!() a
+=====
+key comment
+-----
+!'' a
+=====
+text comment
+-----
+!"" a
+=====
+list comment
+-----
+![a, b] a
+=====
+map comment
+-----
+!{a : b} a
+=====
 leading comment
 -----
 !("") a
 =====
 leading comment no space
 -----
-!("")a
+!()a
 =====
 leading space comment
 -----
- !("") a
+ !() a
 =====
 trailing comment
 -----
-a !("")
+a !()
 =====
 trailing comment space
 -----
-a !("")
+a !()
 
 =====
 leading and trailing comment
 -----
-!("") a !("")
+!() a !()
 =====
 sequence comment
 -----
-!("") !("") a !("") !("")
+!() !() a !() !()
 =====
 comment between tokens
 -----
-a !("") b !("") c
+a !() b !() c
 =====
 multiline comment
 -----
@@ -70,7 +90,3 @@ map item comment
 comment in comment
 -----
 !(!(a) b) c
-=====
-empty comment
------
-!() a
