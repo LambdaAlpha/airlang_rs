@@ -111,17 +111,37 @@ byte hex
 -----
 byte'X00ffff'
 =====
+cell scope
+-----
+.(v)
+=====
+cell key
+-----
+.'key'
+=====
+cell text
+-----
+."text"
+=====
+cell list
+-----
+.[l, i, s, t]
+=====
+cell map
+-----
+.{a : map}
+=====
 cell bit
 -----
 .(true)
 =====
-cell key
+cell scope key
 -----
-.(value)
+.('cell')
 =====
 cell cell
 -----
-.(.("data"))
+.(.[.{a : .""}])
 =====
 pair diff type
 -----

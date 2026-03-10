@@ -409,7 +409,9 @@ fn reset_expect<'a, T>(
 }
 
 fn cell<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
-    scope(ctx).map(|v| T::from(Cell::new(v))).context(label("cell"))
+    let cell = alt((scope(ctx), key.map(T::from), text.map(T::from), list(ctx), map(ctx)))
+        .map(|v| T::from(Cell::new(v)));
+    cell.context(label("cell"))
 }
 
 fn list<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {

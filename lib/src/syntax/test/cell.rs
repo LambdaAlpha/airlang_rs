@@ -4,10 +4,15 @@ use crate::syntax::test::key;
 use crate::syntax::test::list;
 use crate::syntax::test::map;
 use crate::syntax::test::pair;
+use crate::syntax::test::text;
 use crate::syntax::test::unit;
 
 pub(super) fn expected() -> Vec<Repr> {
     vec![
+        cell(key("")),
+        cell(text("")),
+        cell(list(vec![])),
+        cell(map(vec![])),
         cell(unit()),
         cell(cell(key("a"))),
         cell(pair(key("a"), key("b"))),

@@ -1,3 +1,19 @@
+cell key
+-----
+.''
+=====
+cell text
+-----
+.""
+=====
+cell list
+-----
+.[]
+=====
+cell map
+-----
+.{}
+=====
 cell unit
 -----
 .(.)
@@ -10,11 +26,11 @@ cell pair
 -----
 .(a : b)
 =====
-cell list
+cell scope list
 -----
 .([a, b])
 =====
-cell map
+cell scope map
 -----
 .({a : b})
 =====

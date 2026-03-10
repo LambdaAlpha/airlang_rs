@@ -98,12 +98,16 @@ byte'X00ffff'
 
 **cell**
 
-`.(v)`
+- `.(v)`
+- `.'key'`
+- `."text"`
+- `.[l, i, s, t]`
+- `.{a : map}`
 
 ```air
 .(true)
-.(value)
-.(.("data"))
+.('cell')
+.(.[.{a : .""}])
 ```
 
 **pair**
