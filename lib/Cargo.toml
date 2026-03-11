@@ -52,7 +52,7 @@ version = "0.7"
 [dependencies.rand]
 version = "0.10"
 default-features = false
-features = ["alloc"]
+features = ["alloc", "sys_rng"]
 
 # const str
 [dependencies.const_format]
