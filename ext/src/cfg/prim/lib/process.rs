@@ -4,7 +4,7 @@ use airlang::bug;
 use airlang::cfg::CfgMod;
 use airlang::cfg::extend_func;
 use airlang::semantics::cfg::Cfg;
-use airlang::semantics::core::PREFIX_ID;
+use airlang::semantics::core::PREFIX_CELL;
 use airlang::semantics::func::CtxFreeInputAwareFunc;
 use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
@@ -24,7 +24,7 @@ pub struct ProcessLib {
 
 const PROCESS: &str = "process";
 
-pub const CALL: &str = concatcp!(PREFIX_ID, PROCESS, ".call");
+pub const CALL: &str = concatcp!(PREFIX_CELL, PROCESS, ".call");
 
 impl Default for ProcessLib {
     fn default() -> Self {

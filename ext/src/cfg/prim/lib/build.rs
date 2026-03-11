@@ -8,7 +8,7 @@ use airlang::cfg::CfgMod;
 use airlang::cfg::eval_with_prelude;
 use airlang::cfg::extend_func;
 use airlang::semantics::cfg::Cfg;
-use airlang::semantics::core::PREFIX_ID;
+use airlang::semantics::core::PREFIX_CELL;
 use airlang::semantics::func::CtxFreeInputAwareFunc;
 use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
@@ -24,7 +24,7 @@ pub struct BuildLib {
 
 const BUILD: &str = "build";
 
-pub const LOAD: &str = concatcp!(PREFIX_ID, BUILD, ".load");
+pub const LOAD: &str = concatcp!(PREFIX_CELL, BUILD, ".load");
 
 impl Default for BuildLib {
     fn default() -> Self {

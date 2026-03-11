@@ -25,20 +25,20 @@
 / 0
 -----
 _ do _[
-    .any set _ import _value.any,
-    .config.make set _ import _config.make,
-    .link.make set _ import _link.make,
-    .where set _ import _config.where,
-    .is_aborted set _ import _error.is_aborted,
-    .a set _ any _decimal,
-    .c set _ config.make {
-        _prelude : _ link.make {
+    _any set _ import .value.any,
+    _config.make set _ import .config.make,
+    _link.make set _ import .link.make,
+    _where set _ import .config.where,
+    _is_aborted set _ import .error.is_aborted,
+    _a set _ any .decimal,
+    _c set _ config.make {
+        .prelude : _ link.make {
             a : a,
             /. : /.,
         },
     },
-    .c where _(a /. 0.),
-    .c which is_aborted : .,
+    _c where _(a /. 0.),
+    _c which is_aborted : .,
 ]
 -----
 true
@@ -47,7 +47,7 @@ precision
 -----
 _ do _[
     {
-        _decimal.rounding.precision : 10,
+        .decimal.rounding.precision : 10,
     } with _(
         987654321. /. 13579.
     )
@@ -59,8 +59,8 @@ rounding mode infinity 1
 -----
 _ do _[
     {
-        _decimal.rounding.precision : 10,
-        _decimal.rounding.mode : _infinity,
+        .decimal.rounding.precision : 10,
+        .decimal.rounding.mode : .infinity,
     } with _(
         987654321. /. 13579.
     )
@@ -72,8 +72,8 @@ rounding mode infinity 2
 -----
 _ do _[
     {
-        _decimal.rounding.precision : 10,
-        _decimal.rounding.mode : _infinity,
+        .decimal.rounding.precision : 10,
+        .decimal.rounding.mode : .infinity,
     } with _(
         987654321. /. 0-13579.
     )
@@ -85,8 +85,8 @@ rounding mode zero 1
 -----
 _ do _[
     {
-        _decimal.rounding.precision : 10,
-        _decimal.rounding.mode : _zero,
+        .decimal.rounding.precision : 10,
+        .decimal.rounding.mode : .zero,
     } with _(
         987654321. /. 13579.
     )
@@ -98,8 +98,8 @@ rounding mode zero 2
 -----
 _ do _[
     {
-        _decimal.rounding.precision : 10,
-        _decimal.rounding.mode : _zero,
+        .decimal.rounding.precision : 10,
+        .decimal.rounding.mode : .zero,
     } with _(
         987654321. /. 0-13579.
     )
@@ -111,8 +111,8 @@ rounding mode positive 1
 -----
 _ do _[
     {
-        _decimal.rounding.precision : 10,
-        _decimal.rounding.mode : _positive,
+        .decimal.rounding.precision : 10,
+        .decimal.rounding.mode : .positive,
     } with _(
         987654321. /. 13579.
     )
@@ -124,8 +124,8 @@ rounding mode positive 2
 -----
 _ do _[
     {
-        _decimal.rounding.precision : 10,
-        _decimal.rounding.mode : _positive,
+        .decimal.rounding.precision : 10,
+        .decimal.rounding.mode : .positive,
     } with _(
         987654321. /. 0-13579.
     )
@@ -137,8 +137,8 @@ rounding mode negative 1
 -----
 _ do _[
     {
-        _decimal.rounding.precision : 10,
-        _decimal.rounding.mode : _negative,
+        .decimal.rounding.precision : 10,
+        .decimal.rounding.mode : .negative,
     } with _(
         987654321. /. 13579.
     )
@@ -150,8 +150,8 @@ rounding mode negative 2
 -----
 _ do _[
     {
-        _decimal.rounding.precision : 10,
-        _decimal.rounding.mode : _negative,
+        .decimal.rounding.precision : 10,
+        .decimal.rounding.mode : .negative,
     } with _(
         987654321. /. 0-13579.
     )
@@ -163,8 +163,8 @@ rounding mode half infinity 1
 -----
 _ do _[
     {
-        _decimal.rounding.precision : 10,
-        _decimal.rounding.mode : _half_infinity,
+        .decimal.rounding.precision : 10,
+        .decimal.rounding.mode : .half_infinity,
     } with _(
         281366922235. /. 230.
     )
@@ -176,8 +176,8 @@ rounding mode half infinity 2
 -----
 _ do _[
     {
-        _decimal.rounding.precision : 10,
-        _decimal.rounding.mode : _half_infinity,
+        .decimal.rounding.precision : 10,
+        .decimal.rounding.mode : .half_infinity,
     } with _(
         281366922235. /. 0-230.
     )
@@ -189,8 +189,8 @@ rounding mode half zero 1
 -----
 _ do _[
     {
-        _decimal.rounding.precision : 10,
-        _decimal.rounding.mode : _half_zero,
+        .decimal.rounding.precision : 10,
+        .decimal.rounding.mode : .half_zero,
     } with _(
         281366922235. /. 230.
     )
@@ -202,8 +202,8 @@ rounding mode half zero 2
 -----
 _ do _[
     {
-        _decimal.rounding.precision : 10,
-        _decimal.rounding.mode : _half_zero,
+        .decimal.rounding.precision : 10,
+        .decimal.rounding.mode : .half_zero,
     } with _(
         281366922235. /. 0-230.
     )
@@ -215,8 +215,8 @@ rounding mode half even 1
 -----
 _ do _[
     {
-        _decimal.rounding.precision : 10,
-        _decimal.rounding.mode : _half_even,
+        .decimal.rounding.precision : 10,
+        .decimal.rounding.mode : .half_even,
     } with _(
         281366922235. /. 230.
     )
@@ -228,8 +228,8 @@ rounding mode half even 2
 -----
 _ do _[
     {
-        _decimal.rounding.precision : 10,
-        _decimal.rounding.mode : _half_even,
+        .decimal.rounding.precision : 10,
+        .decimal.rounding.mode : .half_even,
     } with _(
         281366922465. /. 230.
     )

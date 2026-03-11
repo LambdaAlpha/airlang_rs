@@ -1,4 +1,4 @@
 _ do _[
-    _decimal.rounding.mode export _half_even,
-    _decimal.rounding.precision export 28,
+    .decimal.rounding.mode export .half_even,
+    .decimal.rounding.precision export 28,
 ]

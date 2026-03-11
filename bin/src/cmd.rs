@@ -47,7 +47,7 @@ fn generate_load(path: &str) -> String {
     write!(&mut escaped, "{:-}", Text::from(path)).unwrap();
     format!(
         "_ do _[\
-            .load set _ import _build.load,\
+            _load set _ import .build.load,\
             _ load \"{escaped}\"\
         ]"
     )

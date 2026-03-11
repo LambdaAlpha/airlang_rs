@@ -1,5 +1,5 @@
 _ do _[
-    .return set .(.),
-    .continue set .(.),
-    .break set .(.(.)),
+    _return set .(.),
+    _continue set .(.),
+    _break set .(.(.)),
 ]

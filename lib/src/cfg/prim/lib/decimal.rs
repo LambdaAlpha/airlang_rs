@@ -7,7 +7,7 @@ use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxFreeInputAwareFunc;
 use crate::semantics::val::DECIMAL;
 use crate::semantics::val::PrimFuncVal;
@@ -32,15 +32,15 @@ pub struct DecimalLib {
     pub less_greater: PrimFuncVal,
 }
 
-pub const ADD: &str = concatcp!(PREFIX_ID, DECIMAL, ".add");
-pub const SUBTRACT: &str = concatcp!(PREFIX_ID, DECIMAL, ".subtract");
-pub const MULTIPLY: &str = concatcp!(PREFIX_ID, DECIMAL, ".multiply");
-pub const DIVIDE: &str = concatcp!(PREFIX_ID, DECIMAL, ".divide");
-pub const LESS: &str = concatcp!(PREFIX_ID, DECIMAL, ".less");
-pub const LESS_EQUAL: &str = concatcp!(PREFIX_ID, DECIMAL, ".less_equal");
-pub const GREATER: &str = concatcp!(PREFIX_ID, DECIMAL, ".greater");
-pub const GREATER_EQUAL: &str = concatcp!(PREFIX_ID, DECIMAL, ".greater_equal");
-pub const LESS_GREATER: &str = concatcp!(PREFIX_ID, DECIMAL, ".less_greater");
+pub const ADD: &str = concatcp!(PREFIX_CELL, DECIMAL, ".add");
+pub const SUBTRACT: &str = concatcp!(PREFIX_CELL, DECIMAL, ".subtract");
+pub const MULTIPLY: &str = concatcp!(PREFIX_CELL, DECIMAL, ".multiply");
+pub const DIVIDE: &str = concatcp!(PREFIX_CELL, DECIMAL, ".divide");
+pub const LESS: &str = concatcp!(PREFIX_CELL, DECIMAL, ".less");
+pub const LESS_EQUAL: &str = concatcp!(PREFIX_CELL, DECIMAL, ".less_equal");
+pub const GREATER: &str = concatcp!(PREFIX_CELL, DECIMAL, ".greater");
+pub const GREATER_EQUAL: &str = concatcp!(PREFIX_CELL, DECIMAL, ".greater_equal");
+pub const LESS_GREATER: &str = concatcp!(PREFIX_CELL, DECIMAL, ".less_greater");
 
 impl Default for DecimalLib {
     fn default() -> Self {
@@ -72,8 +72,8 @@ impl CfgMod for DecimalLib {
     }
 }
 
-pub const ROUNDING_MODE: &str = concatcp!(PREFIX_ID, DECIMAL, ".rounding.mode");
-pub const ROUNDING_PRECISION: &str = concatcp!(PREFIX_ID, DECIMAL, ".rounding.precision");
+pub const ROUNDING_MODE: &str = concatcp!(PREFIX_CELL, DECIMAL, ".rounding.mode");
+pub const ROUNDING_PRECISION: &str = concatcp!(PREFIX_CELL, DECIMAL, ".rounding.precision");
 
 fn decimal_config(cfg: &mut Cfg, tag: &str) -> Option<DecimalConfig> {
     let Some(mode) = cfg.import(Key::from_str_unchecked(ROUNDING_MODE)) else {
@@ -107,13 +107,13 @@ fn decimal_config(cfg: &mut Cfg, tag: &str) -> Option<DecimalConfig> {
     Some(config)
 }
 
-const MODE_INFINITY: &str = concatcp!(PREFIX_ID, "infinity");
-const MODE_ZERO: &str = concatcp!(PREFIX_ID, "zero");
-const MODE_POSITIVE: &str = concatcp!(PREFIX_ID, "positive");
-const MODE_NEGATIVE: &str = concatcp!(PREFIX_ID, "negative");
-const MODE_HALF_INFINITY: &str = concatcp!(PREFIX_ID, "half_infinity");
-const MODE_HALF_ZERO: &str = concatcp!(PREFIX_ID, "half_zero");
-const MODE_HALF_EVEN: &str = concatcp!(PREFIX_ID, "half_even");
+const MODE_INFINITY: &str = concatcp!(PREFIX_CELL, "infinity");
+const MODE_ZERO: &str = concatcp!(PREFIX_CELL, "zero");
+const MODE_POSITIVE: &str = concatcp!(PREFIX_CELL, "positive");
+const MODE_NEGATIVE: &str = concatcp!(PREFIX_CELL, "negative");
+const MODE_HALF_INFINITY: &str = concatcp!(PREFIX_CELL, "half_infinity");
+const MODE_HALF_ZERO: &str = concatcp!(PREFIX_CELL, "half_zero");
+const MODE_HALF_EVEN: &str = concatcp!(PREFIX_CELL, "half_even");
 
 fn parse_rounding_mode(key: &str) -> Option<RoundingMode> {
     let mode = match key {

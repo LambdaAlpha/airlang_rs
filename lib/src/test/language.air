@@ -1,34 +1,34 @@
 parse generate
 -----
 _ do _[
-    .any set _ import _value.any,
-    .parse set _ import _language.syntax.parse,
-    .generate set _ import _language.syntax.generate,
-    .get set _ import _list.get,
-    .% set _ import _integer.remainder,
-    .atom set [_unit, _bit, _key, _text, _integer, _decimal, _byte],
-    .i set 3 + (_ any _integer) % 4,
-    .a set _ any .atom which get : i,
-    _(_ any _bit) loop _[
-        (_ any _bit) test _[
-            .i set 3 + (_ any _integer) % 4,
-            .b set _ any .atom which get : i,
-            .i set (4 + (_ any _integer) % 4) % 4,
-            .a set (_ any _bit) test _[a : b] : _[_ form _(_ a b)],
+    _any set _ import .value.any,
+    _parse set _ import .language.syntax.parse,
+    _generate set _ import .language.syntax.generate,
+    _get set _ import .list.get,
+    _% set _ import .integer.remainder,
+    _atom set [.unit, .bit, .key, .text, .integer, .decimal, .byte],
+    _i set 3 + (_ any .integer) % 4,
+    _a set _ any _atom which get : i,
+    _(_ any .bit) loop _[
+        (_ any .bit) test _[
+            _i set 3 + (_ any .integer) % 4,
+            _b set _ any _atom which get : i,
+            _i set (4 + (_ any .integer) % 4) % 4,
+            _a set (_ any .bit) test _[a : b] : _[_ form _(_ a b)],
         ] : _[
-            (_ any _bit) test _[
-                .i set 3 + (_ any _integer) % 4,
-                .b set _ any .atom which get : i,
-                .a set [a, b],
+            (_ any .bit) test _[
+                _i set 3 + (_ any .integer) % 4,
+                _b set _ any _atom which get : i,
+                _a set [a, b],
             ] : _[
-                .i set 3 + (_ any _integer) % 4,
-                .b set _ any .atom which get : i,
-                .a set {a : b},
+                _i set 3 + (_ any .integer) % 4,
+                _b set _ any _atom which get : i,
+                _a set {a : b},
             ]
         ]
     ],
-    .repr set _ generate a,
-    .(.a1) = _ parse repr,
+    _repr set _ generate a,
+    .(_a1) = _ parse repr,
     a == a1
 ]
 -----
@@ -37,7 +37,7 @@ true
 parse
 -----
 _ do _[
-    .parse set _ import _language.syntax.parse,
+    _parse set _ import .language.syntax.parse,
     _ parse "[1, 2]"
 ]
 -----
@@ -46,8 +46,8 @@ _ do _[
 parse no eval
 -----
 _ do _[
-    .parse set _ import _language.syntax.parse,
-    .a set 1,
+    _parse set _ import .language.syntax.parse,
+    _a set 1,
     _ parse "a"
 ]
 -----
@@ -56,7 +56,7 @@ _ do _[
 parse text
 -----
 _ do _[
-    .parse set _ import _language.syntax.parse,
+    _parse set _ import .language.syntax.parse,
     _ parse "^'1^'"
 ]
 -----
@@ -65,7 +65,7 @@ _ do _[
 generate text
 -----
 _ do _[
-    .generate set _ import _language.syntax.generate,
+    _generate set _ import .language.syntax.generate,
     _ generate "1"
 ]
 -----

@@ -1,11 +1,11 @@
 get
 -----
 _ do _[
-    .any set _ import _value.any,
-    .get_source set _ import _quote.get_source,
-    .v set _ any .,
-    .c set _ form _(_(v)),
-    v == .c which get_source : .
+    _any set _ import .value.any,
+    _get_source set _ import .quote.get_source,
+    _v set _ any .,
+    _c set _ form _(_(v)),
+    v == _c which get_source : .
 ]
 -----
 true
@@ -13,13 +13,13 @@ true
 set get
 -----
 _ do _[
-    .any set _ import _value.any,
-    .get_source set _ import _quote.get_source,
-    .set_source set _ import _quote.set_source,
-    .c set _ any _quote,
-    .v set _ any .,
-    .c which set_source : v,
-    .v1 set .c which get_source : .,
+    _any set _ import .value.any,
+    _get_source set _ import .quote.get_source,
+    _set_source set _ import .quote.set_source,
+    _c set _ any .quote,
+    _v set _ any .,
+    _c which set_source : v,
+    _v1 set _c which get_source : .,
     v == v1
 ]
 -----
@@ -28,11 +28,11 @@ true
 set return
 -----
 _ do _[
-    .any set _ import _value.any,
-    .set_source set _ import _quote.set_source,
-    .v1 set _ any .,
-    .c set _ form _(_(v1)),
-    .v2 set .c which set_source : _ any .,
+    _any set _ import .value.any,
+    _set_source set _ import .quote.set_source,
+    _v1 set _ any .,
+    _c set _ form _(_(v1)),
+    _v2 set _c which set_source : _ any .,
     v1 == v2
 ]
 -----

@@ -4,7 +4,7 @@ use airlang::bug;
 use airlang::cfg::CfgMod;
 use airlang::cfg::extend_func;
 use airlang::semantics::cfg::Cfg;
-use airlang::semantics::core::PREFIX_ID;
+use airlang::semantics::core::PREFIX_CELL;
 use airlang::semantics::func::CtxFreeInputAwareFunc;
 use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
@@ -20,7 +20,7 @@ pub struct CmdLib {
 
 const COMMAND: &str = "command";
 
-pub const CALL: &str = concatcp!(PREFIX_ID, COMMAND, ".call");
+pub const CALL: &str = concatcp!(PREFIX_CELL, COMMAND, ".call");
 
 impl Default for CmdLib {
     fn default() -> Self {

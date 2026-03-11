@@ -6,7 +6,7 @@ use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxConstInputFreeFunc;
 use crate::semantics::func::CtxMutInputAwareFunc;
 use crate::semantics::val::CELL;
@@ -19,8 +19,8 @@ pub struct CellLib {
     pub set_value: PrimFuncVal,
 }
 
-pub const GET_VALUE: &str = concatcp!(PREFIX_ID, CELL, ".get_value");
-pub const SET_VALUE: &str = concatcp!(PREFIX_ID, CELL, ".set_value");
+pub const GET_VALUE: &str = concatcp!(PREFIX_CELL, CELL, ".get_value");
+pub const SET_VALUE: &str = concatcp!(PREFIX_CELL, CELL, ".set_value");
 
 impl Default for CellLib {
     fn default() -> Self {

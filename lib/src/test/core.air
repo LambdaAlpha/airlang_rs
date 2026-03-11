@@ -6,44 +6,44 @@ true
 =====
 set and get
 -----
-_ do _[.a set 1, a]
+_ do _[_a set 1, a]
 -----
 1
 =====
-key id
------
-_a
------
-_a
-=====
-key shift
+key cell
 -----
 .a
+-----
+.a
+=====
+key quote
+-----
+_a
 -----
 a
 =====
-key shift special 1
+key quote special 1
 -----
-..a
+__a
 -----
-.a
+_a
 =====
-key shift special 2
+key quote special 2
 -----
-...a
+___a
 -----
-..a
+__a
 =====
-key shift special 3
+key quote special 3
 -----
-.:a
+_:a
 -----
 :a
 =====
 ctx ref
 -----
 _ do _[
-    .a set 1,
+    _a set 1,
     :a
 ]
 -----
@@ -52,7 +52,7 @@ _ do _[
 ref will not remove
 -----
 _ do _[
-    .a set 1,
+    _a set 1,
     :a,
     :a
 ]
@@ -62,8 +62,8 @@ _ do _[
 ref special
 -----
 _ do _[
-    ._a set 1,
-    :_a
+    _.a set 1,
+    :.a
 ]
 -----
 1
@@ -71,8 +71,8 @@ _ do _[
 cell ref
 -----
 _ do _[
-    .c set .(1),
-    .c which get : _value
+    _c set .(1),
+    _c which get : .value
 ]
 -----
 1
@@ -80,8 +80,8 @@ _ do _[
 pair ref
 -----
 _ do _[
-    .p set 1 : 2,
-    .p which eval : _ form _[_ get _left, _ get _right]
+    _p set 1 : 2,
+    _p which eval : _ form _[_ get .left, _ get .right]
 ]
 -----
 [1, 2]
@@ -89,8 +89,8 @@ _ do _[
 list ref
 -----
 _ do _[
-    .l set [0, 3, 6],
-    .l which eval : _ form _[_ get _first, _ get _last]
+    _l set [0, 3, 6],
+    _l which eval : _ form _[_ get .first, _ get .last]
 ]
 -----
 [0, 6]
@@ -98,8 +98,8 @@ _ do _[
 map ref
 -----
 _ do _[
-    .m set {a : 1, b : 2},
-    .m which eval : [.a, .b]
+    _m set {a : 1, b : 2},
+    _m which eval : [_a, _b]
 ]
 -----
 [1, 2]
@@ -107,8 +107,8 @@ _ do _[
 quote ref
 -----
 _ do _[
-    .c set _(_(1)),
-    .c which get : _source
+    _c set _(_(1)),
+    _c which get : .source
 ]
 -----
 1
@@ -116,8 +116,8 @@ _ do _[
 call ref
 -----
 _ do _[
-    .c set _(_ func input),
-    .c which eval : _ form _[_ get _function, _ get _input]
+    _c set _(_ func input),
+    _c which eval : _ form _[_ get .function, _ get .input]
 ]
 -----
 [func, input]
@@ -167,8 +167,8 @@ true
 cell ctx value
 -----
 _ do _[
-    .c set .(1),
-    .c which get : _value
+    _c set .(1),
+    _c which get : .value
 ]
 -----
 1
@@ -176,8 +176,8 @@ _ do _[
 pair ctx left
 -----
 _ do _[
-    .p set 1 : 2,
-    .p which get : _left
+    _p set 1 : 2,
+    _p which get : .left
 ]
 -----
 1
@@ -185,8 +185,8 @@ _ do _[
 pair ctx right
 -----
 _ do _[
-    .p set 1 : 2,
-    .p which get : _right
+    _p set 1 : 2,
+    _p which get : .right
 ]
 -----
 2
@@ -194,8 +194,8 @@ _ do _[
 list ctx index
 -----
 _ do _[
-    .l set [0, 2, 4],
-    .l which get : 1
+    _l set [0, 2, 4],
+    _l which get : 1
 ]
 -----
 2
@@ -203,8 +203,8 @@ _ do _[
 list ctx first
 -----
 _ do _[
-    .l set [0, 2, 4],
-    .l which get : _first
+    _l set [0, 2, 4],
+    _l which get : .first
 ]
 -----
 0
@@ -212,8 +212,8 @@ _ do _[
 list ctx last
 -----
 _ do _[
-    .l set [0, 2, 4],
-    .l which get : _last
+    _l set [0, 2, 4],
+    _l which get : .last
 ]
 -----
 4
@@ -221,8 +221,8 @@ _ do _[
 map ctx key
 -----
 _ do _[
-    .m set {a : 1, b : 2},
-    .m which get : .a
+    _m set {a : 1, b : 2},
+    _m which get : _a
 ]
 -----
 1
@@ -230,8 +230,8 @@ _ do _[
 quote ctx source
 -----
 _ do _[
-    .c set _(_(1)),
-    .c which get : _source
+    _c set _(_(1)),
+    _c which get : .source
 ]
 -----
 1
@@ -239,8 +239,8 @@ _ do _[
 call ctx func
 -----
 _ do _[
-    .c set _(_ func input),
-    .c which get : _function
+    _c set _(_ func input),
+    _c which get : .function
 ]
 -----
 func
@@ -248,8 +248,8 @@ func
 call ctx input
 -----
 _ do _[
-    .c set _(_ func input),
-    .c which get : _input
+    _c set _(_ func input),
+    _c which get : .input
 ]
 -----
 input

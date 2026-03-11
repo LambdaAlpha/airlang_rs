@@ -170,8 +170,8 @@ Air's evaluation rules are very concise, consisting of only five rules.
 
 First, the evaluation rules for keys are as follows:
 
-1. `_a` ➔ `_a`
-2. `.a` ➔ `a`
+1. `_a` ➔ `a`
+2. `.a` ➔ `.a`
 3. `:a` or `a` ➔ `v`, where `v` is the value bound to key `a` in the context
 
 Second, the evaluation rule for quotes is `_(v)` ➔ `v`.
@@ -197,9 +197,9 @@ The context is the local information environment during execution. In core seman
 
 ```air
 _ do _[
-    .sum set 0,
-    100 iterate .i : _[
-        .sum set sum + i
+    _sum set 0,
+    100 iterate _i : _[
+        _sum set sum + i
     ],
     sum
 ]
@@ -211,9 +211,9 @@ Configuration is the global information environment during execution. Through me
 
 ```air
 _ do _[
-    .push set _ import _list.push,
-    _list.add export push,
-    _list.append export push,
+    _push set _ import .list.push,
+    .list.add export push,
+    .list.append export push,
 ]
 ```
 
@@ -223,7 +223,7 @@ Resources are scarce, consumable entities required during execution, with the mo
 
 ```air
 _ do _[
-    .set_steps set _ import _resource.set_steps,
+    _set_steps set _ import .resource.set_steps,
     _ set_steps 100,
     true loop []
 ]

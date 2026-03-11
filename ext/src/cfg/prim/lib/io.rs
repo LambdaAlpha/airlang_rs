@@ -7,7 +7,7 @@ use airlang::bug;
 use airlang::cfg::CfgMod;
 use airlang::cfg::extend_func;
 use airlang::semantics::cfg::Cfg;
-use airlang::semantics::core::PREFIX_ID;
+use airlang::semantics::core::PREFIX_CELL;
 use airlang::semantics::func::CtxFreeInputAwareFunc;
 use airlang::semantics::func::CtxFreeInputFreeFunc;
 use airlang::semantics::func::CtxMutInputFreeFunc;
@@ -29,13 +29,13 @@ pub struct IoLib {
 
 const IO: &str = "io";
 
-pub const READ_LINE: &str = concatcp!(PREFIX_ID, IO, ".read_line");
-pub const PRINT: &str = concatcp!(PREFIX_ID, IO, ".print");
-pub const PRINT_LINE: &str = concatcp!(PREFIX_ID, IO, ".print_line");
-pub const FLUSH: &str = concatcp!(PREFIX_ID, IO, ".flush");
-pub const ERROR_PRINT: &str = concatcp!(PREFIX_ID, IO, ".error_print");
-pub const ERROR_PRINT_LINE: &str = concatcp!(PREFIX_ID, IO, ".error_print_line");
-pub const ERROR_FLUSH: &str = concatcp!(PREFIX_ID, IO, ".error_flush");
+pub const READ_LINE: &str = concatcp!(PREFIX_CELL, IO, ".read_line");
+pub const PRINT: &str = concatcp!(PREFIX_CELL, IO, ".print");
+pub const PRINT_LINE: &str = concatcp!(PREFIX_CELL, IO, ".print_line");
+pub const FLUSH: &str = concatcp!(PREFIX_CELL, IO, ".flush");
+pub const ERROR_PRINT: &str = concatcp!(PREFIX_CELL, IO, ".error_print");
+pub const ERROR_PRINT_LINE: &str = concatcp!(PREFIX_CELL, IO, ".error_print_line");
+pub const ERROR_FLUSH: &str = concatcp!(PREFIX_CELL, IO, ".error_flush");
 
 impl Default for IoLib {
     fn default() -> Self {

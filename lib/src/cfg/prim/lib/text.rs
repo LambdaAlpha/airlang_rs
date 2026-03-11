@@ -4,7 +4,7 @@ use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxConstInputFreeFunc;
 use crate::semantics::func::CtxFreeInputAwareFunc;
 use crate::semantics::func::CtxMutInputAwareFunc;
@@ -25,11 +25,11 @@ pub struct TextLib {
     pub join: PrimFuncVal,
 }
 
-pub const FROM_UTF8: &str = concatcp!(PREFIX_ID, TEXT, ".from_utf8");
-pub const INTO_UTF8: &str = concatcp!(PREFIX_ID, TEXT, ".into_utf8");
-pub const GET_LENGTH: &str = concatcp!(PREFIX_ID, TEXT, ".get_length");
-pub const PUSH: &str = concatcp!(PREFIX_ID, TEXT, ".push");
-pub const JOIN: &str = concatcp!(PREFIX_ID, TEXT, ".join");
+pub const FROM_UTF8: &str = concatcp!(PREFIX_CELL, TEXT, ".from_utf8");
+pub const INTO_UTF8: &str = concatcp!(PREFIX_CELL, TEXT, ".into_utf8");
+pub const GET_LENGTH: &str = concatcp!(PREFIX_CELL, TEXT, ".get_length");
+pub const PUSH: &str = concatcp!(PREFIX_CELL, TEXT, ".push");
+pub const JOIN: &str = concatcp!(PREFIX_CELL, TEXT, ".join");
 
 impl Default for TextLib {
     fn default() -> Self {

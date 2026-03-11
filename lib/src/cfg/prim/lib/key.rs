@@ -6,7 +6,7 @@ use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxConstInputFreeFunc;
 use crate::semantics::func::CtxFreeInputAwareFunc;
 use crate::semantics::val::KEY;
@@ -25,10 +25,10 @@ pub struct KeyLib {
     pub join: PrimFuncVal,
 }
 
-pub const FROM_TEXT: &str = concatcp!(PREFIX_ID, KEY, ".from_text");
-pub const INTO_TEXT: &str = concatcp!(PREFIX_ID, KEY, ".into_text");
-pub const GET_LENGTH: &str = concatcp!(PREFIX_ID, KEY, ".get_length");
-pub const JOIN: &str = concatcp!(PREFIX_ID, KEY, ".join");
+pub const FROM_TEXT: &str = concatcp!(PREFIX_CELL, KEY, ".from_text");
+pub const INTO_TEXT: &str = concatcp!(PREFIX_CELL, KEY, ".into_text");
+pub const GET_LENGTH: &str = concatcp!(PREFIX_CELL, KEY, ".get_length");
+pub const JOIN: &str = concatcp!(PREFIX_CELL, KEY, ".join");
 
 impl Default for KeyLib {
     fn default() -> Self {

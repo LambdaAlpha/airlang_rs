@@ -6,7 +6,7 @@ use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxConstInputFreeFunc;
 use crate::semantics::func::CtxFreeInputAwareFunc;
 use crate::semantics::func::CtxMutInputAwareFunc;
@@ -25,11 +25,11 @@ pub struct CallLib {
     pub set_input: PrimFuncVal,
 }
 
-pub const MAKE: &str = concatcp!(PREFIX_ID, CALL, ".make");
-pub const GET_FUNCTION: &str = concatcp!(PREFIX_ID, CALL, ".get_function");
-pub const SET_FUNCTION: &str = concatcp!(PREFIX_ID, CALL, ".set_function");
-pub const GET_INPUT: &str = concatcp!(PREFIX_ID, CALL, ".get_input");
-pub const SET_INPUT: &str = concatcp!(PREFIX_ID, CALL, ".set_input");
+pub const MAKE: &str = concatcp!(PREFIX_CELL, CALL, ".make");
+pub const GET_FUNCTION: &str = concatcp!(PREFIX_CELL, CALL, ".get_function");
+pub const SET_FUNCTION: &str = concatcp!(PREFIX_CELL, CALL, ".set_function");
+pub const GET_INPUT: &str = concatcp!(PREFIX_CELL, CALL, ".get_input");
+pub const SET_INPUT: &str = concatcp!(PREFIX_CELL, CALL, ".set_input");
 
 impl Default for CallLib {
     fn default() -> Self {

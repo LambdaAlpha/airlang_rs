@@ -6,7 +6,7 @@ use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxConstInputAwareFunc;
 use crate::semantics::func::CtxConstInputFreeFunc;
 use crate::semantics::func::CtxFreeInputAwareFunc;
@@ -48,26 +48,26 @@ pub struct MapLib {
     pub clear: PrimFuncVal,
 }
 
-pub const MAKE: &str = concatcp!(PREFIX_ID, MAP, ".make");
-pub const MAKE_SET: &str = concatcp!(PREFIX_ID, MAP, ".make_set");
-pub const GET_LENGTH: &str = concatcp!(PREFIX_ID, MAP, ".get_length");
-pub const GET_ITEMS: &str = concatcp!(PREFIX_ID, MAP, ".get_items");
-pub const INTO_ITEMS: &str = concatcp!(PREFIX_ID, MAP, ".into_items");
-pub const GET_KEYS: &str = concatcp!(PREFIX_ID, MAP, ".get_keys");
-pub const INTO_KEYS: &str = concatcp!(PREFIX_ID, MAP, ".into_keys");
-pub const GET_VALUES: &str = concatcp!(PREFIX_ID, MAP, ".get_values");
-pub const INTO_VALUES: &str = concatcp!(PREFIX_ID, MAP, ".into_values");
-pub const CONTAIN: &str = concatcp!(PREFIX_ID, MAP, ".contain");
-pub const CONTAIN_ALL: &str = concatcp!(PREFIX_ID, MAP, ".contain_all");
-pub const CONTAIN_ANY: &str = concatcp!(PREFIX_ID, MAP, ".contain_any");
-pub const SET: &str = concatcp!(PREFIX_ID, MAP, ".set");
-pub const SET_MANY: &str = concatcp!(PREFIX_ID, MAP, ".set_many");
-pub const GET: &str = concatcp!(PREFIX_ID, MAP, ".get");
-pub const GET_MANY: &str = concatcp!(PREFIX_ID, MAP, ".get_many");
-pub const REMOVE: &str = concatcp!(PREFIX_ID, MAP, ".remove");
-pub const REMOVE_MANY: &str = concatcp!(PREFIX_ID, MAP, ".remove_many");
-pub const MOVE: &str = concatcp!(PREFIX_ID, MAP, ".move");
-pub const CLEAR: &str = concatcp!(PREFIX_ID, MAP, ".clear");
+pub const MAKE: &str = concatcp!(PREFIX_CELL, MAP, ".make");
+pub const MAKE_SET: &str = concatcp!(PREFIX_CELL, MAP, ".make_set");
+pub const GET_LENGTH: &str = concatcp!(PREFIX_CELL, MAP, ".get_length");
+pub const GET_ITEMS: &str = concatcp!(PREFIX_CELL, MAP, ".get_items");
+pub const INTO_ITEMS: &str = concatcp!(PREFIX_CELL, MAP, ".into_items");
+pub const GET_KEYS: &str = concatcp!(PREFIX_CELL, MAP, ".get_keys");
+pub const INTO_KEYS: &str = concatcp!(PREFIX_CELL, MAP, ".into_keys");
+pub const GET_VALUES: &str = concatcp!(PREFIX_CELL, MAP, ".get_values");
+pub const INTO_VALUES: &str = concatcp!(PREFIX_CELL, MAP, ".into_values");
+pub const CONTAIN: &str = concatcp!(PREFIX_CELL, MAP, ".contain");
+pub const CONTAIN_ALL: &str = concatcp!(PREFIX_CELL, MAP, ".contain_all");
+pub const CONTAIN_ANY: &str = concatcp!(PREFIX_CELL, MAP, ".contain_any");
+pub const SET: &str = concatcp!(PREFIX_CELL, MAP, ".set");
+pub const SET_MANY: &str = concatcp!(PREFIX_CELL, MAP, ".set_many");
+pub const GET: &str = concatcp!(PREFIX_CELL, MAP, ".get");
+pub const GET_MANY: &str = concatcp!(PREFIX_CELL, MAP, ".get_many");
+pub const REMOVE: &str = concatcp!(PREFIX_CELL, MAP, ".remove");
+pub const REMOVE_MANY: &str = concatcp!(PREFIX_CELL, MAP, ".remove_many");
+pub const MOVE: &str = concatcp!(PREFIX_CELL, MAP, ".move");
+pub const CLEAR: &str = concatcp!(PREFIX_CELL, MAP, ".clear");
 
 impl Default for MapLib {
     fn default() -> Self {

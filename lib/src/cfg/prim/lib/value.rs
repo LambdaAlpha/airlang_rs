@@ -11,7 +11,7 @@ use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxConstInputFreeFunc;
 use crate::semantics::func::CtxFreeInputAwareFunc;
 use crate::semantics::val::BIT;
@@ -58,9 +58,9 @@ pub struct ValueLib {
 
 const VALUE: &str = "value";
 
-pub const ANY: &str = concatcp!(PREFIX_ID, VALUE, ".any");
-pub const GET_TYPE: &str = concatcp!(PREFIX_ID, VALUE, ".get_type");
-pub const EQUAL: &str = concatcp!(PREFIX_ID, VALUE, ".equal");
+pub const ANY: &str = concatcp!(PREFIX_CELL, VALUE, ".any");
+pub const GET_TYPE: &str = concatcp!(PREFIX_CELL, VALUE, ".get_type");
+pub const EQUAL: &str = concatcp!(PREFIX_CELL, VALUE, ".equal");
 
 impl Default for ValueLib {
     fn default() -> Self {
@@ -80,22 +80,22 @@ impl CfgMod for ValueLib {
     }
 }
 
-const TYPE_UNIT: &str = concatcp!(PREFIX_ID, UNIT);
-const TYPE_BIT: &str = concatcp!(PREFIX_ID, BIT);
-const TYPE_KEY: &str = concatcp!(PREFIX_ID, KEY);
-const TYPE_TEXT: &str = concatcp!(PREFIX_ID, TEXT);
-const TYPE_INT: &str = concatcp!(PREFIX_ID, INT);
-const TYPE_DECIMAL: &str = concatcp!(PREFIX_ID, DECIMAL);
-const TYPE_BYTE: &str = concatcp!(PREFIX_ID, BYTE);
-const TYPE_CELL: &str = concatcp!(PREFIX_ID, CELL);
-const TYPE_PAIR: &str = concatcp!(PREFIX_ID, PAIR);
-const TYPE_LIST: &str = concatcp!(PREFIX_ID, LIST);
-const TYPE_MAP: &str = concatcp!(PREFIX_ID, MAP);
-const TYPE_QUOTE: &str = concatcp!(PREFIX_ID, QUOTE);
-const TYPE_CALL: &str = concatcp!(PREFIX_ID, CALL);
-const TYPE_LINK: &str = concatcp!(PREFIX_ID, LINK);
-const TYPE_CFG: &str = concatcp!(PREFIX_ID, CFG);
-const TYPE_FUNC: &str = concatcp!(PREFIX_ID, FUNC);
+const TYPE_UNIT: &str = concatcp!(PREFIX_CELL, UNIT);
+const TYPE_BIT: &str = concatcp!(PREFIX_CELL, BIT);
+const TYPE_KEY: &str = concatcp!(PREFIX_CELL, KEY);
+const TYPE_TEXT: &str = concatcp!(PREFIX_CELL, TEXT);
+const TYPE_INT: &str = concatcp!(PREFIX_CELL, INT);
+const TYPE_DECIMAL: &str = concatcp!(PREFIX_CELL, DECIMAL);
+const TYPE_BYTE: &str = concatcp!(PREFIX_CELL, BYTE);
+const TYPE_CELL: &str = concatcp!(PREFIX_CELL, CELL);
+const TYPE_PAIR: &str = concatcp!(PREFIX_CELL, PAIR);
+const TYPE_LIST: &str = concatcp!(PREFIX_CELL, LIST);
+const TYPE_MAP: &str = concatcp!(PREFIX_CELL, MAP);
+const TYPE_QUOTE: &str = concatcp!(PREFIX_CELL, QUOTE);
+const TYPE_CALL: &str = concatcp!(PREFIX_CELL, CALL);
+const TYPE_LINK: &str = concatcp!(PREFIX_CELL, LINK);
+const TYPE_CFG: &str = concatcp!(PREFIX_CELL, CFG);
+const TYPE_FUNC: &str = concatcp!(PREFIX_CELL, FUNC);
 
 pub fn any(cfg: &mut Cfg, input: Val) -> Val {
     const DEPTH: usize = 0;

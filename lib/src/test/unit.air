@@ -1,7 +1,7 @@
 default
 -----
 _ do _[
-    .default set _ import _unit.default,
+    _default set _ import .unit.default,
     _ default true
 ]
 -----

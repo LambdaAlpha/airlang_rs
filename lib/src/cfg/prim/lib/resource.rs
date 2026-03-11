@@ -7,7 +7,7 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxFreeInputAwareFunc;
 use crate::semantics::func::CtxFreeInputFreeFunc;
 use crate::semantics::func::CtxMutInputAwareFunc;
@@ -26,9 +26,9 @@ pub struct ResourceLib {
 
 const RESOURCE: &str = "resource";
 
-pub const GET_STEPS: &str = concatcp!(PREFIX_ID, RESOURCE, ".get_steps");
-pub const SET_STEPS: &str = concatcp!(PREFIX_ID, RESOURCE, ".set_steps");
-pub const MEASURE_STEPS: &str = concatcp!(PREFIX_ID, RESOURCE, ".measure_steps");
+pub const GET_STEPS: &str = concatcp!(PREFIX_CELL, RESOURCE, ".get_steps");
+pub const SET_STEPS: &str = concatcp!(PREFIX_CELL, RESOURCE, ".set_steps");
+pub const MEASURE_STEPS: &str = concatcp!(PREFIX_CELL, RESOURCE, ".measure_steps");
 
 impl Default for ResourceLib {
     fn default() -> Self {

@@ -7,7 +7,7 @@ use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxConstInputAwareFunc;
 use crate::semantics::func::CtxConstInputFreeFunc;
 use crate::semantics::func::CtxMutInputAwareFunc;
@@ -38,20 +38,20 @@ pub struct ListLib {
     pub clear: PrimFuncVal,
 }
 
-pub const GET_LENGTH: &str = concatcp!(PREFIX_ID, LIST, ".get_length");
-pub const SET: &str = concatcp!(PREFIX_ID, LIST, ".set");
-pub const SET_MANY: &str = concatcp!(PREFIX_ID, LIST, ".set_many");
-pub const GET: &str = concatcp!(PREFIX_ID, LIST, ".get");
-pub const GET_MANY: &str = concatcp!(PREFIX_ID, LIST, ".get_many");
-pub const INSERT: &str = concatcp!(PREFIX_ID, LIST, ".insert");
-pub const INSERT_MANY: &str = concatcp!(PREFIX_ID, LIST, ".insert_many");
-pub const REMOVE: &str = concatcp!(PREFIX_ID, LIST, ".remove");
-pub const REMOVE_MANY: &str = concatcp!(PREFIX_ID, LIST, ".remove_many");
-pub const PUSH: &str = concatcp!(PREFIX_ID, LIST, ".push");
-pub const PUSH_MANY: &str = concatcp!(PREFIX_ID, LIST, ".push_many");
-pub const POP: &str = concatcp!(PREFIX_ID, LIST, ".pop");
-pub const POP_MANY: &str = concatcp!(PREFIX_ID, LIST, ".pop_many");
-pub const CLEAR: &str = concatcp!(PREFIX_ID, LIST, ".clear");
+pub const GET_LENGTH: &str = concatcp!(PREFIX_CELL, LIST, ".get_length");
+pub const SET: &str = concatcp!(PREFIX_CELL, LIST, ".set");
+pub const SET_MANY: &str = concatcp!(PREFIX_CELL, LIST, ".set_many");
+pub const GET: &str = concatcp!(PREFIX_CELL, LIST, ".get");
+pub const GET_MANY: &str = concatcp!(PREFIX_CELL, LIST, ".get_many");
+pub const INSERT: &str = concatcp!(PREFIX_CELL, LIST, ".insert");
+pub const INSERT_MANY: &str = concatcp!(PREFIX_CELL, LIST, ".insert_many");
+pub const REMOVE: &str = concatcp!(PREFIX_CELL, LIST, ".remove");
+pub const REMOVE_MANY: &str = concatcp!(PREFIX_CELL, LIST, ".remove_many");
+pub const PUSH: &str = concatcp!(PREFIX_CELL, LIST, ".push");
+pub const PUSH_MANY: &str = concatcp!(PREFIX_CELL, LIST, ".push_many");
+pub const POP: &str = concatcp!(PREFIX_CELL, LIST, ".pop");
+pub const POP_MANY: &str = concatcp!(PREFIX_CELL, LIST, ".pop_many");
+pub const CLEAR: &str = concatcp!(PREFIX_CELL, LIST, ".clear");
 
 impl Default for ListLib {
     fn default() -> Self {

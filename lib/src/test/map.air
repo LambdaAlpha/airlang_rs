@@ -1,17 +1,17 @@
 length set
 -----
 _ do _[
-    .any set _ import _value.any,
-    .get_length set _ import _map.get_length,
-    .map.set set _ import _map.set,
-    .contain set _ import _map.contain,
-    .a set _ any _map,
-    .l1 set .a which get_length : .,
-    .k set _ any _key,
-    .v set _ any .,
-    .i set (.a which contain : k) test [0] : [1],
-    .a which map.set : k : v,
-    .l2 set .a which get_length : .,
+    _any set _ import .value.any,
+    _get_length set _ import .map.get_length,
+    _map.set set _ import .map.set,
+    _contain set _ import .map.contain,
+    _a set _ any .map,
+    _l1 set _a which get_length : .,
+    _k set _ any .key,
+    _v set _ any .,
+    _i set (_a which contain : k) test [0] : [1],
+    _a which map.set : k : v,
+    _l2 set _a which get_length : .,
     l2 == l1 + i
 ]
 -----
@@ -20,16 +20,16 @@ true
 get_length set_many
 -----
 _ do _[
-    .any set _ import _value.any,
-    .get_length set _ import _map.get_length,
-    .set_many set _ import _map.set_many,
-    .a set _ any _map,
-    .la set .a which get_length : .,
-    .b set _ any _map,
-    .lb set .b which get_length : .,
-    .c set .a which set_many : b,
-    .lc set .c which get_length : .,
-    .lab set .a which get_length : .,
+    _any set _ import .value.any,
+    _get_length set _ import .map.get_length,
+    _set_many set _ import .map.set_many,
+    _a set _ any .map,
+    _la set _a which get_length : .,
+    _b set _ any .map,
+    _lb set _b which get_length : .,
+    _c set _a which set_many : b,
+    _lc set _c which get_length : .,
+    _lab set _a which get_length : .,
     lab == la + lb - lc
 ]
 -----
@@ -38,11 +38,11 @@ true
 get_items make
 -----
 _ do _[
-    .any set _ import _value.any,
-    .make set _ import _map.make,
-    .get_items set _ import _map.get_items,
-    .a1 set _ any _map,
-    .a2 set _ make .a1 which get_items : .,
+    _any set _ import .value.any,
+    _make set _ import .map.make,
+    _get_items set _ import .map.get_items,
+    _a1 set _ any .map,
+    _a2 set _ make _a1 which get_items : .,
     a1 == a2
 ]
 -----
@@ -51,12 +51,12 @@ true
 into_items make
 -----
 _ do _[
-    .any set _ import _value.any,
-    .make set _ import _map.make,
-    .into_items set _ import _map.into_items,
-    .a1 set _ any _map,
-    .a2 set a1,
-    .a3 set _ make .a1 which into_items : .,
+    _any set _ import .value.any,
+    _make set _ import .map.make,
+    _into_items set _ import .map.into_items,
+    _a1 set _ any .map,
+    _a2 set a1,
+    _a3 set _ make _a1 which into_items : .,
     (a1 == {}) and (a2 == a3)
 ]
 -----
@@ -65,13 +65,13 @@ true
 get_keys set
 -----
 _ do _[
-    .any set _ import _value.any,
-    .make_set set _ import _map.make_set,
-    .get_keys set _ import _map.get_keys,
-    .set_many set _ import _map.set_many,
-    .a1 set _ any _map,
-    .a2 set _ make_set .a1 which get_keys : .,
-    .a1 which set_many : a2,
+    _any set _ import .value.any,
+    _make_set set _ import .map.make_set,
+    _get_keys set _ import .map.get_keys,
+    _set_many set _ import .map.set_many,
+    _a1 set _ any .map,
+    _a2 set _ make_set _a1 which get_keys : .,
+    _a1 which set_many : a2,
     a1 == a2
 ]
 -----
@@ -80,13 +80,13 @@ true
 into_keys set
 -----
 _ do _[
-    .any set _ import _value.any,
-    .make_set set _ import _map.make_set,
-    .get_keys set _ import _map.get_keys,
-    .into_keys set _ import _map.into_keys,
-    .a1 set _ any _map,
-    .a2 set _ make_set .a1 which get_keys : .,
-    .a3 set _ make_set .a1 which into_keys : .,
+    _any set _ import .value.any,
+    _make_set set _ import .map.make_set,
+    _get_keys set _ import .map.get_keys,
+    _into_keys set _ import .map.into_keys,
+    _a1 set _ any .map,
+    _a2 set _ make_set _a1 which get_keys : .,
+    _a3 set _ make_set _a1 which into_keys : .,
     (a1 == {}) and (a2 == a3)
 ]
 -----
@@ -95,14 +95,14 @@ true
 set contain
 -----
 _ do _[
-    .any set _ import _value.any,
-    .map.set set _ import _map.set,
-    .contain set _ import _map.contain,
-    .a set _ any _map,
-    .k set _ any _key,
-    .v set _ any .,
-    .a which map.set : k : v,
-    .a which contain : k
+    _any set _ import .value.any,
+    _map.set set _ import .map.set,
+    _contain set _ import .map.contain,
+    _a set _ any .map,
+    _k set _ any .key,
+    _v set _ any .,
+    _a which map.set : k : v,
+    _a which contain : k
 ]
 -----
 true
@@ -110,14 +110,14 @@ true
 set get
 -----
 _ do _[
-    .any set _ import _value.any,
-    .map.set set _ import _map.set,
-    .map.get set _ import _map.get,
-    .a set _ any _map,
-    .k set _ any _key,
-    .v set _ any .,
-    .a which map.set : k : v,
-    .(.v1) = .a which map.get : k,
+    _any set _ import .value.any,
+    _map.set set _ import .map.set,
+    _map.get set _ import .map.get,
+    _a set _ any .map,
+    _k set _ any .key,
+    _v set _ any .,
+    _a which map.set : k : v,
+    .(_v1) = _a which map.get : k,
     v1 == v
 ]
 -----
@@ -126,14 +126,14 @@ true
 set_many contain_all
 -----
 _ do _[
-    .any set _ import _value.any,
-    .set_many set _ import _map.set_many,
-    .contain_all set _ import _map.contain_all,
-    .get_keys set _ import _map.get_keys,
-    .a set _ any _map,
-    .b set _ any _map,
-    .a which set_many : b,
-    .a which contain_all : .b which get_keys : .
+    _any set _ import .value.any,
+    _set_many set _ import .map.set_many,
+    _contain_all set _ import .map.contain_all,
+    _get_keys set _ import .map.get_keys,
+    _a set _ any .map,
+    _b set _ any .map,
+    _a which set_many : b,
+    _a which contain_all : _b which get_keys : .
 ]
 -----
 true
@@ -141,17 +141,17 @@ true
 remove_many contain_any
 -----
 _ do _[
-    .any set _ import _value.any,
-    .remove_many set _ import _map.remove_many,
-    .contain_any set _ import _map.contain_any,
-    .push set _ import _list.push,
-    .a set _ any _map,
-    .ks set [],
-    10 iterate .i : _[
-        .ks which push : _ any _key,
+    _any set _ import .value.any,
+    _remove_many set _ import .map.remove_many,
+    _contain_any set _ import .map.contain_any,
+    _push set _ import .list.push,
+    _a set _ any .map,
+    _ks set [],
+    10 iterate _i : _[
+        _ks which push : _ any .key,
     ],
-    .a which remove_many : ks,
-    _ not .a which contain_any : ks
+    _a which remove_many : ks,
+    _ not _a which contain_any : ks
 ]
 -----
 true
@@ -159,14 +159,14 @@ true
 set_many get_many
 -----
 _ do _[
-    .any set _ import _value.any,
-    .set_many set _ import _map.set_many,
-    .get_many set _ import _map.get_many,
-    .get_keys set _ import _map.get_keys,
-    .a set _ any _map,
-    .b set _ any _map,
-    .a which set_many : b,
-    .b1 set .a which get_many : .b which get_keys : .,
+    _any set _ import .value.any,
+    _set_many set _ import .map.set_many,
+    _get_many set _ import .map.get_many,
+    _get_keys set _ import .map.get_keys,
+    _a set _ any .map,
+    _b set _ any .map,
+    _a which set_many : b,
+    _b1 set _a which get_many : _b which get_keys : .,
     b == b1
 ]
 -----
@@ -175,15 +175,15 @@ true
 get remove
 -----
 _ do _[
-    .any set _ import _value.any,
-    .get set _ import _map.get,
-    .remove set _ import _map.remove,
-    .contain set _ import _map.contain,
-    .a set _ any _map,
-    .k set _ any _key,
-    .v1 set .a which get : k,
-    .v2 set .a which remove : k,
-    .c set .a which contain : k,
+    _any set _ import .value.any,
+    _get set _ import .map.get,
+    _remove set _ import .map.remove,
+    _contain set _ import .map.contain,
+    _a set _ any .map,
+    _k set _ any .key,
+    _v1 set _a which get : k,
+    _v2 set _a which remove : k,
+    _c set _a which contain : k,
     (_ not c) and (v1 == v2)
 ]
 -----
@@ -192,19 +192,19 @@ true
 get_many remove_many
 -----
 _ do _[
-    .any set _ import _value.any,
-    .get_many set _ import _map.get_many,
-    .remove_many set _ import _map.remove_many,
-    .contain_any set _ import _map.contain_any,
-    .push set _ import _list.push,
-    .a set _ any _map,
-    .ks set [],
-    10 iterate .i : _[
-        .ks which push : _ any _key,
+    _any set _ import .value.any,
+    _get_many set _ import .map.get_many,
+    _remove_many set _ import .map.remove_many,
+    _contain_any set _ import .map.contain_any,
+    _push set _ import .list.push,
+    _a set _ any .map,
+    _ks set [],
+    10 iterate _i : _[
+        _ks which push : _ any .key,
     ],
-    .vs1 set .a which get_many : ks,
-    .vs2 set .a which remove_many : ks,
-    .c set .a which contain_any : ks,
+    _vs1 set _a which get_many : ks,
+    _vs2 set _a which remove_many : ks,
+    _c set _a which contain_any : ks,
     (_ not c) and (vs1 == vs2)
 ]
 -----
@@ -213,10 +213,10 @@ true
 clear
 -----
 _ do _[
-    .any set _ import _value.any,
-    .clear set _ import _map.clear,
-    .a set _ any _map,
-    .a which clear : .,
+    _any set _ import .value.any,
+    _clear set _ import .map.clear,
+    _a set _ any .map,
+    _a which clear : .,
     a == {}
 ]
 -----
@@ -225,9 +225,9 @@ true
 get_length
 -----
 _ do _[
-    .get_length set _ import _map.get_length,
-    .m set {a : 1, b : 2},
-    .m which get_length : .
+    _get_length set _ import .map.get_length,
+    _m set {a : 1, b : 2},
+    _m which get_length : .
 ]
 -----
 2
@@ -235,10 +235,10 @@ _ do _[
 get_items make 1
 -----
 _ do _[
-    .get_items set _ import _map.get_items,
-    .make set _ import _map.make,
-    .m set {a : 1, b : 2},
-    .i set .m which get_items : .,
+    _get_items set _ import .map.get_items,
+    _make set _ import .map.make,
+    _m set {a : 1, b : 2},
+    _i set _m which get_items : .,
     _ make i
 ]
 -----
@@ -247,10 +247,10 @@ _ do _[
 get_keys make_set 1
 -----
 _ do _[
-    .get_keys set _ import _map.get_keys,
-    .make_set set _ import _map.make_set,
-    .m set {a : 1, b : 2},
-    .k set .m which get_keys : .,
+    _get_keys set _ import .map.get_keys,
+    _make_set set _ import .map.make_set,
+    _m set {a : 1, b : 2},
+    _k set _m which get_keys : .,
     _ make_set k
 ]
 -----
@@ -259,9 +259,9 @@ _ do _[
 contain 1
 -----
 _ do _[
-    .contain set _ import _map.contain,
-    .m set {a : .b},
-    .m which contain : .a
+    _contain set _ import .map.contain,
+    _m set {a : _b},
+    _m which contain : _a
 ]
 -----
 true
@@ -269,9 +269,9 @@ true
 contain 2
 -----
 _ do _[
-    .contain set _ import _map.contain,
-    .m set {a : .b},
-    .m which contain : .b
+    _contain set _ import .map.contain,
+    _m set {a : _b},
+    _m which contain : _b
 ]
 -----
 false
@@ -279,9 +279,9 @@ false
 contain_all 1
 -----
 _ do _[
-    .contain_all set _ import _map.contain_all,
-    .m set {a : 1, b : 2},
-    .m which contain_all : [.a, .b]
+    _contain_all set _ import .map.contain_all,
+    _m set {a : 1, b : 2},
+    _m which contain_all : [_a, _b]
 ]
 -----
 true
@@ -289,9 +289,9 @@ true
 contain_all 2
 -----
 _ do _[
-    .contain_all set _ import _map.contain_all,
-    .m set {a : .b, c : .d},
-    .m which contain_all : [.a, .b]
+    _contain_all set _ import .map.contain_all,
+    _m set {a : _b, c : _d},
+    _m which contain_all : [_a, _b]
 ]
 -----
 false
@@ -299,9 +299,9 @@ false
 contain_any 1
 -----
 _ do _[
-    .contain_any set _ import _map.contain_any,
-    .m set {a : .b, c : .d},
-    .m which contain_any : [.a, .b]
+    _contain_any set _ import .map.contain_any,
+    _m set {a : _b, c : _d},
+    _m which contain_any : [_a, _b]
 ]
 -----
 true
@@ -309,9 +309,9 @@ true
 contain_any 2
 -----
 _ do _[
-    .contain_any set _ import _map.contain_any,
-    .m set {a : .b, c : .d},
-    .m which contain_any : [.b, .d]
+    _contain_any set _ import .map.contain_any,
+    _m set {a : _b, c : _d},
+    _m which contain_any : [_b, _d]
 ]
 -----
 false
@@ -319,9 +319,9 @@ false
 set 1
 -----
 _ do _[
-    .map.set set _ import _map.set,
-    .m set {a : 1, b : 2},
-    [.m which map.set : .a : 3, m]
+    _map.set set _ import .map.set,
+    _m set {a : 1, b : 2},
+    [_m which map.set : _a : 3, m]
 ]
 -----
 [.(1), {a : 3, b : 2}]
@@ -329,9 +329,9 @@ _ do _[
 set 2
 -----
 _ do _[
-    .map.set set _ import _map.set,
-    .m set {a : 1},
-    [.m which map.set : .b : 2, m]
+    _map.set set _ import .map.set,
+    _m set {a : 1},
+    [_m which map.set : _b : 2, m]
 ]
 -----
 [., {a : 1, b : 2}]
@@ -339,9 +339,9 @@ _ do _[
 set_many 1
 -----
 _ do _[
-    .set_many set _ import _map.set_many,
-    .m set {a : 1, b : 2},
-    [.m which set_many : {a : 3, c : 4}, m]
+    _set_many set _ import .map.set_many,
+    _m set {a : 1, b : 2},
+    [_m which set_many : {a : 3, c : 4}, m]
 ]
 -----
 [{a : 1}, {a : 3, b : 2, c : 4}]
@@ -349,9 +349,9 @@ _ do _[
 get 1
 -----
 _ do _[
-    .map.get set _ import _map.get,
-    .m set {a : 2},
-    .m which map.get : .a
+    _map.get set _ import .map.get,
+    _m set {a : 2},
+    _m which map.get : _a
 ]
 -----
 .(2)
@@ -359,9 +359,9 @@ _ do _[
 get 2
 -----
 _ do _[
-    .map.get set _ import _map.get,
-    .m set {a : .b},
-    .m which map.get : .b
+    _map.get set _ import .map.get,
+    _m set {a : _b},
+    _m which map.get : _b
 ]
 -----
 .
@@ -369,9 +369,9 @@ _ do _[
 get_many duplicate keys
 -----
 _ do _[
-    .get_many set _ import _map.get_many,
-    .m set {a : 1, b : 2, c : 3},
-    .m which get_many : [.a, .b, .a, .d]
+    _get_many set _ import .map.get_many,
+    _m set {a : 1, b : 2, c : 3},
+    _m which get_many : [_a, _b, _a, _d]
 ]
 -----
 {a : 1, b : 2}
@@ -379,9 +379,9 @@ _ do _[
 remove 1
 -----
 _ do _[
-    .remove set _ import _map.remove,
-    .m set {a : 1, b : 2},
-    [.m which remove : .a, m]
+    _remove set _ import .map.remove,
+    _m set {a : 1, b : 2},
+    [_m which remove : _a, m]
 ]
 -----
 [.(1), {b : 2}]
@@ -389,9 +389,9 @@ _ do _[
 remove 2
 -----
 _ do _[
-    .remove set _ import _map.remove,
-    .m set {a : .b},
-    [.m which remove : .b, m]
+    _remove set _ import .map.remove,
+    _m set {a : _b},
+    [_m which remove : _b, m]
 ]
 -----
 [., {a : b}]
@@ -399,9 +399,9 @@ _ do _[
 remove_many 1
 -----
 _ do _[
-    .remove_many set _ import _map.remove_many,
-    .m set {a : 1, b : 2, c : 3},
-    [.m which remove_many : [.a, .c, .e], m]
+    _remove_many set _ import .map.remove_many,
+    _m set {a : 1, b : 2, c : 3},
+    [_m which remove_many : [_a, _c, _e], m]
 ]
 -----
 [{a : 1, c : 3}, {b : 2}] 
@@ -409,9 +409,9 @@ _ do _[
 clear 1
 -----
 _ do _[
-    .clear set _ import _map.clear,
-    .m set {a : 1, b : 2},
-    .m which clear : .,
+    _clear set _ import .map.clear,
+    _m set {a : 1, b : 2},
+    _m which clear : .,
     m
 ]
 -----
@@ -420,8 +420,8 @@ _ do _[
 make 1
 -----
 _ do _[
-    .make set _ import _map.make,
-    _ make [.a : 1, .b : 2]
+    _make set _ import .map.make,
+    _ make [_a : 1, _b : 2]
 ]
 -----
 {a : 1, b : 2}
@@ -429,8 +429,8 @@ _ do _[
 map duplicate keys
 -----
 _ do _[
-    .make set _ import _map.make,
-    _ make [.a : 1, .a : 2]
+    _make set _ import .map.make,
+    _ make [_a : 1, _a : 2]
 ]
 -----
 {a : 2}
@@ -438,8 +438,8 @@ _ do _[
 make_set duplicate keys 1
 -----
 _ do _[
-    .make_set set _ import _map.make_set,
-    _ make_set [.a, .b, .b, .c]
+    _make_set set _ import .map.make_set,
+    _ make_set [_a, _b, _b, _c]
 ]
 -----
 {a, b, c}
@@ -447,8 +447,8 @@ _ do _[
 set duplicate keys 2
 -----
 _ do _[
-    .make_set set _ import _map.make_set,
-    _ make_set [.a, .b, .a]
+    _make_set set _ import .map.make_set,
+    _ make_set [_a, _b, _a]
 ]
 -----
 {a, b}

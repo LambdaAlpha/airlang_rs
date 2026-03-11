@@ -1,13 +1,13 @@
 get
 -----
 _ do _[
-    .any set _ import _value.any,
-    .get_left set _ import _pair.get_left,
-    .get_right set _ import _pair.get_right,
-    .l set _ any .,
-    .r set _ any .,
-    .p set l : r,
-    (l == .p which get_left : .) and (r == .p which get_right : .)
+    _any set _ import .value.any,
+    _get_left set _ import .pair.get_left,
+    _get_right set _ import .pair.get_right,
+    _l set _ any .,
+    _r set _ any .,
+    _p set l : r,
+    (l == _p which get_left : .) and (r == _p which get_right : .)
 ]
 -----
 true
@@ -15,18 +15,18 @@ true
 set get
 -----
 _ do _[
-    .any set _ import _value.any,
-    .get_left set _ import _pair.get_left,
-    .get_right set _ import _pair.get_right,
-    .set_left set _ import _pair.set_left,
-    .set_right set _ import _pair.set_right,
-    .p set _ any _pair,
-    .l set _ any .,
-    .r set _ any .,
-    .p which set_left : l,
-    .p which set_right : r,
-    .l1 set .p which get_left : .,
-    .r1 set .p which get_right : .,
+    _any set _ import .value.any,
+    _get_left set _ import .pair.get_left,
+    _get_right set _ import .pair.get_right,
+    _set_left set _ import .pair.set_left,
+    _set_right set _ import .pair.set_right,
+    _p set _ any .pair,
+    _l set _ any .,
+    _r set _ any .,
+    _p which set_left : l,
+    _p which set_right : r,
+    _l1 set _p which get_left : .,
+    _r1 set _p which get_right : .,
     (l == l1) and (r == r1)
 ]
 -----
@@ -35,14 +35,14 @@ true
 set return
 -----
 _ do _[
-    .any set _ import _value.any,
-    .set_left set _ import _pair.set_left,
-    .set_right set _ import _pair.set_right,
-    .l1 set _ any .,
-    .r1 set _ any .,
-    .p set l1 : r1,
-    .l2 set .p which set_left : _ any .,
-    .r2 set .p which set_right : _ any .,
+    _any set _ import .value.any,
+    _set_left set _ import .pair.set_left,
+    _set_right set _ import .pair.set_right,
+    _l1 set _ any .,
+    _r1 set _ any .,
+    _p set l1 : r1,
+    _l2 set _p which set_left : _ any .,
+    _r2 set _p which set_right : _ any .,
     (l1 == l2) and r1 == r2
 ]
 -----

@@ -1,9 +1,9 @@
 context
 -----
 _ do _[
-    .sum set 0,
-    100 iterate .i : _[
-        .sum set sum + i
+    _sum set 0,
+    100 iterate _i : _[
+        _sum set sum + i
     ],
     sum
 ]
@@ -13,9 +13,9 @@ _ do _[
 configuration
 -----
 _ do _[
-    .push set _ import _list.push,
-    _list.add export push,
-    _list.append export push,
+    _push set _ import .list.push,
+    .list.add export push,
+    .list.append export push,
 ]
 -----
 .
@@ -23,16 +23,16 @@ _ do _[
 resource
 -----
 _ do _[
-    .get_self set _ import _config.get_self,
-    .where set _ import _config.where,
-    .is_aborted set _ import _error.is_aborted,
-    .c set _ get_self .,
-    .c where _(_ do _[
-        .set_steps set _ import _resource.set_steps,
+    _get_self set _ import .config.get_self,
+    _where set _ import .config.where,
+    _is_aborted set _ import .error.is_aborted,
+    _c set _ get_self .,
+    _c where _(_ do _[
+        _set_steps set _ import .resource.set_steps,
         _ set_steps 100,
         true loop []
     ]),
-    .c which is_aborted : .,
+    _c which is_aborted : .,
 ]
 -----
 true

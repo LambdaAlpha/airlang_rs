@@ -1,13 +1,13 @@
 !("bench generate")
 
 _ do _[
-    .x set 42,
-    .y set 24,
+    _x set 42,
+    _y set 24,
     _(x <> y) loop _[
         (x > y) test _[
-            .x set x - y
+            _x set x - y
         ] : _[
-            .y set y - x
+            _y set y - x
         ]
     ],
     x

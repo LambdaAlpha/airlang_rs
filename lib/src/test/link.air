@@ -1,13 +1,13 @@
 make which get_self
 -----
 _ do _[
-    .any set _ import _value.any,
-    .make set _ import _link.make,
-    .which set _ import _link.which,
-    .get_self set _ import _context.get_self,
-    .a set _ any .,
-    .l set _ make a,
-    .a1 set l which get_self : .,
+    _any set _ import .value.any,
+    _make set _ import .link.make,
+    _which set _ import .link.which,
+    _get_self set _ import .context.get_self,
+    _a set _ any .,
+    _l set _ make a,
+    _a1 set l which get_self : .,
     a == a1
 ]
 -----
@@ -16,13 +16,13 @@ true
 make_constant which get_self
 -----
 _ do _[
-    .any set _ import _value.any,
-    .make set _ import _link.make_constant,
-    .which set _ import _link.which,
-    .get_self set _ import _context.get_self,
-    .a set _ any .,
-    .l set _ make a,
-    .a1 set l which get_self : .,
+    _any set _ import .value.any,
+    _make set _ import .link.make_constant,
+    _which set _ import .link.which,
+    _get_self set _ import .context.get_self,
+    _a set _ any .,
+    _l set _ make a,
+    _a1 set l which get_self : .,
     a == a1
 ]
 -----
@@ -31,9 +31,9 @@ true
 const is_constant
 -----
 _ do _[
-    .make_constant set _ import _link.make_constant,
-    .is_constant set _ import _link.is_constant,
-    .l set _ make_constant {},
+    _make_constant set _ import .link.make_constant,
+    _is_constant set _ import .link.is_constant,
+    _l set _ make_constant {},
     _ is_constant l,
 ]
 -----
@@ -42,9 +42,9 @@ true
 mut is_constant
 -----
 _ do _[
-    .make set _ import _link.make,
-    .is_constant set _ import _link.is_constant,
-    .l set _ make {},
+    _make set _ import .link.make,
+    _is_constant set _ import .link.is_constant,
+    _l set _ make {},
     _ is_constant l,
 ]
 -----
@@ -53,9 +53,9 @@ false
 is_available true
 -----
 _ do _[
-    .make set _ import _link.make,
-    .is_available set _ import _link.is_available,
-    .l set _ make {},
+    _make set _ import .link.make,
+    _is_available set _ import .link.is_available,
+    _l set _ make {},
     _ is_available l,
 ]
 -----
@@ -64,10 +64,10 @@ true
 is_available false
 -----
 _ do _[
-    .make set _ import _link.make,
-    .is_available set _ import _link.is_available,
-    .which set _ import _link.which,
-    .l set _ make {},
+    _make set _ import .link.make,
+    _is_available set _ import .link.is_available,
+    _which set _ import .link.which,
+    _l set _ make {},
     l which is_available : l,
 ]
 -----
@@ -76,17 +76,17 @@ false
 get_id
 -----
 _ do _[
-    .any set _ import _value.any,
-    .make set _ import _link.make,
-    .get_id set _ import _link.get_id,
-    .l1 set _ make {},
-    .l2 set l1,
-    .l3 set _ make {},
-    .id_l1 set _ get_id l1,
-    .id_l2 set _ get_id l2,
-    .id_l3 set _ get_id l3,
-    .id_type set .id_l1 which get_type : .,
-    (id_type == _key) and (id_l1 == id_l2) and (_ not l1 == l3) and _ not id_l1 == id_l3
+    _any set _ import .value.any,
+    _make set _ import .link.make,
+    _get_id set _ import .link.get_id,
+    _l1 set _ make {},
+    _l2 set l1,
+    _l3 set _ make {},
+    _id_l1 set _ get_id l1,
+    _id_l2 set _ get_id l2,
+    _id_l3 set _ get_id l3,
+    _id_type set _id_l1 which get_type : .,
+    (id_type == .key) and (id_l1 == id_l2) and (_ not l1 == l3) and _ not id_l1 == id_l3
 ]
 -----
 true
@@ -94,14 +94,14 @@ true
 sync
 -----
 _ do _[
-    .any set _ import _value.any,
-    .make set _ import _link.make,
-    .which set _ import _link.which,
-    .l set _ make {},
-    .l1 set l,
-    .a set _ any .,
-    l which set : _a : a,
-    .a1 set l1 which get : _a,
+    _any set _ import .value.any,
+    _make set _ import .link.make,
+    _which set _ import .link.which,
+    _l set _ make {},
+    _l1 set l,
+    _a set _ any .,
+    l which set : .a : a,
+    _a1 set l1 which get : .a,
     a == a1
 ]
 -----
@@ -110,12 +110,12 @@ true
 leak no panic
 -----
 _ do _[
-    .any set _ import _value.any,
-    .make set _ import _link.make,
-    .which set _ import _link.which,
-    .l set _ make {},
-    l which set : _a : l,
-    .l move _,
+    _any set _ import .value.any,
+    _make set _ import .link.make,
+    _which set _ import .link.which,
+    _l set _ make {},
+    l which set : .a : l,
+    _l move _,
     .
 ]
 -----
@@ -124,12 +124,12 @@ _ do _[
 cycle recover
 -----
 _ do _[
-    .any set _ import _value.any,
-    .make set _ import _link.make,
-    .which set _ import _link.which,
-    .l set _ make {},
-    l which set : _a : l,
-    .l1 set l which move : _a,
+    _any set _ import .value.any,
+    _make set _ import .link.make,
+    _which set _ import .link.which,
+    _l set _ make {},
+    l which set : .a : l,
+    _l1 set l which move : .a,
     l == l1
 ]
 -----

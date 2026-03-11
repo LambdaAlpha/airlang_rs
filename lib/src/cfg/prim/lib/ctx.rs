@@ -8,7 +8,7 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Form;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::CtxConstInputAwareFunc;
 use crate::semantics::func::CtxConstInputFreeFunc;
@@ -35,12 +35,12 @@ pub struct CtxLib {
 
 const CTX: &str = "context";
 
-pub const GET: &str = concatcp!(PREFIX_ID, CTX, ".get");
-pub const SET: &str = concatcp!(PREFIX_ID, CTX, ".set");
-pub const FORM: &str = concatcp!(PREFIX_ID, CTX, ".form");
-pub const REPRESENT: &str = concatcp!(PREFIX_ID, CTX, ".represent");
-pub const GET_SELF: &str = concatcp!(PREFIX_ID, CTX, ".get_self");
-pub const WHICH: &str = concatcp!(PREFIX_ID, CTX, ".which");
+pub const GET: &str = concatcp!(PREFIX_CELL, CTX, ".get");
+pub const SET: &str = concatcp!(PREFIX_CELL, CTX, ".set");
+pub const FORM: &str = concatcp!(PREFIX_CELL, CTX, ".form");
+pub const REPRESENT: &str = concatcp!(PREFIX_CELL, CTX, ".represent");
+pub const GET_SELF: &str = concatcp!(PREFIX_CELL, CTX, ".get_self");
+pub const WHICH: &str = concatcp!(PREFIX_CELL, CTX, ".which");
 
 impl Default for CtxLib {
     fn default() -> Self {

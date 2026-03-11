@@ -1,6 +1,6 @@
 use airlang::cfg::CfgMod;
 use airlang::semantics::cfg::Cfg;
-use airlang::semantics::core::PREFIX_ID;
+use airlang::semantics::core::PREFIX_CELL;
 use airlang::semantics::val::TextVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Key;
@@ -14,7 +14,7 @@ pub struct ReplLib {
 
 const REPL: &str = "repl";
 
-pub const HELP: &str = concatcp!(PREFIX_ID, REPL, ".help");
+pub const HELP: &str = concatcp!(PREFIX_CELL, REPL, ".help");
 
 impl Default for ReplLib {
     fn default() -> Self {

@@ -13,7 +13,7 @@ use crate::cfg::prim::lib::ctx::pattern::PatternMatch;
 use crate::cfg::prim::lib::ctx::pattern::PatternParse;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::CtxMutInputAwareFunc;
 use crate::semantics::func::DynFunc;
@@ -44,12 +44,12 @@ pub struct CtrlLib {
 
 const CTRL: &str = "control";
 
-pub const DO: &str = concatcp!(PREFIX_ID, CTRL, ".do");
-pub const TEST: &str = concatcp!(PREFIX_ID, CTRL, ".test");
-pub const SWITCH: &str = concatcp!(PREFIX_ID, CTRL, ".switch");
-pub const MATCH: &str = concatcp!(PREFIX_ID, CTRL, ".match");
-pub const LOOP: &str = concatcp!(PREFIX_ID, CTRL, ".loop");
-pub const ITERATE: &str = concatcp!(PREFIX_ID, CTRL, ".iterate");
+pub const DO: &str = concatcp!(PREFIX_CELL, CTRL, ".do");
+pub const TEST: &str = concatcp!(PREFIX_CELL, CTRL, ".test");
+pub const SWITCH: &str = concatcp!(PREFIX_CELL, CTRL, ".switch");
+pub const MATCH: &str = concatcp!(PREFIX_CELL, CTRL, ".match");
+pub const LOOP: &str = concatcp!(PREFIX_CELL, CTRL, ".loop");
+pub const ITERATE: &str = concatcp!(PREFIX_CELL, CTRL, ".iterate");
 
 impl Default for CtrlLib {
     fn default() -> Self {
@@ -75,7 +75,7 @@ impl CfgMod for CtrlLib {
     }
 }
 
-const TRY: &str = concatcp!(PREFIX_ID, "try");
+const TRY: &str = concatcp!(PREFIX_CELL, "try");
 
 #[derive(Clone)]
 struct Block {
@@ -134,7 +134,7 @@ impl Statement {
         let Val::Key(s) = &call.func else {
             return Ok(Statement { try_, body: Val::Call(call) });
         };
-        if !s.starts_with(PREFIX_ID) {
+        if !s.starts_with(PREFIX_CELL) {
             return Ok(Statement { try_, body: Val::Call(call) });
         }
         if s.deref() != TRY {

@@ -5,7 +5,7 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxFreeInputAwareFunc;
 use crate::semantics::func::PrimCtx;
 use crate::semantics::func::PrimFunc;
@@ -25,9 +25,9 @@ pub struct LangLib {
 
 const LANGUAGE: &str = "language";
 
-pub const EVAL: &str = concatcp!(PREFIX_ID, LANGUAGE, ".semantics.eval");
-pub const PARSE: &str = concatcp!(PREFIX_ID, LANGUAGE, ".syntax.parse");
-pub const GENERATE: &str = concatcp!(PREFIX_ID, LANGUAGE, ".syntax.generate");
+pub const EVAL: &str = concatcp!(PREFIX_CELL, LANGUAGE, ".semantics.eval");
+pub const PARSE: &str = concatcp!(PREFIX_CELL, LANGUAGE, ".syntax.parse");
+pub const GENERATE: &str = concatcp!(PREFIX_CELL, LANGUAGE, ".syntax.generate");
 
 impl Default for LangLib {
     fn default() -> Self {

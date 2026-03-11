@@ -169,8 +169,8 @@ Air 的求值规则非常简洁，只有五条规则。
 
 第一，键的求值规则如下：
 
-1. `_a` ➔ `_a`
-2. `.a` ➔ `a`
+1. `_a` ➔ `a`
+2. `.a` ➔ `.a`
 3. `:a` 或 `a` ➔ `v`，`v` 为上下文中键 `a` 所绑定的值
 
 第二，引用的求值规则为 `_(v)` ➔ `v`。
@@ -196,9 +196,9 @@ Air 的求值规则非常简洁，只有五条规则。
 
 ```air
 _ do _[
-    .sum set 0,
-    100 iterate .i : _[
-        .sum set sum + i
+    _sum set 0,
+    100 iterate _i : _[
+        _sum set sum + i
     ],
     sum
 ]
@@ -210,9 +210,9 @@ _ do _[
 
 ```air
 _ do _[
-    .push set _ import _list.push,
-    _list.add export push,
-    _list.append export push,
+    _push set _ import .list.push,
+    .list.add export push,
+    .list.append export push,
 ]
 ```
 
@@ -222,7 +222,7 @@ _ do _[
 
 ```air
 _ do _[
-    .set_steps set _ import _resource.set_steps,
+    _set_steps set _ import .resource.set_steps,
     _ set_steps 100,
     true loop []
 ]

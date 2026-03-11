@@ -6,7 +6,7 @@ use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxFreeInputAwareFunc;
 use crate::semantics::func::DynFunc;
 use crate::semantics::func::PrimCtx;
@@ -30,12 +30,12 @@ pub struct LinkLib {
     pub which: PrimFuncVal,
 }
 
-pub const MAKE: &str = concatcp!(PREFIX_ID, LINK, ".make");
-pub const MAKE_CONSTANT: &str = concatcp!(PREFIX_ID, LINK, ".make_constant");
-pub const IS_CONSTANT: &str = concatcp!(PREFIX_ID, LINK, ".is_constant");
-pub const IS_AVAILABLE: &str = concatcp!(PREFIX_ID, LINK, ".is_available");
-pub const GET_ID: &str = concatcp!(PREFIX_ID, LINK, ".get_id");
-pub const WHICH: &str = concatcp!(PREFIX_ID, LINK, ".which");
+pub const MAKE: &str = concatcp!(PREFIX_CELL, LINK, ".make");
+pub const MAKE_CONSTANT: &str = concatcp!(PREFIX_CELL, LINK, ".make_constant");
+pub const IS_CONSTANT: &str = concatcp!(PREFIX_CELL, LINK, ".is_constant");
+pub const IS_AVAILABLE: &str = concatcp!(PREFIX_CELL, LINK, ".is_available");
+pub const GET_ID: &str = concatcp!(PREFIX_CELL, LINK, ".get_id");
+pub const WHICH: &str = concatcp!(PREFIX_CELL, LINK, ".which");
 
 impl Default for LinkLib {
     fn default() -> Self {

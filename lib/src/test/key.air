@@ -1,15 +1,15 @@
 get_length join
 -----
 _ do _[
-    .any set _ import _value.any,
-    .get_length set _ import _key.get_length,
-    .join set _ import _key.join,
-    .a set _ any _key,
-    .la set .a which get_length : .,
-    .b set _ any _key,
-    .lb set .b which get_length : .,
-    .ab set empty join [a, b],
-    .lab set .ab which get_length : .,
+    _any set _ import .value.any,
+    _get_length set _ import .key.get_length,
+    _join set _ import .key.join,
+    _a set _ any .key,
+    _la set _a which get_length : .,
+    _b set _ any .key,
+    _lb set _b which get_length : .,
+    _ab set empty join [a, b],
+    _lab set _ab which get_length : .,
     lab == la + lb
 ]
 -----
@@ -18,8 +18,8 @@ true
 get_length empty
 -----
 _ do _[
-    .get_length set _ import _key.get_length,
-    .empty which get_length : .
+    _get_length set _ import .key.get_length,
+    _empty which get_length : .
 ]
 -----
 0
@@ -27,9 +27,9 @@ _ do _[
 get_length else
 -----
 _ do _[
-    .get_length set _ import _key.get_length,
-    .s set _a,
-    .s which get_length : .
+    _get_length set _ import .key.get_length,
+    _s set .a,
+    _s which get_length : .
 ]
 -----
 2
@@ -37,8 +37,8 @@ _ do _[
 join empty
 -----
 _ do _[
-    .join set _ import _key.join,
-    empty join [.a, .b]
+    _join set _ import .key.join,
+    empty join [_a, _b]
 ]
 -----
 ab
@@ -46,7 +46,7 @@ ab
 join no key
 -----
 _ do _[
-    .join set _ import _key.join,
+    _join set _ import .key.join,
     empty join []
 ]
 -----
@@ -55,8 +55,8 @@ _ do _[
 join else
 -----
 _ do _[
-    .join set _ import _key.join,
-    .. join [.a, .b]
+    _join set _ import .key.join,
+    _. join [_a, _b]
 ]
 -----
 a.b
@@ -64,11 +64,11 @@ a.b
 into_text from_text
 -----
 _ do _[
-    .any set _ import _value.any,
-    .from_text set _ import _key.from_text,
-    .into_text set _ import _key.into_text,
-    .s set _ any _key,
-    .s1 set _ from_text _ into_text s,
+    _any set _ import .value.any,
+    _from_text set _ import .key.from_text,
+    _into_text set _ import .key.into_text,
+    _s set _ any .key,
+    _s1 set _ from_text _ into_text s,
     s == s1
 ]
 -----
@@ -77,7 +77,7 @@ true
 from_text empty
 -----
 _ do _[
-    .from_text set _ import _key.from_text,
+    _from_text set _ import .key.from_text,
     _ from_text ""
 ]
 -----
@@ -86,7 +86,7 @@ _ do _[
 from_text trivial
 -----
 _ do _[
-    .from_text set _ import _key.from_text,
+    _from_text set _ import .key.from_text,
     _ from_text "hello_world!"
 ]
 -----
@@ -95,7 +95,7 @@ hello_world!
 from_text special
 -----
 _ do _[
-    .from_text set _ import _key.from_text,
+    _from_text set _ import .key.from_text,
     _ from_text "{}"
 ]
 -----
@@ -104,7 +104,7 @@ _ do _[
 into_text empty
 -----
 _ do _[
-    .into_text set _ import _key.into_text,
+    _into_text set _ import .key.into_text,
     _ into_text empty
 ]
 -----
@@ -113,8 +113,8 @@ _ do _[
 into_text trivial
 -----
 _ do _[
-    .into_text set _ import _key.into_text,
-    _ into_text .hello_world!
+    _into_text set _ import .key.into_text,
+    _ into_text _hello_world!
 ]
 -----
 "hello_world!"

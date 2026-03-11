@@ -4,7 +4,7 @@ use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxConstInputFreeFunc;
 use crate::semantics::func::CtxFreeInputAwareFunc;
 use crate::semantics::func::CtxMutInputAwareFunc;
@@ -23,9 +23,9 @@ pub struct ByteLib {
     pub join: PrimFuncVal,
 }
 
-pub const GET_LENGTH: &str = concatcp!(PREFIX_ID, BYTE, ".get_length");
-pub const PUSH: &str = concatcp!(PREFIX_ID, BYTE, ".push");
-pub const JOIN: &str = concatcp!(PREFIX_ID, BYTE, ".join");
+pub const GET_LENGTH: &str = concatcp!(PREFIX_CELL, BYTE, ".get_length");
+pub const PUSH: &str = concatcp!(PREFIX_CELL, BYTE, ".push");
+pub const JOIN: &str = concatcp!(PREFIX_CELL, BYTE, ".join");
 
 impl Default for ByteLib {
     fn default() -> Self {

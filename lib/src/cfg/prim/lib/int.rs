@@ -5,7 +5,7 @@ use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxFreeInputAwareFunc;
 use crate::semantics::val::INT;
 use crate::semantics::val::PrimFuncVal;
@@ -28,17 +28,17 @@ pub struct IntLib {
     pub less_greater: PrimFuncVal,
 }
 
-pub const ADD: &str = concatcp!(PREFIX_ID, INT, ".add");
-pub const SUBTRACT: &str = concatcp!(PREFIX_ID, INT, ".subtract");
-pub const MULTIPLY: &str = concatcp!(PREFIX_ID, INT, ".multiply");
-pub const DIVIDE: &str = concatcp!(PREFIX_ID, INT, ".divide");
-pub const REMAINDER: &str = concatcp!(PREFIX_ID, INT, ".remainder");
-pub const DIVIDE_REMAINDER: &str = concatcp!(PREFIX_ID, INT, ".divide_remainder");
-pub const LESS: &str = concatcp!(PREFIX_ID, INT, ".less");
-pub const LESS_EQUAL: &str = concatcp!(PREFIX_ID, INT, ".less_equal");
-pub const GREATER: &str = concatcp!(PREFIX_ID, INT, ".greater");
-pub const GREATER_EQUAL: &str = concatcp!(PREFIX_ID, INT, ".greater_equal");
-pub const LESS_GREATER: &str = concatcp!(PREFIX_ID, INT, ".less_greater");
+pub const ADD: &str = concatcp!(PREFIX_CELL, INT, ".add");
+pub const SUBTRACT: &str = concatcp!(PREFIX_CELL, INT, ".subtract");
+pub const MULTIPLY: &str = concatcp!(PREFIX_CELL, INT, ".multiply");
+pub const DIVIDE: &str = concatcp!(PREFIX_CELL, INT, ".divide");
+pub const REMAINDER: &str = concatcp!(PREFIX_CELL, INT, ".remainder");
+pub const DIVIDE_REMAINDER: &str = concatcp!(PREFIX_CELL, INT, ".divide_remainder");
+pub const LESS: &str = concatcp!(PREFIX_CELL, INT, ".less");
+pub const LESS_EQUAL: &str = concatcp!(PREFIX_CELL, INT, ".less_equal");
+pub const GREATER: &str = concatcp!(PREFIX_CELL, INT, ".greater");
+pub const GREATER_EQUAL: &str = concatcp!(PREFIX_CELL, INT, ".greater_equal");
+pub const LESS_GREATER: &str = concatcp!(PREFIX_CELL, INT, ".less_greater");
 
 impl Default for IntLib {
     fn default() -> Self {

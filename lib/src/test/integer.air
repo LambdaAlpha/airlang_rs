@@ -1,8 +1,8 @@
 + 0
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any _integer,
+    _any set _ import .value.any,
+    _a set _ any .integer,
     a == a + 0
 ]
 -----
@@ -11,8 +11,8 @@ true
 - 0
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any _integer,
+    _any set _ import .value.any,
+    _a set _ any .integer,
     a == a - 0
 ]
 -----
@@ -21,9 +21,9 @@ true
 + -
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any _integer,
-    .b set _ any _integer,
+    _any set _ import .value.any,
+    _a set _ any .integer,
+    _b set _ any .integer,
     a == <(a + b - b)
 ]
 -----
@@ -32,9 +32,9 @@ true
 - +
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any _integer,
-    .b set _ any _integer,
+    _any set _ import .value.any,
+    _a set _ any .integer,
+    _b set _ any .integer,
     a == <(a - b + b)
 ]
 -----
@@ -55,8 +55,8 @@ true
 * 0
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any _integer,
+    _any set _ import .value.any,
+    _a set _ any .integer,
     0 == a * 0
 ]
 -----
@@ -65,8 +65,8 @@ true
 * 1
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any _integer,
+    _any set _ import .value.any,
+    _a set _ any .integer,
     a == a * 1
 ]
 -----
@@ -75,8 +75,8 @@ true
 * -1
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any _integer,
+    _any set _ import .value.any,
+    _a set _ any .integer,
     0 == a + a * 0-1
 ]
 -----
@@ -85,20 +85,20 @@ true
 / 0
 -----
 _ do _[
-    .any set _ import _value.any,
-    .config.make set _ import _config.make,
-    .link.make set _ import _link.make,
-    .where set _ import _config.where,
-    .is_aborted set _ import _error.is_aborted,
-    .a set _ any _integer,
-    .c set _ config.make {
-        _prelude : _ link.make {
+    _any set _ import .value.any,
+    _config.make set _ import .config.make,
+    _link.make set _ import .link.make,
+    _where set _ import .config.where,
+    _is_aborted set _ import .error.is_aborted,
+    _a set _ any .integer,
+    _c set _ config.make {
+        .prelude : _ link.make {
             a : a,
             / : /,
         },
     },
-    .c where _(a / 0),
-    .c which is_aborted : .,
+    _c where _(a / 0),
+    _c which is_aborted : .,
 ]
 -----
 true
@@ -106,8 +106,8 @@ true
 / 1
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any _integer,
+    _any set _ import .value.any,
+    _a set _ any .integer,
     a == a / 1
 ]
 -----
@@ -116,8 +116,8 @@ true
 / -1
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any _integer,
+    _any set _ import .value.any,
+    _a set _ any .integer,
     0 == a + a / 0-1
 ]
 -----
@@ -126,9 +126,9 @@ true
 0 /
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any _integer,
-    _ _try (a == 0) test [.(true)],
+    _any set _ import .value.any,
+    _a set _ any .integer,
+    _ .try (a == 0) test [.(true)],
     0 == 0 / a
 ]
 -----
@@ -137,10 +137,10 @@ true
 0 remainder
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any _integer,
-    _ _try (a == 0) test [.(true)],
-    .% set _ import _integer.remainder,
+    _any set _ import .value.any,
+    _a set _ any .integer,
+    _ .try (a == 0) test [.(true)],
+    _% set _ import .integer.remainder,
     0 == 0 % a
 ]
 -----
@@ -149,21 +149,21 @@ true
 remainder 0
 -----
 _ do _[
-    .% set _ import _integer.remainder,
-    .any set _ import _value.any,
-    .config.make set _ import _config.make,
-    .link.make set _ import _link.make,
-    .where set _ import _config.where,
-    .is_aborted set _ import _error.is_aborted,
-    .a set _ any _integer,
-    .c set _ config.make {
-        _prelude : _ link.make {
+    _% set _ import .integer.remainder,
+    _any set _ import .value.any,
+    _config.make set _ import .config.make,
+    _link.make set _ import .link.make,
+    _where set _ import .config.where,
+    _is_aborted set _ import .error.is_aborted,
+    _a set _ any .integer,
+    _c set _ config.make {
+        .prelude : _ link.make {
             a : a,
             % : %,
         },
     },
-    .c where _(a % 0),
-    .c which is_aborted : .,
+    _c where _(a % 0),
+    _c which is_aborted : .,
 ]
 -----
 true
@@ -171,9 +171,9 @@ true
 remainder 1
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any _integer,
-    .% set _ import _integer.remainder,
+    _any set _ import .value.any,
+    _a set _ any .integer,
+    _% set _ import .integer.remainder,
     0 == a % 1
 ]
 -----
@@ -182,11 +182,11 @@ true
 remainder exact
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any _integer,
-    .b set _ any _integer,
-    _ _try (b == 0) test [.(true)],
-    .% set _ import _integer.remainder,
+    _any set _ import .value.any,
+    _a set _ any .integer,
+    _b set _ any .integer,
+    _ .try (b == 0) test [.(true)],
+    _% set _ import .integer.remainder,
     0 == (a * b) % b
 ]
 -----
@@ -195,11 +195,11 @@ true
 sign(a remainder b) == sign(a)
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any _integer,
-    .b set _ any _integer,
-    _ _try (b == 0) test [.(true)],
-    .% set _ import _integer.remainder,
+    _any set _ import .value.any,
+    _a set _ any .integer,
+    _b set _ any .integer,
+    _ .try (b == 0) test [.(true)],
+    _% set _ import .integer.remainder,
     (0 <= a) == 0 <= a % b
 ]
 -----
@@ -208,11 +208,11 @@ true
 abs(a remainder b) < abs(b)
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any _integer,
-    .b set _ any _integer,
-    _ _try (b == 0) test [.(true)],
-    .% set _ import _integer.remainder,
+    _any set _ import .value.any,
+    _a set _ any .integer,
+    _b set _ any .integer,
+    _ .try (b == 0) test [.(true)],
+    _% set _ import .integer.remainder,
     (0 <= b) == 0 <= b + a % b
 ]
 -----
@@ -221,10 +221,10 @@ true
 * /
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any _integer,
-    .b set _ any _integer,
-    _ _try (b == 0) test [.(true)],
+    _any set _ import .value.any,
+    _a set _ any .integer,
+    _b set _ any .integer,
+    _ .try (b == 0) test [.(true)],
     a == <(a * b / b)
 ]
 -----
@@ -233,11 +233,11 @@ true
 exact / *
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any _integer,
-    .b set _ any _integer,
-    _ _try (b == 0) test [.(true)],
-    .c set a * b,
+    _any set _ import .value.any,
+    _a set _ any .integer,
+    _b set _ any .integer,
+    _ .try (b == 0) test [.(true)],
+    _c set a * b,
     c == <(c / b * b)
 ]
 -----
@@ -246,10 +246,10 @@ true
 inexact / abs(a) > abs(a / b * b)
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any _integer,
-    .b set _ any _integer,
-    _ _try (b == 0) test [.(true)],
+    _any set _ import .value.any,
+    _a set _ any .integer,
+    _b set _ any .integer,
+    _ .try (b == 0) test [.(true)],
     (0 <= a) == 0 <= a - a / b * b
 ]
 -----
@@ -258,11 +258,11 @@ true
 a == b * a / b + a remainder b
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any _integer,
-    .b set _ any _integer,
-    _ _try (b == 0) test [.(true)],
-    .% set _ import _integer.remainder,
+    _any set _ import .value.any,
+    _a set _ any .integer,
+    _b set _ any .integer,
+    _ .try (b == 0) test [.(true)],
+    _% set _ import .integer.remainder,
     a == (b * a / b) + a % b
 ]
 -----
@@ -313,7 +313,7 @@ true
 remainder exact
 -----
 _ do _[
-    .% set _ import _integer.remainder,
+    _% set _ import .integer.remainder,
     6 % 3
 ]
 -----
@@ -322,7 +322,7 @@ _ do _[
 remainder inexact smaller
 -----
 _ do _[
-    .% set _ import _integer.remainder,
+    _% set _ import .integer.remainder,
     5 % 3
 ]
 -----
@@ -331,7 +331,7 @@ _ do _[
 remainder inexact bigger
 -----
 _ do _[
-    .% set _ import _integer.remainder,
+    _% set _ import .integer.remainder,
     7 % 3
 ]
 -----
@@ -340,7 +340,7 @@ _ do _[
 remainder inexact negative 1
 -----
 _ do _[
-    .% set _ import _integer.remainder,
+    _% set _ import .integer.remainder,
     7 % 0-3
 ]
 -----
@@ -349,7 +349,7 @@ _ do _[
 remainder inexact negative 2
 -----
 _ do _[
-    .% set _ import _integer.remainder,
+    _% set _ import .integer.remainder,
     0-7 % 3
 ]
 -----
@@ -358,7 +358,7 @@ _ do _[
 remainder inexact negative 3
 -----
 _ do _[
-    .% set _ import _integer.remainder,
+    _% set _ import .integer.remainder,
     0-7 % 0-3
 ]
 -----
@@ -367,12 +367,12 @@ _ do _[
 a divide_remainder b == (a / b) : (a remainder b)
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any _integer,
-    .b set _ any _integer,
-    _ _try (b == 0) test [.(true)],
-    .% set _ import _integer.remainder,
-    ./% set _ import _integer.divide_remainder,
+    _any set _ import .value.any,
+    _a set _ any .integer,
+    _b set _ any .integer,
+    _ .try (b == 0) test [.(true)],
+    _% set _ import .integer.remainder,
+    _/% set _ import .integer.divide_remainder,
     (a /% b) == (a / b) : (a % b)
 ]
 -----
@@ -381,7 +381,7 @@ true
 divide_remainder both positive
 -----
 _ do _[
-    ./% set _ import _integer.divide_remainder,
+    _/% set _ import .integer.divide_remainder,
     7 /% 3
 ]
 -----
@@ -390,7 +390,7 @@ _ do _[
 divide_remainder positive negative
 -----
 _ do _[
-    ./% set _ import _integer.divide_remainder,
+    _/% set _ import .integer.divide_remainder,
     7 /% 0-3
 ]
 -----
@@ -399,7 +399,7 @@ _ do _[
 divide_remainder negative positive
 -----
 _ do _[
-    ./% set _ import _integer.divide_remainder,
+    _/% set _ import .integer.divide_remainder,
     0-7 /% 3
 ]
 -----
@@ -408,7 +408,7 @@ _ do _[
 divide_remainder negative negative
 -----
 _ do _[
-    ./% set _ import _integer.divide_remainder,
+    _/% set _ import .integer.divide_remainder,
     0-7 /% 0-3
 ]
 -----
@@ -417,10 +417,10 @@ _ do _[
 order relations
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any _integer,
-    .b set _ any _integer,
-    .c set _ any _integer,
+    _any set _ import .value.any,
+    _a set _ any .integer,
+    _b set _ any .integer,
+    _c set _ any .integer,
     [
         (a > b) == (b < a),
         (a < b) == (b > a),

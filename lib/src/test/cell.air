@@ -1,11 +1,11 @@
 get
 -----
 _ do _[
-    .any set _ import _value.any,
-    .get_value set _ import _cell.get_value,
-    .v set _ any .,
-    .c set .(v),
-    v == .c which get_value : .
+    _any set _ import .value.any,
+    _get_value set _ import .cell.get_value,
+    _v set _ any .,
+    _c set .(v),
+    v == _c which get_value : .
 ]
 -----
 true
@@ -13,13 +13,13 @@ true
 set get
 -----
 _ do _[
-    .any set _ import _value.any,
-    .get_value set _ import _cell.get_value,
-    .set_value set _ import _cell.set_value,
-    .c set _ any _cell,
-    .v set _ any .,
-    .c which set_value : v,
-    .v1 set .c which get_value : .,
+    _any set _ import .value.any,
+    _get_value set _ import .cell.get_value,
+    _set_value set _ import .cell.set_value,
+    _c set _ any .cell,
+    _v set _ any .,
+    _c which set_value : v,
+    _v1 set _c which get_value : .,
     v == v1
 ]
 -----
@@ -28,11 +28,11 @@ true
 set return
 -----
 _ do _[
-    .any set _ import _value.any,
-    .set_value set _ import _cell.set_value,
-    .v1 set _ any .,
-    .c set .(v1),
-    .v2 set .c which set_value : _ any .,
+    _any set _ import .value.any,
+    _set_value set _ import .cell.set_value,
+    _v1 set _ any .,
+    _c set .(v1),
+    _v2 set _c which set_value : _ any .,
     v1 == v2
 ]
 -----

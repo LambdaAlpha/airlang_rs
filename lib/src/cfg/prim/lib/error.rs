@@ -4,7 +4,7 @@ use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::core::abort_by_bug_with_msg;
 use crate::semantics::func::CtxConstInputFreeFunc;
 use crate::semantics::func::CtxFreeInputAwareFunc;
@@ -25,10 +25,10 @@ pub struct ErrorLib {
 
 const ERROR: &str = "error";
 
-pub const ABORT: &str = concatcp!(PREFIX_ID, ERROR, ".abort");
-pub const ASSERT: &str = concatcp!(PREFIX_ID, ERROR, ".assert");
-pub const IS_ABORTED: &str = concatcp!(PREFIX_ID, ERROR, ".is_aborted");
-pub const RECOVER: &str = concatcp!(PREFIX_ID, ERROR, ".recover");
+pub const ABORT: &str = concatcp!(PREFIX_CELL, ERROR, ".abort");
+pub const ASSERT: &str = concatcp!(PREFIX_CELL, ERROR, ".assert");
+pub const IS_ABORTED: &str = concatcp!(PREFIX_CELL, ERROR, ".is_aborted");
+pub const RECOVER: &str = concatcp!(PREFIX_CELL, ERROR, ".recover");
 
 impl Default for ErrorLib {
     fn default() -> Self {

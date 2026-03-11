@@ -9,7 +9,7 @@ use const_format::concatcp;
 use crate::cfg::repr::func::generate_func;
 use crate::cfg::utils::key;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::val::CFG;
 use crate::semantics::val::DynVal;
 use crate::semantics::val::FUNC;
@@ -99,7 +99,7 @@ impl Display for LinkVal {
         let id = self.ptr_addr();
         let id = Key::from_string_unchecked(format!("{id:x}"));
         let repr = Val::Key(id);
-        let tag = key(concatcp!(PREFIX_ID, LINK));
+        let tag = key(concatcp!(PREFIX_CELL, LINK));
         let call = Call::new(tag, repr);
         Display::fmt(&call, f)
     }
@@ -114,7 +114,7 @@ impl Debug for LinkVal {
 impl Display for Cfg {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let repr = Val::Map(Map::clone(self).into());
-        let tag = key(concatcp!(PREFIX_ID, CFG));
+        let tag = key(concatcp!(PREFIX_CELL, CFG));
         let call = Call::new(tag, repr);
         Display::fmt(&call, f)
     }
@@ -129,7 +129,7 @@ impl Debug for Cfg {
 impl Display for FuncVal {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let repr = generate_func(self.clone());
-        let tag = key(concatcp!(PREFIX_ID, FUNC));
+        let tag = key(concatcp!(PREFIX_CELL, FUNC));
         let call = Call::new(tag, repr);
         Display::fmt(&call, f)
     }

@@ -6,7 +6,7 @@ use const_format::concatcp;
 use crate::bug;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::DynFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -24,7 +24,7 @@ pub fn extend_func(cfg: &mut Cfg, key: &str, val: PrimFuncVal) {
     cfg.extend(Key::from_str_unchecked(key), Val::Func(val.into()));
 }
 
-pub const KEY_PRELUDE: &str = concatcp!(PREFIX_ID, "prelude");
+pub const KEY_PRELUDE: &str = concatcp!(PREFIX_CELL, "prelude");
 
 pub fn prelude(cfg: &mut Cfg) -> Val {
     let prelude = cfg.import(Key::from_str_unchecked(KEY_PRELUDE));

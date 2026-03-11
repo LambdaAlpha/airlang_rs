@@ -9,7 +9,7 @@ use crate::cfg::repr::func::generate_code;
 use crate::cfg::repr::func::generate_func;
 use crate::cfg::repr::func::parse_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxConstInputFreeFunc;
 use crate::semantics::func::CtxFreeInputAwareFunc;
 use crate::semantics::func::PrimCtx;
@@ -35,15 +35,15 @@ pub struct FuncLib {
     pub get_id: PrimFuncVal,
 }
 
-pub const MAKE: &str = concatcp!(PREFIX_ID, FUNC, ".make");
-pub const REPRESENT: &str = concatcp!(PREFIX_ID, FUNC, ".represent");
-pub const IS_CONTEXT_FREE: &str = concatcp!(PREFIX_ID, FUNC, ".is_context_free");
-pub const IS_CONTEXT_CONSTANT: &str = concatcp!(PREFIX_ID, FUNC, ".is_context_constant");
-pub const IS_INPUT_FREE: &str = concatcp!(PREFIX_ID, FUNC, ".is_input_free");
-pub const IS_PRIMITIVE: &str = concatcp!(PREFIX_ID, FUNC, ".is_primitive");
-pub const GET_CODE: &str = concatcp!(PREFIX_ID, FUNC, ".get_code");
-pub const GET_PRELUDE: &str = concatcp!(PREFIX_ID, FUNC, ".get_prelude");
-pub const GET_ID: &str = concatcp!(PREFIX_ID, FUNC, ".get_id");
+pub const MAKE: &str = concatcp!(PREFIX_CELL, FUNC, ".make");
+pub const REPRESENT: &str = concatcp!(PREFIX_CELL, FUNC, ".represent");
+pub const IS_CONTEXT_FREE: &str = concatcp!(PREFIX_CELL, FUNC, ".is_context_free");
+pub const IS_CONTEXT_CONSTANT: &str = concatcp!(PREFIX_CELL, FUNC, ".is_context_constant");
+pub const IS_INPUT_FREE: &str = concatcp!(PREFIX_CELL, FUNC, ".is_input_free");
+pub const IS_PRIMITIVE: &str = concatcp!(PREFIX_CELL, FUNC, ".is_primitive");
+pub const GET_CODE: &str = concatcp!(PREFIX_CELL, FUNC, ".get_code");
+pub const GET_PRELUDE: &str = concatcp!(PREFIX_CELL, FUNC, ".get_prelude");
+pub const GET_ID: &str = concatcp!(PREFIX_CELL, FUNC, ".get_id");
 
 impl Default for FuncLib {
     fn default() -> Self {

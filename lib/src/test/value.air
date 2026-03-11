@@ -1,9 +1,9 @@
 == true
 -----
 _ do _[
-    .any set _ import _value.any,
-    .a set _ any .,
-    .b set a,
+    _any set _ import .value.any,
+    _a set _ any .,
+    _b set a,
     a == b
 ]
 -----
@@ -12,290 +12,290 @@ true
 any unit
 -----
 _ do _[
-    .any set _ import _value.any,
-    .u set _ any _unit,
-    .u which get_type : .
+    _any set _ import .value.any,
+    _u set _ any .unit,
+    _u which get_type : .
 ]
 -----
-_unit
+.unit
 =====
 any bit
 -----
 _ do _[
-    .any set _ import _value.any,
-    .b set _ any _bit,
-    .b which get_type : .
+    _any set _ import .value.any,
+    _b set _ any .bit,
+    _b which get_type : .
 ]
 -----
-_bit
+.bit
 =====
 any key
 -----
 _ do _[
-    .any set _ import _value.any,
-    .s set _ any _key,
-    .s which get_type : .
+    _any set _ import .value.any,
+    _s set _ any .key,
+    _s which get_type : .
 ]
 -----
-_key
+.key
 =====
 any text
 -----
 _ do _[
-    .any set _ import _value.any,
-    .t set _ any _text,
-    .t which get_type : .
+    _any set _ import .value.any,
+    _t set _ any .text,
+    _t which get_type : .
 ]
 -----
-_text
+.text
 =====
 any integer
 -----
 _ do _[
-    .any set _ import _value.any,
-    .i set _ any _integer,
-    .i which get_type : .
+    _any set _ import .value.any,
+    _i set _ any .integer,
+    _i which get_type : .
 ]
 -----
-_integer
+.integer
 =====
 any decimal
 -----
 _ do _[
-    .any set _ import _value.any,
-    .n set _ any _decimal,
-    .n which get_type : .
+    _any set _ import .value.any,
+    _n set _ any .decimal,
+    _n which get_type : .
 ]
 -----
-_decimal
+.decimal
 =====
 any byte
 -----
 _ do _[
-    .any set _ import _value.any,
-    .b set _ any _byte,
-    .b which get_type : .
+    _any set _ import .value.any,
+    _b set _ any .byte,
+    _b which get_type : .
 ]
 -----
-_byte
+.byte
 =====
 any cell
 -----
 _ do _[
-    .any set _ import _value.any,
-    .c set _ any _cell,
-    .c which get_type : .
+    _any set _ import .value.any,
+    _c set _ any .cell,
+    _c which get_type : .
 ]
 -----
-_cell
+.cell
 =====
 any pair
 -----
 _ do _[
-    .any set _ import _value.any,
-    .p set _ any _pair,
-    .p which get_type : .
+    _any set _ import .value.any,
+    _p set _ any .pair,
+    _p which get_type : .
 ]
 -----
-_pair
+.pair
 =====
 any list
 -----
 _ do _[
-    .any set _ import _value.any,
-    .l set _ any _list,
-    .l which get_type : .
+    _any set _ import .value.any,
+    _l set _ any .list,
+    _l which get_type : .
 ]
 -----
-_list
+.list
 =====
 any map
 -----
 _ do _[
-    .any set _ import _value.any,
-    .m set _ any _map,
-    .m which get_type : .
+    _any set _ import .value.any,
+    _m set _ any .map,
+    _m which get_type : .
 ]
 -----
-_map
+.map
 =====
 any quote
 -----
 _ do _[
-    .any set _ import _value.any,
-    .q set _ any _quote,
-    .q which get_type : .
+    _any set _ import .value.any,
+    _q set _ any .quote,
+    _q which get_type : .
 ]
 -----
-_quote
+.quote
 =====
 any call
 -----
 _ do _[
-    .any set _ import _value.any,
-    .c set _ any _call,
-    .c which get_type : .
+    _any set _ import .value.any,
+    _c set _ any .call,
+    _c which get_type : .
 ]
 -----
-_call
+.call
 =====
 any link
 -----
 _ do _[
-    .any set _ import _value.any,
-    .l set _ any _link,
-    .l which get_type : .
+    _any set _ import .value.any,
+    _l set _ any .link,
+    _l which get_type : .
 ]
 -----
-_link
+.link
 =====
 any function
 -----
 _ do _[
-    .any set _ import _value.any,
-    .f set _ any _function,
-    .f which get_type : .
+    _any set _ import .value.any,
+    _f set _ any .function,
+    _f which get_type : .
 ]
 -----
-_function
+.function
 =====
 get_type unit
 -----
 _ do _[
-    .a set .,
-    .a which get_type : .
+    _a set .,
+    _a which get_type : .
 ]
 -----
-_unit
+.unit
 =====
 get_type bit
 -----
 _ do _[
-    .a set true,
-    .a which get_type : .
+    _a set true,
+    _a which get_type : .
 ]
 -----
-_bit
+.bit
 =====
 get_type key
 -----
 _ do _[
-    .a set _a,
-    .a which get_type : .
+    _a set .a,
+    _a which get_type : .
 ]
 -----
-_key
+.key
 =====
 get_type text
 -----
 _ do _[
-    .a set "",
-    .a which get_type : .
+    _a set "",
+    _a which get_type : .
 ]
 -----
-_text
+.text
 =====
 get_type integer
 -----
 _ do _[
-    .a set 1,
-    .a which get_type : .
+    _a set 1,
+    _a which get_type : .
 ]
 -----
-_integer
+.integer
 =====
 get_type decimal
 -----
 _ do _[
-    .a set 1.0,
-    .a which get_type : .
+    _a set 1.0,
+    _a which get_type : .
 ]
 -----
-_decimal
+.decimal
 =====
 get_type byte
 -----
 _ do _[
-    .a set byte'ff',
-    .a which get_type : .
+    _a set byte'ff',
+    _a which get_type : .
 ]
 -----
-_byte
+.byte
 =====
 get_type cell
 -----
 _ do _[
-    .a set .(1),
-    .a which get_type : .
+    _a set .(1),
+    _a which get_type : .
 ]
 -----
-_cell
+.cell
 =====
 get_type pair
 -----
 _ do _[
-    .a set 1 : 2,
-    .a which get_type : .
+    _a set 1 : 2,
+    _a which get_type : .
 ]
 -----
-_pair
+.pair
 =====
 get_type list
 -----
 _ do _[
-    .a set [],
-    .a which get_type : .
+    _a set [],
+    _a which get_type : .
 ]
 -----
-_list
+.list
 =====
 get_type map
 -----
 _ do _[
-    .a set {},
-    .a which get_type : .
+    _a set {},
+    _a which get_type : .
 ]
 -----
-_map
+.map
 =====
 get_type quote
 -----
 _ do _[
-    .a set _(_(a)),
-    .a which get_type : .
+    _a set _(_(a)),
+    _a which get_type : .
 ]
 -----
-_quote
+.quote
 =====
 get_type call
 -----
 _ do _[
-    .a set _(_ f a),
-    .a which get_type : .
+    _a set _(_ f a),
+    _a which get_type : .
 ]
 -----
-_call
+.call
 =====
 get_type link
 -----
 _ do _[
-    .make_link set _ import _link.make,
-    .a set _ make_link .,
-    .a which get_type : .
+    _make_link set _ import .link.make,
+    _a set _ make_link .,
+    _a which get_type : .
 ]
 -----
-_link
+.link
 =====
 get_type function
 -----
 _ do _[
-    .a set _ function {
+    _a set _ function {
         code : (. : .) : .,
     },
-    .a which get_type : .
+    _a which get_type : .
 ]
 -----
-_function
+.function
 =====
 == unit
 -----
@@ -317,7 +317,7 @@ true
 =====
 == key
 -----
-_a == _a
+.a == .a
 -----
 true
 =====
@@ -384,9 +384,9 @@ true
 == link true
 -----
 _ do _[
-    .make_link set _ import _link.make,
-    .a set _ make_link .,
-    .b set a,
+    _make_link set _ import .link.make,
+    _a set _ make_link .,
+    _b set a,
     (a == b) and _ not a == .
 ]
 -----
@@ -395,9 +395,9 @@ true
 == link false
 -----
 _ do _[
-    .make_link set _ import _link.make,
-    .a set _ make_link .,
-    .b set _ make_link .,
+    _make_link set _ import .link.make,
+    _a set _ make_link .,
+    _b set _ make_link .,
     (a == b) and _ not a == .
 ]
 -----
@@ -406,10 +406,10 @@ false
 == function
 -----
 _ do _[
-    .a set _ function {
+    _a set _ function {
         code : (. : .) : .,
     },
-    .b set _ function {
+    _b set _ function {
         code : (. : .) : .,
     },
     (a == b) and _ not a == .
@@ -432,7 +432,7 @@ false
 == ref val
 -----
 _ do _[
-    .a set 1,
+    _a set 1,
     a == 1
 ]
 -----
@@ -441,7 +441,7 @@ true
 == val ref
 -----
 _ do _[
-    .a set 1,
+    _a set 1,
     1 == a
 ]
 -----
@@ -450,8 +450,8 @@ true
 == ref ref
 -----
 _ do _[
-    .a set 1,
-    .b set 1,
+    _a set 1,
+    _b set 1,
     a == b
 ]
 -----
@@ -460,7 +460,7 @@ true
 == same ref
 -----
 _ do _[
-    .a set 1,
+    _a set 1,
     a == a
 ]
 -----
@@ -469,8 +469,8 @@ true
 == special ref
 -----
 _ do _[
-    ._a set 1,
-    :_a == 1
+    _.a set 1,
+    :.a == 1
 ]
 -----
 true

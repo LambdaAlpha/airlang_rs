@@ -6,7 +6,7 @@ use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxConstInputFreeFunc;
 use crate::semantics::func::CtxMutInputAwareFunc;
 use crate::semantics::val::PrimFuncVal;
@@ -19,8 +19,8 @@ pub struct QuoteLib {
     pub set_source: PrimFuncVal,
 }
 
-pub const GET_SOURCE: &str = concatcp!(PREFIX_ID, QUOTE, ".get_source");
-pub const SET_SOURCE: &str = concatcp!(PREFIX_ID, QUOTE, ".set_source");
+pub const GET_SOURCE: &str = concatcp!(PREFIX_CELL, QUOTE, ".get_source");
+pub const SET_SOURCE: &str = concatcp!(PREFIX_CELL, QUOTE, ".set_source");
 
 impl Default for QuoteLib {
     fn default() -> Self {

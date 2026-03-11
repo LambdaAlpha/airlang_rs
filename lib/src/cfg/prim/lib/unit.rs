@@ -3,7 +3,7 @@ use const_format::concatcp;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxFreeInputFreeFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::UNIT;
@@ -15,7 +15,7 @@ pub struct UnitLib {
     pub default: PrimFuncVal,
 }
 
-pub const DEFAULT: &str = concatcp!(PREFIX_ID, UNIT, ".default");
+pub const DEFAULT: &str = concatcp!(PREFIX_CELL, UNIT, ".default");
 
 impl Default for UnitLib {
     fn default() -> Self {

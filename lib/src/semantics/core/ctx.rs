@@ -3,7 +3,7 @@ use num_traits::ToPrimitive;
 
 use crate::bug;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::val::CallVal;
 use crate::semantics::val::CellVal;
@@ -15,7 +15,7 @@ use crate::semantics::val::QuoteVal;
 use crate::semantics::val::Val;
 use crate::type_::Key;
 
-pub(crate) const VALUE: &str = concatcp!(PREFIX_ID, "value");
+pub(crate) const VALUE: &str = concatcp!(PREFIX_CELL, "value");
 
 impl DynCtx<Key, Val> for CellVal {
     fn ref_(&self, cfg: &mut Cfg, key: Key) -> Option<&Val> {
@@ -44,7 +44,7 @@ impl DynCtx<Key, Val> for CellVal {
     }
 }
 
-pub(crate) const SOURCE: &str = concatcp!(PREFIX_ID, "source");
+pub(crate) const SOURCE: &str = concatcp!(PREFIX_CELL, "source");
 
 impl DynCtx<Key, Val> for QuoteVal {
     fn ref_(&self, cfg: &mut Cfg, key: Key) -> Option<&Val> {
@@ -73,8 +73,8 @@ impl DynCtx<Key, Val> for QuoteVal {
     }
 }
 
-pub(crate) const LEFT: &str = concatcp!(PREFIX_ID, "left");
-pub(crate) const RIGHT: &str = concatcp!(PREFIX_ID, "right");
+pub(crate) const LEFT: &str = concatcp!(PREFIX_CELL, "left");
+pub(crate) const RIGHT: &str = concatcp!(PREFIX_CELL, "right");
 
 impl DynCtx<Key, Val> for PairVal {
     fn ref_(&self, cfg: &mut Cfg, key: Key) -> Option<&Val> {
@@ -114,8 +114,8 @@ impl DynCtx<Key, Val> for PairVal {
     }
 }
 
-pub(crate) const FUNCTION: &str = concatcp!(PREFIX_ID, "function");
-pub(crate) const INPUT: &str = concatcp!(PREFIX_ID, "input");
+pub(crate) const FUNCTION: &str = concatcp!(PREFIX_CELL, "function");
+pub(crate) const INPUT: &str = concatcp!(PREFIX_CELL, "input");
 
 impl DynCtx<Key, Val> for CallVal {
     fn ref_(&self, cfg: &mut Cfg, key: Key) -> Option<&Val> {
@@ -155,8 +155,8 @@ impl DynCtx<Key, Val> for CallVal {
     }
 }
 
-pub(crate) const FIRST: &str = concatcp!(PREFIX_ID, "first");
-pub(crate) const LAST: &str = concatcp!(PREFIX_ID, "last");
+pub(crate) const FIRST: &str = concatcp!(PREFIX_CELL, "first");
+pub(crate) const LAST: &str = concatcp!(PREFIX_CELL, "last");
 
 impl DynCtx<Key, Val> for ListVal {
     fn ref_(&self, cfg: &mut Cfg, key: Key) -> Option<&Val> {

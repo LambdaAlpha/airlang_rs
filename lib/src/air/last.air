@@ -1,9 +1,9 @@
 _ do _[
-    .prelude set _ import _prelude,
-    .link_which set _ import _link.which,
+    _prelude set _ import .prelude,
+    _link_which set _ import .link.which,
     
-    prelude link_which set : .empty : empty,
-    prelude link_which set : .return : return,
-    prelude link_which set : .continue : continue,
-    prelude link_which set : .break : break,
+    prelude link_which set : _empty : empty,
+    prelude link_which set : _return : return,
+    prelude link_which set : _continue : continue,
+    prelude link_which set : _break : break,
 ]

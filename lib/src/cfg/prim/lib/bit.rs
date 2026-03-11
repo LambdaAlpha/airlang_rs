@@ -4,7 +4,7 @@ use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxFreeInputAwareFunc;
 use crate::semantics::val::BIT;
 use crate::semantics::val::PrimFuncVal;
@@ -19,11 +19,11 @@ pub struct BitLib {
     pub imply: PrimFuncVal,
 }
 
-pub const NOT: &str = concatcp!(PREFIX_ID, BIT, ".not");
-pub const AND: &str = concatcp!(PREFIX_ID, BIT, ".and");
-pub const OR: &str = concatcp!(PREFIX_ID, BIT, ".or");
-pub const XOR: &str = concatcp!(PREFIX_ID, BIT, ".xor");
-pub const IMPLY: &str = concatcp!(PREFIX_ID, BIT, ".imply");
+pub const NOT: &str = concatcp!(PREFIX_CELL, BIT, ".not");
+pub const AND: &str = concatcp!(PREFIX_CELL, BIT, ".and");
+pub const OR: &str = concatcp!(PREFIX_CELL, BIT, ".or");
+pub const XOR: &str = concatcp!(PREFIX_CELL, BIT, ".xor");
+pub const IMPLY: &str = concatcp!(PREFIX_CELL, BIT, ".imply");
 
 impl Default for BitLib {
     fn default() -> Self {

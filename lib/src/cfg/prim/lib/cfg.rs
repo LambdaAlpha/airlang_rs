@@ -6,7 +6,7 @@ use crate::cfg::eval_with_prelude;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::CtxConstInputFreeFunc;
 use crate::semantics::func::CtxFreeInputAwareFunc;
@@ -36,15 +36,15 @@ pub struct CfgLib {
     pub where_: PrimFuncVal,
 }
 
-pub const MAKE: &str = concatcp!(PREFIX_ID, CFG, ".make");
-pub const REPRESENT: &str = concatcp!(PREFIX_ID, CFG, ".represent");
-pub const EXIST: &str = concatcp!(PREFIX_ID, CFG, ".exist");
-pub const IMPORT: &str = concatcp!(PREFIX_ID, CFG, ".import");
-pub const EXPORT: &str = concatcp!(PREFIX_ID, CFG, ".export");
-pub const GET_LENGTH: &str = concatcp!(PREFIX_ID, CFG, ".get_length");
-pub const WITH: &str = concatcp!(PREFIX_ID, CFG, ".with");
-pub const GET_SELF: &str = concatcp!(PREFIX_ID, CFG, ".get_self");
-pub const WHERE: &str = concatcp!(PREFIX_ID, CFG, ".where");
+pub const MAKE: &str = concatcp!(PREFIX_CELL, CFG, ".make");
+pub const REPRESENT: &str = concatcp!(PREFIX_CELL, CFG, ".represent");
+pub const EXIST: &str = concatcp!(PREFIX_CELL, CFG, ".exist");
+pub const IMPORT: &str = concatcp!(PREFIX_CELL, CFG, ".import");
+pub const EXPORT: &str = concatcp!(PREFIX_CELL, CFG, ".export");
+pub const GET_LENGTH: &str = concatcp!(PREFIX_CELL, CFG, ".get_length");
+pub const WITH: &str = concatcp!(PREFIX_CELL, CFG, ".with");
+pub const GET_SELF: &str = concatcp!(PREFIX_CELL, CFG, ".get_self");
+pub const WHERE: &str = concatcp!(PREFIX_CELL, CFG, ".where");
 
 impl Default for CfgLib {
     fn default() -> Self {

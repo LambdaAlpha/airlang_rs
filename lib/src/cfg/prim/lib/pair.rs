@@ -6,7 +6,7 @@ use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::PREFIX_ID;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxConstInputFreeFunc;
 use crate::semantics::func::CtxMutInputAwareFunc;
 use crate::semantics::val::PAIR;
@@ -21,10 +21,10 @@ pub struct PairLib {
     pub set_right: PrimFuncVal,
 }
 
-pub const GET_LEFT: &str = concatcp!(PREFIX_ID, PAIR, ".get_left");
-pub const SET_LEFT: &str = concatcp!(PREFIX_ID, PAIR, ".set_left");
-pub const GET_RIGHT: &str = concatcp!(PREFIX_ID, PAIR, ".get_right");
-pub const SET_RIGHT: &str = concatcp!(PREFIX_ID, PAIR, ".set_right");
+pub const GET_LEFT: &str = concatcp!(PREFIX_CELL, PAIR, ".get_left");
+pub const SET_LEFT: &str = concatcp!(PREFIX_CELL, PAIR, ".set_left");
+pub const GET_RIGHT: &str = concatcp!(PREFIX_CELL, PAIR, ".get_right");
+pub const SET_RIGHT: &str = concatcp!(PREFIX_CELL, PAIR, ".set_right");
 
 impl Default for PairLib {
     fn default() -> Self {
