@@ -16,7 +16,7 @@ _ do _[
         1
     ]),
     _b set _cfg which is_aborted : .,
-    b and a == .
+    b and a = .
 ]
 -----
 true

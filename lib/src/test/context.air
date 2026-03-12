@@ -3,7 +3,7 @@ get ref
 _ do _[
     _any set _ import .value.any,
     _a set _ any .,
-    a == _a get _
+    a = _a get _
 ]
 -----
 true
@@ -14,7 +14,7 @@ _ do _[
     _any set _ import .value.any,
     _a set _ any .,
     _b set _a,
-    a == b get _
+    a = b get _
 ]
 -----
 true
@@ -78,70 +78,70 @@ _ do _[
 -----
 1
 =====
-= destruct cell
+represent cell
 -----
 _ do _[
-    .(_v) = .(true),
+    .(_v) represent .(true),
     v
 ]
 -----
 true
 =====
-= destruct pair
+represent pair
 -----
 _ do _[
-    (_a : _b) = 1 : 2,
+    _(a : b) represent 1 : 2,
     a : b
 ]
 -----
 1 : 2
 =====
-= destruct recursive
+represent recursive
 -----
 _ do _[
-    (_a : _b : _c) = 1 : 2 : 3,
+    _(a : b : c) represent 1 : 2 : 3,
     [a, b, c]
 ]
 -----
 [1, 2, 3]
 =====
-= destruct call
+represent call
 -----
 _ do _[
-    (_ form _(_ _f _a)) = _(_ 1 2),
+    _(_ f a) represent _(_ 1 2),
     [f, a]
 ]
 -----
 [1, 2]
 =====
-= destruct infix
+represent infix
 -----
 _ do _[
-    (_ form _(_a _b _c)) = _(1 2 3),
+    _(a b c) represent _(1 2 3),
     [a, b, c]
 ]
 -----
 [1, 2, 3]
 =====
-= destruct list equal length
+represent list equal length
 -----
 _ do _[
-    [_a, _b, _c] = [1, 2, 3],
+    _[a, b, c] represent [1, 2, 3],
     [a, b, c]
 ]
 -----
 [1, 2, 3]
 =====
-= destruct list more value
+represent list more value
 -----
 _ do _[
-    [_a, _b] = [1, 2, 3],
+    _[a, b] represent [1, 2, 3],
     [a, b]
 ]
 -----
 [1, 2]
 =====
-= destruct list more pattern
+represent list more pattern
 -----
 _ do _[
     _config.make set _ import .config.make,
@@ -150,43 +150,43 @@ _ do _[
     _is_aborted set _ import .error.is_aborted,
     _c set _ config.make {
         .prelude : _ link.make {
-            = : =,
+            represent : represent,
         },
     },
-    _c where _([_a, _b] = [3]),
+    _c where _(_[a, b] represent [3]),
     _c which is_aborted : .,
 ]
 -----
 true
 =====
-= destruct map key
+represent map key
 -----
 _ do _[
-    {a : _a, b : _b} = {a : 1, b : 2, c : 3},
+    _{a : a, b : b} represent {a : 1, b : 2, c : 3},
     [a, b]
 ]
 -----
 [1, 2]
 =====
-= destruct map other key
+represent map other key
 -----
 _ do _[
-    {1 : _a, 3 : _b} = {1 : 2, 3 : 4},
+    _{1 : a, 3 : b} represent {1 : 2, 3 : 4},
     [a, b]
 ]
 -----
 [2, 4]
 =====
-= destruct match
+represent match
 -----
 _ do _[
-    [_a, 2, _c] = [1, 2, 3],
+    _[a, 2, c] represent [1, 2, 3],
     [a, c]
 ]
 -----
 [1, 3]
 =====
-= pair ctx
+represent pair ctx
 -----
 _ do _[
     _p set 1 : 2,
@@ -196,7 +196,7 @@ _ do _[
 -----
 3
 =====
-= call ctx
+represent call ctx
 -----
 _ do _[
     _c set _(_ func input),
@@ -206,7 +206,7 @@ _ do _[
 -----
 .f
 =====
-= list ctx
+represent list ctx
 -----
 _ do _[
     _list.get set _ import .list.get,
@@ -217,7 +217,7 @@ _ do _[
 -----
 4
 =====
-= map ctx
+represent map ctx
 -----
 _ do _[
     _map.get set _ import .map.get,
@@ -228,7 +228,7 @@ _ do _[
 -----
 .(3)
 =====
-= map ctx not exist
+represent map ctx not exist
 -----
 _ do _[
     _map.get set _ import .map.get,

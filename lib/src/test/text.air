@@ -8,7 +8,7 @@ _ do _[
     _l set _t which get_length : .,
     _t which push : "a",
     _l1 set _t which get_length : .,
-    l1 == l + 1
+    l1 = l + 1
 ]
 -----
 true
@@ -25,7 +25,7 @@ _ do _[
     _lb set _b which get_length : .,
     _ab set "" join [a, b],
     _lab set _ab which get_length : .,
-    lab == la + lb
+    lab = la + lb
 ]
 -----
 true
@@ -61,7 +61,7 @@ _ do _[
     _t set a,
     _t which push : b,
     _t1 set "" join [a, b],
-    t == t1
+    t = t1
 ]
 -----
 true
@@ -114,7 +114,7 @@ _ do _[
     _into_utf8 set _ import .text.into_utf8,
     _t set _ any .text,
     _t1 set _ from_utf8 _ into_utf8 t,
-    t == t1
+    t = t1
 ]
 -----
 true

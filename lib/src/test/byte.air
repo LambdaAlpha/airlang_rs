@@ -8,7 +8,7 @@ _ do _[
     _l set _b which get_length : .,
     _b which push : byte'00',
     _l1 set _b which get_length : .,
-    l1 == l + 1
+    l1 = l + 1
 ]
 -----
 true
@@ -25,7 +25,7 @@ _ do _[
     _lb set _b which get_length : .,
     _ab set byte'' join [a, b],
     _lab set _ab which get_length : .,
-    lab == la + lb
+    lab = la + lb
 ]
 -----
 true
@@ -61,7 +61,7 @@ _ do _[
     _ab set a,
     _ab which push : b,
     _ab1 set byte'' join [a, b],
-    ab == ab1
+    ab = ab1
 ]
 -----
 true

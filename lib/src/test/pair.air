@@ -7,7 +7,7 @@ _ do _[
     _l set _ any .,
     _r set _ any .,
     _p set l : r,
-    (l == _p which get_left : .) and (r == _p which get_right : .)
+    (l = _p which get_left : .) and (r = _p which get_right : .)
 ]
 -----
 true
@@ -27,7 +27,7 @@ _ do _[
     _p which set_right : r,
     _l1 set _p which get_left : .,
     _r1 set _p which get_right : .,
-    (l == l1) and (r == r1)
+    (l = l1) and (r = r1)
 ]
 -----
 true
@@ -43,7 +43,7 @@ _ do _[
     _p set l1 : r1,
     _l2 set _p which set_left : _ any .,
     _r2 set _p which set_right : _ any .,
-    (l1 == l2) and r1 == r2
+    (l1 = l2) and r1 = r2
 ]
 -----
 true

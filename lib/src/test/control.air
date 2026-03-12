@@ -404,7 +404,7 @@ _ do _[
     _b set 0,
     _(b < 5) loop _[
         _b set b + 1,
-        _ .try (b == 2) test _[continue],
+        _ .try (b = 2) test _[continue],
         _a set a + b,
     ],
     a
@@ -453,7 +453,7 @@ _ do _[
 iterate return 1
 -----
 [1, 2, 3, 4, 5] iterate _i : _[
-    _ .try (i == 3) test [.(.(true))]
+    _ .try (i = 3) test [.(.(true))]
 ]
 -----
 true
@@ -462,7 +462,7 @@ iterate return 2
 -----
 _ do _[
     [1, 2, 3, 4, 5] iterate _i : _[
-        _ .try (i == 3) test _[break],
+        _ .try (i = 3) test _[break],
         _a set i
     ],
     a
@@ -477,7 +477,7 @@ _ do _[
     _b set 0,
     [1, 2, 3, 4, 5] iterate _i : _[
         _a set a + i,
-        _ .try (i == 3) test _[continue],
+        _ .try (i = 3) test _[continue],
         _b set b + i
     ],
     a : b

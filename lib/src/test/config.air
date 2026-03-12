@@ -6,7 +6,7 @@ _ do _[
     _represent set _ import .config.represent,
     _c set {a : _ any ., b : _ any ., c : _ any .},
     _c1 set _ represent _ make c,
-    c == c1
+    c = c1
 ]
 -----
 true
@@ -23,7 +23,7 @@ _ do _[
 -----
 3
 =====
-get_length == represent length
+get_length = represent length
 -----
 _ do _[
     _config.get_length set _ import .config.get_length,
@@ -34,7 +34,7 @@ _ do _[
     _m set _ represent c,
     _lc set _c which config.get_length : .,
     _lm set _m which map.get_length : .,
-    lc == lm
+    lc = lm
 ]
 -----
 true
@@ -57,7 +57,7 @@ _ do _[
     _ab set _ any .,
     .a.b export ab,
     _ab1 set _ import .a.b,
-    ab == ab1
+    ab = ab1
 ]
 -----
 true
@@ -80,7 +80,7 @@ _ do _[
     _c2 set _c1 where _(_ get_self .),
     _m1 set _ represent c1,
     _m2 set _ represent c2,
-    m1 == m2
+    m1 = m2
 ]
 -----
 true
@@ -95,7 +95,7 @@ _ do _[
         _a4 set {.a : a2} with _(_ import .a),
         _a3 set _ import .a,
     ]),
-    (a1 == a3) and (a2 == a4)
+    (a1 = a3) and (a2 = a4)
 ]
 -----
 true
@@ -155,8 +155,8 @@ _ do _[
         },
         .a : a,
     },
-    _a1 = _c where _(_ import .a),
-    a == a1
+    _a1 set _c where _(_ import .a),
+    a = a1
 ]
 -----
 true
@@ -170,7 +170,7 @@ _ do _[
         code : (. : .) : _ form _(_ import .a),
     },
     _a1 set {.a : a0} with _(_ f .),
-    a0 == a1
+    a0 = a1
 ]
 -----
 true

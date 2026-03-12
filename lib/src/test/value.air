@@ -1,10 +1,10 @@
-== true
+= true
 -----
 _ do _[
     _any set _ import .value.any,
     _a set _ any .,
     _b set a,
-    a == b
+    a = b
 ]
 -----
 true
@@ -297,113 +297,113 @@ _ do _[
 -----
 .function
 =====
-== unit
+= unit
 -----
-. == .
+. = .
 -----
 true
 =====
-== false
+= false
 -----
-true == false
+true = false
 -----
 false
 =====
-== true
+= true
 -----
-false == false
------
-true
-=====
-== key
------
-.a == .a
+false = false
 -----
 true
 =====
-== text
+= key
 -----
-"" == ""
------
-true
-=====
-== integer
------
-1 == 1
+.a = .a
 -----
 true
 =====
-== decimal
+= text
 -----
-1.0 == 1.0
------
-true
-=====
-== byte
------
-byte'ff' == byte'ff'
+"" = ""
 -----
 true
 =====
-== cell
+= integer
 -----
-.(1) == .(1)
------
-true
-=====
-== pair
------
-(1 : 2) == (1 : 2)
+1 = 1
 -----
 true
 =====
-== list
+= decimal
 -----
-[1, 2] == [1, 2]
------
-true
-=====
-== map
------
-{} == {}
+1.0 = 1.0
 -----
 true
 =====
-== quote
+= byte
 -----
-_(_(1)) == _(_(1))
------
-true
-=====
-== call
------
-_(_ 1 2) == _(_ 1 2)
+byte'ff' = byte'ff'
 -----
 true
 =====
-== link true
+= cell
+-----
+.(1) = .(1)
+-----
+true
+=====
+= pair
+-----
+(1 : 2) = (1 : 2)
+-----
+true
+=====
+= list
+-----
+[1, 2] = [1, 2]
+-----
+true
+=====
+= map
+-----
+{} = {}
+-----
+true
+=====
+= quote
+-----
+_(_(1)) = _(_(1))
+-----
+true
+=====
+= call
+-----
+_(_ 1 2) = _(_ 1 2)
+-----
+true
+=====
+= link true
 -----
 _ do _[
     _make_link set _ import .link.make,
     _a set _ make_link .,
     _b set a,
-    (a == b) and _ not a == .
+    (a = b) and _ not a = .
 ]
 -----
 true
 =====
-== link false
+= link false
 -----
 _ do _[
     _make_link set _ import .link.make,
     _a set _ make_link .,
     _b set _ make_link .,
-    (a == b) and _ not a == .
+    (a = b) and _ not a = .
 ]
 -----
 false
 =====
-== function
+= function
 -----
 _ do _[
     _a set _ function {
@@ -412,65 +412,65 @@ _ do _[
     _b set _ function {
         code : (. : .) : .,
     },
-    (a == b) and _ not a == .
+    (a = b) and _ not a = .
 ]
 -----
 true
 =====
-== eval
+= eval
 -----
-(1 + 1) == (3 - 1)
+(1 + 1) = (3 - 1)
 -----
 true
 =====
-== diff type
+= diff type
 -----
-1 == "a"
+1 = "a"
 -----
 false
 =====
-== ref val
+= ref val
 -----
 _ do _[
     _a set 1,
-    a == 1
+    a = 1
 ]
 -----
 true
 =====
-== val ref
+= val ref
 -----
 _ do _[
     _a set 1,
-    1 == a
+    1 = a
 ]
 -----
 true
 =====
-== ref ref
+= ref ref
 -----
 _ do _[
     _a set 1,
     _b set 1,
-    a == b
+    a = b
 ]
 -----
 true
 =====
-== same ref
+= same ref
 -----
 _ do _[
     _a set 1,
-    a == a
+    a = a
 ]
 -----
 true
 =====
-== special ref
+= special ref
 -----
 _ do _[
     _.a set 1,
-    1 == _ get _.a
+    1 = _ get _.a
 ]
 -----
 true

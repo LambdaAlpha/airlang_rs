@@ -189,7 +189,7 @@ _ do _[
         },
     },
     _ f .,
-    a == 1
+    a = 1
 ]
 -----
 true
@@ -237,7 +237,7 @@ _ do _[
         context_constant : true,
         code : not_code,
     },
-    repr == _ represent not
+    repr = _ represent not
 ]
 -----
 true
@@ -268,7 +268,7 @@ _ do _[
         context_constant : true,
         code : type_code,
     },
-    repr == _ represent get_type
+    repr = _ represent get_type
 ]
 -----
 true
@@ -283,7 +283,7 @@ _ do _[
         prelude : {},
     },
     _new_repr set _ represent _ function repr,
-    repr == new_repr
+    repr = new_repr
 ]
 -----
 true
@@ -401,12 +401,12 @@ _ do _[
         code : (. : .) : .,
         prelude : prelude
     },
-    (_f which function.get_prelude : .) == prelude
+    (_f which function.get_prelude : .) = prelude
 ]
 -----
 true
 =====
-get_id ==
+get_id =
 -----
 _ do _[
     _get_id set _ import .function.get_id,
@@ -415,7 +415,7 @@ _ do _[
     _f2 set _ any .function,
     _id_f1 set _f1 which get_id : .,
     _id_f2 set _f2 which get_id : .,
-    (f1 == f2) == (id_f1 == id_f2)
+    (f1 = f2) = (id_f1 = id_f2)
 ]
 -----
 true
@@ -425,7 +425,7 @@ get_id primitive
 _ do _[
     _get_id set _ import .function.get_id,
     _id_not set _not which get_id : .,
-    .key == _id_not which get_type : .,
+    .key = _id_not which get_type : .,
 ]
 -----
 true
@@ -449,7 +449,7 @@ _ do _[
     _id_g set _g which get_id : .,
     _id_h set _h which get_id : .,
     _id_type set _id_f which get_type : .,
-    (id_type == .key) and (id_f == id_g) and _ not id_f == id_h
+    (id_type = .key) and (id_f = id_g) and _ not id_f = id_h
 ]
 -----
 true
@@ -459,7 +459,7 @@ recurse
 _ do _[
     _g set _ function {
         code : (. : _fi) : _ form _(_ do _[
-            (__f : __i) = _fi,
+            _(_f : _i) represent _fi,
             (_i < 1) test _[
                 0
             ] : _[

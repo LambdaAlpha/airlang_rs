@@ -175,7 +175,7 @@ impl Prelude for BasePrimPrelude {
         map_put_func(map, "get", self.get);
         map_put_func(map, "set", self.set);
         map_put_func(map, "form", self.form);
-        map_put_func(map, "=", self.represent);
+        map_put_func(map, "represent", self.represent);
         map_put_func(map, "which", self.which);
 
         map_put_func(map, "do", self.do_);
@@ -186,7 +186,7 @@ impl Prelude for BasePrimPrelude {
         map_put_func(map, "iterate", self.iterate);
 
         map_put_func(map, "get_type", self.get_type);
-        map_put_func(map, "==", self.equal);
+        map_put_func(map, "=", self.equal);
 
         map_put_func(map, "abort", self.abort);
         map_put_func(map, "assert", self.assert);

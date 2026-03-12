@@ -10,7 +10,7 @@ _ do _[
     _lb set _b which get_length : .,
     _ab set empty join [a, b],
     _lab set _ab which get_length : .,
-    lab == la + lb
+    lab = la + lb
 ]
 -----
 true
@@ -69,7 +69,7 @@ _ do _[
     _into_text set _ import .key.into_text,
     _s set _ any .key,
     _s1 set _ from_text _ into_text s,
-    s == s1
+    s = s1
 ]
 -----
 true

@@ -3,7 +3,7 @@
 _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
-    a == a + 0
+    a = a + 0
 ]
 -----
 true
@@ -13,7 +13,7 @@ true
 _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
-    a == a - 0
+    a = a - 0
 ]
 -----
 true
@@ -24,7 +24,7 @@ _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
     _b set _ any .integer,
-    a == <(a + b - b)
+    a = <(a + b - b)
 ]
 -----
 true
@@ -35,7 +35,7 @@ _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
     _b set _ any .integer,
-    a == <(a - b + b)
+    a = <(a - b + b)
 ]
 -----
 true
@@ -57,7 +57,7 @@ true
 _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
-    0 == a * 0
+    0 = a * 0
 ]
 -----
 true
@@ -67,7 +67,7 @@ true
 _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
-    a == a * 1
+    a = a * 1
 ]
 -----
 true
@@ -77,7 +77,7 @@ true
 _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
-    0 == a + a * 0-1
+    0 = a + a * 0-1
 ]
 -----
 true
@@ -108,7 +108,7 @@ true
 _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
-    a == a / 1
+    a = a / 1
 ]
 -----
 true
@@ -118,7 +118,7 @@ true
 _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
-    0 == a + a / 0-1
+    0 = a + a / 0-1
 ]
 -----
 true
@@ -128,8 +128,8 @@ true
 _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
-    _ .try (a == 0) test [.(true)],
-    0 == 0 / a
+    _ .try (a = 0) test [.(true)],
+    0 = 0 / a
 ]
 -----
 true
@@ -139,9 +139,9 @@ true
 _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
-    _ .try (a == 0) test [.(true)],
+    _ .try (a = 0) test [.(true)],
     _% set _ import .integer.remainder,
-    0 == 0 % a
+    0 = 0 % a
 ]
 -----
 true
@@ -174,7 +174,7 @@ _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
     _% set _ import .integer.remainder,
-    0 == a % 1
+    0 = a % 1
 ]
 -----
 true
@@ -185,22 +185,22 @@ _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
     _b set _ any .integer,
-    _ .try (b == 0) test [.(true)],
+    _ .try (b = 0) test [.(true)],
     _% set _ import .integer.remainder,
-    0 == (a * b) % b
+    0 = (a * b) % b
 ]
 -----
 true
 =====
-sign(a remainder b) == sign(a)
+sign(a remainder b) = sign(a)
 -----
 _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
     _b set _ any .integer,
-    _ .try (b == 0) test [.(true)],
+    _ .try (b = 0) test [.(true)],
     _% set _ import .integer.remainder,
-    (0 <= a) == 0 <= a % b
+    (0 <= a) = 0 <= a % b
 ]
 -----
 true
@@ -211,9 +211,9 @@ _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
     _b set _ any .integer,
-    _ .try (b == 0) test [.(true)],
+    _ .try (b = 0) test [.(true)],
     _% set _ import .integer.remainder,
-    (0 <= b) == 0 <= b + a % b
+    (0 <= b) = 0 <= b + a % b
 ]
 -----
 true
@@ -224,8 +224,8 @@ _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
     _b set _ any .integer,
-    _ .try (b == 0) test [.(true)],
-    a == <(a * b / b)
+    _ .try (b = 0) test [.(true)],
+    a = <(a * b / b)
 ]
 -----
 true
@@ -236,9 +236,9 @@ _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
     _b set _ any .integer,
-    _ .try (b == 0) test [.(true)],
+    _ .try (b = 0) test [.(true)],
     _c set a * b,
-    c == <(c / b * b)
+    c = <(c / b * b)
 ]
 -----
 true
@@ -249,21 +249,21 @@ _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
     _b set _ any .integer,
-    _ .try (b == 0) test [.(true)],
-    (0 <= a) == 0 <= a - a / b * b
+    _ .try (b = 0) test [.(true)],
+    (0 <= a) = 0 <= a - a / b * b
 ]
 -----
 true
 =====
-a == b * a / b + a remainder b
+a = b * a / b + a remainder b
 -----
 _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
     _b set _ any .integer,
-    _ .try (b == 0) test [.(true)],
+    _ .try (b = 0) test [.(true)],
     _% set _ import .integer.remainder,
-    a == (b * a / b) + a % b
+    a = (b * a / b) + a % b
 ]
 -----
 true
@@ -364,16 +364,16 @@ _ do _[
 -----
 0-1
 =====
-a divide_remainder b == (a / b) : (a remainder b)
+a divide_remainder b = (a / b) : (a remainder b)
 -----
 _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
     _b set _ any .integer,
-    _ .try (b == 0) test [.(true)],
+    _ .try (b = 0) test [.(true)],
     _% set _ import .integer.remainder,
     _/% set _ import .integer.divide_remainder,
-    (a /% b) == (a / b) : (a % b)
+    (a /% b) = (a / b) : (a % b)
 ]
 -----
 true
@@ -422,17 +422,17 @@ _ do _[
     _b set _ any .integer,
     _c set _ any .integer,
     [
-        (a > b) == (b < a),
-        (a < b) == (b > a),
-        (a >= b) == (b <= a),
-        (a <= b) == (b >= a),
+        (a > b) = (b < a),
+        (a < b) = (b > a),
+        (a >= b) = (b <= a),
+        (a <= b) = (b >= a),
         (a < b) xor (b <= a),
         (a <= b) xor (b < a),
         (a > b) xor (b >= a),
         (a >= b) xor (b > a),
-        (a < b) or (a == b) or (a > b),
-        (a <> b) == (a < b) or (a > b),
-        (a < b) == ((a + c) < (b + c)),
+        (a < b) or (a = b) or (a > b),
+        (a <> b) = (a < b) or (a > b),
+        (a < b) = ((a + c) < (b + c)),
     ]
 ]
 -----
@@ -442,7 +442,7 @@ order trivial
 -----
 _ do _[
     (0 < 1) and (0 <= 1) and (1 <= 1) and (0 <> 1)
-    and (2 > 1) and (2 >= 1) and (2 >= 2) and (2 == 2)
+    and (2 > 1) and (2 >= 1) and (2 >= 2) and (2 = 2)
 ]
 -----
 true

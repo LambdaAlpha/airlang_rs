@@ -28,8 +28,8 @@ _ do _[
         ]
     ],
     _repr set _ generate a,
-    .(_a1) = _ parse repr,
-    a == a1
+    .(_a1) represent _ parse repr,
+    a = a1
 ]
 -----
 true

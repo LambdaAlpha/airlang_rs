@@ -8,7 +8,7 @@ _ do _[
     _l1 set _a which get_length : .,
     _a which push : .,
     _l2 set _a which get_length : .,
-    l2 == l1 + 1
+    l2 = l1 + 1
 ]
 -----
 true
@@ -25,7 +25,7 @@ _ do _[
     _lb set _b which get_length : .,
     _a which push_many : b,
     _lab set _a which get_length : .,
-    lab == la + lb
+    lab = la + lb
 ]
 -----
 true
@@ -39,11 +39,11 @@ _ do _[
     _% set _ import .integer.remainder,
     _a set _ any .list,
     _l1 set _a which get_length : .,
-    _ .try (l1 == 0) test [.(true)],
+    _ .try (l1 = 0) test [.(true)],
     _i set (l1 + (_ any .integer) % l1) % l1,
     _a which pop_many : i,
     _l2 set _a which get_length : .,
-    l2 == l1 - i
+    l2 = l1 - i
 ]
 -----
 true
@@ -59,14 +59,14 @@ _ do _[
     _a set _ any .list,
     _b set a,
     _l set _a which get_length : .,
-    _ .try (l == 0) test [.(true)],
+    _ .try (l = 0) test [.(true)],
     _i set (l + (_ any .integer) % l) % l,
     _v1 set _a which list.get : i,
     _v2 set _ any .,
     _v3 set _a which list.set : i : v2,
     _v4 set _a which list.get : i,
     _a which list.set : i : v1,
-    (v1 == v3) and (v2 == v4) and (a == b)
+    (v1 = v3) and (v2 = v4) and (a = b)
 ]
 -----
 true
@@ -81,10 +81,10 @@ _ do _[
     _% set _ import .integer.remainder,
     _a set _ any .list,
     _la set _a which get_length : .,
-    _ .try (la == 0) test [.(true)],
+    _ .try (la = 0) test [.(true)],
     _b set _ any .list,
     _lb set _b which get_length : .,
-    _ .try (lb == 0) test [.(true)],
+    _ .try (lb = 0) test [.(true)],
     (la < lb) test _[
         _t set a,
         _a set b,
@@ -95,12 +95,12 @@ _ do _[
     ],
     _a1 set a,
     _d set la - lb,
-    _i set (d == 0) test [0] : _[(d + (_ any .integer) % d) % d],
+    _i set (d = 0) test [0] : _[(d + (_ any .integer) % d) % d],
     _c1 set _a which get_many : i : i + lb,
     _c2 set _a which set_many : i : b,
     _b1 set _a which get_many : i : i + lb,
     _a which set_many : i : c1,
-    (b == b1) and (c1 == c2) and (a == a1)
+    (b = b1) and (c1 = c2) and (a = a1)
 ]
 -----
 true
@@ -120,7 +120,7 @@ _ do _[
     _a which insert : i : v,
     _v1 set _a which get : i,
     _l1 set _a which get_length : .,
-    (v == v1) and (l == l1)
+    (v = v1) and (l = l1)
 ]
 -----
 true
@@ -140,7 +140,7 @@ _ do _[
     _v1 set _ any .,
     _a which insert : i : v1,
     _v2 set _a which remove : i,
-    (v1 == v2) and a == b
+    (v1 = v2) and a = b
 ]
 -----
 true
@@ -161,7 +161,7 @@ _ do _[
     _a which insert_many : i : v1,
     _v2 set _a which get_many : i : i + vl,
     _l2 set _a which get_length : .,
-    (v1 == v2) and l2 == l1 + vl - 1,
+    (v1 = v2) and l2 = l1 + vl - 1,
 ]
 -----
 true
@@ -182,7 +182,7 @@ _ do _[
     _v1l set _v1 which get_length : .,
     _a which insert_many : i : v1,
     _v2 set _a which remove_many : i : i + v1l,
-    (v1 == v2) and a == b
+    (v1 = v2) and a = b
 ]
 -----
 true
@@ -198,7 +198,7 @@ _ do _[
     _v1 set _ any .,
     _a1 which push : v1,
     _v2 set _a1 which pop : .,
-    (v1 == v2) and (a1 == a2)
+    (v1 = v2) and (a1 = a2)
 ]
 -----
 true
@@ -216,7 +216,7 @@ _ do _[
     _lb set _b1 which get_length : .,
     _a1 which push_many : b1,
     _b2 set _a1 which pop_many : lb,
-    (b1 == b2) and a1 == a2
+    (b1 = b2) and a1 = a2
 ]
 -----
 true
@@ -228,7 +228,7 @@ _ do _[
     _clear set _ import .list.clear,
     _a set _ any .list,
     _a which clear : .,
-    a == []
+    a = []
 ]
 -----
 true
