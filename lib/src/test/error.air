@@ -24,11 +24,11 @@ true
 abort is_aborted
 -----
 _ do _[
-    _cfg_make set _ import .config.make,
+    _config.make set _ import .config.make,
     _link.make set _ import .link.make,
     _where set _ import .config.where,
     _is_aborted set _ import .error.is_aborted,
-    _cfg set _ cfg_make {
+    _cfg set _ config.make {
         .prelude : _ link.make {
             abort : abort,
         },
@@ -42,11 +42,11 @@ true
 assert false
 -----
 _ do _[
-    _cfg_make set _ import .config.make,
+    _config.make set _ import .config.make,
     _link.make set _ import .link.make,
     _where set _ import .config.where,
     _is_aborted set _ import .error.is_aborted,
-    _cfg set _ cfg_make {
+    _cfg set _ config.make {
         .prelude : _ link.make {
             assert : assert,
         },
@@ -60,11 +60,11 @@ true
 assert true
 -----
 _ do _[
-    _cfg_make set _ import .config.make,
+    _config.make set _ import .config.make,
     _link.make set _ import .link.make,
     _where set _ import .config.where,
     _is_aborted set _ import .error.is_aborted,
-    _cfg set _ cfg_make {
+    _cfg set _ config.make {
         .prelude : _ link.make {
             assert : assert,
         },

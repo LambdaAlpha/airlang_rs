@@ -2,7 +2,7 @@ _ do _[
     _version set _ import .language.version,
     _generate set _ import .language.syntax.generate,
     _join set _ import .text.join,
-    (_major : _minor : _patch) represent version,
+    _(major : minor : patch) represent version,
     _major set _ generate major,
     _minor set _ generate minor,
     _patch set _ generate patch,
