@@ -8,7 +8,6 @@ pub(crate) struct KeyEval;
 
 pub const PREFIX_QUOTE: char = '_';
 pub const PREFIX_CELL: char = '.';
-pub const PREFIX_CTX: char = ':';
 
 enum KeyMode {
     Quote,
@@ -21,7 +20,6 @@ impl KeyEval {
         match key.chars().next() {
             Some(PREFIX_QUOTE) => (KeyMode::Quote, Key::from_str_unchecked(&key[1 ..])),
             Some(PREFIX_CELL) => (KeyMode::Cell, key),
-            Some(PREFIX_CTX) => (KeyMode::Ctx, Key::from_str_unchecked(&key[1 ..])),
             _ => (KeyMode::Ctx, key),
         }
     }
@@ -30,10 +28,8 @@ impl KeyEval {
 impl DynFunc<Cfg, Val, Key, Val> for KeyEval {
     fn call(&self, cfg: &mut Cfg, ctx: &mut Val, key: Key) -> Val {
         let (mode, key) = self.recognize(key);
-        match mode {
-            KeyMode::Quote => return Val::Key(key),
-            KeyMode::Cell => return Val::Key(key),
-            KeyMode::Ctx => {},
+        if matches!(mode, KeyMode::Quote | KeyMode::Cell) {
+            return Val::Key(key);
         }
         let Some(val) = ctx.ref_(cfg, key) else {
             return Val::default();

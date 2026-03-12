@@ -172,7 +172,7 @@ First, the evaluation rules for keys are as follows:
 
 1. `_a` ➔ `a`
 2. `.a` ➔ `.a`
-3. `:a` or `a` ➔ `v`, where `v` is the value bound to key `a` in the context
+3. `a` ➔ `v`, where `v` is the value bound to key `a` in the context
 
 Second, the evaluation rule for quotes is `_(v)` ➔ `v`.
 

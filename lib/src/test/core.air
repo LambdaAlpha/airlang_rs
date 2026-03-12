@@ -34,17 +34,11 @@ ___a
 -----
 __a
 =====
-key quote special 3
------
-_:a
------
-:a
-=====
 ctx ref
 -----
 _ do _[
     _a set 1,
-    :a
+    _ get _a
 ]
 -----
 1
@@ -53,8 +47,8 @@ ref will not remove
 -----
 _ do _[
     _a set 1,
-    :a,
-    :a
+    a,
+    a
 ]
 -----
 1
@@ -63,7 +57,7 @@ ref special
 -----
 _ do _[
     _.a set 1,
-    :.a
+    _ get .a
 ]
 -----
 1

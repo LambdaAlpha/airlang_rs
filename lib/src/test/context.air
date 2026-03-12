@@ -2,8 +2,8 @@ get ref
 -----
 _ do _[
     _any set _ import .value.any,
-    .a set _ any .,
-    :.a == .a get _
+    _a set _ any .,
+    a == _a get _
 ]
 -----
 true
@@ -53,7 +53,7 @@ set indirect
 -----
 _ do _[
     _a set _b,
-    :a set 1,
+    a set 1,
     b
 ]
 -----
@@ -63,7 +63,7 @@ set special key 1
 -----
 _ do _[
     .a set 1,
-    :.a
+    _ get .a
 ]
 -----
 1
@@ -72,8 +72,8 @@ set special key 2
 -----
 _ do _[
     _get_left set _ import .pair.get_left,
-    .:p set 1 : 2,
-    .:p which get_left : .
+    __p set 1 : 2,
+    __p which get_left : .
 ]
 -----
 1
