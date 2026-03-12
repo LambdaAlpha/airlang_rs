@@ -78,12 +78,12 @@ false
 recover
 -----
 _ do _[
-    _cfg_make set _ import .config.make,
+    _config.make set _ import .config.make,
     _link.make set _ import .link.make,
     _where set _ import .config.where,
     _is_aborted set _ import .error.is_aborted,
     _recover set _ import .error.recover,
-    _cfg set _ cfg_make {
+    _cfg set _ config.make {
         .prelude : _ link.make {
             abort : abort,
         },

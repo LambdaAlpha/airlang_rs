@@ -53,16 +53,16 @@ true
 stateful
 -----
 _ do _[
-    _make_link set _ import .link.make,
-    _link_which set _ import .link.which,
+    _link.make set _ import .link.make,
+    _link.which set _ import .link.which,
     _f set _ function {
         code : (. : .) : _ form _(_ do _[
-            __i set _a link_which get : .i,
-            _a link_which set : .i : _i + 1,
+            __i set _a link.which get : .i,
+            _a link.which set : .i : _i + 1,
             _i
         ]),
         prelude : {
-            a : _ make_link {.i : 0}
+            a : _ link.make {.i : 0}
         },
     },
     [_ f ., _ f ., _ f .]
@@ -73,16 +73,16 @@ _ do _[
 multiple stateful
 -----
 _ do _[
-    _make_link set _ import .link.make,
-    _link_which set _ import .link.which,
+    _link.make set _ import .link.make,
+    _link.which set _ import .link.which,
     _f set _(_ function {
         code : (. : .) : _ form _(_ do _[
-            __i set _a link_which get : .value,
-            _a link_which set : .value : _i + 1,
+            __i set _a link.which get : .value,
+            _a link.which set : .value : _i + 1,
             _i
         ]),
         prelude : {
-            a : _ make_link .(0)
+            a : _ link.make .(0)
         },
     }),
     _f1 set _ eval f,
@@ -95,10 +95,10 @@ _ do _[
 const const
 -----
 _ do _[
-    _link_which set _ import .link.which,
+    _link.which set _ import .link.which,
     .a set 1,
     _f set _ function {
-        code : (_c : .) : _ form _(_c link_which get : .a),
+        code : (_c : .) : _ form _(_c link.which get : .a),
         context_constant : true,
         prelude : {},
     },
@@ -110,10 +110,10 @@ _ do _[
 mutable const
 -----
 _ do _[
-    _link_which set _ import .link.which,
+    _link.which set _ import .link.which,
     .a set 1,
     _f set _ function {
-        code : (_c : .) : _ form _(_c link_which get : .a),
+        code : (_c : .) : _ form _(_c link.which get : .a),
         context_constant : false,
         prelude : {},
     },
@@ -125,9 +125,9 @@ _ do _[
 mutable mutate
 -----
 _ do _[
-    _link_which set _ import .link.which,
+    _link.which set _ import .link.which,
     _f set _ function {
-        code : (_c : _i) : _ form _(_c link_which set : _i : 2),
+        code : (_c : _i) : _ form _(_c link.which set : _i : 2),
         context_constant : false,
         prelude : {},
     },
@@ -141,13 +141,13 @@ _ do _[
 const mutate fail
 -----
 _ do _[
-    _link_which set _ import .link.which,
+    _link.which set _ import .link.which,
     _config.make set _ import .config.make,
     _link.make set _ import .link.make,
     _where set _ import .config.where,
     _is_aborted set _ import .error.is_aborted,
     _f set _ function {
-        code : (_c : _i) : _ form _(_c link_which set : _i : 2),
+        code : (_c : _i) : _ form _(_c link.which set : _i : 2),
         context_constant : true,
         prelude : {},
     },
@@ -197,11 +197,11 @@ true
 ctx explicit
 -----
 _ do _[
-    _link_which set _ import .link.which,
+    _link.which set _ import .link.which,
     _set_left set _ import .pair.set_left,
     _a set 1 : 2,
     _f set _ function {
-        code : (_p : _i) : _ form _(_p link_which set_left : _i),
+        code : (_p : _i) : _ form _(_p link.which set_left : _i),
         prelude : {},
     },
     _a which f : 3,

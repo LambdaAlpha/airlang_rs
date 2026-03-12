@@ -583,12 +583,12 @@ iterate map
 -----
 _ do _[
     _push set _ import .list.push,
-    _make_map set _ import .map.make,
+    _map.make set _ import .map.make,
     _kv set [],
     {1 : 2, 3 : 4} iterate _i : _[
         _kv which push : i
     ],
-    _ make_map kv
+    _ map.make kv
 ]
 -----
 {1 : 2, 3 : 4}

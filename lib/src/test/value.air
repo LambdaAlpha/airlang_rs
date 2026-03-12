@@ -279,8 +279,8 @@ _ do _[
 get_type link
 -----
 _ do _[
-    _make_link set _ import .link.make,
-    _a set _ make_link .,
+    _link set _ import .link.make,
+    _a set _ link .,
     _a which get_type : .
 ]
 -----
@@ -384,8 +384,8 @@ true
 = link true
 -----
 _ do _[
-    _make_link set _ import .link.make,
-    _a set _ make_link .,
+    _link set _ import .link.make,
+    _a set _ link .,
     _b set a,
     (a = b) and _ not a = .
 ]
@@ -395,9 +395,9 @@ true
 = link false
 -----
 _ do _[
-    _make_link set _ import .link.make,
-    _a set _ make_link .,
-    _b set _ make_link .,
+    _link set _ import .link.make,
+    _a set _ link .,
+    _b set _ link .,
     (a = b) and _ not a = .
 ]
 -----
