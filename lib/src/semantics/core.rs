@@ -1,6 +1,5 @@
 pub use self::eval::Eval;
 pub use self::form::Form;
-pub use self::id::Id;
 pub use self::key::PREFIX_CELL;
 pub use self::key::PREFIX_QUOTE;
 
@@ -36,5 +35,3 @@ mod form;
 mod key;
 
 mod ctx;
-
-mod id;
