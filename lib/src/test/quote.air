@@ -1,11 +1,23 @@
+make
+-----
+_ do _[
+    _any set _ import .value.any,
+    _v1 set _ any .,
+    _q1 set _ quote v1,
+    _(_(v2)) represent q1,
+    v1 = v2
+]
+-----
+true
+=====
 get
 -----
 _ do _[
     _any set _ import .value.any,
     _get_source set _ import .quote.get_source,
     _v set _ any .,
-    _c set _ form _(_(v)),
-    v = _c which get_source : .
+    _q set _ quote v,
+    v = _q which get_source : .
 ]
 -----
 true
@@ -16,11 +28,11 @@ _ do _[
     _any set _ import .value.any,
     _get_source set _ import .quote.get_source,
     _set_source set _ import .quote.set_source,
-    _c set _ any .quote,
-    _v set _ any .,
-    _c which set_source : v,
-    _v1 set _c which get_source : .,
-    v = v1
+    _q set _ any .quote,
+    _v1 set _ any .,
+    _q which set_source : v1,
+    _v2 set _q which get_source : .,
+    v1 = v2
 ]
 -----
 true
@@ -31,8 +43,8 @@ _ do _[
     _any set _ import .value.any,
     _set_source set _ import .quote.set_source,
     _v1 set _ any .,
-    _c set _ form _(_(v1)),
-    _v2 set _c which set_source : _ any .,
+    _q set _ quote v1,
+    _v2 set _q which set_source : _ any .,
     v1 = v2
 ]
 -----

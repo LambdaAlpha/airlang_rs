@@ -32,9 +32,11 @@ pub struct BasePrimPrelude {
     pub decimal_greater_equal: PrimFuncVal,
     pub decimal_less_greater: PrimFuncVal,
 
-    pub call: PrimFuncVal,
-
     pub move_: PrimFuncVal,
+
+    pub quote: PrimFuncVal,
+
+    pub call: PrimFuncVal,
 
     pub exist: PrimFuncVal,
     pub import: PrimFuncVal,
@@ -98,9 +100,11 @@ impl BasePrimPrelude {
             decimal_greater_equal: lib.decimal.greater_equal,
             decimal_less_greater: lib.decimal.less_greater,
 
-            call: lib.call.make,
-
             move_: lib.map.move_,
+
+            quote: lib.quote.make,
+
+            call: lib.call.make,
 
             exist: lib.cfg.exist,
             import: lib.cfg.import,
@@ -161,9 +165,11 @@ impl Prelude for BasePrimPrelude {
         map_put_func(map, ">=.", self.decimal_greater_equal);
         map_put_func(map, "<>.", self.decimal_less_greater);
 
-        map_put_func(map, "call", self.call);
-
         map_put_func(map, "move", self.move_);
+
+        map_put_func(map, "quote", self.quote);
+
+        map_put_func(map, "call", self.call);
 
         map_put_func(map, "exist", self.exist);
         map_put_func(map, "import", self.import);
