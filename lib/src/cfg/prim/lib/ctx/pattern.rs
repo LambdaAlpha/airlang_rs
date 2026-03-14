@@ -1,6 +1,7 @@
 use crate::bug;
 use crate::cfg::utils::key;
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::PREFIX_QUOTE;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::val::CallVal;
 use crate::semantics::val::CellVal;
@@ -18,7 +19,7 @@ use crate::type_::Pair;
 use crate::type_::Quote;
 
 pub(in crate::cfg) enum Pattern {
-    Any(Key),
+    Any(Option<Key>),
     Val(Val),
     Cell(Box<Cell<Pattern>>),
     Pair(Box<Pair<Pattern, Pattern>>),
@@ -47,17 +48,13 @@ impl PatternParse for Val {
     }
 }
 
-const KEY_LITERAL_CHAR: char = '-';
-const KEY_REF_CHAR: char = '*';
-
 impl PatternParse for Key {
     fn parse(self, _cfg: &mut Cfg, _tag: &str) -> Option<Pattern> {
-        let pattern = match self.chars().next() {
-            Some(KEY_LITERAL_CHAR) => Pattern::Val(key(&self[1 ..])),
-            Some(KEY_REF_CHAR) => Pattern::Any(Key::from_str_unchecked(&self[1 ..])),
-            _ => Pattern::Any(self),
-        };
-        Some(pattern)
+        if self.starts_with(PREFIX_QUOTE) {
+            return Some(Pattern::Val(key(&self[1 ..])));
+        }
+        let pattern = if self.is_empty() { None } else { Some(self) };
+        Some(Pattern::Any(pattern))
     }
 }
 
@@ -136,7 +133,7 @@ impl PatternMatch<Val> for Pattern {
     }
 }
 
-impl PatternMatch<Val> for Key {
+impl PatternMatch<Val> for Option<Key> {
     fn match_(&self, _cfg: &mut Cfg, _force: bool, _tag: &str, _val: &Val) -> bool {
         true
     }
@@ -272,9 +269,12 @@ impl PatternAssign<Val, Val> for Pattern {
     }
 }
 
-impl PatternAssign<Val, Val> for Key {
+impl PatternAssign<Val, Val> for Option<Key> {
     fn assign(self, cfg: &mut Cfg, _tag: &str, ctx: &mut Val, val: Val) -> Option<()> {
-        ctx.set(cfg, self, val);
+        let Some(key) = self else {
+            return Some(());
+        };
+        ctx.set(cfg, key, val);
         if cfg.is_aborted() {
             return None;
         }

@@ -308,14 +308,26 @@ _ do _[
 match key
 -----
 _ do _[
-    _a set _a,
-    a match _[
-        .*a : [1],
-        .*b : [2]
+    _a match _[
+        __a : [1],
+        __b : [2],
     ]
 ]
 -----
 1
+=====
+match any
+-----
+_ do _[
+    _exist set _ import .map.contain,
+    _a set [1] match _[
+        true : [1],
+        _'' : [2],
+    ],
+    (a = 2) and _ not _ exist _''
+]
+-----
+true
 =====
 match try return
 -----
