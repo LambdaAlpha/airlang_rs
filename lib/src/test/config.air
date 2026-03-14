@@ -167,7 +167,10 @@ _ do _[
     _any set _ import .value.any,
     _a0 set _ any .,
     _f set _ function {
-        code : (. : .) : _ form _(_ import .a),
+        code : (. : .) : _(_ import .a),
+        prelude : {
+            import : import,
+        },
     },
     _a1 set {.a : a0} with _(_ f .),
     a0 = a1

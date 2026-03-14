@@ -1,5 +1,4 @@
 pub use self::eval::Eval;
-pub use self::form::Form;
 pub use self::key::PREFIX_CELL;
 pub use self::key::PREFIX_QUOTE;
 

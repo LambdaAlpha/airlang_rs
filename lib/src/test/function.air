@@ -14,7 +14,7 @@ call external func
 -----
 _ do _[
     _f set _ function {
-        code : (. : _i) : _ form _(_ not _i),
+        code : (. : _i) : not call _i,
         prelude : {},
     },
     _ f _ not true
@@ -26,7 +26,7 @@ call internal func
 -----
 _ do _[
     _f set _ function {
-        code : (. : _i) : _ form _(_ _not _i),
+        code : _((. : i) : _ not i),
         prelude : {
             not : not
         },
@@ -40,7 +40,7 @@ call rename
 -----
 _ do _[
     _f set _ function {
-        code : (. : _a) : _ form _(_ _n _a),
+        code : _((. : a) : _ n a),
         prelude : {
             n : not
         },
@@ -56,13 +56,18 @@ _ do _[
     _link.make set _ import .link.make,
     _link.which set _ import .link.which,
     _f set _ function {
-        code : (. : .) : _ form _(_ do _[
-            __i set _a link.which get : .i,
-            _a link.which set : .i : _i + 1,
-            _i
+        code : (. : .) : _(_ do _[
+            _i set a link.which get : .i,
+            a link.which set : .i : i + 1,
+            i
         ]),
         prelude : {
-            a : _ link.make {.i : 0}
+            a : _ link.make {.i : 0},
+            do : do,
+            set : set,
+            link.which : link.which,
+            get : get,
+            + : +,
         },
     },
     [_ f ., _ f ., _ f .]
@@ -76,13 +81,18 @@ _ do _[
     _link.make set _ import .link.make,
     _link.which set _ import .link.which,
     _f set _(_ function {
-        code : (. : .) : _ form _(_ do _[
-            __i set _a link.which get : .value,
-            _a link.which set : .value : _i + 1,
-            _i
+        code : _((. : .) : _ do _[
+            _i set a link.which get : .value,
+            a link.which set : .value : i + 1,
+            i
         ]),
         prelude : {
-            a : _ link.make .(0)
+            a : _ link.make .(0),
+            do : do,
+            set : set,
+            link.which : link.which,
+            get : get,
+            + : +,
         },
     }),
     _f1 set _ eval f,
@@ -98,9 +108,12 @@ _ do _[
     _link.which set _ import .link.which,
     .a set 1,
     _f set _ function {
-        code : (_c : .) : _ form _(_c link.which get : .a),
+        code : _((c : .) : c link.which get : .a),
         context_constant : true,
-        prelude : {},
+        prelude : {
+            link.which : link.which,
+            get : get,
+        },
     },
     _ f .
 ]
@@ -113,9 +126,12 @@ _ do _[
     _link.which set _ import .link.which,
     .a set 1,
     _f set _ function {
-        code : (_c : .) : _ form _(_c link.which get : .a),
+        code : _((c : .) : c link.which get : .a),
         context_constant : false,
-        prelude : {},
+        prelude : {
+            link.which : link.which,
+            get : get,
+        },
     },
     _ f .
 ]
@@ -127,9 +143,12 @@ mutable mutate
 _ do _[
     _link.which set _ import .link.which,
     _f set _ function {
-        code : (_c : _i) : _ form _(_c link.which set : _i : 2),
+        code : _((c : i) : c link.which set : i : 2),
         context_constant : false,
-        prelude : {},
+        prelude : {
+            link.which : link.which,
+            set : set,
+        },
     },
     _a set 1,
     _ f _a,
@@ -147,9 +166,12 @@ _ do _[
     _where set _ import .config.where,
     _is_aborted set _ import .error.is_aborted,
     _f set _ function {
-        code : (_c : _i) : _ form _(_c link.which set : _i : 2),
+        code : _((c : i) : c link.which set : i : 2),
         context_constant : true,
-        prelude : {},
+        prelude : {
+            link.which : link.which,
+            set : set,
+        },
     },
     _c set _ config.make {
         .prelude : _ link.make {
@@ -201,8 +223,11 @@ _ do _[
     _set_left set _ import .pair.set_left,
     _a set 1 : 2,
     _f set _ function {
-        code : (_p : _i) : _ form _(_p link.which set_left : _i),
-        prelude : {},
+        code : _((p : i) : p link.which set_left : i),
+        prelude : {
+            link.which : link.which,
+            set_left : set_left,
+        },
     },
     _a which f : 3,
     a
@@ -458,15 +483,22 @@ recurse
 -----
 _ do _[
     _g set _ function {
-        code : (. : _fi) : _ form _(_ do _[
-            _(_f : _i) represent _fi,
-            (_i < 1) test _[
+        code : _((. : fi) : _ do _[
+            _(f : i) represent fi,
+            (i < 1) test _[
                 0
             ] : _[
-                _i + _f _f _i - 1
+                i + f f i - 1
             ]
         ]),
-        prelude : {},
+        prelude : {
+            do : do,
+            represent : represent,
+            < : <,
+            test : test,
+            + : +,
+            - : -,
+        },
     },
     g g 10
 ]

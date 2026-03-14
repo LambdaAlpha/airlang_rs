@@ -19,7 +19,7 @@ _ do _[
 -----
 1
 =====
-measure_steps ref + form + call
+measure_steps ref + pair + call
 -----
 _ do _[
     _measure_steps set _ import .resource.measure_steps,

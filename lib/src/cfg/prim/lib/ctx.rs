@@ -7,26 +7,20 @@ use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::Form;
 use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::CtxConstInputAwareFunc;
 use crate::semantics::func::CtxConstInputFreeFunc;
 use crate::semantics::func::CtxMutInputAwareFunc;
 use crate::semantics::func::DynFunc;
-use crate::semantics::func::PrimCtx;
-use crate::semantics::func::PrimFunc;
-use crate::semantics::func::PrimInput;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Pair;
-use crate::utils::memory::leak_const;
 
 #[derive(Clone)]
 pub struct CtxLib {
     pub get: PrimFuncVal,
     pub set: PrimFuncVal,
-    pub form: PrimFuncVal,
     pub represent: PrimFuncVal,
     pub get_self: PrimFuncVal,
     // todo rename
@@ -37,7 +31,6 @@ const CTX: &str = "context";
 
 pub const GET: &str = concatcp!(PREFIX_CELL, CTX, ".get");
 pub const SET: &str = concatcp!(PREFIX_CELL, CTX, ".set");
-pub const FORM: &str = concatcp!(PREFIX_CELL, CTX, ".form");
 pub const REPRESENT: &str = concatcp!(PREFIX_CELL, CTX, ".represent");
 pub const GET_SELF: &str = concatcp!(PREFIX_CELL, CTX, ".get_self");
 pub const WHICH: &str = concatcp!(PREFIX_CELL, CTX, ".which");
@@ -47,8 +40,6 @@ impl Default for CtxLib {
         CtxLib {
             get: CtxConstInputAwareFunc { fn_: get }.build(),
             set: CtxMutInputAwareFunc { fn_: set }.build(),
-            form: PrimFunc { fn_: leak_const(Form), ctx: PrimCtx::Const_, input: PrimInput::Aware }
-                .into(),
             represent: CtxMutInputAwareFunc { fn_: represent }.build(),
             get_self: CtxConstInputFreeFunc { fn_: get_self }.build(),
             which: CtxMutInputAwareFunc { fn_: which }.build(),
@@ -60,7 +51,6 @@ impl CfgMod for CtxLib {
     fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, GET, self.get);
         extend_func(cfg, SET, self.set);
-        extend_func(cfg, FORM, self.form);
         extend_func(cfg, REPRESENT, self.represent);
         extend_func(cfg, GET_SELF, self.get_self);
         extend_func(cfg, WHICH, self.which);

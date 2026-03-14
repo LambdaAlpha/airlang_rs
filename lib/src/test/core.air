@@ -75,7 +75,7 @@ pair ref
 -----
 _ do _[
     _p set 1 : 2,
-    _p which eval : _ form _[_ get .left, _ get .right]
+    _p which eval : [get call .left, get call .right]
 ]
 -----
 [1, 2]
@@ -84,7 +84,7 @@ list ref
 -----
 _ do _[
     _l set [0, 3, 6],
-    _l which eval : _ form _[_ get .first, _ get .last]
+    _l which eval : [get call .first, get call .last]
 ]
 -----
 [0, 6]
@@ -111,7 +111,7 @@ call ref
 -----
 _ do _[
     _c set _(_ func input),
-    _c which eval : _ form _[_ get .function, _ get .input]
+    _c which eval : [get call .function, get call .input]
 ]
 -----
 [func, input]

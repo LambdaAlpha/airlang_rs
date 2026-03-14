@@ -47,7 +47,6 @@ pub struct BasePrimPrelude {
 
     pub get: PrimFuncVal,
     pub set: PrimFuncVal,
-    pub form: PrimFuncVal,
     pub represent: PrimFuncVal,
     pub which: PrimFuncVal,
 
@@ -115,7 +114,6 @@ impl BasePrimPrelude {
 
             get: lib.ctx.get,
             set: lib.ctx.set,
-            form: lib.ctx.form,
             represent: lib.ctx.represent,
             which: lib.ctx.which,
 
@@ -180,7 +178,6 @@ impl Prelude for BasePrimPrelude {
 
         map_put_func(map, "get", self.get);
         map_put_func(map, "set", self.set);
-        map_put_func(map, "form", self.form);
         map_put_func(map, "represent", self.represent);
         map_put_func(map, "which", self.which);
 

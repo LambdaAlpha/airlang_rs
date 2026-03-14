@@ -244,7 +244,7 @@ which 1
 _ do _[
     _set_left set _ import .pair.set_left,
     .a set {.p : 1 : 2},
-    .a which eval : _ form _(.p which set_left : 3),
+    .a which eval : which call .p : set_left : 3,
     .a which move : .p,
 ]
 -----
@@ -258,7 +258,7 @@ _ do _[
         .p : 1 : 2,
         .b : 3,
     },
-    .a which eval : _ form _(.p which set_left : _ get .b),
+    .a which eval : which call .p : set_left : get call .b,
     .a which move : .p,
 ]
 -----
@@ -273,7 +273,7 @@ _ do _[
         .p : 1 : 2,
         b : 3,
     },
-    .a which eval : _ form _(.p which _set_left : _b),
+    .a which eval : which call .p : _set_left : _b,
     .a which move : .p,
 ]
 -----
@@ -283,7 +283,7 @@ which recursive
 -----
 _ do _[
     .a set {.b : {.c : 1}},
-    .a which eval : _ form _(.b which get : .c)
+    .a which eval : which call .b : get : .c
 ]
 -----
 1

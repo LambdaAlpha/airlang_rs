@@ -2,11 +2,11 @@ make
 -----
 _ do _[
     _any set _ import .value.any,
-    _f set _ any .,
-    _i set _ any .,
-    _c1 set f call i,
-    _c2 set _ form _(_ f i),
-    c1 = c2
+    _f1 set _ any .,
+    _i1 set _ any .,
+    _c set f1 call i1,
+    _(_ f2 i2) represent c,
+    (f1 = f2) and (i1 = i2)
 ]
 -----
 true
@@ -19,7 +19,7 @@ _ do _[
     _get_input set _ import .call.get_input,
     _f set _ any .,
     _i set _ any .,
-    _c set _ form _(_ f i),
+    _c set f call i,
     (f = _c which get_function : .) and (i = _c which get_input : .)
 ]
 -----
@@ -51,7 +51,7 @@ _ do _[
     _set_input set _ import .call.set_input,
     _f1 set _ any .,
     _i1 set _ any .,
-    _c set _ form _(_ f1 i1),
+    _c set f1 call i1,
     _f2 set _c which set_function : _ any .,
     _i2 set _c which set_input : _ any .,
     (f1 = f2) and (i1 = i2)

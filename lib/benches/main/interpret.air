@@ -3,15 +3,24 @@
 _ do _[
     _% set _ import .integer.remainder,
     _f set _ function {
-        code : (. : _n) : _ form _(_ do _[
-            __sum set 0,
-            _n iterate __i : _[
-                _ .try (0 = _i % 3) test _[continue],
-                __sum set _sum + _i,
+        code : _((. : n) : _ do _[
+            _sum set 0,
+            n iterate _i : _[
+                _ .try (0 = i % 3) test _[continue],
+                _sum set sum + i,
             ],
-            _sum
+            sum
         ]),
-        prelude : {},
+        prelude : {
+            do : do,
+            set : set,
+            iterate : iterate,
+            = : =,
+            % : %,
+            test : test,
+            continue : continue,
+            + : +,
+        },
     },
     _ f 100
 ]
