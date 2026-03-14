@@ -99,10 +99,10 @@ byte'X00ffff'
 **cell**
 
 - `.(v)`
-- `.'key'`
-- `."text"`
-- `.[l, i, s, t]`
-- `.{a : map}`
+- `.'key'` = `.('key')`
+- `."text"` = `.("text")`
+- `.[l, i, s, t]` = `.([l, i, s, t])`
+- `.{a : map}` = `.({a : map})`
 
 ```air
 .(true)
@@ -121,30 +121,39 @@ a : b : c
 
 **list**
 
-`[v1, v2, ..., vn]`
+- `[v1, v2, ..., vn]`
+- `#[v1 v2 ... vn]`
 
 ```air
 [0, 1, 2]
 [., false, 0, '',]
+#[git commit --amend --no-edit]
 ```
 
 **map**
 
-`{k1 : v1, k2 : v2, ..., kn : vn}`
+- `{k1 : v1, k2 : v2, ... : ..., kn : vn}`
+- `#{k1 v1 k2 v2 ... ... kn vn}`
 
 ```air
 {a : 1, b : 2, c : 3}
 {a : 1, b : true, c : ' ',}
 {a, b, c}
+#{
+    select *
+    from book
+    where (price > 100)
+    order_by title
+}
 ```
 
 **quote**
 
 - `_(v)`
-- `_'key'`
-- `_"text"`
-- `_[l, i, s, t]`
-- `_{a : map}`
+- `_'key'` = `_('key')`
+- `_"text"` = `_("text")`
+- `_[l, i, s, t]` = `_([l, i, s, t])`
+- `_{a : map}` = `_({a : map})`
 
 ```air
 _(true)

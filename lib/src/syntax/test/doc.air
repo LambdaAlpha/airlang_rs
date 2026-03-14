@@ -143,6 +143,10 @@ cell cell
 -----
 .(.[.{a : .""}])
 =====
+pair pattern
+-----
+left : right
+=====
 pair diff type
 -----
 a : 1
@@ -151,6 +155,14 @@ pair recursive
 -----
 a : b : c
 =====
+list pattern
+-----
+[v1, v2, ..., vn]
+=====
+list compact pattern
+-----
+#[v1 v2 ... vn]
+=====
 list same type
 -----
 [0, 1, 2]
@@ -158,6 +170,18 @@ list same type
 list diff type
 -----
 [., false, 0, '',]
+=====
+list compact example
+-----
+#[git commit --amend --no-edit]
+=====
+map pattern
+-----
+{k1 : v1, k2 : v2, ... : ..., kn : vn}
+=====
+map compact pattern
+-----
+#{k1 v1 k2 v2 ... ... kn vn}
 =====
 map same type
 -----
@@ -170,6 +194,15 @@ map diff type
 map set
 -----
 {a, b, c}
+=====
+map compact example
+-----
+#{
+    select *
+    from book
+    where (price > 100)
+    order_by title
+}
 =====
 quote scope
 -----
