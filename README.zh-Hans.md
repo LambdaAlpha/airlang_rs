@@ -13,43 +13,28 @@
 
 Air 的语法非常简洁，它仅包含注释和 13 种数据类型，不包含控制流，函数，类型，模块等语义特定语法，而且它的规则非常简单，使用前缀避免歧义，只有 5 个关键词（`_`，`.`，`:`，`true`，`false`）。这使得它非常适用于配置或数据交换。
 
-**注释**
-
-- `!(t1 t2 ... tn)`
-- `!'key'`
-- `!"text"`
-- `![l, i, s, t]`
-- `!{a : map}`
-
-```air
-!"comment"
-[1, !(2, 3,) 4]
-{a : !(1, b :) 2}
-```
-
 **单元**
 
-```air
-.
-```
+`.`
 
 **比特**
 
-```air
-true
-false
-```
+- `true`
+- `false`
 
 **键**
 
-```air
-key
+- `'key'`
+- `key`
 
+```air
 >=
 
 a.b.c
 
 '[0, 1, 2]'
+
+'^"^_^"'
 
 ' abcdefghijklmnopqrstuvwxyz
 | ABCDEFGHIJKLMNOPQRSTUVWXYZ
@@ -59,36 +44,51 @@ a.b.c
 
 **文本**
 
+`"text"`
+
 ```air
-"🜁^u(1f701)"
+"🜁: Alchemical Symbol For Air"
 
-"- a^r^n^t- a.1^r^n^t- a.2"
+"^_^r^n^t^'^u(1f701)^'"
 
- "- a
-+   - a.1
-+   - a.2"
+    "
+    |(()[]{}<>\|/
+    | '"`^*+=-~_
+    | .,:;!?
+    | @#$%&
+    |)"
 ```
 
 **整数**
+
+- `integer'0'`
+- `0-1` = `integer'-1'`
 
 ```air
 123
 0-123
 integer'-123'
 0X7f
+integer'X7f'
 0-B1110
 ```
 
 **小数**
 
+- `decimal'0.'`
+- `0-1.` = `decimal'-1.'`
+
 ```air
-0.1
-0-0.1
+12.3
+0-12.3
+decimal'-12.3'
 0-E-12*3.456
-decimal'-0.1'
+decimal'-E-12*3.456'
 ```
 
 **字节**
+
+`byte'00'`
 
 ```air
 byte'B00001111'
@@ -121,7 +121,7 @@ a : b : c
 **列表**
 
 - `[v1, v2, ..., vn]`
-- `#[v1 v2 ... vn]`
+- `#[v1 v2 ... vn]` = `[v1, v2, ..., vn]`
 
 ```air
 [0, 1, 2]
@@ -132,7 +132,7 @@ a : b : c
 **映射**
 
 - `{k1 : v1, k2 : v2, ... : ..., kn : vn}`
-- `#{k1 v1 k2 v2 ... ... kn vn}`
+- `#{k1 v1 k2 v2 ... ... kn vn}` = `{k1 : v1, k2 : v2, ... : ..., kn : vn}`
 
 ```air
 {a : 1, b : 2, c : 3}
@@ -164,12 +164,26 @@ _(_[_{a : _""}])
 
 - `_ function input`
 - `input function _`
-- `left function right`
+- `left function right` = `_ function left : right`
 
 ```air
 _ not true
 1 + 1
 a and b or c
+```
+
+**注释**
+
+- `!(t1 t2 ... tn)`
+- `!'key'`
+- `!"text"`
+- `![l, i, s, t]`
+- `!{a : map}`
+
+```air
+!"comment"
+[1, !(2, 3,) 4]
+{a : !(1, b :) 2}
 ```
 
 ### 极简语义
@@ -184,18 +198,14 @@ Air 的求值规则非常简洁，只有五条规则。
 
 第二，引用的求值规则为 `_(v)` ➔ `v`。
 
-第三，调用的求值规则为 `_ f i` ➔ `o`，步骤如下：
-
-1. `eval(f)` ➔ `vf`
-2. `eval(i)` ➔ `vi`
-3. `vf(vi)` ➔ `o`
+第三，调用的求值规则为 `_ f i` ➔ `f'(i')`，其中 `x'` 表示 `x` 求值的结果，下同。
 
 第四，单元格，配对，列表，映射的求值规则如下：
 
-- `.(v)` ➔ `.(eval(v))`
-- `v1 : v2` ➔ `eval(v1) : eval(v2)`
-- `[v1, v2, ..., vn]` ➔ `[eval(v1), eval(v2), ..., eval(vn)]`
-- `{k1 : v1, k2 : v2, ..., kn : vn}` ➔ `{k1 : eval(v1), k2 : eval(v2), kn : eval(vn)}`
+- `.(v)` ➔ `.(v')`
+- `v1 : v2` ➔ `v1' : v2'`
+- `[v1, v2, ..., vn]` ➔ `[v1', v2', ..., vn']`
+- `{k1 : v1, k2 : v2, ..., kn : vn}` ➔ `{k1 : v1', k2 : v2', kn : vn'}`
 
 第五，其他值的求值规则为 `v` ➔ `v`。
 

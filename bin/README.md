@@ -14,43 +14,28 @@
 
 Air's syntax is extremely concise. It only includes comments and 13 data types, with no semantic-specific syntax for control flows, functions, types, modules, etc. Its rules are very simple, using prefixes to avoid ambiguity, and it has only 5 keywords (`_`, `.`, `:`, `true`, `false`). This makes it highly suitable for configuration or data interchange.
 
-**comment**
-
-- `!(t1 t2 ... tn)`
-- `!'key'`
-- `!"text"`
-- `![l, i, s, t]`
-- `!{a : map}`
-
-```air
-!"comment"
-[1, !(2, 3,) 4]
-{a : !(1, b :) 2}
-```
-
 **unit**
 
-```air
-.
-```
+`.`
 
 **bit**
 
-```air
-true
-false
-```
+- `true`
+- `false`
 
 **key**
 
-```air
-key
+- `'key'`
+- `key`
 
+```air
 >=
 
 a.b.c
 
 '[0, 1, 2]'
+
+'^"^_^"'
 
 ' abcdefghijklmnopqrstuvwxyz
 | ABCDEFGHIJKLMNOPQRSTUVWXYZ
@@ -60,36 +45,51 @@ a.b.c
 
 **text**
 
+`"text"`
+
 ```air
-"🜁^u(1f701)"
+"🜁: Alchemical Symbol For Air"
 
-"- a^r^n^t- a.1^r^n^t- a.2"
+"^_^r^n^t^'^u(1f701)^'"
 
- "- a
-+   - a.1
-+   - a.2"
+    "
+    |(()[]{}<>\|/
+    | '"`^*+=-~_
+    | .,:;!?
+    | @#$%&
+    |)"
 ```
 
 **integer**
+
+- `integer'0'`
+- `0-1` = `integer'-1'`
 
 ```air
 123
 0-123
 integer'-123'
 0X7f
+integer'X7f'
 0-B1110
 ```
 
 **decimal**
 
+- `decimal'0.'`
+- `0-1.` = `decimal'-1.'`
+
 ```air
-0.1
-0-0.1
+12.3
+0-12.3
+decimal'-12.3'
 0-E-12*3.456
-decimal'-0.1'
+decimal'-E-12*3.456'
 ```
 
 **byte**
+
+`byte'00'`
 
 ```air
 byte'B00001111'
@@ -122,7 +122,7 @@ a : b : c
 **list**
 
 - `[v1, v2, ..., vn]`
-- `#[v1 v2 ... vn]`
+- `#[v1 v2 ... vn]` = `[v1, v2, ..., vn]`
 
 ```air
 [0, 1, 2]
@@ -133,7 +133,7 @@ a : b : c
 **map**
 
 - `{k1 : v1, k2 : v2, ... : ..., kn : vn}`
-- `#{k1 v1 k2 v2 ... ... kn vn}`
+- `#{k1 v1 k2 v2 ... ... kn vn}` = `{k1 : v1, k2 : v2, ... : ..., kn : vn}`
 
 ```air
 {a : 1, b : 2, c : 3}
@@ -165,12 +165,26 @@ _(_[_{a : _""}])
 
 - `_ function input`
 - `input function _`
-- `left function right`
+- `left function right` = `_ function left : right`
 
 ```air
 _ not true
 1 + 1
 a and b or c
+```
+
+**comment**
+
+- `!(t1 t2 ... tn)`
+- `!'key'`
+- `!"text"`
+- `![l, i, s, t]`
+- `!{a : map}`
+
+```air
+!"comment"
+[1, !(2, 3,) 4]
+{a : !(1, b :) 2}
 ```
 
 ### Minimalist Semantics
@@ -185,18 +199,14 @@ First, the evaluation rules for keys are as follows:
 
 Second, the evaluation rule for quotes is `_(v)` ➔ `v`.
 
-Third, the evaluation rule for calls is `_ f i` ➔ `o`, with the following steps:
-
-1. `eval(f)` ➔ `vf`
-2. `eval(i)` ➔ `vi`
-3. `vf(vi)` ➔ `o`
+Third, the evaluation rule for calls is `_ f i ➔ f'(i')`, where `x'` denotes the result of evaluating `x` (the same applies below).
 
 Fourth, the evaluation rules for cells, pairs, lists, and maps are as follows:
 
-- `.(v)` ➔ `.(eval(v))`
-- `v1 : v2` ➔ `eval(v1) : eval(v2)`
-- `[v1, v2, ..., vn]` ➔ `[eval(v1), eval(v2), ..., eval(vn)]`
-- `{k1 : v1, k2 : v2, ..., kn : vn}` ➔ `{k1 : eval(v1), k2 : eval(v2), kn : eval(vn)}`
+- `.(v)` ➔ `.(v')`
+- `v1 : v2` ➔ `v1' : v2'`
+- `[v1, v2, ..., vn]` ➔ `[v1', v2', ..., vn']`
+- `{k1 : v1, k2 : v2, ..., kn : vn}` ➔ `{k1 : v1', k2 : v2', kn : vn'}`
 
 Fifth, the evaluation rule for other values is `v` ➔ `v`.
 

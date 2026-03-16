@@ -1,34 +1,18 @@
-comment scope
+unit
 -----
-!(t1 t2 ... tn) .
+.
 =====
-comment key .
+bit true
 -----
-!'key' .
+true
 =====
-comment text
+bit false
 -----
-!"text" .
+false
 =====
-comment list
+key quoted
 -----
-![l, i, s, t] .
-=====
-comment map
------
-!{a : map} .
-=====
-comment text example
------
-!"comment" .
-=====
-comment list item
------
-[1, !(2, 3,) 4]
-=====
-comment map item
------
-{a : !(1, b :) 2}
+'key'
 =====
 key unquote
 -----
@@ -46,6 +30,10 @@ key quote
 -----
 '[0, 1, 2]'
 =====
+key escape
+-----
+'^"^_^"'
+=====
 key all
 -----
 ' abcdefghijklmnopqrstuvwxyz
@@ -53,55 +41,90 @@ key all
 |(()[]{}<>\|/'"`^*+=-~_.,:;!?@#$%&
 |)0123456789'
 =====
+text pattern
+-----
+"text"
+=====
 text unicode
 -----
-"🜁^u(1f701)"
+"🜁: Alchemical Symbol For Air"
 =====
 text escape
 -----
-"- a^r^n^t- a.1^r^n^t- a.2"
+"^_^r^n^t^'^u(1f701)^'"
 =====
-text multiline
+text raw
 -----
- "- a
-+   - a.1
-+   - a.2"
-=====
-integer plain
------
-123
-=====
-integer prefix 0
------
-0-123
+    "
+    |(()[]{}<>\|/
+    | '"`^*+=-~_
+    | .,:;!?
+    | @#$%&
+    |)"
 =====
 integer prefix id
 -----
+integer'0'
+=====
+integer prefix 0
+-----
+0-1
+=====
+integer plain example
+-----
+123
+=====
+integer prefix 0 example
+-----
+0-123
+=====
+integer prefix id example
+-----
 integer'-123'
 =====
-integer hex
+integer hex prefix 0 example
 -----
 0X7f
 =====
-integer binary
+integer hex prefix id example
+-----
+integer'X7f'
+=====
+integer binary prefix 0 example
 -----
 0-B1110
 =====
-decimal plain
+decimal prefix id
 -----
-0.1
+decimal'0.'
 =====
-decimal prefix plain
+decimal prefix 0
 -----
-0-0.1
+0-1.
 =====
-decimal prefix normal
+decimal plain example
+-----
+12.3
+=====
+decimal prefix 0 example
+-----
+0-12.3
+=====
+decimal prefix id example
+-----
+decimal'-12.3'
+=====
+decimal prefix 0 normal example
 -----
 0-E-12*3.456
 =====
-decimal prefix id
+decimal prefix id normal example
 -----
-decimal'-0.1'
+decimal'-E-12*3.456'
+=====
+byte pattern
+-----
+byte'00'
 =====
 byte binary
 -----
@@ -247,3 +270,35 @@ call pair input
 call recursive
 -----
 a and b or c
+=====
+comment scope
+-----
+!(t1 t2 ... tn) .
+=====
+comment key .
+-----
+!'key' .
+=====
+comment text
+-----
+!"text" .
+=====
+comment list
+-----
+![l, i, s, t] .
+=====
+comment map
+-----
+!{a : map} .
+=====
+comment text example
+-----
+!"comment" .
+=====
+comment list item
+-----
+[1, !(2, 3,) 4]
+=====
+comment map item
+-----
+{a : !(1, b :) 2}
