@@ -35,12 +35,13 @@ a.b.c
 
 '[0, 1, 2]'
 
-'^"^_^"'
+'^(' sp X3f ^)'
 
-' abcdefghijklmnopqrstuvwxyz
-| ABCDEFGHIJKLMNOPQRSTUVWXYZ
-|(()[]{}<>\|/'"`^*+=-~_.,:;!?@#$%&
-|)0123456789'
+'abcdefghijklmnopqrstuvwxyz
+|_()[]{}<>\|/'"`^*+=-~_.,:;!?@#$%&
+|^sp 0 1 2 3 4 5 6 7 8 9
+|!this line is a comment
+|'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 ```
 
 **text**
@@ -50,14 +51,16 @@ a.b.c
 ```air
 "🜁: Alchemical Symbol For Air"
 
-"^_^r^n^t^'^u(1f701)^'"
+"^(sp ht cr lf " X1f701 ^)"
 
     "
-    |(()[]{}<>\|/
+    |_()[]{}<>\|/
     | '"`^*+=-~_
     | .,:;!?
     | @#$%&
-    |)"
+    |^" ^ X1f701 sp ht cr lf
+    |!this line is a comment
+    |""
 ```
 
 **integer**

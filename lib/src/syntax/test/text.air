@@ -4,7 +4,7 @@ empty
 =====
 key
 -----
-"()[]{}<>\|/'^'`^^*+=-~_.,:;!?@#$%&"
+"()[]{}<>\|/'^(")`^(^)*+=-~_.,:;!?@#$%&"
 =====
 alphabet digit
 -----
@@ -14,63 +14,60 @@ unicode
 -----
 "🜁🜂🜃🜄"
 =====
-escape
+escape ascii
 -----
-" ^_^n^r^t^u(1f701)"
+"^(nul soh stx etx eot enq ack bel bs ht lf vt ff cr so si dle dc1 dc2 dc3 dc4 nak syn etb can em sub esc fs gs rs us sp del)"
 =====
-double escape
+escape unicode
 -----
-" ^^_^^n^^r^^t^^u(1f701)"
+"^(a X3f X1f701)"
 =====
-triple escape
+tab format
 -----
-" ^^^_^^^n^^^r^^^t^^^u(1f701)"
+"a	b"
 =====
-multiline rich
+multiline
 -----
-"^_^t^r^n
-| ^_^t^r^n
-| "
+"a
+| b^(sp)"
 =====
-multiline rich newline
+multiline default
 -----
-"^_^t^r^n
-+ ^_^t^r^n
-| "
+"a
+|"b^(sp)"
 =====
 multiline raw
 -----
-"
-|(^_^t^r^n
-| ^_^t^r^n
-| ()[]{}<>\|/'"`^*+=-~_.,:;!?@#$%&
-+)"
+"a
+|_"^
+|""
 =====
-multiline mix
+multiline code
 -----
-"^_^t^r^n
-| ^_^t^r^n
-|(^_^t^r^n
-| ^_^t^r^n
-|)^_^t^r^n
-| ^_^t^r^n"
+"a
+|^b " ^ sp
+|""
+=====
+multiline comment
+-----
+"a
+|!中文注释
+|""
+=====
+multiline switch
+-----
+"a
+| b
+|_"
+|^sp
+|!comment
+|"end"
 =====
 multiline indent
 -----
-    "^_^t^r^n
-    | ^_^t^r^n
-    |(^_^t^r^n
-    | ^_^t^r^n
-    |)^_^t^r^n
-    | ^_^t^r^n"
-=====
-multiline rich empty
------
-"
-| "
-=====
-multiline raw empty
------
-"
-|(
-|)"
+    "a
+    | b
+    |_"
+    |^sp
+    |!comment
+    |"end"

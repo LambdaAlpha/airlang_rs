@@ -16,6 +16,7 @@ use num_traits::Signed;
 use super::BYTE;
 use super::Direction;
 use super::EMPTY;
+use super::ESCAPE;
 use super::FALSE;
 use super::KEY_QUOTE;
 use super::LEFT;
@@ -127,11 +128,12 @@ fn key_fmt(key: Key, f: &mut Formatter<'_>) -> std::fmt::Result {
     }
 }
 
+// todo impl join codes
 fn key_esc(key: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
     for c in key.chars() {
         match c {
-            '^' => f.write_str("^^")?,
-            KEY_QUOTE => f.write_str(concatcp!('^', TEXT_QUOTE))?,
+            ESCAPE => f.write_str(concatcp!(ESCAPE, SCOPE_LEFT, ESCAPE, SCOPE_RIGHT))?,
+            KEY_QUOTE => f.write_str(concatcp!(ESCAPE, SCOPE_LEFT, KEY_QUOTE, SCOPE_RIGHT))?,
             _ => f.write_char(c)?,
         }
     }
@@ -193,49 +195,69 @@ fn text_fmt(text: &Text, f: &mut Formatter<'_>) -> std::fmt::Result {
     Ok(())
 }
 
+// todo impl join codes
 fn text_esc(str: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
     for c in str.chars() {
         let escaped = match c {
-            '^' => "^^",
-            '\n' => "^n",
-            '\r' => "^r",
-            '\t' => "^t",
-            TEXT_QUOTE => concatcp!('^', KEY_QUOTE),
+            ESCAPE => concatcp!(ESCAPE),
+            '\n' => "lf",
+            '\r' => "cr",
+            '\t' => "ht",
+            TEXT_QUOTE => concatcp!(TEXT_QUOTE),
             _ => {
                 f.write_char(c)?;
                 continue;
             },
         };
+        f.write_char(ESCAPE)?;
+        f.write_char(SCOPE_LEFT)?;
         f.write_str(escaped)?;
+        f.write_char(SCOPE_RIGHT)?;
     }
     Ok(())
 }
 
+// todo impl join codes
 fn text_key_encoding(str: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
     for c in str.chars() {
-        let escaped = match c {
-            '^' => "^^",
-            '\n' => "^n",
-            '\r' => "^r",
-            '\t' => "^t",
-            TEXT_QUOTE => concatcp!('^', KEY_QUOTE),
-            c if Key::is_key(c) => &format!("{c}"),
-            c => &format!("^u({:x})", c as u32),
+        let code = match c {
+            '\n' => "lf",
+            '\r' => "cr",
+            '\t' => "ht",
+            ESCAPE => concatcp!(ESCAPE),
+            TEXT_QUOTE => concatcp!(TEXT_QUOTE),
+            c if Key::is_key(c) => {
+                f.write_char(c)?;
+                continue;
+            },
+            c => {
+                f.write_char(ESCAPE)?;
+                f.write_char(SCOPE_LEFT)?;
+                f.write_char('X')?;
+                write!(f, "{:x}", c as u32)?;
+                f.write_char(SCOPE_RIGHT)?;
+                continue;
+            },
         };
-        f.write_str(escaped)?;
+        f.write_char(ESCAPE)?;
+        f.write_char(SCOPE_LEFT)?;
+        f.write_str(code)?;
+        f.write_char(SCOPE_RIGHT)?;
     }
     Ok(())
 }
 
 fn text_raw(str: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
-    f.write_str("\n|(")?;
+    f.write_str("\n|")?;
+    f.write_str(EMPTY)?;
     for line in str.split_inclusive('\n') {
         f.write_str(line)?;
         if line.ends_with('\n') {
             f.write_str("+ ")?;
         }
     }
-    f.write_str("\n|)")
+    f.write_str("\n|")?;
+    f.write_char(TEXT_QUOTE)
 }
 
 impl Display for Int {

@@ -36,11 +36,7 @@ text extra unpaired
 =====
 text escape unpaired
 -----
-"^'
-=====
-text wrong quote
------
-"^""
+"^(")
 =====
 text concat
 -----
@@ -48,29 +44,20 @@ text concat
 =====
 text unknown escape
 -----
-"^a"
-=====
-unicode no body
------
-"^u"
+"^(abc)"
 =====
 unicode wrong bracket
 -----
-"^u{32}"
+"^{X32}"
 =====
 unicode not exist
 -----
-"^u(1234567)"
+"^(X1234567)"
 =====
-unicode space
------
-"^u( 1f701 )"
-=====
-raw text unpaired
+raw text end
 -----
 "
-|(
-| "
+|_"
 =====
 raw text no space after line indicator
 -----
@@ -83,6 +70,12 @@ raw text no line indicator
 "
 abc
 +"
+=====
+text code unknown
+-----
+"
+|^abc
+|""
 =====
 key empty unpaired
 -----
@@ -98,15 +91,11 @@ key extra unpaired
 =====
 key escape unpaired
 -----
-'^"
-=====
-key wrong quote
------
-'^''
+'^(')
 =====
 key unknown escape
 -----
-'^a'
+'^(abc)'
 =====
 key illegal
 -----
@@ -129,11 +118,10 @@ key tab
 '	a
 |'
 =====
-raw key unpaired
+raw key end
 -----
 '
-|(
-| '
+|_'
 =====
 raw key wrong line indicator
 -----
@@ -145,6 +133,12 @@ raw key illegal
 '
 | 中
 '
+=====
+key code not key
+-----
+'
+|^cr
+|''
 =====
 unknown prefix
 -----
@@ -381,10 +375,6 @@ empty
 illegal unicode
 -----
 中
-=====
-comment in unicode
------
-"^u(!(a) 123)"
 =====
 comment unpaired
 -----

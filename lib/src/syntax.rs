@@ -1,3 +1,5 @@
+use const_format::concatcp;
+
 pub use self::error::ParseError;
 pub use self::generator::FmtCtx;
 pub use self::generator::FmtRepr;
@@ -24,7 +26,8 @@ pub(crate) const KEY_QUOTE: char = '\'';
 // } delimiters
 
 // keywords {
-pub(crate) const EMPTY: &str = "_";
+pub(crate) const EMPTY: &str = concatcp!(EMPTY_CHAR);
+pub(crate) const EMPTY_CHAR: char = '_';
 pub(crate) const UNIT: &str = ".";
 pub(crate) const PAIR: &str = ":";
 
@@ -33,7 +36,8 @@ pub(crate) const FALSE: &str = "false";
 // } keywords
 
 // prefixes {
-pub(crate) const COMMENT: &str = "!";
+pub(crate) const COMMENT: &str = concatcp!(COMMENT_CHAR);
+pub(crate) const COMMENT_CHAR: char = '!';
 pub(crate) const LEFT: &str = "<";
 pub(crate) const RIGHT: &str = ">";
 pub(crate) const COMPACT: &str = "#";
@@ -62,6 +66,8 @@ pub(crate) fn is_delimiter(c: char) -> bool {
 pub(crate) fn keyword(s: &str) -> bool {
     matches!(s, EMPTY | UNIT | PAIR | TRUE | FALSE)
 }
+
+pub(crate) const ESCAPE: char = '^';
 
 #[derive(Default, Copy, Clone, PartialEq, Eq, IsVariant)]
 enum Direction {

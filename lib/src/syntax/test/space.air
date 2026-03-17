@@ -72,8 +72,8 @@ a !() b !() c
 multiline comment
 -----
 !("
-|(
-|)") a
+| 
+| ") a
 =====
 complex comment
 -----

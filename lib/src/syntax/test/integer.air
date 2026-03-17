@@ -88,16 +88,16 @@ integer'-D123'
 =====
 norm positive hexadecimal
 -----
-integer'Xa0^ b1^ c2^ d3'
+integer'Xa0	b1	c2	d3'
 =====
 norm negative hexadecimal
 -----
-integer'-Xa0^ b1^ c2^ d3'
+integer'-Xa0	b1	c2	d3'
 =====
 norm positive binary
 -----
-integer'B1101^ 0010'
+integer'B1101	0010'
 =====
 norm negative binary
 -----
-integer'-B1101^ 0010'
+integer'-B1101	0010'

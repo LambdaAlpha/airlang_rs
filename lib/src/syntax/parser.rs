@@ -27,18 +27,23 @@ use winnow::error::ErrMode;
 use winnow::error::StrContext;
 use winnow::error::StrContextValue;
 use winnow::stream::Checkpoint;
+use winnow::stream::Range;
 use winnow::stream::Stream;
 use winnow::token::any;
 use winnow::token::one_of;
+use winnow::token::take_till;
 use winnow::token::take_until;
 use winnow::token::take_while;
 
 use super::BYTE;
 use super::COMMENT;
+use super::COMMENT_CHAR;
 use super::COMPACT;
 use super::DECIMAL;
 use super::Direction;
 use super::EMPTY;
+use super::EMPTY_CHAR;
+use super::ESCAPE;
 use super::FALSE;
 use super::INT;
 use super::KEY_QUOTE;
@@ -132,9 +137,9 @@ fn spaces(i: &mut &str) -> ModalResult<()> {
     f.context(label("spaces")).parse_next(i)
 }
 
-fn space_tab0(i: &mut &str) -> ModalResult<()> {
-    let f = take_while(0 .., |c| matches!(c, ' ' | '\t')).void();
-    f.context(label("space_tab0")).parse_next(i)
+fn space_tab<'a>(range: impl Into<Range>) -> impl Parser<&'a str, (), E> {
+    let f = take_while(range, |c| matches!(c, ' ' | '\t')).void();
+    f.context(label("space_tab"))
 }
 
 fn void<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
@@ -538,39 +543,54 @@ fn any_key(i: &mut &str) -> ModalResult<Key> {
     alt((trivial_key1.map(Key::from_str_unchecked), key)).parse_next(i)
 }
 
+#[expect(const_item_mutation)]
 fn key(i: &mut &str) -> ModalResult<Key> {
     let key = move |i: &mut _| {
+        let mut raw1 = take_while(1 .., |c| is_key(c) && c != ESCAPE && c != KEY_QUOTE);
+        let mut code1 = take_while(1 .., |c| is_key(c) && c != ' ' && c != SCOPE_RIGHT)
+            .verify_map(character)
+            .verify(|c| is_key(*c));
+        let mut raw = take_while(0 .., is_key);
+        let mut code = take_while(1 .., |c| is_key(c) && c != ' ')
+            .verify_map(character)
+            .verify(|c| is_key(*c));
+        let mut comment = take_until(0 .., '\n').void();
+        let mut space_tab1 = space_tab(1 ..);
+        let mut tab = take_while(1 .., '\t').void();
+
+        let mut mode = Mode::Default;
         let mut s = String::new();
-        let mut literal = take_while(1 .., |c| is_key(c) && c != '^' && c != KEY_QUOTE);
-        let mut raw_literal = take_while(0 .., is_key);
-        let mut raw = false;
         loop {
-            if raw {
-                match peek(any).parse_next(i)? {
-                    '\r' | '\n' => {
-                        key_newline.parse_next(i)?;
-                        match any.parse_next(i)? {
-                            SCOPE_RIGHT => raw = false,
-                            ' ' => {},
-                            _ => return fail.parse_next(i),
-                        }
-                    },
-                    _ => s.push_str(raw_literal.parse_next(i)?),
-                }
-            } else {
-                match peek(any).parse_next(i)? {
+            let c = peek(any).parse_next(i)?;
+            if c == '\r' || c == '\n' {
+                key_newline.parse_next(i)?;
+                mode = switch_mode(mode, KEY_QUOTE).parse_next(i)?;
+                continue;
+            }
+            match mode {
+                Mode::Raw => s.push_str(raw.parse_next(i)?),
+                Mode::Code => match c {
+                    ' ' | '\t' => space_tab1.parse_next(i)?,
+                    _ => s.push(code.parse_next(i)?),
+                },
+                Mode::Default => match c {
                     KEY_QUOTE => break,
-                    '^' => s.push_str(key_escaped.parse_next(i)?),
-                    '\r' | '\n' => {
-                        key_newline.parse_next(i)?;
-                        match any.parse_next(i)? {
-                            SCOPE_LEFT => raw = true,
-                            ' ' => {},
-                            _ => return fail.parse_next(i),
+                    ESCAPE => {
+                        ESCAPE.parse_next(i)?;
+                        SCOPE_LEFT.parse_next(i)?;
+                        loop {
+                            match peek(any).parse_next(i)? {
+                                ' ' | '\t' => space_tab1.parse_next(i)?,
+                                SCOPE_RIGHT => break,
+                                _ => s.push(code1.parse_next(i)?),
+                            }
                         }
+                        SCOPE_RIGHT.parse_next(i)?;
                     },
-                    _ => s.push_str(literal.parse_next(i)?),
-                }
+                    '\t' => tab.parse_next(i)?,
+                    _ => s.push_str(raw1.parse_next(i)?),
+                },
+                Mode::Comment => comment.parse_next(i)?,
             }
         }
         Ok(Key::from_string_unchecked(s))
@@ -578,56 +598,57 @@ fn key(i: &mut &str) -> ModalResult<Key> {
     delimited_cut(KEY_QUOTE, key, KEY_QUOTE).context(label("key")).parse_next(i)
 }
 
-fn key_escaped<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
-    let f = preceded('^', move |i: &mut _| match any.parse_next(i)? {
-        '^' => empty.value("^").parse_next(i),
-        '_' => empty.value(" ").parse_next(i),
-        TEXT_QUOTE => empty.value(concatcp!(KEY_QUOTE)).parse_next(i),
-        ' ' | '\t' => space_tab0.value("").parse_next(i),
-        _ => fail.parse_next(i),
-    });
-    f.context(expect_desc("escape character")).parse_next(i)
-}
-
 fn key_newline(i: &mut &str) -> ModalResult<()> {
-    let f = (line_ending, space_tab0, '|'.context(expect_char('|'))).void();
+    let f = (line_ending, space_tab(0 ..), '|'.context(expect_char('|'))).void();
     f.context(expect_desc("newline")).parse_next(i)
 }
 
+#[expect(const_item_mutation)]
 fn text(i: &mut &str) -> ModalResult<Text> {
     let text = move |i: &mut _| {
         let i: &mut &str = i;
+        let mut raw1 = take_till(1 .., ('"', ESCAPE, '\n', '\t'));
+        let mut code1 =
+            take_while(1 .., |c| is_key(c) && c != ' ' && c != SCOPE_RIGHT).verify_map(character);
+        let mut raw = take_until(1 .., '\n');
+        let mut code = take_while(1 .., |c| is_key(c) && c != ' ').verify_map(character);
+        let mut comment = take_until(0 .., '\n').void();
+        let mut space_tab1 = space_tab(1 ..);
+        let mut tab = take_while(1 .., '\t').void();
+
+        let mut mode = Mode::Default;
         let mut s = String::new();
-        let mut literal = take_until(1 .., ('"', '^', '\n'));
-        let mut raw_literal = take_until(1 .., '\n');
-        let mut raw = false;
         loop {
-            if raw {
-                match peek(any).parse_next(i)? {
-                    '\n' => {
-                        s.push_str(text_newline.parse_next(i)?);
-                        match any.parse_next(i)? {
-                            SCOPE_RIGHT => raw = false,
-                            ' ' => {},
-                            _ => return fail.parse_next(i),
-                        }
-                    },
-                    _ => s.push_str(raw_literal.parse_next(i)?),
-                }
-            } else {
-                match peek(any).parse_next(i)? {
+            let c = peek(any).parse_next(i)?;
+            if c == '\n' {
+                s.push_str(text_newline.parse_next(i)?);
+                mode = switch_mode(mode, TEXT_QUOTE).parse_next(i)?;
+                continue;
+            }
+            match mode {
+                Mode::Raw => s.push_str(raw.parse_next(i)?),
+                Mode::Code => match c {
+                    ' ' | '\t' => space_tab1.parse_next(i)?,
+                    _ => s.push(code.parse_next(i)?),
+                },
+                Mode::Default => match c {
                     TEXT_QUOTE => break,
-                    '^' => text_escaped.parse_next(i)?.push(&mut s),
-                    '\n' => {
-                        s.push_str(text_newline.parse_next(i)?);
-                        match any.parse_next(i)? {
-                            SCOPE_LEFT => raw = true,
-                            ' ' => {},
-                            _ => return fail.parse_next(i),
+                    ESCAPE => {
+                        ESCAPE.parse_next(i)?;
+                        SCOPE_LEFT.parse_next(i)?;
+                        loop {
+                            match peek(any).parse_next(i)? {
+                                ' ' | '\t' => space_tab1.parse_next(i)?,
+                                SCOPE_RIGHT => break,
+                                _ => s.push(code1.parse_next(i)?),
+                            }
                         }
+                        SCOPE_RIGHT.parse_next(i)?;
                     },
-                    _ => s.push_str(literal.parse_next(i)?),
-                }
+                    '\t' => tab.parse_next(i)?,
+                    _ => s.push_str(raw1.parse_next(i)?),
+                },
+                Mode::Comment => comment.parse_next(i)?,
             }
         }
         Ok(Text::from(s))
@@ -635,49 +656,90 @@ fn text(i: &mut &str) -> ModalResult<Text> {
     delimited_cut(TEXT_QUOTE, text, TEXT_QUOTE).context(label("text")).parse_next(i)
 }
 
-fn text_escaped<'a>(i: &mut &'a str) -> ModalResult<StrFragment<'a>> {
-    let f = preceded('^', move |i: &mut _| match any.parse_next(i)? {
-        'u' => unicode.map(StrFragment::Char).parse_next(i),
-        'n' => empty.value(StrFragment::Char('\n')).parse_next(i),
-        'r' => empty.value(StrFragment::Char('\r')).parse_next(i),
-        't' => empty.value(StrFragment::Char('\t')).parse_next(i),
-        '^' => empty.value(StrFragment::Char('^')).parse_next(i),
-        '_' => empty.value(StrFragment::Char(' ')).parse_next(i),
-        KEY_QUOTE => empty.value(StrFragment::Char(TEXT_QUOTE)).parse_next(i),
-        ' ' | '\t' => space_tab0.value(StrFragment::Str("")).parse_next(i),
-        _ => fail.parse_next(i),
-    });
-    f.context(expect_desc("escape character")).parse_next(i)
-}
-
-fn unicode(i: &mut &str) -> ModalResult<char> {
-    let digit = take_while(1 .. 7, is_hexadecimal);
-    let f = delimited_cut(SCOPE_LEFT, digit, SCOPE_RIGHT)
-        .verify_map(|hex| char::from_u32(u32::from_str_radix(hex, 16).unwrap()));
-    f.context(expect_desc("unicode")).parse_next(i)
-}
-
 fn text_newline<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
     let newline = alt(('+'.value(true), '|'.value(false)))
         .context(expect_char('+'))
         .context(expect_char('|'));
-    let f = preceded(("\n", space_tab0), newline).map(|new| if new { "\n" } else { "" });
+    let f = preceded(("\n", space_tab(0 ..)), newline).map(|new| if new { "\n" } else { "" });
     f.context(expect_desc("newline")).parse_next(i)
 }
 
-#[derive(Clone)]
-enum StrFragment<'a> {
-    Str(&'a str),
-    Char(char),
+#[derive(Copy, Clone)]
+enum Mode {
+    Default,
+    Raw,
+    Code,
+    Comment,
 }
 
-impl StrFragment<'_> {
-    fn push(self, str: &mut String) {
-        match self {
-            StrFragment::Str(s) => str.push_str(s),
-            StrFragment::Char(c) => str.push(c),
-        }
+fn switch_mode<'a>(mode: Mode, quote: char) -> impl Parser<&'a str, Mode, E> {
+    move |i: &mut _| match any.parse_next(i)? {
+        EMPTY_CHAR => Ok(Mode::Raw),
+        ESCAPE => Ok(Mode::Code),
+        COMMENT_CHAR => Ok(Mode::Comment),
+        ' ' => Ok(mode),
+        c if c == quote => Ok(Mode::Default),
+        _ => fail
+            .context(expect_char(EMPTY_CHAR))
+            .context(expect_char(ESCAPE))
+            .context(expect_char(quote))
+            .context(expect_char(COMMENT_CHAR))
+            .context(expect_char(' '))
+            .parse_next(i),
     }
+}
+
+fn character(s: &str) -> Option<char> {
+    if s.len() == 1 {
+        return Some(s.chars().next().unwrap());
+    }
+    if let Some(code) = s.strip_prefix('X') {
+        if !code.chars().all(is_hexadecimal) {
+            return None;
+        }
+        let Ok(i) = u32::from_str_radix(code, 16) else {
+            return None;
+        };
+        return char::from_u32(i);
+    }
+    let c = match s {
+        "nul" => '\u{00}',
+        "soh" => '\u{01}',
+        "stx" => '\u{02}',
+        "etx" => '\u{03}',
+        "eot" => '\u{04}',
+        "enq" => '\u{05}',
+        "ack" => '\u{06}',
+        "bel" => '\u{07}',
+        "bs" => '\u{08}',
+        "ht" => '\u{09}',
+        "lf" => '\u{0A}',
+        "vt" => '\u{0B}',
+        "ff" => '\u{0C}',
+        "cr" => '\u{0D}',
+        "so" => '\u{0E}',
+        "si" => '\u{0F}',
+        "dle" => '\u{10}',
+        "dc1" => '\u{11}',
+        "dc2" => '\u{12}',
+        "dc3" => '\u{13}',
+        "dc4" => '\u{14}',
+        "nak" => '\u{15}',
+        "syn" => '\u{16}',
+        "etb" => '\u{17}',
+        "can" => '\u{18}',
+        "em" => '\u{19}',
+        "sub" => '\u{1A}',
+        "esc" => '\u{1B}',
+        "fs" => '\u{1C}',
+        "gs" => '\u{1D}',
+        "rs" => '\u{1E}',
+        "us" => '\u{1F}',
+        "sp" => '\u{20}',
+        "del" => '\u{7F}',
+        _ => return None,
+    };
+    Some(c)
 }
 
 fn number<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {

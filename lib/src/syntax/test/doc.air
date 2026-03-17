@@ -32,14 +32,15 @@ key quote
 =====
 key escape
 -----
-'^"^_^"'
+'^(' sp X3f ^)'
 =====
 key all
 -----
-' abcdefghijklmnopqrstuvwxyz
-| ABCDEFGHIJKLMNOPQRSTUVWXYZ
-|(()[]{}<>\|/'"`^*+=-~_.,:;!?@#$%&
-|)0123456789'
+'abcdefghijklmnopqrstuvwxyz
+|_()[]{}<>\|/'"`^*+=-~_.,:;!?@#$%&
+|^sp 0 1 2 3 4 5 6 7 8 9
+|!this line is a comment
+|'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 =====
 text pattern
 -----
@@ -51,16 +52,18 @@ text unicode
 =====
 text escape
 -----
-"^_^r^n^t^'^u(1f701)^'"
+"^(sp ht cr lf " X1f701 ^)"
 =====
 text raw
 -----
     "
-    |(()[]{}<>\|/
+    |_()[]{}<>\|/
     | '"`^*+=-~_
     | .,:;!?
     | @#$%&
-    |)"
+    |^" ^ X1f701 sp ht cr lf
+    |!this line is a comment
+    |""
 =====
 integer prefix id
 -----

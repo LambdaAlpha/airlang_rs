@@ -57,7 +57,7 @@ parse text
 -----
 _ do _[
     _parse set _ import .language.syntax.parse,
-    _ parse "^'1^'"
+    _ parse "^(" 1 ")"
 ]
 -----
 .("1")
@@ -69,4 +69,4 @@ _ do _[
     _ generate "1"
 ]
 -----
-"^'1^'"
+"^(" 1 ")"

@@ -52,7 +52,7 @@ space
 =====
 '
 -----
-'^"'
+'^(')'
 =====
 "
 -----
@@ -136,11 +136,65 @@ _
 =====
 all symbols
 -----
-' ()[]{}<>\|/^""`^^*+=-~_.,:;!?@#$%&'
+' ()[]{}<>\|/^(')"`^(^)*+=-~_.,:;!?@#$%&'
 =====
 alphabet + number
 -----
 abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789
+=====
+tab format
+-----
+'a	b'
+=====
+default code multiple
+-----
+'^(a b ' ^	sp X3f)'
+=====
+multiline
+-----
+'a
+| b^(sp)'
+=====
+multiline default
+-----
+'a
+|'b^(sp)'
+=====
+multiline raw
+-----
+'a
+|_'^
+|''
+=====
+multiline code
+-----
+'a
+|^b ' ^ sp
+|''
+=====
+multiline comment
+-----
+'a
+|!中文注释
+|''
+=====
+multiline switch
+-----
+'a
+| b
+|_'
+|^sp
+|!comment
+|'end'
+=====
+multiline indent
+-----
+    'a
+    | b
+    |_'
+    |^sp
+    |!comment
+    |'end'
 =====
 ->
 -----
@@ -176,7 +230,7 @@ key with "
 =====
 key with '
 -----
-'^"a'
+'^(')a'
 =====
 key with _
 -----
@@ -233,43 +287,3 @@ soft keyword digit
 -alphabet
 -----
 --stat
-=====
-escape ^
------
-'^^'
-=====
-escape space
------
-'^_'
-=====
-multiline rich
------
-'
-| ^_^"
-| a 
-|  b'
-=====
-multiline raw
------
-'
-|(^_
-| ^""
-|)'
-=====
-multiline mix
------
-'^_^"
-| ^_^"
-|(^_^"
-| ^_^"
-|)^_^"
-| ^_^"'
-=====
-multiline indent
------
-   '^_^"
-   | ^_^"
-   |(^_^"
-   | ^_^"
-   |)^_^"
-   | ^_^"'
