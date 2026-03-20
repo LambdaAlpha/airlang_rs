@@ -34,7 +34,7 @@ a.b.c
 
 '[0, 1, 2]'
 
-'^(' sp X3f ^)'
+'^(X3f ' ^ sp)'
 
 'abcdefghijklmnopqrstuvwxyz
 |_()[]{}<>\|/'"`^*+=-~_.,:;!?@#$%&
@@ -50,14 +50,14 @@ a.b.c
 ```air
 "🜁: Alchemical Symbol For Air"
 
-"^(sp ht cr lf " X1f701 ^)"
+"^(X1f701 " ^ sp ht cr lf)"
 
     "
     |_()[]{}<>\|/
     | '"`^*+=-~_
     | .,:;!?
     | @#$%&
-    |^" ^ X1f701 sp ht cr lf
+    |^X1f701 " ^ sp ht cr lf
     |!this line is a comment
     |""
 ```
