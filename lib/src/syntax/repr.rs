@@ -142,4 +142,8 @@ impl FmtRepr for Repr {
         };
         Pair::new(&pair.left, &pair.right)
     }
+
+    fn is_text_list_map(&self) -> bool {
+        matches!(self, Repr::Text(_) | Repr::List(_) | Repr::Map(_))
+    }
 }

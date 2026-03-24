@@ -92,6 +92,10 @@ impl FmtRepr for Val {
         let Val::Pair(pair) = self else { panic!("called `FmtRepr::to_pair()` on non-pair value") };
         Pair::new(&pair.left, &pair.right)
     }
+
+    fn is_text_list_map(&self) -> bool {
+        matches!(self, Val::Text(_) | Val::List(_) | Val::Map(_))
+    }
 }
 
 impl Display for LinkVal {

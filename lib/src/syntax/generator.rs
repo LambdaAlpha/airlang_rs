@@ -69,6 +69,10 @@ pub trait FmtRepr {
     fn to_pair(&self) -> Pair<&dyn FmtRepr, &dyn FmtRepr> {
         panic!("called `FmtRepr::to_pair()` on non-pair value")
     }
+
+    fn is_text_list_map(&self) -> bool {
+        false
+    }
 }
 
 impl Display for Unit {
@@ -117,27 +121,30 @@ impl Debug for Key {
 
 fn key_fmt(key: Key, f: &mut Formatter<'_>) -> std::fmt::Result {
     if f.sign_minus() {
-        return key_esc(&key, f);
+        return key_compact(&key, f);
     }
     if f.sign_plus() || key_should_quote(&key) {
         f.write_char(KEY_QUOTE)?;
-        key_esc(&key, f)?;
+        key_compact(&key, f)?;
         f.write_char(KEY_QUOTE)
     } else {
         f.write_str(&key)
     }
 }
 
-// todo impl join codes
-fn key_esc(key: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
+fn key_compact(key: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
+    let mut code_mode = false;
     for c in key.chars() {
-        match c {
-            ESCAPE => f.write_str(concatcp!(ESCAPE, SCOPE_LEFT, ESCAPE, SCOPE_RIGHT))?,
-            KEY_QUOTE => f.write_str(concatcp!(ESCAPE, SCOPE_LEFT, KEY_QUOTE, SCOPE_RIGHT))?,
-            _ => f.write_char(c)?,
+        if let c @ (ESCAPE | KEY_QUOTE) = c {
+            start_code(&mut code_mode, f)?;
+            f.write_char(' ')?;
+            f.write_char(c)?;
+        } else {
+            stop_code(&mut code_mode, f)?;
+            f.write_char(c)?;
         }
     }
-    Ok(())
+    stop_code(&mut code_mode, f)
 }
 
 fn key_should_quote(str: &str) -> bool {
@@ -187,7 +194,7 @@ fn text_fmt(text: &Text, f: &mut Formatter<'_>) -> std::fmt::Result {
     if f.alternate() && text.contains('\n') {
         text_raw(text, f)?;
     } else {
-        text_esc(text, f)?;
+        text_compact(text, f)?;
     }
     if !f.sign_minus() {
         f.write_char(TEXT_QUOTE)?;
@@ -195,8 +202,8 @@ fn text_fmt(text: &Text, f: &mut Formatter<'_>) -> std::fmt::Result {
     Ok(())
 }
 
-// todo impl join codes
-fn text_esc(str: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
+fn text_compact(str: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
+    let mut code_mode = false;
     for c in str.chars() {
         let escaped = match c {
             ESCAPE => concatcp!(ESCAPE),
@@ -205,20 +212,20 @@ fn text_esc(str: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
             '\t' => "ht",
             TEXT_QUOTE => concatcp!(TEXT_QUOTE),
             _ => {
+                stop_code(&mut code_mode, f)?;
                 f.write_char(c)?;
                 continue;
             },
         };
-        f.write_char(ESCAPE)?;
-        f.write_char(SCOPE_LEFT)?;
+        start_code(&mut code_mode, f)?;
+        f.write_char(' ')?;
         f.write_str(escaped)?;
-        f.write_char(SCOPE_RIGHT)?;
     }
-    Ok(())
+    stop_code(&mut code_mode, f)
 }
 
-// todo impl join codes
 fn text_key_encoding(str: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
+    let mut code_mode = false;
     for c in str.chars() {
         let code = match c {
             '\n' => "lf",
@@ -227,24 +234,23 @@ fn text_key_encoding(str: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
             ESCAPE => concatcp!(ESCAPE),
             TEXT_QUOTE => concatcp!(TEXT_QUOTE),
             c if Key::is_key(c) => {
+                stop_code(&mut code_mode, f)?;
                 f.write_char(c)?;
                 continue;
             },
             c => {
-                f.write_char(ESCAPE)?;
-                f.write_char(SCOPE_LEFT)?;
+                start_code(&mut code_mode, f)?;
+                f.write_char(' ')?;
                 f.write_char('X')?;
                 write!(f, "{:x}", c as u32)?;
-                f.write_char(SCOPE_RIGHT)?;
                 continue;
             },
         };
-        f.write_char(ESCAPE)?;
-        f.write_char(SCOPE_LEFT)?;
+        start_code(&mut code_mode, f)?;
+        f.write_char(' ')?;
         f.write_str(code)?;
-        f.write_char(SCOPE_RIGHT)?;
     }
-    Ok(())
+    stop_code(&mut code_mode, f)
 }
 
 fn text_raw(str: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -258,6 +264,24 @@ fn text_raw(str: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
     }
     f.write_str("\n|")?;
     f.write_char(TEXT_QUOTE)
+}
+
+fn start_code(code_mode: &mut bool, f: &mut Formatter<'_>) -> std::fmt::Result {
+    if !*code_mode {
+        *code_mode = true;
+        f.write_char(ESCAPE)?;
+        f.write_char(SCOPE_LEFT)?;
+    }
+    Ok(())
+}
+
+fn stop_code(code_mode: &mut bool, f: &mut Formatter<'_>) -> std::fmt::Result {
+    if *code_mode {
+        *code_mode = false;
+        f.write_char(' ')?;
+        f.write_char(SCOPE_RIGHT)?;
+    }
+    Ok(())
 }
 
 impl Display for Int {
@@ -375,9 +399,13 @@ impl<T: FmtRepr> Debug for Cell<T> {
 impl<T: FmtRepr> FmtRepr for Cell<T> {
     fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str(UNIT)?;
-        f.write_char(SCOPE_LEFT)?;
-        self.value.fmt(ctx, f)?;
-        f.write_char(SCOPE_RIGHT)
+        if self.value.is_text_list_map() {
+            self.value.fmt(ctx, f)
+        } else {
+            f.write_char(SCOPE_LEFT)?;
+            self.value.fmt(ctx, f)?;
+            f.write_char(SCOPE_RIGHT)
+        }
     }
 }
 
@@ -396,9 +424,13 @@ impl<T: FmtRepr> Debug for Quote<T> {
 impl<T: FmtRepr> FmtRepr for Quote<T> {
     fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str(EMPTY)?;
-        f.write_char(SCOPE_LEFT)?;
-        self.source.fmt(ctx, f)?;
-        f.write_char(SCOPE_RIGHT)
+        if self.source.is_text_list_map() {
+            self.source.fmt(ctx, f)
+        } else {
+            f.write_char(SCOPE_LEFT)?;
+            self.source.fmt(ctx, f)?;
+            f.write_char(SCOPE_RIGHT)
+        }
     }
 }
 
@@ -662,6 +694,10 @@ impl<T: FmtRepr> FmtRepr for List<T> {
         }
         f.write_char(LIST_RIGHT)
     }
+
+    fn is_text_list_map(&self) -> bool {
+        true
+    }
 }
 
 impl<T: FmtRepr> Display for Map<Key, T> {
@@ -706,6 +742,10 @@ impl<T: FmtRepr> FmtRepr for Map<Key, T> {
             }
         }
         f.write_char(MAP_RIGHT)
+    }
+
+    fn is_text_list_map(&self) -> bool {
+        true
     }
 }
 
