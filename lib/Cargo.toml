@@ -46,7 +46,7 @@ features = []
 
 # syntax parsing
 [dependencies.winnow]
-version = "0.7"
+version = "1"
 
 # val generation
 [dependencies.rand]
