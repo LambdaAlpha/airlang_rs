@@ -38,12 +38,10 @@ use winnow::token::take_while;
 use super::BYTE;
 use super::COMMENT;
 use super::COMMENT_CHAR;
-use super::COMPACT;
 use super::DECIMAL;
 use super::Direction;
 use super::EMPTY;
 use super::EMPTY_CHAR;
-use super::ESCAPE;
 use super::FALSE;
 use super::INT;
 use super::KEY_QUOTE;
@@ -59,6 +57,8 @@ use super::SCOPE_RIGHT;
 use super::SEPARATOR;
 use super::SPACE;
 use super::TEXT_QUOTE;
+use super::TOKEN;
+use super::TOKEN_CHAR;
 use super::TRUE;
 use super::UNIT;
 use super::is_delimiter;
@@ -242,7 +242,7 @@ fn prefix<'a, T: ParseRepr>(prefix: &str, ctx: ParseCtx) -> impl Parser<&'a str,
     move |i: &mut _| {
         let i: &mut &str = i;
         match prefix {
-            COMPACT => match i.chars().next().unwrap() {
+            TOKEN => match i.chars().next().unwrap() {
                 LIST_LEFT => raw_list(ctx).parse_next(i),
                 MAP_LEFT => raw_map(ctx).parse_next(i),
                 _ => fail.context(label("prefix token")).parse_next(i),
@@ -546,12 +546,12 @@ fn any_key(i: &mut &str) -> ModalResult<Key> {
 #[expect(const_item_mutation)]
 fn key(i: &mut &str) -> ModalResult<Key> {
     let key = move |i: &mut _| {
-        let mut raw1 = take_while(1 .., |c| is_key(c) && c != ESCAPE && c != KEY_QUOTE);
-        let mut code1 = take_while(1 .., |c| is_key(c) && c != ' ' && c != SCOPE_RIGHT)
+        let mut raw1 = take_while(1 .., |c| is_key(c) && c != TOKEN_CHAR && c != KEY_QUOTE);
+        let mut token1 = take_while(1 .., |c| is_key(c) && c != ' ' && c != SCOPE_RIGHT)
             .verify_map(character)
             .verify(|c| is_key(*c));
         let mut raw = take_while(0 .., is_key);
-        let mut code = take_while(1 .., |c| is_key(c) && c != ' ')
+        let mut token = take_while(1 .., |c| is_key(c) && c != ' ')
             .verify_map(character)
             .verify(|c| is_key(*c));
         let mut comment = take_until(0 .., '\n').void();
@@ -569,20 +569,20 @@ fn key(i: &mut &str) -> ModalResult<Key> {
             }
             match mode {
                 Mode::Raw => s.push_str(raw.parse_next(i)?),
-                Mode::Code => match c {
+                Mode::Token => match c {
                     ' ' | '\t' => space_tab1.parse_next(i)?,
-                    _ => s.push(code.parse_next(i)?),
+                    _ => s.push(token.parse_next(i)?),
                 },
                 Mode::Default => match c {
                     KEY_QUOTE => break,
-                    ESCAPE => {
-                        ESCAPE.parse_next(i)?;
+                    TOKEN_CHAR => {
+                        TOKEN_CHAR.parse_next(i)?;
                         SCOPE_LEFT.parse_next(i)?;
                         loop {
                             match peek(any).parse_next(i)? {
                                 ' ' | '\t' => space_tab1.parse_next(i)?,
                                 SCOPE_RIGHT => break,
-                                _ => s.push(code1.parse_next(i)?),
+                                _ => s.push(token1.parse_next(i)?),
                             }
                         }
                         SCOPE_RIGHT.parse_next(i)?;
@@ -607,11 +607,11 @@ fn key_newline(i: &mut &str) -> ModalResult<()> {
 fn text(i: &mut &str) -> ModalResult<Text> {
     let text = move |i: &mut _| {
         let i: &mut &str = i;
-        let mut raw1 = take_till(1 .., ('"', ESCAPE, '\n', '\t'));
-        let mut code1 =
+        let mut raw1 = take_till(1 .., ('"', TOKEN_CHAR, '\n', '\t'));
+        let mut token1 =
             take_while(1 .., |c| is_key(c) && c != ' ' && c != SCOPE_RIGHT).verify_map(character);
         let mut raw = take_until(1 .., '\n');
-        let mut code = take_while(1 .., |c| is_key(c) && c != ' ').verify_map(character);
+        let mut token = take_while(1 .., |c| is_key(c) && c != ' ').verify_map(character);
         let mut comment = take_until(0 .., '\n').void();
         let mut space_tab1 = space_tab(1 ..);
         let mut tab = take_while(1 .., '\t').void();
@@ -627,20 +627,20 @@ fn text(i: &mut &str) -> ModalResult<Text> {
             }
             match mode {
                 Mode::Raw => s.push_str(raw.parse_next(i)?),
-                Mode::Code => match c {
+                Mode::Token => match c {
                     ' ' | '\t' => space_tab1.parse_next(i)?,
-                    _ => s.push(code.parse_next(i)?),
+                    _ => s.push(token.parse_next(i)?),
                 },
                 Mode::Default => match c {
                     TEXT_QUOTE => break,
-                    ESCAPE => {
-                        ESCAPE.parse_next(i)?;
+                    TOKEN_CHAR => {
+                        TOKEN_CHAR.parse_next(i)?;
                         SCOPE_LEFT.parse_next(i)?;
                         loop {
                             match peek(any).parse_next(i)? {
                                 ' ' | '\t' => space_tab1.parse_next(i)?,
                                 SCOPE_RIGHT => break,
-                                _ => s.push(code1.parse_next(i)?),
+                                _ => s.push(token1.parse_next(i)?),
                             }
                         }
                         SCOPE_RIGHT.parse_next(i)?;
@@ -668,20 +668,20 @@ fn text_newline<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
 enum Mode {
     Default,
     Raw,
-    Code,
+    Token,
     Comment,
 }
 
 fn switch_mode<'a>(mode: Mode, quote: char) -> impl Parser<&'a str, Mode, E> {
     move |i: &mut _| match any.parse_next(i)? {
         EMPTY_CHAR => Ok(Mode::Raw),
-        ESCAPE => Ok(Mode::Code),
+        TOKEN_CHAR => Ok(Mode::Token),
         COMMENT_CHAR => Ok(Mode::Comment),
         ' ' => Ok(mode),
         c if c == quote => Ok(Mode::Default),
         _ => fail
             .context(expect_char(EMPTY_CHAR))
-            .context(expect_char(ESCAPE))
+            .context(expect_char(TOKEN_CHAR))
             .context(expect_char(quote))
             .context(expect_char(COMMENT_CHAR))
             .context(expect_char(' '))

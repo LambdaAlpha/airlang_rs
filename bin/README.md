@@ -125,24 +125,24 @@ a : b : c
 **list**
 
 - `[v1, v2, ..., vn]`
-- `#[v1 v2 ... vn]` = `[v1, v2, ..., vn]`
+- `^[v1 v2 ... vn]` = `[v1, v2, ..., vn]`
 
 ```air
 [0, 1, 2]
 [., false, 0, '',]
-#[git commit --amend --no-edit]
+^[git commit --amend --no-edit]
 ```
 
 **map**
 
 - `{k1 : v1, k2 : v2, ... : ..., kn : vn}`
-- `#{k1 v1 k2 v2 ... ... kn vn}` = `{k1 : v1, k2 : v2, ... : ..., kn : vn}`
+- `^{k1 v1 k2 v2 ... ... kn vn}` = `{k1 : v1, k2 : v2, ... : ..., kn : vn}`
 
 ```air
 {a : 1, b : 2, c : 3}
 {a : 1, b : true, c : ' ',}
 {a, b, c}
-#{
+^{
     select *
     from book
     where (price > 100)

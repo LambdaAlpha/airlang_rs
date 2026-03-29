@@ -16,7 +16,6 @@ use num_traits::Signed;
 use super::BYTE;
 use super::Direction;
 use super::EMPTY;
-use super::ESCAPE;
 use super::FALSE;
 use super::KEY_QUOTE;
 use super::LEFT;
@@ -30,6 +29,8 @@ use super::SCOPE_LEFT;
 use super::SCOPE_RIGHT;
 use super::SEPARATOR;
 use super::TEXT_QUOTE;
+use super::TOKEN;
+use super::TOKEN_CHAR;
 use super::TRUE;
 use super::UNIT;
 use super::is_delimiter;
@@ -135,7 +136,7 @@ fn key_fmt(key: Key, f: &mut Formatter<'_>) -> std::fmt::Result {
 fn key_compact(key: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
     let mut code_mode = false;
     for c in key.chars() {
-        if let c @ (ESCAPE | KEY_QUOTE) = c {
+        if let c @ (TOKEN_CHAR | KEY_QUOTE) = c {
             start_code(&mut code_mode, f)?;
             f.write_char(' ')?;
             f.write_char(c)?;
@@ -206,7 +207,7 @@ fn text_compact(str: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
     let mut code_mode = false;
     for c in str.chars() {
         let escaped = match c {
-            ESCAPE => concatcp!(ESCAPE),
+            TOKEN_CHAR => TOKEN,
             '\n' => "lf",
             '\r' => "cr",
             '\t' => "ht",
@@ -231,7 +232,7 @@ fn text_key_encoding(str: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
             '\n' => "lf",
             '\r' => "cr",
             '\t' => "ht",
-            ESCAPE => concatcp!(ESCAPE),
+            TOKEN_CHAR => TOKEN,
             TEXT_QUOTE => concatcp!(TEXT_QUOTE),
             c if Key::is_key(c) => {
                 stop_code(&mut code_mode, f)?;
@@ -269,7 +270,7 @@ fn text_raw(str: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
 fn start_code(code_mode: &mut bool, f: &mut Formatter<'_>) -> std::fmt::Result {
     if !*code_mode {
         *code_mode = true;
-        f.write_char(ESCAPE)?;
+        f.write_char(TOKEN_CHAR)?;
         f.write_char(SCOPE_LEFT)?;
     }
     Ok(())

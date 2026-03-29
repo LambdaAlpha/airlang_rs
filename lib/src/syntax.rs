@@ -40,7 +40,8 @@ pub(crate) const COMMENT: &str = concatcp!(COMMENT_CHAR);
 pub(crate) const COMMENT_CHAR: char = '!';
 pub(crate) const LEFT: &str = "<";
 pub(crate) const RIGHT: &str = ">";
-pub(crate) const COMPACT: &str = "#";
+pub(crate) const TOKEN: &str = concatcp!(TOKEN_CHAR);
+pub(crate) const TOKEN_CHAR: char = '^';
 
 pub(crate) const INT: &str = "integer";
 pub(crate) const DECIMAL: &str = "decimal";
@@ -66,8 +67,6 @@ pub(crate) fn is_delimiter(c: char) -> bool {
 pub(crate) fn keyword(s: &str) -> bool {
     matches!(s, EMPTY | UNIT | PAIR | TRUE | FALSE)
 }
-
-pub(crate) const ESCAPE: char = '^';
 
 #[derive(Default, Copy, Clone, PartialEq, Eq, IsVariant)]
 enum Direction {
