@@ -73,15 +73,15 @@ impl FmtRepr for Val {
             Val::Map(map) => <Map<Key, Val> as FmtRepr>::fmt(map, ctx, f),
             Val::Quote(quote) => <Quote<Val> as FmtRepr>::fmt(quote, ctx, f),
             Val::Call(call) => <Call<Val, Val> as FmtRepr>::fmt(call, ctx, f),
-            Val::Link(link) => <LinkVal as Display>::fmt(link, f),
-            Val::Cfg(cfg) => <Cfg as Display>::fmt(cfg, f),
-            Val::Func(func) => <FuncVal as Display>::fmt(func, f),
+            Val::Link(link) => <LinkVal as FmtRepr>::fmt(link, ctx, f),
+            Val::Cfg(cfg) => <Cfg as FmtRepr>::fmt(cfg, ctx, f),
+            Val::Func(func) => <FuncVal as FmtRepr>::fmt(func, ctx, f),
             Val::Dyn(val) => <dyn DynVal as Display>::fmt(val.deref(), f),
         }
     }
 
     fn is_call(&self) -> bool {
-        matches!(self, Val::Call(_))
+        matches!(self, Val::Call(_) | Val::Link(_) | Val::Cfg(_) | Val::Func(_))
     }
 
     fn is_pair(&self) -> bool {
@@ -100,48 +100,78 @@ impl FmtRepr for Val {
 
 impl Display for LinkVal {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let id = self.ptr_addr();
-        let id = Key::from_string_unchecked(format!("{id:x}"));
-        let repr = Val::Key(id);
-        let tag = key(concatcp!(PREFIX_CELL, LINK));
-        let call = Call::new(tag, repr);
-        Display::fmt(&call, f)
+        FmtRepr::fmt(self, FmtCtx::default(), f)
     }
 }
 
 impl Debug for LinkVal {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(self, f)
+        FmtRepr::fmt(self, FmtCtx::default(), f)
+    }
+}
+
+impl FmtRepr for LinkVal {
+    fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let id = self.ptr_addr();
+        let id = Key::from_string_unchecked(format!("{id:x}"));
+        let repr = Val::Key(id);
+        let tag = key(concatcp!(PREFIX_CELL, LINK));
+        let call = Call::new(tag, repr);
+        FmtRepr::fmt(&call, ctx, f)
+    }
+
+    fn is_call(&self) -> bool {
+        true
     }
 }
 
 impl Display for Cfg {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let repr = Val::Map(Map::clone(self).into());
-        let tag = key(concatcp!(PREFIX_CELL, CFG));
-        let call = Call::new(tag, repr);
-        Display::fmt(&call, f)
+        FmtRepr::fmt(self, FmtCtx::default(), f)
     }
 }
 
 impl Debug for Cfg {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(self, f)
+        FmtRepr::fmt(self, FmtCtx::default(), f)
+    }
+}
+
+impl FmtRepr for Cfg {
+    fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let repr = Val::Map(Map::clone(self).into());
+        let tag = key(concatcp!(PREFIX_CELL, CFG));
+        let call = Call::new(tag, repr);
+        FmtRepr::fmt(&call, ctx, f)
+    }
+
+    fn is_call(&self) -> bool {
+        true
     }
 }
 
 impl Display for FuncVal {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let repr = generate_func(self.clone());
-        let tag = key(concatcp!(PREFIX_CELL, FUNC));
-        let call = Call::new(tag, repr);
-        Display::fmt(&call, f)
+        FmtRepr::fmt(self, FmtCtx::default(), f)
     }
 }
 
 impl Debug for FuncVal {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(self, f)
+        FmtRepr::fmt(self, FmtCtx::default(), f)
+    }
+}
+
+impl FmtRepr for FuncVal {
+    fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let repr = generate_func(self.clone());
+        let tag = key(concatcp!(PREFIX_CELL, FUNC));
+        let call = Call::new(tag, repr);
+        FmtRepr::fmt(&call, ctx, f)
+    }
+
+    fn is_call(&self) -> bool {
+        true
     }
 }
 
