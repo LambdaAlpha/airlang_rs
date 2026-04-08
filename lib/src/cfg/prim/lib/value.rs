@@ -4,8 +4,7 @@ pub use self::arbitrary::Arbitrary;
 
 _____!();
 
-use rand::make_rng;
-use rand::rngs::SmallRng;
+use rand::rng;
 
 use crate::bug;
 use crate::cfg::CfgMod;
@@ -98,28 +97,27 @@ const TYPE_CFG: &str = concatcp!(PREFIX_CELL, CFG);
 const TYPE_FUNC: &str = concatcp!(PREFIX_CELL, FUNC);
 
 pub fn any(cfg: &mut Cfg, input: Val) -> Val {
-    const DEPTH: usize = 0;
-    let mut rng: SmallRng = make_rng();
+    let mut rng = rng();
     let rng = &mut rng;
     match input {
-        Val::Unit(_) => Val::any(rng, DEPTH),
+        Val::Unit(_) => Val::any(rng),
         Val::Key(s) => match &*s {
-            TYPE_UNIT => Val::Unit(Unit::any(rng, DEPTH)),
-            TYPE_BIT => Val::Bit(Bit::any(rng, DEPTH)),
-            TYPE_KEY => Val::Key(Key::any(rng, DEPTH)),
-            TYPE_TEXT => Val::Text(Text::any(rng, DEPTH).into()),
-            TYPE_INT => Val::Int(Int::any(rng, DEPTH).into()),
-            TYPE_DECIMAL => Val::Decimal(Decimal::any(rng, DEPTH).into()),
-            TYPE_BYTE => Val::Byte(Byte::any(rng, DEPTH).into()),
-            TYPE_CELL => Val::Cell(Cell::<Val>::any(rng, DEPTH).into()),
-            TYPE_PAIR => Val::Pair(Pair::<Val, Val>::any(rng, DEPTH).into()),
-            TYPE_LIST => Val::List(List::<Val>::any(rng, DEPTH).into()),
-            TYPE_MAP => Val::Map(Map::<Key, Val>::any(rng, DEPTH).into()),
-            TYPE_QUOTE => Val::Quote(Quote::<Val>::any(rng, DEPTH).into()),
-            TYPE_CALL => Val::Call(Call::<Val, Val>::any(rng, DEPTH).into()),
-            TYPE_LINK => Val::Link(LinkVal::any(rng, DEPTH)),
-            TYPE_CFG => Val::Cfg(Cfg::any(rng, DEPTH).into()),
-            TYPE_FUNC => Val::Func(FuncVal::any(rng, DEPTH)),
+            TYPE_UNIT => Val::Unit(Unit::any(rng)),
+            TYPE_BIT => Val::Bit(Bit::any(rng)),
+            TYPE_KEY => Val::Key(Key::any(rng)),
+            TYPE_TEXT => Val::Text(Text::any(rng).into()),
+            TYPE_INT => Val::Int(Int::any(rng).into()),
+            TYPE_DECIMAL => Val::Decimal(Decimal::any(rng).into()),
+            TYPE_BYTE => Val::Byte(Byte::any(rng).into()),
+            TYPE_CELL => Val::Cell(Cell::<Val>::any(rng).into()),
+            TYPE_PAIR => Val::Pair(Pair::<Val, Val>::any(rng).into()),
+            TYPE_LIST => Val::List(List::<Val>::any(rng).into()),
+            TYPE_MAP => Val::Map(Map::<Key, Val>::any(rng).into()),
+            TYPE_QUOTE => Val::Quote(Quote::<Val>::any(rng).into()),
+            TYPE_CALL => Val::Call(Call::<Val, Val>::any(rng).into()),
+            TYPE_LINK => Val::Link(LinkVal::any(rng)),
+            TYPE_CFG => Val::Cfg(Cfg::any(rng).into()),
+            TYPE_FUNC => Val::Func(FuncVal::any(rng)),
             s => bug!(cfg, "{ANY}: unknown type {s}"),
         },
         v => bug!(cfg, "{ANY}: expected input to be a key or a unit, but got {v}"),
