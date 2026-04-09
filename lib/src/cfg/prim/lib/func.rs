@@ -86,7 +86,7 @@ pub fn represent(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Func(func) = input else {
         return bug!(cfg, "{REPRESENT}: expected input to be a function, but got {input}");
     };
-    generate_func(func)
+    Val::Map(generate_func(func))
 }
 
 pub fn is_context_free(cfg: &mut Cfg, ctx: &Val) -> Val {

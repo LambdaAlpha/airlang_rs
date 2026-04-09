@@ -9,6 +9,7 @@ use crate::semantics::func::DynFunc;
 use crate::semantics::func::PrimCtx;
 use crate::semantics::val::CompFuncVal;
 use crate::semantics::val::FuncVal;
+use crate::semantics::val::MapVal;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
@@ -53,7 +54,7 @@ fn parse_bit(cfg: &mut Cfg, tag: &str, val: Val) -> Option<bool> {
     }
 }
 
-pub(in crate::cfg) fn generate_func(f: FuncVal) -> Val {
+pub(in crate::cfg) fn generate_func(f: FuncVal) -> MapVal {
     match f {
         FuncVal::Prim(f) => generate_prim(f),
         FuncVal::Comp(f) => generate_comp(f),
@@ -124,11 +125,11 @@ fn comp_code(comp: &CompFunc) -> Val {
     Val::Pair(Pair::new(names, comp.body.clone()).into())
 }
 
-fn generate_prim(f: PrimFuncVal) -> Val {
+fn generate_prim(f: PrimFuncVal) -> MapVal {
     prim(PrimRepr { common: CommonRepr { ctx: f.ctx, code: prim_code(&f.fn_) } })
 }
 
-fn generate_comp(f: CompFuncVal) -> Val {
+fn generate_comp(f: CompFuncVal) -> MapVal {
     comp(CompRepr {
         common: CommonRepr { ctx: f.ctx.to_prim_ctx(), code: comp_code(&f) },
         prelude: f.prelude.clone(),
@@ -150,10 +151,10 @@ struct PrimRepr {
     common: CommonRepr,
 }
 
-fn prim(prim: PrimRepr) -> Val {
+fn prim(prim: PrimRepr) -> MapVal {
     let mut repr = Map::<Key, Val>::default();
     generate_common(&mut repr, prim.common);
-    Val::Map(repr.into())
+    repr.into()
 }
 
 struct CompRepr {
@@ -161,9 +162,9 @@ struct CompRepr {
     prelude: Val,
 }
 
-fn comp(comp: CompRepr) -> Val {
+fn comp(comp: CompRepr) -> MapVal {
     let mut repr = Map::<Key, Val>::default();
     generate_common(&mut repr, comp.common);
     repr.insert(Key::from_str_unchecked(PRELUDE), comp.prelude);
-    Val::Map(repr.into())
+    repr.into()
 }

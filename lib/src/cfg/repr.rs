@@ -4,12 +4,8 @@ use std::fmt::Formatter;
 use std::ops::Deref;
 use std::str::FromStr;
 
-use const_format::concatcp;
-
 use crate::cfg::repr::func::generate_func;
-use crate::cfg::utils::key;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::val::CFG;
 use crate::semantics::val::DynVal;
 use crate::semantics::val::FUNC;
@@ -81,7 +77,7 @@ impl FmtRepr for Val {
     }
 
     fn is_call(&self) -> bool {
-        matches!(self, Val::Call(_) | Val::Link(_) | Val::Cfg(_) | Val::Func(_))
+        matches!(self, Val::Call(_))
     }
 
     fn is_pair(&self) -> bool {
@@ -111,17 +107,12 @@ impl Debug for LinkVal {
 }
 
 impl FmtRepr for LinkVal {
-    fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, _ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(LINK)?;
         let id = self.ptr_addr();
         let id = Key::from_string_unchecked(format!("{id:x}"));
         let repr = Val::Key(id);
-        let tag = key(concatcp!(PREFIX_CELL, LINK));
-        let call = Call::new(tag, repr);
-        FmtRepr::fmt(&call, ctx, f)
-    }
-
-    fn is_call(&self) -> bool {
-        true
+        write!(f, "{repr:+}")
     }
 }
 
@@ -139,14 +130,8 @@ impl Debug for Cfg {
 
 impl FmtRepr for Cfg {
     fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let repr = Val::Map(Map::clone(self).into());
-        let tag = key(concatcp!(PREFIX_CELL, CFG));
-        let call = Call::new(tag, repr);
-        FmtRepr::fmt(&call, ctx, f)
-    }
-
-    fn is_call(&self) -> bool {
-        true
+        f.write_str(CFG)?;
+        FmtRepr::fmt(&**self, ctx, f)
     }
 }
 
@@ -164,14 +149,9 @@ impl Debug for FuncVal {
 
 impl FmtRepr for FuncVal {
     fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(FUNC)?;
         let repr = generate_func(self.clone());
-        let tag = key(concatcp!(PREFIX_CELL, FUNC));
-        let call = Call::new(tag, repr);
-        FmtRepr::fmt(&call, ctx, f)
-    }
-
-    fn is_call(&self) -> bool {
-        true
+        FmtRepr::fmt(&*repr, ctx, f)
     }
 }
 
