@@ -1,14 +1,17 @@
 use std::fmt::Debug;
 use std::fmt::Display;
 use std::fmt::Formatter;
+use std::fmt::Write;
 use std::str::FromStr;
 
 use derive_more::From;
 use derive_more::IsVariant;
 
 use super::ParseError;
-use super::generator::FmtCtx;
+use super::ReprType;
+use super::generator::FmtOptions;
 use super::generator::FmtRepr;
+use super::impl_display_debug_for_fmt_repr;
 use super::parser::ParseRepr;
 use super::parser::parse;
 use crate::type_::Bit;
@@ -97,43 +100,41 @@ impl FromStr for Repr {
     }
 }
 
-impl Display for Repr {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        FmtRepr::fmt(self, FmtCtx::default(), f)
-    }
-}
-
-impl Debug for Repr {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        FmtRepr::fmt(self, FmtCtx::default(), f)
-    }
-}
-
 impl FmtRepr for Repr {
-    fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
         match self {
-            Repr::Unit(unit) => <Unit as Display>::fmt(unit, f),
-            Repr::Bit(bit) => <Bit as Display>::fmt(bit, f),
-            Repr::Key(key) => <Key as Display>::fmt(key, f),
-            Repr::Text(text) => <Text as Display>::fmt(text, f),
-            Repr::Int(int) => <Int as Display>::fmt(int, f),
-            Repr::Decimal(decimal) => <Decimal as Display>::fmt(decimal, f),
-            Repr::Byte(byte) => <Byte as Display>::fmt(byte, f),
-            Repr::Cell(cell) => <CellRepr as FmtRepr>::fmt(cell, ctx, f),
-            Repr::Pair(pair) => <PairRepr as FmtRepr>::fmt(pair, ctx, f),
-            Repr::List(list) => <ListRepr as FmtRepr>::fmt(list, ctx, f),
-            Repr::Map(map) => <MapRepr as FmtRepr>::fmt(map, ctx, f),
-            Repr::Quote(quote) => <QuoteRepr as FmtRepr>::fmt(quote, ctx, f),
-            Repr::Call(call) => <CallRepr as FmtRepr>::fmt(call, ctx, f),
+            Repr::Unit(unit) => <Unit as FmtRepr>::fmt(unit, options, f),
+            Repr::Bit(bit) => <Bit as FmtRepr>::fmt(bit, options, f),
+            Repr::Key(key) => <Key as FmtRepr>::fmt(key, options, f),
+            Repr::Text(text) => <Text as FmtRepr>::fmt(text, options, f),
+            Repr::Int(int) => <Int as FmtRepr>::fmt(int, options, f),
+            Repr::Decimal(decimal) => <Decimal as FmtRepr>::fmt(decimal, options, f),
+            Repr::Byte(byte) => <Byte as FmtRepr>::fmt(byte, options, f),
+            Repr::Cell(cell) => <CellRepr as FmtRepr>::fmt(cell, options, f),
+            Repr::Pair(pair) => <PairRepr as FmtRepr>::fmt(pair, options, f),
+            Repr::List(list) => <ListRepr as FmtRepr>::fmt(list, options, f),
+            Repr::Map(map) => <MapRepr as FmtRepr>::fmt(map, options, f),
+            Repr::Quote(quote) => <QuoteRepr as FmtRepr>::fmt(quote, options, f),
+            Repr::Call(call) => <CallRepr as FmtRepr>::fmt(call, options, f),
         }
     }
 
-    fn is_call(&self) -> bool {
-        matches!(self, Repr::Call(_))
-    }
-
-    fn is_pair(&self) -> bool {
-        matches!(self, Repr::Pair(_))
+    fn get_type(&self) -> ReprType {
+        match self {
+            Repr::Unit(_) => ReprType::Unit,
+            Repr::Bit(_) => ReprType::Bit,
+            Repr::Key(_) => ReprType::Key,
+            Repr::Text(_) => ReprType::Text,
+            Repr::Int(_) => ReprType::Int,
+            Repr::Decimal(_) => ReprType::Decimal,
+            Repr::Byte(_) => ReprType::Byte,
+            Repr::Cell(_) => ReprType::Cell,
+            Repr::Pair(_) => ReprType::Pair,
+            Repr::List(_) => ReprType::List,
+            Repr::Map(_) => ReprType::Map,
+            Repr::Quote(_) => ReprType::Quote,
+            Repr::Call(_) => ReprType::Call,
+        }
     }
 
     fn to_pair(&self) -> Pair<&dyn FmtRepr, &dyn FmtRepr> {
@@ -142,8 +143,6 @@ impl FmtRepr for Repr {
         };
         Pair::new(&pair.left, &pair.right)
     }
-
-    fn is_text_list_map(&self) -> bool {
-        matches!(self, Repr::Text(_) | Repr::List(_) | Repr::Map(_))
-    }
 }
+
+impl_display_debug_for_fmt_repr!(Repr);

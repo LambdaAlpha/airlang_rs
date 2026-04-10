@@ -1,10 +1,15 @@
 use const_format::concatcp;
 
 pub use self::error::ParseError;
-pub use self::generator::FmtCtx;
+pub use self::generator::FmtOptions;
 pub use self::generator::FmtRepr;
+pub use self::generator::SpaceFmt;
 pub use self::parser::ParseRepr;
 pub use self::parser::parse;
+
+_____!();
+
+pub(crate) use self::generator::impl_display_debug_for_fmt_repr;
 
 _____!();
 
@@ -69,10 +74,28 @@ pub(crate) fn keyword(s: &str) -> bool {
 }
 
 #[derive(Default, Copy, Clone, PartialEq, Eq, IsVariant)]
-enum Direction {
+pub enum Direction {
     Left,
     #[default]
     Right,
+}
+
+#[derive(Copy, Clone, IsVariant)]
+pub enum ReprType {
+    Unit,
+    Bit,
+    Key,
+    Text,
+    Int,
+    Decimal,
+    Byte,
+    Cell,
+    Pair,
+    List,
+    Map,
+    Quote,
+    Call,
+    Other,
 }
 
 pub mod repr;

@@ -1,22 +1,19 @@
-use std::fmt::Alignment;
-use std::fmt::Binary;
 use std::fmt::Debug;
 use std::fmt::Display;
 use std::fmt::Formatter;
-use std::fmt::LowerHex;
-use std::fmt::Pointer;
 use std::fmt::Write;
-use std::fmt::from_fn;
 
 use bigdecimal::BigDecimal;
 use const_format::concatcp;
-use num_bigint::BigInt;
+use derive_more::IsVariant;
 use num_traits::Signed;
 
 use super::BYTE;
+use super::DECIMAL;
 use super::Direction;
 use super::EMPTY;
 use super::FALSE;
+use super::INT;
 use super::KEY_QUOTE;
 use super::LEFT;
 use super::LIST_LEFT;
@@ -25,6 +22,7 @@ use super::MAP_LEFT;
 use super::MAP_RIGHT;
 use super::PAIR;
 use super::RIGHT;
+use super::ReprType;
 use super::SCOPE_LEFT;
 use super::SCOPE_RIGHT;
 use super::SEPARATOR;
@@ -50,214 +48,164 @@ use crate::type_::Text;
 use crate::type_::Unit;
 
 #[derive(Default, Copy, Clone)]
-pub struct FmtCtx {
-    direction: Direction,
+pub struct FmtOptions {
+    pub key_encoding: bool,
+    pub normalized: bool,
+    pub space: SpaceFmt,
+    pub direction: Direction,
+    pub key_ctx: bool,
+}
+
+#[derive(Default, Copy, Clone, IsVariant)]
+pub enum SpaceFmt {
+    #[default]
+    Compact,
+    Pretty,
 }
 
 pub trait FmtRepr {
-    /// '#' for pretty
-    /// alignment for direction: none or '^' for smart direction
-    fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result;
+    fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result;
 
-    fn is_call(&self) -> bool {
-        false
-    }
-
-    fn is_pair(&self) -> bool {
-        false
-    }
+    fn get_type(&self) -> ReprType;
 
     fn to_pair(&self) -> Pair<&dyn FmtRepr, &dyn FmtRepr> {
         panic!("called `FmtRepr::to_pair()` on non-pair value")
     }
-
-    fn is_text_list_map(&self) -> bool {
-        false
-    }
 }
 
-impl Display for Unit {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        unit_fmt(f)
-    }
-}
-
-impl Debug for Unit {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        unit_fmt(f)
-    }
-}
-
-fn unit_fmt(f: &mut Formatter<'_>) -> std::fmt::Result {
-    f.write_str(UNIT)
-}
-
-impl Display for Bit {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        bit_fmt(*self, f)
-    }
-}
-
-impl Debug for Bit {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        bit_fmt(*self, f)
-    }
-}
-
-fn bit_fmt(bit: Bit, f: &mut Formatter<'_>) -> std::fmt::Result {
-    f.write_str(if *bit { TRUE } else { FALSE })
-}
-
-impl Display for Key {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        key_fmt(self.clone(), f)
-    }
-}
-
-impl Debug for Key {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        key_fmt(self.clone(), f)
-    }
-}
-
-fn key_fmt(key: Key, f: &mut Formatter<'_>) -> std::fmt::Result {
-    if f.sign_minus() {
-        return key_compact(&key, f);
-    }
-    if f.sign_plus() || key_should_quote(&key) {
-        f.write_char(KEY_QUOTE)?;
-        key_compact(&key, f)?;
-        f.write_char(KEY_QUOTE)
-    } else {
-        f.write_str(&key)
-    }
-}
-
-fn key_compact(key: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
-    let mut code_mode = false;
-    for c in key.chars() {
-        if let c @ (TOKEN_CHAR | KEY_QUOTE) = c {
-            start_code(&mut code_mode, f)?;
-            f.write_char(' ')?;
-            f.write_char(c)?;
-        } else {
-            stop_code(&mut code_mode, f)?;
-            f.write_char(c)?;
+impl<'a> From<&Formatter<'a>> for FmtOptions {
+    fn from(f: &Formatter<'a>) -> Self {
+        Self {
+            space: if f.alternate() { SpaceFmt::Pretty } else { SpaceFmt::Compact },
+            ..Default::default()
         }
     }
-    stop_code(&mut code_mode, f)
 }
 
-fn key_should_quote(str: &str) -> bool {
-    if str.is_empty() {
+impl FmtRepr for Unit {
+    fn fmt(&self, _options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
+        f.write_str(UNIT)
+    }
+
+    fn get_type(&self) -> ReprType {
+        ReprType::Unit
+    }
+}
+
+impl FmtRepr for Bit {
+    fn fmt(&self, _options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
+        f.write_str(if **self { TRUE } else { FALSE })
+    }
+
+    fn get_type(&self) -> ReprType {
+        ReprType::Bit
+    }
+}
+
+impl FmtRepr for Key {
+    fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
+        if !key_should_quote(self, options) {
+            return f.write_str(self);
+        }
+        f.write_char(KEY_QUOTE)?;
+        key_compact(self, f)?;
+        f.write_char(KEY_QUOTE)
+    }
+
+    fn get_type(&self) -> ReprType {
+        ReprType::Key
+    }
+}
+
+fn key_compact(key: &str, f: &mut dyn Write) -> std::fmt::Result {
+    let mut token_mode = false;
+    for c in key.chars() {
+        if let TOKEN_CHAR | KEY_QUOTE = c {
+            start_token(&mut token_mode, f)?;
+        } else {
+            stop_token(&mut token_mode, f)?;
+        }
+        f.write_char(c)?;
+    }
+    stop_token(&mut token_mode, f)
+}
+
+fn key_should_quote(key: &str, options: FmtOptions) -> bool {
+    if options.normalized {
         return true;
     }
-    if keyword(str) {
+    if key.is_empty() {
         return true;
     }
-    let first = str.chars().next().unwrap();
+    if options.key_ctx {
+        return key.chars().any(is_delimiter);
+    }
+    if keyword(key) {
+        return true;
+    }
+    let first = key.chars().next().unwrap();
     if first.is_ascii_digit() {
         return true;
     }
-    str.chars().any(is_delimiter)
+    key.chars().any(is_delimiter)
 }
 
-impl Display for Text {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        text_fmt(self, f)
-    }
-}
-
-impl Debug for Text {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        text_fmt(self, f)
-    }
-}
-
-// key encoding
-impl Pointer for Text {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        if !f.sign_minus() {
-            f.write_char(TEXT_QUOTE)?;
-        }
-        text_key_encoding(self, f)?;
-        if !f.sign_minus() {
-            f.write_char(TEXT_QUOTE)?;
-        }
-        Ok(())
-    }
-}
-
-fn text_fmt(text: &Text, f: &mut Formatter<'_>) -> std::fmt::Result {
-    if !f.sign_minus() {
+impl FmtRepr for Text {
+    fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
         f.write_char(TEXT_QUOTE)?;
+        if options.key_encoding {
+            text_compact(self, true, f)?;
+        } else if options.normalized {
+            text_compact(self, false, f)?;
+        } else if options.space.is_pretty() && self.contains('\n') {
+            text_raw(self, f)?;
+        } else {
+            text_compact(self, false, f)?;
+        }
+        f.write_char(TEXT_QUOTE)
     }
-    if f.alternate() && text.contains('\n') {
-        text_raw(text, f)?;
-    } else {
-        text_compact(text, f)?;
+
+    fn get_type(&self) -> ReprType {
+        ReprType::Text
     }
-    if !f.sign_minus() {
-        f.write_char(TEXT_QUOTE)?;
-    }
-    Ok(())
 }
 
-fn text_compact(str: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
-    let mut code_mode = false;
-    for c in str.chars() {
-        let escaped = match c {
-            TOKEN_CHAR => TOKEN,
+fn text_compact(text: &str, key_encoding: bool, f: &mut dyn Write) -> std::fmt::Result {
+    let mut token_mode = false;
+    for c in text.chars() {
+        let mut is_token = true;
+        let token = match c {
             '\n' => "lf",
             '\r' => "cr",
             '\t' => "ht",
+            TOKEN_CHAR => TOKEN,
             TEXT_QUOTE => concatcp!(TEXT_QUOTE),
             _ => {
-                stop_code(&mut code_mode, f)?;
-                f.write_char(c)?;
-                continue;
+                is_token = false;
+                ""
             },
         };
-        start_code(&mut code_mode, f)?;
-        f.write_char(' ')?;
-        f.write_str(escaped)?;
+        if is_token {
+            start_token(&mut token_mode, f)?;
+            f.write_str(token)?;
+            continue;
+        }
+        if key_encoding && !Key::is_key(c) {
+            start_token(&mut token_mode, f)?;
+            f.write_char('X')?;
+            write!(f, "{:x}", c as u32)?;
+        } else {
+            stop_token(&mut token_mode, f)?;
+            f.write_char(c)?;
+        }
     }
-    stop_code(&mut code_mode, f)
+    stop_token(&mut token_mode, f)
 }
 
-fn text_key_encoding(str: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
-    let mut code_mode = false;
-    for c in str.chars() {
-        let code = match c {
-            '\n' => "lf",
-            '\r' => "cr",
-            '\t' => "ht",
-            TOKEN_CHAR => TOKEN,
-            TEXT_QUOTE => concatcp!(TEXT_QUOTE),
-            c if Key::is_key(c) => {
-                stop_code(&mut code_mode, f)?;
-                f.write_char(c)?;
-                continue;
-            },
-            c => {
-                start_code(&mut code_mode, f)?;
-                f.write_char(' ')?;
-                f.write_char('X')?;
-                write!(f, "{:x}", c as u32)?;
-                continue;
-            },
-        };
-        start_code(&mut code_mode, f)?;
-        f.write_char(' ')?;
-        f.write_str(code)?;
-    }
-    stop_code(&mut code_mode, f)
-}
-
-fn text_raw(str: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
+fn text_raw(text: &str, f: &mut dyn Write) -> std::fmt::Result {
     f.write_str("\n|")?;
     f.write_str(EMPTY)?;
-    for line in str.split_inclusive('\n') {
+    for line in text.split_inclusive('\n') {
         f.write_str(line)?;
         if line.ends_with('\n') {
             f.write_str("+ ")?;
@@ -267,215 +215,178 @@ fn text_raw(str: &str, f: &mut Formatter<'_>) -> std::fmt::Result {
     f.write_char(TEXT_QUOTE)
 }
 
-fn start_code(code_mode: &mut bool, f: &mut Formatter<'_>) -> std::fmt::Result {
-    if !*code_mode {
-        *code_mode = true;
-        f.write_char(TOKEN_CHAR)?;
-        f.write_char(SCOPE_LEFT)?;
+fn start_token(token_mode: &mut bool, f: &mut dyn Write) -> std::fmt::Result {
+    if *token_mode {
+        return f.write_char(' ');
     }
-    Ok(())
+    *token_mode = true;
+    f.write_char(TOKEN_CHAR)?;
+    f.write_char(SCOPE_LEFT)
 }
 
-fn stop_code(code_mode: &mut bool, f: &mut Formatter<'_>) -> std::fmt::Result {
-    if *code_mode {
-        *code_mode = false;
-        f.write_char(' ')?;
-        f.write_char(SCOPE_RIGHT)?;
+fn stop_token(token_mode: &mut bool, f: &mut dyn Write) -> std::fmt::Result {
+    if !*token_mode {
+        return Ok(());
     }
-    Ok(())
+    *token_mode = false;
+    f.write_char(SCOPE_RIGHT)
 }
 
-impl Display for Int {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        int_fmt(self, f)
+impl FmtRepr for Int {
+    fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
+        if options.normalized {
+            f.write_str(INT)?;
+            f.write_char(KEY_QUOTE)?;
+            int_fmt(self, options, f)?;
+            f.write_char(KEY_QUOTE)
+        } else {
+            if self.is_negative() {
+                f.write_char('0')?;
+            }
+            int_fmt(self, options, f)
+        }
     }
-}
 
-impl Debug for Int {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        int_fmt(self, f)
-    }
-}
-
-fn int_fmt(int: &Int, f: &mut Formatter<'_>) -> std::fmt::Result {
-    if !f.sign_minus() && int.is_negative() {
-        f.write_char('0')?;
-    }
-    <BigInt as Display>::fmt(int, f)
-}
-
-impl Display for Decimal {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        decimal_fmt(self, f)
+    fn get_type(&self) -> ReprType {
+        ReprType::Int
     }
 }
 
-impl Debug for Decimal {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        decimal_fmt(self, f)
+fn int_fmt(int: &Int, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
+    if int.is_negative() {
+        f.write_char('-')?;
+    } else if int.is_positive() && options.normalized {
+        f.write_char('+')?;
+    }
+    if options.normalized {
+        f.write_char('D')?;
+    }
+    write!(f, "{}", int.magnitude())
+}
+
+impl FmtRepr for Decimal {
+    fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
+        if options.normalized {
+            f.write_str(DECIMAL)?;
+            f.write_char(KEY_QUOTE)?;
+            decimal_fmt(self, options, f)?;
+            f.write_char(KEY_QUOTE)
+        } else {
+            f.write_char('0')?;
+            decimal_fmt(self, options, f)
+        }
+    }
+
+    fn get_type(&self) -> ReprType {
+        ReprType::Decimal
     }
 }
 
-fn decimal_fmt(decimal: &Decimal, f: &mut Formatter<'_>) -> std::fmt::Result {
-    if !f.sign_minus() {
-        f.write_char('0')?;
-    }
+fn decimal_fmt(decimal: &Decimal, options: FmtOptions, mut f: &mut dyn Write) -> std::fmt::Result {
     if decimal.is_negative() {
         f.write_char('-')?;
+    } else if options.normalized && decimal.is_positive() {
+        f.write_char('+')?;
     }
     f.write_char('E')?;
-    Display::fmt(&decimal.order_of_magnitude(), f)?;
+    write!(f, "{}", &decimal.order_of_magnitude())?;
     f.write_char('*')?;
     let (i, _exp) = decimal.abs().into_bigint_and_scale();
     let scale = (decimal.digits() - 1) as i64;
     let significand = BigDecimal::from_bigint(i, scale);
     let no_frac = significand.fractional_digit_count() <= 0;
-    significand.write_plain_string(f)?;
+    significand.write_plain_string(&mut f)?;
     if no_frac {
         f.write_char('.')?;
     }
     Ok(())
 }
 
-impl Display for Byte {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        byte_fmt(self, 16, f)
-    }
-}
-
-impl Debug for Byte {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        byte_fmt(self, 16, f)
-    }
-}
-
-impl LowerHex for Byte {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        byte_fmt(self, 16, f)
-    }
-}
-
-impl Binary for Byte {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        byte_fmt(self, 2, f)
-    }
-}
-
-fn byte_fmt(byte: &Byte, radix: u8, f: &mut Formatter<'_>) -> std::fmt::Result {
-    if !f.sign_minus() {
+impl FmtRepr for Byte {
+    fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
         f.write_str(BYTE)?;
         f.write_char(KEY_QUOTE)?;
+        if options.normalized {
+            f.write_char('X')?;
+        }
+        for &b in self.iter() {
+            write!(f, "{b:02x}")?;
+        }
+        f.write_char(KEY_QUOTE)
     }
-    match radix {
-        16 => {
-            for &b in byte.iter() {
-                write!(f, "{b:02x}")?;
-            }
-        },
-        2 => {
-            for &b in byte.iter() {
-                write!(f, "{b:08b}")?;
-            }
-        },
-        _ => unreachable!("invalid radix {radix}"),
-    }
-    if !f.sign_minus() {
-        f.write_char(KEY_QUOTE)?;
-    }
-    Ok(())
-}
 
-impl<T: FmtRepr> Display for Cell<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        FmtRepr::fmt(self, FmtCtx::default(), f)
-    }
-}
-
-impl<T: FmtRepr> Debug for Cell<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        FmtRepr::fmt(self, FmtCtx::default(), f)
+    fn get_type(&self) -> ReprType {
+        ReprType::Byte
     }
 }
 
 impl<T: FmtRepr> FmtRepr for Cell<T> {
-    fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
         f.write_str(UNIT)?;
-        if self.value.is_text_list_map() {
-            self.value.fmt(ctx, f)
-        } else {
-            f.write_char(SCOPE_LEFT)?;
-            self.value.fmt(ctx, f)?;
-            f.write_char(SCOPE_RIGHT)
-        }
+        fmt_delimited(&self.value, options, f)
     }
-}
 
-impl<T: FmtRepr> Display for Quote<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        FmtRepr::fmt(self, FmtCtx::default(), f)
-    }
-}
-
-impl<T: FmtRepr> Debug for Quote<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        FmtRepr::fmt(self, FmtCtx::default(), f)
+    fn get_type(&self) -> ReprType {
+        ReprType::Cell
     }
 }
 
 impl<T: FmtRepr> FmtRepr for Quote<T> {
-    fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
         f.write_str(EMPTY)?;
-        if self.source.is_text_list_map() {
-            self.source.fmt(ctx, f)
-        } else {
+        fmt_delimited(&self.source, options, f)
+    }
+
+    fn get_type(&self) -> ReprType {
+        ReprType::Quote
+    }
+}
+
+fn fmt_delimited(
+    repr: &dyn FmtRepr, mut options: FmtOptions, f: &mut dyn Write,
+) -> std::fmt::Result {
+    match repr.get_type() {
+        ReprType::Text | ReprType::List | ReprType::Map => repr.fmt(options, f),
+        ReprType::Key => {
+            options.normalized = true;
+            repr.fmt(options, f)
+        },
+        _ => {
             f.write_char(SCOPE_LEFT)?;
-            self.source.fmt(ctx, f)?;
+            repr.fmt(options, f)?;
             f.write_char(SCOPE_RIGHT)
-        }
-    }
-}
-
-impl<T: FmtRepr> Display for Pair<T, T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        FmtRepr::fmt(self, FmtCtx::default(), f)
-    }
-}
-
-impl<T: FmtRepr> Debug for Pair<T, T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        FmtRepr::fmt(self, FmtCtx::default(), f)
+        },
     }
 }
 
 impl<T: FmtRepr> FmtRepr for Pair<T, T> {
-    fn fmt(&self, mut ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let align = f.align().unwrap_or(Alignment::Center);
-        match ctx.direction {
+    fn fmt(&self, mut options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
+        match options.direction {
             Direction::Left => {
-                if best_left(align, &self.left, &self.right) {
-                    return pair_fmt_left(self, ctx, f);
+                if best_left(options, &self.left, &self.right) {
+                    return pair_fmt_left(self, options, f);
                 }
                 f.write_str(RIGHT)?;
                 f.write_char(SCOPE_LEFT)?;
-                ctx.direction = Direction::Right;
-                pair_fmt_right(self, ctx, f)?;
+                options.direction = Direction::Right;
+                pair_fmt_right(self, options, f)?;
                 f.write_char(SCOPE_RIGHT)
             },
             Direction::Right => {
-                if best_right(align, &self.left, &self.right) {
-                    return pair_fmt_right(self, ctx, f);
+                if best_right(options, &self.left, &self.right) {
+                    return pair_fmt_right(self, options, f);
                 }
                 f.write_str(LEFT)?;
                 f.write_char(SCOPE_LEFT)?;
-                ctx.direction = Direction::Left;
-                pair_fmt_left(self, ctx, f)?;
+                options.direction = Direction::Left;
+                pair_fmt_left(self, options, f)?;
                 f.write_char(SCOPE_RIGHT)
             },
         }
     }
 
-    fn is_pair(&self) -> bool {
-        true
+    fn get_type(&self) -> ReprType {
+        ReprType::Pair
     }
 
     fn to_pair(&self) -> Pair<&dyn FmtRepr, &dyn FmtRepr> {
@@ -484,145 +395,137 @@ impl<T: FmtRepr> FmtRepr for Pair<T, T> {
 }
 
 fn pair_fmt_left<T: FmtRepr>(
-    pair: &Pair<T, T>, ctx: FmtCtx, f: &mut Formatter<'_>,
+    pair: &Pair<T, T>, options: FmtOptions, f: &mut dyn Write,
 ) -> std::fmt::Result {
-    pair.left.fmt(ctx, f)?;
+    pair.left.fmt(options, f)?;
     f.write_char(' ')?;
     f.write_str(PAIR)?;
     f.write_char(' ')?;
-    closure(&pair.right, ctx, f)
+    closure(&pair.right, options, f)
 }
 
 fn pair_fmt_right<T: FmtRepr>(
-    pair: &Pair<T, T>, ctx: FmtCtx, f: &mut Formatter<'_>,
+    pair: &Pair<T, T>, options: FmtOptions, f: &mut dyn Write,
 ) -> std::fmt::Result {
-    closure(&pair.left, ctx, f)?;
+    closure(&pair.left, options, f)?;
     f.write_char(' ')?;
     f.write_str(PAIR)?;
     f.write_char(' ')?;
-    pair.right.fmt(ctx, f)
-}
-
-impl<T: FmtRepr> Display for Call<T, T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        FmtRepr::fmt(self, FmtCtx::default(), f)
-    }
-}
-
-impl<T: FmtRepr> Debug for Call<T, T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        FmtRepr::fmt(self, FmtCtx::default(), f)
-    }
+    pair.right.fmt(options, f)
 }
 
 impl<T: FmtRepr> FmtRepr for Call<T, T> {
-    fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
-        if f.alternate() && self.input.is_pair() {
-            call_fmt_infix(&self.func, self.input.to_pair(), ctx, f)
+    fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
+        if !options.normalized && self.input.get_type().is_pair() {
+            call_fmt_infix(&self.func, self.input.to_pair(), options, f)
         } else {
-            call_fmt_default(&self.func, &self.input, ctx, f)
+            call_fmt_normalized(&self.func, &self.input, options, f)
         }
     }
 
-    fn is_call(&self) -> bool {
-        true
+    fn get_type(&self) -> ReprType {
+        ReprType::Call
     }
 }
 
-fn call_fmt_infix<T: FmtRepr>(
-    func: &T, pair: Pair<&dyn FmtRepr, &dyn FmtRepr>, mut ctx: FmtCtx, f: &mut Formatter<'_>,
+fn call_fmt_infix(
+    func: &dyn FmtRepr, pair: Pair<&dyn FmtRepr, &dyn FmtRepr>, mut options: FmtOptions,
+    f: &mut dyn Write,
 ) -> std::fmt::Result {
-    let align = f.align().unwrap_or(Alignment::Center);
-    match ctx.direction {
+    match options.direction {
         Direction::Left => {
-            if best_left(align, pair.left, pair.right) {
-                return call_fmt_infix_left(func, pair, ctx, f);
+            if best_left(options, pair.left, pair.right) {
+                return call_fmt_infix_left(func, pair, options, f);
             }
             f.write_str(RIGHT)?;
             f.write_char(SCOPE_LEFT)?;
-            ctx.direction = Direction::Right;
-            call_fmt_infix_right(func, pair, ctx, f)?;
+            options.direction = Direction::Right;
+            call_fmt_infix_right(func, pair, options, f)?;
             f.write_char(SCOPE_RIGHT)
         },
         Direction::Right => {
-            if best_right(align, pair.left, pair.right) {
-                return call_fmt_infix_right(func, pair, ctx, f);
+            if best_right(options, pair.left, pair.right) {
+                return call_fmt_infix_right(func, pair, options, f);
             }
             f.write_str(LEFT)?;
             f.write_char(SCOPE_LEFT)?;
-            ctx.direction = Direction::Left;
-            call_fmt_infix_left(func, pair, ctx, f)?;
+            options.direction = Direction::Left;
+            call_fmt_infix_left(func, pair, options, f)?;
             f.write_char(SCOPE_RIGHT)
         },
     }
 }
 
-fn call_fmt_infix_left<T: FmtRepr>(
-    func: &T, pair: Pair<&dyn FmtRepr, &dyn FmtRepr>, ctx: FmtCtx, f: &mut Formatter<'_>,
+fn call_fmt_infix_left(
+    func: &dyn FmtRepr, pair: Pair<&dyn FmtRepr, &dyn FmtRepr>, options: FmtOptions,
+    f: &mut dyn Write,
 ) -> std::fmt::Result {
-    pair.left.fmt(ctx, f)?;
+    pair.left.fmt(options, f)?;
     f.write_char(' ')?;
-    closure(func, ctx, f)?;
+    closure(func, options, f)?;
     f.write_char(' ')?;
-    closure(pair.right, ctx, f)
+    closure(pair.right, options, f)
 }
 
-fn call_fmt_infix_right<T: FmtRepr>(
-    func: &T, pair: Pair<&dyn FmtRepr, &dyn FmtRepr>, ctx: FmtCtx, f: &mut Formatter<'_>,
+fn call_fmt_infix_right(
+    func: &dyn FmtRepr, pair: Pair<&dyn FmtRepr, &dyn FmtRepr>, options: FmtOptions,
+    f: &mut dyn Write,
 ) -> std::fmt::Result {
-    closure(pair.left, ctx, f)?;
+    closure(pair.left, options, f)?;
     f.write_char(' ')?;
-    closure(func, ctx, f)?;
+    closure(func, options, f)?;
     f.write_char(' ')?;
-    pair.right.fmt(ctx, f)
+    pair.right.fmt(options, f)
 }
 
-fn call_fmt_default<T: FmtRepr>(
-    func: &T, input: &T, ctx: FmtCtx, f: &mut Formatter<'_>,
+fn call_fmt_normalized(
+    func: &dyn FmtRepr, input: &dyn FmtRepr, options: FmtOptions, f: &mut dyn Write,
 ) -> std::fmt::Result {
-    match ctx.direction {
-        Direction::Left => call_fmt_left(func, input, ctx, f),
-        Direction::Right => call_fmt_right(func, input, ctx, f),
+    match options.direction {
+        Direction::Left => call_fmt_left(func, input, options, f),
+        Direction::Right => call_fmt_right(func, input, options, f),
     }
 }
 
-fn call_fmt_left<T: FmtRepr>(
-    func: &T, input: &T, ctx: FmtCtx, f: &mut Formatter<'_>,
+fn call_fmt_left(
+    func: &dyn FmtRepr, input: &dyn FmtRepr, options: FmtOptions, f: &mut dyn Write,
 ) -> std::fmt::Result {
-    input.fmt(ctx, f)?;
+    input.fmt(options, f)?;
     f.write_char(' ')?;
-    closure(func, ctx, f)?;
+    closure(func, options, f)?;
     f.write_char(' ')?;
     f.write_str(EMPTY)
 }
 
-fn call_fmt_right<T: FmtRepr>(
-    func: &T, input: &T, ctx: FmtCtx, f: &mut Formatter<'_>,
+fn call_fmt_right(
+    func: &dyn FmtRepr, input: &dyn FmtRepr, options: FmtOptions, f: &mut dyn Write,
 ) -> std::fmt::Result {
     f.write_str(EMPTY)?;
     f.write_char(' ')?;
-    closure(func, ctx, f)?;
+    closure(func, options, f)?;
     f.write_char(' ')?;
-    input.fmt(ctx, f)
+    input.fmt(options, f)
 }
 
-fn best_left(align: Alignment, left: &dyn FmtRepr, right: &dyn FmtRepr) -> bool {
-    best_direction(Direction::Left, align, left, right) == Direction::Left
+fn best_left(options: FmtOptions, left: &dyn FmtRepr, right: &dyn FmtRepr) -> bool {
+    let direction = if options.normalized {
+        options.direction
+    } else {
+        best_direction(Direction::Left, left, right)
+    };
+    direction == Direction::Left
 }
 
-fn best_right(align: Alignment, left: &dyn FmtRepr, right: &dyn FmtRepr) -> bool {
-    best_direction(Direction::Right, align, left, right) == Direction::Right
+fn best_right(options: FmtOptions, left: &dyn FmtRepr, right: &dyn FmtRepr) -> bool {
+    let direction = if options.normalized {
+        options.direction
+    } else {
+        best_direction(Direction::Right, left, right)
+    };
+    direction == Direction::Right
 }
 
-fn best_direction(
-    direction: Direction, align: Alignment, left: &dyn FmtRepr, right: &dyn FmtRepr,
-) -> Direction {
-    if align == Alignment::Left {
-        return Direction::Left;
-    }
-    if align == Alignment::Right {
-        return Direction::Right;
-    }
+fn best_direction(direction: Direction, left: &dyn FmtRepr, right: &dyn FmtRepr) -> Direction {
     let left_open = is_open(left);
     let right_open = is_open(right);
     match direction {
@@ -641,32 +544,20 @@ fn best_direction(
 }
 
 fn is_open(repr: &dyn FmtRepr) -> bool {
-    repr.is_pair() || repr.is_call()
+    matches!(repr.get_type(), ReprType::Pair | ReprType::Call)
 }
 
-fn closure(repr: &dyn FmtRepr, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
+fn closure(repr: &dyn FmtRepr, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
     if !is_open(repr) {
-        return repr.fmt(ctx, f);
+        return repr.fmt(options, f);
     }
     f.write_char(SCOPE_LEFT)?;
-    repr.fmt(ctx, f)?;
+    repr.fmt(options, f)?;
     f.write_char(SCOPE_RIGHT)
 }
 
-impl<T: FmtRepr> Display for List<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        FmtRepr::fmt(self, FmtCtx::default(), f)
-    }
-}
-
-impl<T: FmtRepr> Debug for List<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        FmtRepr::fmt(self, FmtCtx::default(), f)
-    }
-}
-
 impl<T: FmtRepr> FmtRepr for List<T> {
-    fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
         if self.is_empty() {
             f.write_char(LIST_LEFT)?;
             return f.write_char(LIST_RIGHT);
@@ -674,47 +565,35 @@ impl<T: FmtRepr> FmtRepr for List<T> {
 
         if self.len() == 1 {
             f.write_char(LIST_LEFT)?;
-            self.first().unwrap().fmt(ctx, f)?;
+            self.first().unwrap().fmt(options, f)?;
             return f.write_char(LIST_RIGHT);
         }
 
         f.write_char(LIST_LEFT)?;
-        if f.alternate() {
-            f.write_char('\n')?;
+        if options.key_encoding || options.space.is_compact() {
             for repr in self {
-                let repr = from_fn(|f| repr.fmt(ctx, f));
-                indent(&repr, f)?;
+                repr.fmt(options, f)?;
+                f.write_char(SEPARATOR)?;
             }
         } else {
-            f.write_char(' ')?;
+            f.write_char('\n')?;
             for repr in self {
-                repr.fmt(ctx, f)?;
-                f.write_char(SEPARATOR)?;
-                f.write_char(' ')?;
+                let mut indent = Indent::new(f);
+                repr.fmt(options, &mut indent)?;
+                indent.write_char(SEPARATOR)?;
+                f.write_char('\n')?;
             }
         }
         f.write_char(LIST_RIGHT)
     }
 
-    fn is_text_list_map(&self) -> bool {
-        true
-    }
-}
-
-impl<T: FmtRepr> Display for Map<Key, T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        FmtRepr::fmt(self, FmtCtx::default(), f)
-    }
-}
-
-impl<T: FmtRepr> Debug for Map<Key, T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        FmtRepr::fmt(self, FmtCtx::default(), f)
+    fn get_type(&self) -> ReprType {
+        ReprType::List
     }
 }
 
 impl<T: FmtRepr> FmtRepr for Map<Key, T> {
-    fn fmt(&self, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
         if self.is_empty() {
             f.write_char(MAP_LEFT)?;
             return f.write_char(MAP_RIGHT);
@@ -723,81 +602,119 @@ impl<T: FmtRepr> FmtRepr for Map<Key, T> {
         if self.len() == 1 {
             f.write_char(MAP_LEFT)?;
             let (key, value) = self.iter().next().unwrap();
-            kv_fmt(key.clone(), value, ctx, f)?;
+            kv_fmt(key.clone(), value, options, f)?;
             return f.write_char(MAP_RIGHT);
         }
 
         f.write_char(MAP_LEFT)?;
-        if f.alternate() {
-            f.write_char('\n')?;
+        if options.key_encoding || options.space.is_compact() {
             for (key, value) in self {
-                let repr = from_fn(|f| kv_fmt(key.clone(), value, ctx, f));
-                indent(&repr, f)?;
+                kv_fmt(key.clone(), value, options, f)?;
+                f.write_char(SEPARATOR)?;
             }
         } else {
-            f.write_char(' ')?;
+            f.write_char('\n')?;
             for (key, value) in self {
-                kv_fmt(key.clone(), value, ctx, f)?;
-                f.write_char(SEPARATOR)?;
-                f.write_char(' ')?;
+                let mut indent = Indent::new(f);
+                kv_fmt(key.clone(), value, options, &mut indent)?;
+                indent.write_char(SEPARATOR)?;
+                f.write_char('\n')?;
             }
         }
         f.write_char(MAP_RIGHT)
     }
 
-    fn is_text_list_map(&self) -> bool {
-        true
+    fn get_type(&self) -> ReprType {
+        ReprType::Map
     }
 }
 
-fn kv_fmt<T: FmtRepr>(key: Key, value: &T, ctx: FmtCtx, f: &mut Formatter<'_>) -> std::fmt::Result {
-    Display::fmt(&key, f)?;
+fn kv_fmt<T: FmtRepr>(
+    key: Key, value: &T, options: FmtOptions, f: &mut dyn Write,
+) -> std::fmt::Result {
+    let mut key_options = options;
+    key_options.key_ctx = true;
+    FmtRepr::fmt(&key, key_options, f)?;
+    if !options.normalized && value.get_type().is_unit() {
+        return Ok(());
+    }
     f.write_char(' ')?;
     f.write_str(PAIR)?;
     f.write_char(' ')?;
-    value.fmt(ctx, f)
+    value.fmt(options, f)
 }
 
-// TODO impl options lost
-fn indent(repr: &dyn Display, f: &mut Formatter<'_>) -> std::fmt::Result {
-    let align = f.align();
-    let mut writer = Indent::new(f);
-    match align {
-        Some(Alignment::Left) => writeln!(writer, "{repr:<#}{SEPARATOR}"),
-        Some(Alignment::Center) => writeln!(writer, "{repr:^#}{SEPARATOR}"),
-        Some(Alignment::Right) => writeln!(writer, "{repr:>#}{SEPARATOR}"),
-        None => writeln!(writer, "{repr:#}{SEPARATOR}"),
-    }
+macro_rules! impl_display_debug_for_fmt_repr {
+    (<$repr:tt> $ty: ident <$($arg:tt),*>) => {
+        impl<$repr: FmtRepr> Display for $ty<$($arg),*>  {
+            fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+                FmtRepr::fmt(self, FmtOptions::from(&*f), f)
+            }
+        }
+        impl<$repr: FmtRepr> Debug for $ty<$($arg),*> {
+            fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+                FmtRepr::fmt(self, FmtOptions::from(&*f), f)
+            }
+        }
+    };
+    ($ty: ty) => {
+        impl Display for $ty  {
+            fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+                FmtRepr::fmt(self, FmtOptions::from(&*f), f)
+            }
+        }
+        impl Debug for $ty {
+            fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+                FmtRepr::fmt(self, FmtOptions::from(&*f), f)
+            }
+        }
+    };
 }
 
-struct Indent<'a, 'b> {
-    fmt: &'a mut Formatter<'b>,
+pub(crate) use impl_display_debug_for_fmt_repr;
+
+impl_display_debug_for_fmt_repr!(Unit);
+impl_display_debug_for_fmt_repr!(Bit);
+impl_display_debug_for_fmt_repr!(Key);
+impl_display_debug_for_fmt_repr!(Text);
+impl_display_debug_for_fmt_repr!(Int);
+impl_display_debug_for_fmt_repr!(Decimal);
+impl_display_debug_for_fmt_repr!(Byte);
+impl_display_debug_for_fmt_repr!(<T> Cell<T>);
+impl_display_debug_for_fmt_repr!(<T> Pair<T, T>);
+impl_display_debug_for_fmt_repr!(<T> List<T>);
+impl_display_debug_for_fmt_repr!(<T> Map<Key, T>);
+impl_display_debug_for_fmt_repr!(<T> Quote<T>);
+impl_display_debug_for_fmt_repr!(<T> Call<T, T>);
+
+struct Indent<'a> {
+    writer: &'a mut dyn Write,
     on_newline: bool,
 }
 
-impl<'a, 'b> Write for Indent<'a, 'b> {
+impl<'a> Write for Indent<'a> {
     fn write_str(&mut self, s: &str) -> std::fmt::Result {
         for s in s.split_inclusive('\n') {
             if self.on_newline {
-                self.fmt.write_str("    ")?;
+                self.writer.write_str("    ")?;
             }
             self.on_newline = s.ends_with('\n');
-            self.fmt.write_str(s)?;
+            self.writer.write_str(s)?;
         }
         Ok(())
     }
 
     fn write_char(&mut self, c: char) -> std::fmt::Result {
         if self.on_newline {
-            self.fmt.write_str("    ")?;
+            self.writer.write_str("    ")?;
         }
         self.on_newline = c == '\n';
-        self.fmt.write_char(c)
+        self.writer.write_char(c)
     }
 }
 
-impl<'a, 'b> Indent<'a, 'b> {
-    fn new(fmt: &'a mut Formatter<'b>) -> Self {
-        Indent { fmt, on_newline: true }
+impl<'a> Indent<'a> {
+    fn new(writer: &'a mut dyn Write) -> Self {
+        Indent { writer, on_newline: true }
     }
 }

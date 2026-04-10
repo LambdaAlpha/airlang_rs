@@ -1,10 +1,11 @@
 use std::error::Error;
-use std::fmt::Write;
 
 use airlang::cfg::prelude;
 use airlang::semantics::core::Eval;
 use airlang::semantics::func::DynFunc;
 use airlang::semantics::val::Val;
+use airlang::syntax::FmtOptions;
+use airlang::syntax::FmtRepr;
 use airlang::type_::Bit;
 use airlang::type_::Cell;
 use airlang::type_::Int;
@@ -40,12 +41,13 @@ fn test_build_load(path: &str, expect: Val) -> Result<(), Box<dyn Error>> {
 
 // AIR CODE
 fn generate_load(path: &str) -> String {
-    let mut path_prefix = String::new();
-    write!(&mut path_prefix, "{:-}", Text::from(env!("CARGO_MANIFEST_DIR"))).unwrap();
+    let path_str = format!("{}{}", env!("CARGO_MANIFEST_DIR"), path);
+    let mut path_text = String::new();
+    Text::from(path_str).fmt(FmtOptions::default(), &mut path_text).unwrap();
     format!(
         "_ do _[\
             _load set _ import .build.load,\
-            _ load \"{path_prefix}{path}\"\
+            _ load {path_text}\
         ]"
     )
 }

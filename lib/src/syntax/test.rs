@@ -111,24 +111,8 @@ fn test_generate(src: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
             eprintln!("file {file_name} case ({title}) src({s}): parse failed\n{e}");
             e
         })?;
-        let fmt_list = [
-            format!("{repr}"),
-            format!("{repr:#}"),
-            format!("{repr:?}"),
-            format!("{repr:#?}"),
-            format!("{repr:<}"),
-            format!("{repr:<#}"),
-            format!("{repr:<?}"),
-            format!("{repr:<#?}"),
-            format!("{repr:^}"),
-            format!("{repr:^#}"),
-            format!("{repr:^?}"),
-            format!("{repr:^#?}"),
-            format!("{repr:>}"),
-            format!("{repr:>#}"),
-            format!("{repr:>?}"),
-            format!("{repr:>#?}"),
-        ];
+        let fmt_list =
+            [format!("{repr}"), format!("{repr:#}"), format!("{repr:?}"), format!("{repr:#?}")];
         for repr_str in fmt_list {
             let new_repr = repr_str.parse().map_err(|e| {
                 eprintln!(

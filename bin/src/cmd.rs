@@ -6,6 +6,8 @@ use airlang::cfg::prelude;
 use airlang::semantics::core::Eval;
 use airlang::semantics::func::DynFunc;
 use airlang::semantics::val::Val;
+use airlang::syntax::FmtOptions;
+use airlang::syntax::FmtRepr;
 use airlang::type_::Text;
 
 use crate::cfg::comp::BinCompCfg;
@@ -42,13 +44,12 @@ pub fn interpret_file(path: &str) -> std::io::Result<()> {
 
 // AIR CODE
 fn generate_load(path: &str) -> String {
-    use std::fmt::Write;
-    let mut escaped = String::new();
-    write!(&mut escaped, "{:-}", Text::from(path)).unwrap();
+    let mut path_text = String::new();
+    Text::from(path).fmt(FmtOptions::default(), &mut path_text).unwrap();
     format!(
         "_ do _[\
             _load set _ import .build.load,\
-            _ load \"{escaped}\"\
+            _ load {path_text}\
         ]"
     )
 }
