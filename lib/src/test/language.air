@@ -1,9 +1,9 @@
-parse generate
+parse generate_pretty
 -----
 _ do _[
     _any set _ import .value.any,
     _parse set _ import .language.syntax.parse,
-    _generate set _ import .language.syntax.generate,
+    _generate_pretty set _ import .language.syntax.generate_pretty,
     _get set _ import .list.get,
     _% set _ import .integer.remainder,
     _atom set [.unit, .bit, .key, .text, .integer, .decimal, .byte],
@@ -27,9 +27,23 @@ _ do _[
             ]
         ]
     ],
-    _repr set _ generate a,
+    _repr set _a which generate_pretty : .,
     .(_a1) represent _ parse repr,
     a = a1
+]
+-----
+true
+=====
+generate_key equal
+-----
+_ do _[
+    _any set _ import .value.any,
+    _generate_key set _ import .language.syntax.generate_key,
+    _a set _ any .,
+    _b set _ any .,
+    _a_key set _a which generate_key : .,
+    _b_key set _b which generate_key : .,
+    (a = b) = (a_key = b_key)
 ]
 -----
 true
@@ -62,11 +76,12 @@ _ do _[
 -----
 .("1")
 =====
-generate text
+generate_pretty text
 -----
 _ do _[
-    _generate set _ import .language.syntax.generate,
-    _ generate "1"
+    _generate_pretty set _ import .language.syntax.generate_pretty,
+    _a set "1",
+    _a which generate_pretty : .
 ]
 -----
 "^(" 1 ")"
