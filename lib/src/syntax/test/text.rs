@@ -16,7 +16,7 @@ pub(super) fn expected() -> Vec<Repr> {
         ),
         text("a?🜁"),
         text("ab"),
-        text("ab "),
+        text("ab\n \r\n"),
         text("ab "),
     ]
 }

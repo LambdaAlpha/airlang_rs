@@ -543,7 +543,7 @@ fn any_key(i: &mut &str) -> ModalResult<Key> {
 fn key(i: &mut &str) -> ModalResult<Key> {
     let key = take_while(1 .., |c| is_key(c) && c != KEY_QUOTE);
     let text = take_while(1 .., |c| is_key(c) && c != TEXT_QUOTE);
-    let comment = take_until(0 .., ('\n', SCOPE_RIGHT)).void();
+    let comment = take_until(0 .., ('\r', '\n', SCOPE_RIGHT)).void();
     let token = take_while(1 .., |c| is_key(c) && c != ' ' && c != LIST_RIGHT)
         .verify_map(character)
         .verify(|c| is_key(*c));
@@ -553,17 +553,36 @@ fn key(i: &mut &str) -> ModalResult<Key> {
 }
 
 fn text(i: &mut &str) -> ModalResult<Text> {
-    let key = take_until(1 .., (KEY_QUOTE, '\n', '\t'));
-    let text = take_until(1 .., (TEXT_QUOTE, '\n', '\t'));
+    let key = take_while(1 .., |c| !matches!(c, KEY_QUOTE | '\r' | '\n' | '\t'));
+    let text = take_while(1 .., |c| !matches!(c, TEXT_QUOTE | '\r' | '\n' | '\t'));
     let comment = take_until(0 .., (SCOPE_RIGHT, '\n')).void();
     let token =
         take_while(1 .., |c| is_key(c) && c != ' ' && c != LIST_RIGHT).verify_map(character);
-    let newline = alt(('+'.value(true), '|'.value(false)))
-        .context(expect_char('+'))
-        .context(expect_char('|'));
-    let newline = preceded(("\n", space_tab(0 ..)), newline).map(|new| if new { "\n" } else { "" });
+    let newline = alt(('|'.value(NewLine::None), '.'.value(NewLine::Lf), ':'.value(NewLine::Crlf)))
+        .context(expect_char('|'))
+        .context(expect_char('.'))
+        .context(expect_char(':'));
+    #[expect(clippy::redundant_closure_for_method_calls)]
+    let newline = preceded((line_ending, space_tab(0 ..)), newline).map(|newline| newline.as_str());
     let text = key_text(key, text, comment, token, newline).map(Text::from);
     preceded(peek(TEXT_QUOTE), text).context(label("text")).parse_next(i)
+}
+
+#[derive(Copy, Clone)]
+enum NewLine {
+    None,
+    Lf,
+    Crlf,
+}
+
+impl NewLine {
+    fn as_str(self) -> &'static str {
+        match self {
+            NewLine::None => "",
+            NewLine::Lf => "\n",
+            NewLine::Crlf => "\r\n",
+        }
+    }
 }
 
 #[derive(Copy, Clone)]
@@ -615,7 +634,7 @@ fn key_text<'a>(
                         TEXT_QUOTE => State::Text,
                         SCOPE_LEFT => State::Comment,
                         LIST_LEFT => State::Token,
-                        '\n' => {
+                        '\r' | '\n' => {
                             s.push_str(newline.parse_next(i)?);
                             continue;
                         },
@@ -625,24 +644,24 @@ fn key_text<'a>(
                 },
                 State::Key => match peek_one.parse_next(i)? {
                     KEY_QUOTE => clean(i, &mut state)?,
-                    '\n' => s.push_str(newline.parse_next(i)?),
+                    '\r' | '\n' => s.push_str(newline.parse_next(i)?),
                     '\t' => tab.parse_next(i)?,
                     _ => s.push_str(key.parse_next(i)?),
                 },
                 State::Text => match peek_one.parse_next(i)? {
                     TEXT_QUOTE => clean(i, &mut state)?,
-                    '\n' => s.push_str(newline.parse_next(i)?),
+                    '\r' | '\n' => s.push_str(newline.parse_next(i)?),
                     '\t' => tab.parse_next(i)?,
                     _ => s.push_str(text.parse_next(i)?),
                 },
                 State::Comment => match peek_one.parse_next(i)? {
                     SCOPE_RIGHT => clean(i, &mut state)?,
-                    '\n' => s.push_str(newline.parse_next(i)?),
+                    '\r' | '\n' => s.push_str(newline.parse_next(i)?),
                     _ => comment.parse_next(i)?,
                 },
                 State::Token => match peek_one.parse_next(i)? {
                     LIST_RIGHT => clean(i, &mut state)?,
-                    '\n' => s.push_str(newline.parse_next(i)?),
+                    '\r' | '\n' => s.push_str(newline.parse_next(i)?),
                     ' ' | '\t' => space_tab1.parse_next(i)?,
                     _ => s.push(token.parse_next(i)?),
                 },

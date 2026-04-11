@@ -150,7 +150,33 @@ impl FmtRepr for Text {
     fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
         f.write_char(TEXT_QUOTE)?;
         let mut state = State::Text;
+        let mut has_cr = false;
         for c in self.chars() {
+            if has_cr && c != '\n' {
+                switch_state(&mut state, State::Token, f)?;
+                f.write_str("cr")?;
+                has_cr = false;
+            }
+            if c == '\n' {
+                if options.key_encoding || options.normalized || options.space.is_compact() {
+                    switch_state(&mut state, State::Token, f)?;
+                    if has_cr {
+                        f.write_str("cr lf")?;
+                    } else {
+                        f.write_str("lf")?;
+                    }
+                } else {
+                    f.write_char('\n')?;
+                    let s = if has_cr { ':' } else { '.' };
+                    f.write_char(s)?;
+                }
+                has_cr = false;
+                continue;
+            }
+            if c == '\r' {
+                has_cr = true;
+                continue;
+            }
             if c == KEY_QUOTE && state == State::Key {
                 switch_state(&mut state, State::Text, f)?;
                 f.write_char(KEY_QUOTE)?;
@@ -176,22 +202,7 @@ impl FmtRepr for Text {
                 f.write_char(c)?;
                 continue;
             }
-            if c == '\n' {
-                if options.key_encoding || options.normalized || options.space.is_compact() {
-                    switch_state(&mut state, State::Token, f)?;
-                    f.write_str("lf")?;
-                } else {
-                    f.write_char('\n')?;
-                    f.write_char('+')?;
-                }
-                continue;
-            }
-            if c == '\t' {
-                switch_state(&mut state, State::Token, f)?;
-                f.write_str("ht")?;
-                continue;
-            }
-            if !options.key_encoding && !options.normalized {
+            if !options.key_encoding && !options.normalized && !c.is_ascii() {
                 switch_state(&mut state, State::Text, f)?;
                 f.write_char(c)?;
                 continue;
@@ -239,6 +250,10 @@ impl FmtRepr for Text {
                 },
             };
             f.write_str(token)?;
+        }
+        if has_cr {
+            switch_state(&mut state, State::Token, f)?;
+            f.write_str("cr")?;
         }
         end_state(state, f)
     }

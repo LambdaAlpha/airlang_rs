@@ -30,8 +30,8 @@ multiline
 -----
 "a"_
 |'b
-|'[sp
-|](c)
+.'[sp
+:](c)
 =====
 multiline indent
 -----
