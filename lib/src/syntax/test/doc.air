@@ -184,7 +184,7 @@ list pattern
 =====
 list compact pattern
 -----
-^[v1 v2 ... vn]
+#[v1 v2 ... vn]
 =====
 list same type
 -----
@@ -196,7 +196,7 @@ list diff type
 =====
 list compact example
 -----
-^[git commit --amend --no-edit]
+#[git commit --amend --no-edit]
 =====
 map pattern
 -----
@@ -204,7 +204,7 @@ map pattern
 =====
 map compact pattern
 -----
-^{k1 v1 k2 v2 ... ... kn vn}
+#{k1 v1 k2 v2 ... ... kn vn}
 =====
 map same type
 -----
@@ -220,7 +220,7 @@ map set
 =====
 map compact example
 -----
-^{
+#{
     select *
     from book
     where (price > 100)

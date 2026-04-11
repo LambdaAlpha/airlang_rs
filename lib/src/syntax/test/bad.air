@@ -12,7 +12,7 @@ map key leading :
 =====
 key multiline
 -----
-^[
+#[
     ''
     |
 ]
@@ -21,7 +21,7 @@ key multiline
 =====
 text multiline
 -----
-^[
+#[
     ""
     |
 ]

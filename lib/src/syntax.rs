@@ -44,7 +44,7 @@ pub(crate) const FALSE: &str = "false";
 pub(crate) const COMMENT: &str = "!";
 pub(crate) const LEFT: &str = "<";
 pub(crate) const RIGHT: &str = ">";
-pub(crate) const TOKEN: &str = "^";
+pub(crate) const TOKEN: &str = "#";
 
 pub(crate) const INT: &str = "integer";
 pub(crate) const DECIMAL: &str = "decimal";
