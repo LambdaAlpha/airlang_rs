@@ -4,7 +4,6 @@ use std::fmt::Formatter;
 use std::fmt::Write;
 
 use bigdecimal::BigDecimal;
-use const_format::concatcp;
 use derive_more::IsVariant;
 use num_traits::Signed;
 
@@ -27,8 +26,6 @@ use super::SCOPE_LEFT;
 use super::SCOPE_RIGHT;
 use super::SEPARATOR;
 use super::TEXT_QUOTE;
-use super::TOKEN;
-use super::TOKEN_CHAR;
 use super::TRUE;
 use super::UNIT;
 use super::is_delimiter;
@@ -108,26 +105,25 @@ impl FmtRepr for Key {
             return f.write_str(self);
         }
         f.write_char(KEY_QUOTE)?;
-        key_compact(self, f)?;
-        f.write_char(KEY_QUOTE)
+        let mut is_key = true;
+        for c in self.chars() {
+            if is_key && c == KEY_QUOTE {
+                f.write_char(KEY_QUOTE)?;
+                f.write_char(TEXT_QUOTE)?;
+                is_key = false;
+            } else if !is_key && c == TEXT_QUOTE {
+                f.write_char(TEXT_QUOTE)?;
+                f.write_char(KEY_QUOTE)?;
+                is_key = true;
+            }
+            f.write_char(c)?;
+        }
+        if is_key { f.write_char(KEY_QUOTE) } else { f.write_char(TEXT_QUOTE) }
     }
 
     fn get_type(&self) -> ReprType {
         ReprType::Key
     }
-}
-
-fn key_compact(key: &str, f: &mut dyn Write) -> std::fmt::Result {
-    let mut token_mode = false;
-    for c in key.chars() {
-        if let TOKEN_CHAR | KEY_QUOTE = c {
-            start_token(&mut token_mode, f)?;
-        } else {
-            stop_token(&mut token_mode, f)?;
-        }
-        f.write_char(c)?;
-    }
-    stop_token(&mut token_mode, f)
 }
 
 fn key_should_quote(key: &str, options: FmtOptions) -> bool {
@@ -153,16 +149,98 @@ fn key_should_quote(key: &str, options: FmtOptions) -> bool {
 impl FmtRepr for Text {
     fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
         f.write_char(TEXT_QUOTE)?;
-        if options.key_encoding {
-            text_compact(self, true, f)?;
-        } else if options.normalized {
-            text_compact(self, false, f)?;
-        } else if options.space.is_pretty() && self.contains('\n') {
-            text_raw(self, f)?;
-        } else {
-            text_compact(self, false, f)?;
+        let mut state = State::Text;
+        for c in self.chars() {
+            if c == KEY_QUOTE && state == State::Key {
+                switch_state(&mut state, State::Text, f)?;
+                f.write_char(KEY_QUOTE)?;
+                continue;
+            }
+            if c == TEXT_QUOTE && state == State::Text {
+                switch_state(&mut state, State::Key, f)?;
+                f.write_char(TEXT_QUOTE)?;
+                continue;
+            }
+            if c == LIST_RIGHT && state == State::Token {
+                switch_state(&mut state, State::Text, f)?;
+                f.write_char(LIST_RIGHT)?;
+                continue;
+            }
+            if c == ' ' && state == State::Token {
+                prepare_for_write(state, f)?;
+                f.write_str("sp")?;
+                continue;
+            }
+            if Key::is_key(c) {
+                prepare_for_write(state, f)?;
+                f.write_char(c)?;
+                continue;
+            }
+            if c == '\n' {
+                if options.key_encoding || options.normalized || options.space.is_compact() {
+                    switch_state(&mut state, State::Token, f)?;
+                    f.write_str("lf")?;
+                } else {
+                    f.write_char('\n')?;
+                    f.write_char('+')?;
+                }
+                continue;
+            }
+            if c == '\t' {
+                switch_state(&mut state, State::Token, f)?;
+                f.write_str("ht")?;
+                continue;
+            }
+            if !options.key_encoding && !options.normalized {
+                switch_state(&mut state, State::Text, f)?;
+                f.write_char(c)?;
+                continue;
+            }
+            switch_state(&mut state, State::Token, f)?;
+            let token = match c {
+                '\u{00}' => "nul",
+                '\u{01}' => "soh",
+                '\u{02}' => "stx",
+                '\u{03}' => "etx",
+                '\u{04}' => "eot",
+                '\u{05}' => "enq",
+                '\u{06}' => "ack",
+                '\u{07}' => "bel",
+                '\u{08}' => "bs",
+                '\u{09}' => "ht",
+                '\u{0A}' => "lf",
+                '\u{0B}' => "vt",
+                '\u{0C}' => "ff",
+                '\u{0D}' => "cr",
+                '\u{0E}' => "so",
+                '\u{0F}' => "si",
+                '\u{10}' => "dle",
+                '\u{11}' => "dc1",
+                '\u{12}' => "dc2",
+                '\u{13}' => "dc3",
+                '\u{14}' => "dc4",
+                '\u{15}' => "nak",
+                '\u{16}' => "syn",
+                '\u{17}' => "etb",
+                '\u{18}' => "can",
+                '\u{19}' => "em",
+                '\u{1A}' => "sub",
+                '\u{1B}' => "esc",
+                '\u{1C}' => "fs",
+                '\u{1D}' => "gs",
+                '\u{1E}' => "rs",
+                '\u{1F}' => "us",
+                '\u{20}' => "sp",
+                '\u{7F}' => "del",
+                _ => {
+                    f.write_char('X')?;
+                    write!(f, "{:x}", c as u32)?;
+                    continue;
+                },
+            };
+            f.write_str(token)?;
         }
-        f.write_char(TEXT_QUOTE)
+        end_state(state, f)
     }
 
     fn get_type(&self) -> ReprType {
@@ -170,66 +248,46 @@ impl FmtRepr for Text {
     }
 }
 
-fn text_compact(text: &str, key_encoding: bool, f: &mut dyn Write) -> std::fmt::Result {
-    let mut token_mode = false;
-    for c in text.chars() {
-        let mut is_token = true;
-        let token = match c {
-            '\n' => "lf",
-            '\r' => "cr",
-            '\t' => "ht",
-            TOKEN_CHAR => TOKEN,
-            TEXT_QUOTE => concatcp!(TEXT_QUOTE),
-            _ => {
-                is_token = false;
-                ""
-            },
-        };
-        if is_token {
-            start_token(&mut token_mode, f)?;
-            f.write_str(token)?;
-            continue;
-        }
-        if key_encoding && !Key::is_key(c) {
-            start_token(&mut token_mode, f)?;
-            f.write_char('X')?;
-            write!(f, "{:x}", c as u32)?;
-        } else {
-            stop_token(&mut token_mode, f)?;
-            f.write_char(c)?;
-        }
-    }
-    stop_token(&mut token_mode, f)
+#[derive(Copy, Clone, PartialEq, Eq)]
+enum State {
+    Key,
+    Text,
+    Token,
 }
 
-fn text_raw(text: &str, f: &mut dyn Write) -> std::fmt::Result {
-    f.write_str("\n|")?;
-    f.write_str(EMPTY)?;
-    for line in text.split_inclusive('\n') {
-        f.write_str(line)?;
-        if line.ends_with('\n') {
-            f.write_str("+ ")?;
+fn prepare_for_write(state: State, f: &mut dyn Write) -> std::fmt::Result {
+    if state == State::Token {
+        f.write_char(' ')?;
+    }
+    Ok(())
+}
+
+fn switch_state(state: &mut State, target: State, f: &mut dyn Write) -> std::fmt::Result {
+    if *state == target {
+        if target == State::Token {
+            f.write_char(' ')?;
         }
-    }
-    f.write_str("\n|")?;
-    f.write_char(TEXT_QUOTE)
-}
-
-fn start_token(token_mode: &mut bool, f: &mut dyn Write) -> std::fmt::Result {
-    if *token_mode {
-        return f.write_char(' ');
-    }
-    *token_mode = true;
-    f.write_char(TOKEN_CHAR)?;
-    f.write_char(SCOPE_LEFT)
-}
-
-fn stop_token(token_mode: &mut bool, f: &mut dyn Write) -> std::fmt::Result {
-    if !*token_mode {
         return Ok(());
     }
-    *token_mode = false;
-    f.write_char(SCOPE_RIGHT)
+    end_state(*state, f)?;
+    *state = target;
+    begin_state(target, f)
+}
+
+fn begin_state(state: State, f: &mut dyn Write) -> std::fmt::Result {
+    match state {
+        State::Key => f.write_char(KEY_QUOTE),
+        State::Text => f.write_char(TEXT_QUOTE),
+        State::Token => f.write_char(LIST_LEFT),
+    }
+}
+
+fn end_state(state: State, f: &mut dyn Write) -> std::fmt::Result {
+    match state {
+        State::Key => f.write_char(KEY_QUOTE),
+        State::Text => f.write_char(TEXT_QUOTE),
+        State::Token => f.write_char(LIST_RIGHT),
+    }
 }
 
 impl FmtRepr for Int {

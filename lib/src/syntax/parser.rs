@@ -31,13 +31,11 @@ use winnow::stream::Range;
 use winnow::stream::Stream;
 use winnow::token::any;
 use winnow::token::one_of;
-use winnow::token::take_till;
 use winnow::token::take_until;
 use winnow::token::take_while;
 
 use super::BYTE;
 use super::COMMENT;
-use super::COMMENT_CHAR;
 use super::DECIMAL;
 use super::Direction;
 use super::EMPTY;
@@ -58,7 +56,6 @@ use super::SEPARATOR;
 use super::SPACE;
 use super::TEXT_QUOTE;
 use super::TOKEN;
-use super::TOKEN_CHAR;
 use super::TRUE;
 use super::UNIT;
 use super::is_delimiter;
@@ -543,149 +540,115 @@ fn any_key(i: &mut &str) -> ModalResult<Key> {
     alt((trivial_key1.map(Key::from_str_unchecked), key)).parse_next(i)
 }
 
-#[expect(const_item_mutation)]
 fn key(i: &mut &str) -> ModalResult<Key> {
-    let key = move |i: &mut _| {
-        let mut raw1 = take_while(1 .., |c| is_key(c) && c != TOKEN_CHAR && c != KEY_QUOTE);
-        let mut token1 = take_while(1 .., |c| is_key(c) && c != ' ' && c != SCOPE_RIGHT)
-            .verify_map(character)
-            .verify(|c| is_key(*c));
-        let mut raw = take_while(0 .., is_key);
-        let mut token = take_while(1 .., |c| is_key(c) && c != ' ')
-            .verify_map(character)
-            .verify(|c| is_key(*c));
-        let mut comment = take_until(0 .., '\n').void();
-        let mut space_tab1 = space_tab(1 ..);
-        let mut tab = take_while(1 .., '\t').void();
-
-        let mut mode = Mode::Default;
-        let mut s = String::new();
-        loop {
-            let c = peek(any).parse_next(i)?;
-            if c == '\r' || c == '\n' {
-                key_newline.parse_next(i)?;
-                mode = switch_mode(mode, KEY_QUOTE).parse_next(i)?;
-                continue;
-            }
-            match mode {
-                Mode::Raw => s.push_str(raw.parse_next(i)?),
-                Mode::Token => match c {
-                    ' ' | '\t' => space_tab1.parse_next(i)?,
-                    _ => s.push(token.parse_next(i)?),
-                },
-                Mode::Default => match c {
-                    KEY_QUOTE => break,
-                    TOKEN_CHAR => {
-                        TOKEN_CHAR.parse_next(i)?;
-                        SCOPE_LEFT.parse_next(i)?;
-                        loop {
-                            match peek(any).parse_next(i)? {
-                                ' ' | '\t' => space_tab1.parse_next(i)?,
-                                SCOPE_RIGHT => break,
-                                _ => s.push(token1.parse_next(i)?),
-                            }
-                        }
-                        SCOPE_RIGHT.parse_next(i)?;
-                    },
-                    '\t' => tab.parse_next(i)?,
-                    _ => s.push_str(raw1.parse_next(i)?),
-                },
-                Mode::Comment => comment.parse_next(i)?,
-            }
-        }
-        Ok(Key::from_string_unchecked(s))
-    };
-    delimited_cut(KEY_QUOTE, key, KEY_QUOTE).context(label("key")).parse_next(i)
+    let key = take_while(1 .., |c| is_key(c) && c != KEY_QUOTE);
+    let text = take_while(1 .., |c| is_key(c) && c != TEXT_QUOTE);
+    let comment = take_until(0 .., ('\n', SCOPE_RIGHT)).void();
+    let token = take_while(1 .., |c| is_key(c) && c != ' ' && c != LIST_RIGHT)
+        .verify_map(character)
+        .verify(|c| is_key(*c));
+    let newline = (line_ending, space_tab(0 ..), '|'.context(expect_char('|'))).value("");
+    let key = key_text(key, text, comment, token, newline).map(Key::from_string_unchecked);
+    preceded(peek(KEY_QUOTE), key).context(label("key")).parse_next(i)
 }
 
-fn key_newline(i: &mut &str) -> ModalResult<()> {
-    let f = (line_ending, space_tab(0 ..), '|'.context(expect_char('|'))).void();
-    f.context(expect_desc("newline")).parse_next(i)
-}
-
-#[expect(const_item_mutation)]
 fn text(i: &mut &str) -> ModalResult<Text> {
-    let text = move |i: &mut _| {
-        let i: &mut &str = i;
-        let mut raw1 = take_till(1 .., ('"', TOKEN_CHAR, '\n', '\t'));
-        let mut token1 =
-            take_while(1 .., |c| is_key(c) && c != ' ' && c != SCOPE_RIGHT).verify_map(character);
-        let mut raw = take_until(1 .., '\n');
-        let mut token = take_while(1 .., |c| is_key(c) && c != ' ').verify_map(character);
-        let mut comment = take_until(0 .., '\n').void();
-        let mut space_tab1 = space_tab(1 ..);
-        let mut tab = take_while(1 .., '\t').void();
-
-        let mut mode = Mode::Default;
-        let mut s = String::new();
-        loop {
-            let c = peek(any).parse_next(i)?;
-            if c == '\n' {
-                s.push_str(text_newline.parse_next(i)?);
-                mode = switch_mode(mode, TEXT_QUOTE).parse_next(i)?;
-                continue;
-            }
-            match mode {
-                Mode::Raw => s.push_str(raw.parse_next(i)?),
-                Mode::Token => match c {
-                    ' ' | '\t' => space_tab1.parse_next(i)?,
-                    _ => s.push(token.parse_next(i)?),
-                },
-                Mode::Default => match c {
-                    TEXT_QUOTE => break,
-                    TOKEN_CHAR => {
-                        TOKEN_CHAR.parse_next(i)?;
-                        SCOPE_LEFT.parse_next(i)?;
-                        loop {
-                            match peek(any).parse_next(i)? {
-                                ' ' | '\t' => space_tab1.parse_next(i)?,
-                                SCOPE_RIGHT => break,
-                                _ => s.push(token1.parse_next(i)?),
-                            }
-                        }
-                        SCOPE_RIGHT.parse_next(i)?;
-                    },
-                    '\t' => tab.parse_next(i)?,
-                    _ => s.push_str(raw1.parse_next(i)?),
-                },
-                Mode::Comment => comment.parse_next(i)?,
-            }
-        }
-        Ok(Text::from(s))
-    };
-    delimited_cut(TEXT_QUOTE, text, TEXT_QUOTE).context(label("text")).parse_next(i)
-}
-
-fn text_newline<'a>(i: &mut &'a str) -> ModalResult<&'a str> {
+    let key = take_until(1 .., (KEY_QUOTE, '\n', '\t'));
+    let text = take_until(1 .., (TEXT_QUOTE, '\n', '\t'));
+    let comment = take_until(0 .., (SCOPE_RIGHT, '\n')).void();
+    let token =
+        take_while(1 .., |c| is_key(c) && c != ' ' && c != LIST_RIGHT).verify_map(character);
     let newline = alt(('+'.value(true), '|'.value(false)))
         .context(expect_char('+'))
         .context(expect_char('|'));
-    let f = preceded(("\n", space_tab(0 ..)), newline).map(|new| if new { "\n" } else { "" });
-    f.context(expect_desc("newline")).parse_next(i)
+    let newline = preceded(("\n", space_tab(0 ..)), newline).map(|new| if new { "\n" } else { "" });
+    let text = key_text(key, text, comment, token, newline).map(Text::from);
+    preceded(peek(TEXT_QUOTE), text).context(label("text")).parse_next(i)
 }
 
 #[derive(Copy, Clone)]
-enum Mode {
-    Default,
-    Raw,
-    Token,
+enum State {
+    Clean,
+    More,
+    Key,
+    Text,
     Comment,
+    Token,
 }
 
-fn switch_mode<'a>(mode: Mode, quote: char) -> impl Parser<&'a str, Mode, E> {
-    move |i: &mut _| match any.parse_next(i)? {
-        EMPTY_CHAR => Ok(Mode::Raw),
-        TOKEN_CHAR => Ok(Mode::Token),
-        COMMENT_CHAR => Ok(Mode::Comment),
-        ' ' => Ok(mode),
-        c if c == quote => Ok(Mode::Default),
-        _ => fail
-            .context(expect_char(EMPTY_CHAR))
-            .context(expect_char(TOKEN_CHAR))
-            .context(expect_char(quote))
-            .context(expect_char(COMMENT_CHAR))
-            .context(expect_char(' '))
-            .parse_next(i),
+fn key_text<'a>(
+    mut key: impl Parser<&'a str, &'a str, E>, mut text: impl Parser<&'a str, &'a str, E>,
+    mut comment: impl Parser<&'a str, (), E>, mut token: impl Parser<&'a str, char, E>,
+    mut newline: impl Parser<&'a str, &'a str, E>,
+) -> impl Parser<&'a str, String, E> {
+    fn clean(i: &mut &str, state: &mut State) -> ModalResult<()> {
+        *state = State::Clean;
+        any.void().parse_next(i)
+    }
+    move |i: &mut _| {
+        let i: &mut &str = i;
+        let mut space_tab1 = space_tab(1 ..);
+        let mut tab = take_while(1 .., '\t').void();
+        let mut peek_one = peek(any);
+
+        let mut state = State::Clean;
+        let mut s = String::new();
+        loop {
+            match state {
+                State::Clean => {
+                    if i.is_empty() {
+                        break;
+                    }
+                    state = match peek_one.parse_next(i)? {
+                        KEY_QUOTE => State::Key,
+                        TEXT_QUOTE => State::Text,
+                        SCOPE_LEFT => State::Comment,
+                        LIST_LEFT => State::Token,
+                        EMPTY_CHAR => State::More,
+                        _ => break,
+                    };
+                    any.parse_next(i)?;
+                },
+                State::More => {
+                    state = match peek_one.parse_next(i)? {
+                        KEY_QUOTE => State::Key,
+                        TEXT_QUOTE => State::Text,
+                        SCOPE_LEFT => State::Comment,
+                        LIST_LEFT => State::Token,
+                        '\n' => {
+                            s.push_str(newline.parse_next(i)?);
+                            continue;
+                        },
+                        _ => return fail.parse_next(i),
+                    };
+                    any.parse_next(i)?;
+                },
+                State::Key => match peek_one.parse_next(i)? {
+                    KEY_QUOTE => clean(i, &mut state)?,
+                    '\n' => s.push_str(newline.parse_next(i)?),
+                    '\t' => tab.parse_next(i)?,
+                    _ => s.push_str(key.parse_next(i)?),
+                },
+                State::Text => match peek_one.parse_next(i)? {
+                    TEXT_QUOTE => clean(i, &mut state)?,
+                    '\n' => s.push_str(newline.parse_next(i)?),
+                    '\t' => tab.parse_next(i)?,
+                    _ => s.push_str(text.parse_next(i)?),
+                },
+                State::Comment => match peek_one.parse_next(i)? {
+                    SCOPE_RIGHT => clean(i, &mut state)?,
+                    '\n' => s.push_str(newline.parse_next(i)?),
+                    _ => comment.parse_next(i)?,
+                },
+                State::Token => match peek_one.parse_next(i)? {
+                    LIST_RIGHT => clean(i, &mut state)?,
+                    '\n' => s.push_str(newline.parse_next(i)?),
+                    ' ' | '\t' => space_tab1.parse_next(i)?,
+                    _ => s.push(token.parse_next(i)?),
+                },
+            }
+        }
+        Ok(s)
     }
 }
 

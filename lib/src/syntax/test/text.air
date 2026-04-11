@@ -4,7 +4,7 @@ empty
 =====
 key
 -----
-"()[]{}<>\|/'^(")`^(^)*+=-~_.,:;!?@#$%&"
+"()[]{}<>\|/'"'"`^*+=-~_.,:;!?@#$%&'
 =====
 alphabet digit
 -----
@@ -16,11 +16,11 @@ unicode
 =====
 escape ascii
 -----
-"^(nul soh stx etx eot enq ack bel bs ht lf vt ff cr so si dle dc1 dc2 dc3 dc4 nak syn etb can em sub esc fs gs rs us sp del)"
+""[nul soh stx etx eot enq ack bel bs ht lf vt ff cr so si dle dc1 dc2 dc3 dc4 nak syn etb can em sub esc fs gs rs us sp del]
 =====
 escape unicode
 -----
-"^(a X3f X1f701)"
+""[a X3f X1f701]
 =====
 tab format
 -----
@@ -28,46 +28,14 @@ tab format
 =====
 multiline
 -----
-"a
-| b^(sp)"
-=====
-multiline default
------
-"a
-|"b^(sp)"
-=====
-multiline raw
------
-"a
-|_"^
-|""
-=====
-multiline code
------
-"a
-|^b " ^ sp
-|""
-=====
-multiline comment
------
-"a
-|!中文注释
-|""
-=====
-multiline switch
------
-"a
-| b
-|_"
-|^sp
-|!comment
-|"end"
+"a"_
+|'b
+|'[sp
+|](c)
 =====
 multiline indent
 -----
-    "a
-    | b
-    |_"
-    |^sp
-    |!comment
-    |"end"
+    "a"_
+    |'b
+    |'[sp
+    |](c)

@@ -30,16 +30,17 @@ key quote
 -----
 '[0, 1, 2]'
 =====
-key escape
+key concat
 -----
-'^(X3f ' ^ sp)'
+'"a"'(this is a comment)[X3f ' " ) ( sp]"'a'"
 =====
 key all
 -----
-'abcdefghijklmnopqrstuvwxyz
-|_()[]{}<>\|/'"`^*+=-~_.,:;!?@#$%&
-|^sp 0 1 2 3 4 5 6 7 8 9
-|!this line is a comment
+'abcdefghijklmnopqrstuvwxyz'_
+|"()[]{}<>\|/'"_
+|'"`^*+=-~_.,:;!?@#$%&'_
+|(this is a comment)_
+|[sp 0 1 2 3 4 5 6 7 8 9]_
 |'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 =====
 text pattern
@@ -50,20 +51,16 @@ text unicode
 -----
 "🜁: Alchemical Symbol For Air"
 =====
-text escape
+text concat
 -----
-"^(X1f701 " ^ sp ht cr lf)"
+"'a'"(this is a comment)[X1f701 ' " sp ht cr lf]'"a"'
 =====
-text raw
+text multiline
 -----
-    "
-    |_()[]{}<>\|/
-    | '"`^*+=-~_
-    | .,:;!?
-    | @#$%&
-    |^X1f701 " ^ sp ht cr lf
-    |!this line is a comment
-    |""
+    "()[]{}<>\|/'"_
+    |'"`^*+=-~_.,:;!?@#$%&'_
+    |(this is a comment)_
+    |[X1f701 ' " sp ht cr lf]
 =====
 integer prefix id
 -----

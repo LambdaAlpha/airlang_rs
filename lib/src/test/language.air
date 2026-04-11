@@ -71,7 +71,7 @@ parse text
 -----
 _ do _[
     _parse set _ import .language.syntax.parse,
-    _ parse "^(" 1 ")"
+    _ parse ""'"1"'
 ]
 -----
 .("1")
@@ -84,4 +84,4 @@ _ do _[
     _a which generate_pretty : .
 ]
 -----
-"^(" 1 ")"
+""'"1"'

@@ -41,12 +41,10 @@ pub(crate) const FALSE: &str = "false";
 // } keywords
 
 // prefixes {
-pub(crate) const COMMENT: &str = concatcp!(COMMENT_CHAR);
-pub(crate) const COMMENT_CHAR: char = '!';
+pub(crate) const COMMENT: &str = "!";
 pub(crate) const LEFT: &str = "<";
 pub(crate) const RIGHT: &str = ">";
-pub(crate) const TOKEN: &str = concatcp!(TOKEN_CHAR);
-pub(crate) const TOKEN_CHAR: char = '^';
+pub(crate) const TOKEN: &str = "^";
 
 pub(crate) const INT: &str = "integer";
 pub(crate) const DECIMAL: &str = "decimal";
