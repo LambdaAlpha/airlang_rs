@@ -7,6 +7,7 @@ use rand::Rng;
 use rand::RngExt;
 use rand::distr::SampleString;
 use rand::distr::StandardUniform;
+use rand::distr::Uniform;
 use rand::prelude::Distribution;
 
 use crate::semantics::cfg::Cfg;
@@ -100,7 +101,12 @@ impl Distribution<Key> for Any {
 impl Distribution<Text> for Any {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Text {
         let len = any_len(rng, 8, 2);
-        let s: String = rng.sample_iter::<char, _>(StandardUniform).take(len).collect();
+        let s: String = if rng.random() {
+            let uniform = Uniform::new(char::from(0), char::from(128)).unwrap();
+            rng.sample_iter::<char, _>(uniform).take(len).collect()
+        } else {
+            rng.sample_iter::<char, _>(StandardUniform).take(len).collect()
+        };
         Text::from(s)
     }
 }

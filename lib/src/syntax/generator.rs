@@ -187,18 +187,10 @@ impl FmtRepr for Text {
                 f.write_char(TEXT_QUOTE)?;
                 continue;
             }
-            if c == LIST_RIGHT && state == State::Token {
-                switch_state(&mut state, State::Text, f)?;
-                f.write_char(LIST_RIGHT)?;
-                continue;
-            }
-            if c == ' ' && state == State::Token {
-                prepare_for_write(state, f)?;
-                f.write_str("sp")?;
-                continue;
-            }
             if Key::is_key(c) {
-                prepare_for_write(state, f)?;
+                if state == State::Token {
+                    switch_state(&mut state, State::Text, f)?;
+                }
                 f.write_char(c)?;
                 continue;
             }
@@ -268,13 +260,6 @@ enum State {
     Key,
     Text,
     Token,
-}
-
-fn prepare_for_write(state: State, f: &mut dyn Write) -> std::fmt::Result {
-    if state == State::Token {
-        f.write_char(' ')?;
-    }
-    Ok(())
 }
 
 fn switch_state(state: &mut State, target: State, f: &mut dyn Write) -> std::fmt::Result {
