@@ -1,6 +1,5 @@
 use const_format::concatcp;
-
-pub use self::arbitrary::Arbitrary;
+use rand::distr::Distribution;
 
 _____!();
 
@@ -9,6 +8,7 @@ use rand::rng;
 use crate::bug;
 use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
+use crate::cfg::prim::lib::value::arbitrary::Any;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxConstInputFreeFunc;
@@ -100,24 +100,24 @@ pub fn any(cfg: &mut Cfg, input: Val) -> Val {
     let mut rng = rng();
     let rng = &mut rng;
     match input {
-        Val::Unit(_) => Val::any(rng),
+        Val::Unit(_) => Any.sample(rng),
         Val::Key(s) => match &*s {
-            TYPE_UNIT => Val::Unit(Unit::any(rng)),
-            TYPE_BIT => Val::Bit(Bit::any(rng)),
-            TYPE_KEY => Val::Key(Key::any(rng)),
-            TYPE_TEXT => Val::Text(Text::any(rng).into()),
-            TYPE_INT => Val::Int(Int::any(rng).into()),
-            TYPE_DECIMAL => Val::Decimal(Decimal::any(rng).into()),
-            TYPE_BYTE => Val::Byte(Byte::any(rng).into()),
-            TYPE_CELL => Val::Cell(Cell::<Val>::any(rng).into()),
-            TYPE_PAIR => Val::Pair(Pair::<Val, Val>::any(rng).into()),
-            TYPE_LIST => Val::List(List::<Val>::any(rng).into()),
-            TYPE_MAP => Val::Map(Map::<Key, Val>::any(rng).into()),
-            TYPE_QUOTE => Val::Quote(Quote::<Val>::any(rng).into()),
-            TYPE_CALL => Val::Call(Call::<Val, Val>::any(rng).into()),
-            TYPE_LINK => Val::Link(LinkVal::any(rng)),
-            TYPE_CFG => Val::Cfg(Cfg::any(rng).into()),
-            TYPE_FUNC => Val::Func(FuncVal::any(rng)),
+            TYPE_UNIT => Val::Unit(Distribution::<Unit>::sample(&Any, rng)),
+            TYPE_BIT => Val::Bit(Distribution::<Bit>::sample(&Any, rng)),
+            TYPE_KEY => Val::Key(Distribution::<Key>::sample(&Any, rng)),
+            TYPE_TEXT => Val::Text(Distribution::<Text>::sample(&Any, rng).into()),
+            TYPE_INT => Val::Int(Distribution::<Int>::sample(&Any, rng).into()),
+            TYPE_DECIMAL => Val::Decimal(Distribution::<Decimal>::sample(&Any, rng).into()),
+            TYPE_BYTE => Val::Byte(Distribution::<Byte>::sample(&Any, rng).into()),
+            TYPE_CELL => Val::Cell(Distribution::<Cell<Val>>::sample(&Any, rng).into()),
+            TYPE_PAIR => Val::Pair(Distribution::<Pair<Val, Val>>::sample(&Any, rng).into()),
+            TYPE_LIST => Val::List(Distribution::<List<Val>>::sample(&Any, rng).into()),
+            TYPE_MAP => Val::Map(Distribution::<Map<Key, Val>>::sample(&Any, rng).into()),
+            TYPE_QUOTE => Val::Quote(Distribution::<Quote<Val>>::sample(&Any, rng).into()),
+            TYPE_CALL => Val::Call(Distribution::<Call<Val, Val>>::sample(&Any, rng).into()),
+            TYPE_LINK => Val::Link(Distribution::<LinkVal>::sample(&Any, rng)),
+            TYPE_CFG => Val::Cfg(Distribution::<Cfg>::sample(&Any, rng).into()),
+            TYPE_FUNC => Val::Func(Distribution::<FuncVal>::sample(&Any, rng)),
             s => bug!(cfg, "{ANY}: unknown type {s}"),
         },
         v => bug!(cfg, "{ANY}: expected input to be a key or a unit, but got {v}"),

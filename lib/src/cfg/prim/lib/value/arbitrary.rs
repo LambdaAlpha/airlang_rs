@@ -32,42 +32,41 @@ use crate::type_::Quote;
 use crate::type_::Text;
 use crate::type_::Unit;
 
-pub trait Arbitrary {
-    fn any<R: Rng + ?Sized>(rng: &mut R) -> Self;
-}
+#[derive(Copy, Clone)]
+pub(crate) struct Any;
 
-impl Arbitrary for Val {
-    fn any<R: Rng + ?Sized>(rng: &mut R) -> Self {
+impl Distribution<Val> for Any {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Val {
         match rng.random_range(0 ..= 15) {
-            0 => Val::Unit(Unit::any(rng)),
-            1 => Val::Bit(Bit::any(rng)),
-            2 => Val::Key(Key::any(rng)),
-            3 => Val::Text(Text::any(rng).into()),
-            4 => Val::Int(Int::any(rng).into()),
-            5 => Val::Decimal(Decimal::any(rng).into()),
-            6 => Val::Byte(Byte::any(rng).into()),
-            7 => Val::Cell(Cell::<Val>::any(rng).into()),
-            8 => Val::Pair(Pair::<Val, Val>::any(rng).into()),
-            9 => Val::List(List::<Val>::any(rng).into()),
-            10 => Val::Map(Map::<Key, Val>::any(rng).into()),
-            11 => Val::Quote(Quote::<Val>::any(rng).into()),
-            12 => Val::Call(Call::<Val, Val>::any(rng).into()),
-            13 => Val::Link(LinkVal::any(rng)),
-            14 => Val::Cfg(Cfg::any(rng).into()),
-            15 => Val::Func(FuncVal::any(rng)),
+            0 => Val::Unit(Distribution::<Unit>::sample(self, rng)),
+            1 => Val::Bit(Distribution::<Bit>::sample(self, rng)),
+            2 => Val::Key(Distribution::<Key>::sample(self, rng)),
+            3 => Val::Text(Distribution::<Text>::sample(self, rng).into()),
+            4 => Val::Int(Distribution::<Int>::sample(self, rng).into()),
+            5 => Val::Decimal(Distribution::<Decimal>::sample(self, rng).into()),
+            6 => Val::Byte(Distribution::<Byte>::sample(self, rng).into()),
+            7 => Val::Cell(Distribution::<Cell<Val>>::sample(self, rng).into()),
+            8 => Val::Pair(Distribution::<Pair<Val, Val>>::sample(self, rng).into()),
+            9 => Val::List(Distribution::<List<Val>>::sample(self, rng).into()),
+            10 => Val::Map(Distribution::<Map<Key, Val>>::sample(self, rng).into()),
+            11 => Val::Quote(Distribution::<Quote<Val>>::sample(self, rng).into()),
+            12 => Val::Call(Distribution::<Call<Val, Val>>::sample(self, rng).into()),
+            13 => Val::Link(Distribution::<LinkVal>::sample(self, rng)),
+            14 => Val::Cfg(Distribution::<Cfg>::sample(self, rng).into()),
+            15 => Val::Func(Distribution::<FuncVal>::sample(self, rng)),
             _ => unreachable!(),
         }
     }
 }
 
-impl Arbitrary for Unit {
-    fn any<R: Rng + ?Sized>(_rng: &mut R) -> Self {
+impl Distribution<Unit> for Any {
+    fn sample<R: Rng + ?Sized>(&self, _rng: &mut R) -> Unit {
         Unit
     }
 }
 
-impl Arbitrary for Bit {
-    fn any<R: Rng + ?Sized>(rng: &mut R) -> Self {
+impl Distribution<Bit> for Any {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Bit {
         Bit::from(rng.random::<bool>())
     }
 }
@@ -90,159 +89,158 @@ impl SampleString for DistKey {
     }
 }
 
-impl Arbitrary for Key {
-    fn any<R: Rng + ?Sized>(rng: &mut R) -> Self {
+impl Distribution<Key> for Any {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Key {
         let len = any_len(rng, 8, 2);
         let s = DistKey.sample_string(rng, len);
         Key::from_string_unchecked(s)
     }
 }
 
-impl Arbitrary for Text {
-    fn any<R: Rng + ?Sized>(rng: &mut R) -> Self {
+impl Distribution<Text> for Any {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Text {
         let len = any_len(rng, 8, 2);
         let s: String = rng.sample_iter::<char, _>(StandardUniform).take(len).collect();
         Text::from(s)
     }
 }
 
-impl Arbitrary for Int {
-    fn any<R: Rng + ?Sized>(rng: &mut R) -> Self {
+impl Distribution<Int> for Any {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Int {
         Int::from(any_int(rng))
     }
 }
 
-impl Arbitrary for Decimal {
-    fn any<R: Rng + ?Sized>(rng: &mut R) -> Self {
+impl Distribution<Decimal> for Any {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Decimal {
         let d = BigDecimal::from_bigint(any_int(rng), rng.random());
         Decimal::new(d)
     }
 }
 
-impl Arbitrary for Byte {
-    fn any<R: Rng + ?Sized>(rng: &mut R) -> Self {
+impl Distribution<Byte> for Any {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Byte {
         Byte::from(any_bytes(rng))
     }
 }
 
-impl<Value> Arbitrary for Cell<Value>
-where Value: Arbitrary
+impl<Value> Distribution<Cell<Value>> for Any
+where Any: Distribution<Value>
 {
-    fn any<R: Rng + ?Sized>(rng: &mut R) -> Self {
-        Cell::new(Value::any(rng))
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Cell<Value> {
+        Cell::new(self.sample(rng))
     }
 }
 
-impl<Value> Arbitrary for Quote<Value>
-where Value: Arbitrary
+impl<Value> Distribution<Quote<Value>> for Any
+where Any: Distribution<Value>
 {
-    fn any<R: Rng + ?Sized>(rng: &mut R) -> Self {
-        Quote::new(Value::any(rng))
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Quote<Value> {
+        Quote::new(self.sample(rng))
     }
 }
 
-impl<Left, Right> Arbitrary for Pair<Left, Right>
-where
-    Left: Arbitrary,
-    Right: Arbitrary,
+impl<Left, Right> Distribution<Pair<Left, Right>> for Any
+where Any: Distribution<Left> + Distribution<Right>
 {
-    fn any<R: Rng + ?Sized>(rng: &mut R) -> Self {
-        Pair::new(Left::any(rng), Right::any(rng))
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Pair<Left, Right> {
+        Pair::new(self.sample(rng), self.sample(rng))
     }
 }
 
-impl<This, That> Arbitrary for Either<This, That>
-where
-    This: Arbitrary,
-    That: Arbitrary,
+impl<This, That> Distribution<Either<This, That>> for Any
+where Any: Distribution<This> + Distribution<That>
 {
-    fn any<R: Rng + ?Sized>(rng: &mut R) -> Self {
-        if rng.random() { Either::This(This::any(rng)) } else { Either::That(That::any(rng)) }
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Either<This, That> {
+        if rng.random() { Either::This(self.sample(rng)) } else { Either::That(self.sample(rng)) }
     }
 }
 
-impl<Func, Input> Arbitrary for Call<Func, Input>
-where
-    Func: Arbitrary,
-    Input: Arbitrary,
+impl<Func, Input> Distribution<Call<Func, Input>> for Any
+where Any: Distribution<Func> + Distribution<Input>
 {
-    fn any<R: Rng + ?Sized>(rng: &mut R) -> Self {
-        Call { func: Func::any(rng), input: Input::any(rng) }
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Call<Func, Input> {
+        Call { func: self.sample(rng), input: self.sample(rng) }
     }
 }
 
-impl<T> Arbitrary for List<T>
-where T: Arbitrary
+impl<T> Distribution<List<T>> for Any
+where Any: Distribution<T>
 {
-    fn any<R: Rng + ?Sized>(rng: &mut R) -> Self {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> List<T> {
         let mut list = Vec::new();
         for _ in 0 .. any_len(rng, 2, 4) {
-            list.push(T::any(rng));
+            list.push(self.sample(rng));
         }
         List::from(list)
     }
 }
 
-impl<K, V> Arbitrary for Map<K, V>
+impl<K, V> Distribution<Map<K, V>> for Any
 where
-    K: Eq + Hash + Arbitrary,
-    V: Arbitrary,
+    K: Eq + Hash,
+    Any: Distribution<K> + Distribution<V>,
 {
-    fn any<R: Rng + ?Sized>(rng: &mut R) -> Self {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Map<K, V> {
         let mut map = Map::default();
         for _ in 0 .. any_len(rng, 2, 4) {
-            map.insert(K::any(rng), V::any(rng));
+            map.insert(self.sample(rng), self.sample(rng));
         }
         map
     }
 }
 
-impl Arbitrary for LinkVal {
-    fn any<R: Rng + ?Sized>(rng: &mut R) -> Self {
-        let val = Val::any(rng);
+impl Distribution<LinkVal> for Any {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> LinkVal {
+        let val = self.sample(rng);
         let const_ = rng.random();
         LinkVal::new(val, const_)
     }
 }
 
-impl Arbitrary for Cfg {
-    fn any<R: Rng + ?Sized>(rng: &mut R) -> Self {
-        Cfg::from(Map::any(rng))
+impl Distribution<Cfg> for Any {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Cfg {
+        let map: Map<Key, Val> = self.sample(rng);
+        Cfg::from(map)
     }
 }
 
-impl<T: Arbitrary> Arbitrary for Option<T> {
-    fn any<R: Rng + ?Sized>(rng: &mut R) -> Self {
-        if rng.random_ratio(1, 4) { None } else { Some(T::any(rng)) }
+impl<T> Distribution<Option<T>> for Any
+where Any: Distribution<T>
+{
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Option<T> {
+        if rng.random_ratio(1, 4) { None } else { Some(self.sample(rng)) }
     }
 }
 
-impl<T: Arbitrary> Arbitrary for Box<T> {
-    fn any<R: Rng + ?Sized>(rng: &mut R) -> Self {
-        Box::new(T::any(rng))
+impl<T> Distribution<Box<T>> for Any
+where Any: Distribution<T>
+{
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Box<T> {
+        Box::new(self.sample(rng))
     }
 }
 
-impl Arbitrary for FuncVal {
-    fn any<R: Rng + ?Sized>(rng: &mut R) -> Self {
-        let func = Arbitrary::any(rng);
+impl Distribution<FuncVal> for Any {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> FuncVal {
+        let func = self.sample(rng);
         FuncVal::Comp(func)
     }
 }
 
-impl Arbitrary for CompFuncVal {
-    fn any<R: Rng + ?Sized>(rng: &mut R) -> Self {
+impl Distribution<CompFuncVal> for Any {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> CompFuncVal {
         let ctx = if rng.random() {
-            CompCtx::Aware { name: Arbitrary::any(rng), const_: rng.random() }
+            CompCtx::Aware { name: self.sample(rng), const_: rng.random() }
         } else {
             CompCtx::Free
         };
         let input = if rng.random() {
-            CompInput::Aware { name: Arbitrary::any(rng) }
+            CompInput::Aware { name: self.sample(rng) }
         } else {
             CompInput::Free
         };
-        let func = CompFunc { prelude: Arbitrary::any(rng), body: Arbitrary::any(rng), input, ctx };
+        let func = CompFunc { prelude: self.sample(rng), body: self.sample(rng), input, ctx };
         CompFuncVal::from(func)
     }
 }
