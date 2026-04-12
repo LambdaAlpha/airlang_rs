@@ -195,7 +195,9 @@ impl FmtRepr for Text {
                 continue;
             }
             if !options.key_encoding && !options.normalized && !c.is_ascii() {
-                switch_state(&mut state, State::Text, f)?;
+                if state == State::Token {
+                    switch_state(&mut state, State::Text, f)?;
+                }
                 f.write_char(c)?;
                 continue;
             }
