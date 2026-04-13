@@ -26,12 +26,6 @@ impl From<PrimFunc> for PrimFuncVal {
     }
 }
 
-impl PrimFuncVal {
-    pub(crate) fn unwrap(self) -> &'static PrimFunc {
-        self.0
-    }
-}
-
 rc_wrap!(pub CompFuncVal(CompFunc));
 
 impl DynFunc<Cfg, Val, Val, Val> for FuncVal {

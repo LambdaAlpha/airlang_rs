@@ -13,7 +13,6 @@ use crate::semantics::val::MapVal;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
-use crate::type_::Int;
 use crate::type_::Key;
 use crate::type_::Map;
 use crate::type_::Pair;
@@ -21,7 +20,7 @@ use crate::type_::Pair;
 // todo rename
 const CODE: &str = "code";
 const PRELUDE: &str = "prelude";
-const CTX_CONST: &str = "context_constant";
+const CONST: &str = "constant";
 
 pub(in crate::cfg) fn parse_func(cfg: &mut Cfg, input: Val) -> Option<FuncVal> {
     let Val::Map(mut map) = input else {
@@ -31,7 +30,7 @@ pub(in crate::cfg) fn parse_func(cfg: &mut Cfg, input: Val) -> Option<FuncVal> {
     let CompCode { ctx_name, input_name, body } = parse_code(cfg, map_remove(&mut map, CODE))?;
     let prelude = map_remove(&mut map, PRELUDE);
     let ctx = if let Some(name) = ctx_name {
-        let const_ = parse_bit(cfg, CTX_CONST, map_remove(&mut map, CTX_CONST))?;
+        let const_ = parse_bit(cfg, CONST, map_remove(&mut map, CONST))?;
         CompCtx::Aware { name, const_ }
     } else {
         CompCtx::Free
@@ -108,8 +107,8 @@ pub(in crate::cfg) fn generate_code(func: &FuncVal) -> Val {
 }
 
 fn prim_code(fn_: *const dyn DynFunc<Cfg, Val, Val, Val>) -> Val {
-    let int = Int::from(fn_.addr());
-    Val::Int(int.into())
+    let s = format!("{:x}", fn_.addr());
+    Val::Key(Key::from_string_unchecked(s))
 }
 
 fn comp_code(comp: &CompFunc) -> Val {
@@ -144,7 +143,7 @@ struct CommonRepr {
 fn generate_common(repr: &mut Map<Key, Val>, common: CommonRepr) {
     repr.insert(Key::from_str_unchecked(CODE), common.code);
     let const_ = !matches!(common.ctx, PrimCtx::Mut);
-    repr.insert(Key::from_str_unchecked(CTX_CONST), Val::Bit(Bit::from(const_)));
+    repr.insert(Key::from_str_unchecked(CONST), Val::Bit(Bit::from(const_)));
 }
 
 struct PrimRepr {

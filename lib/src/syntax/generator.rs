@@ -689,8 +689,8 @@ impl<T: FmtRepr> FmtRepr for Map<Key, T> {
     }
 }
 
-fn kv_fmt<T: FmtRepr>(
-    key: Key, value: &T, options: FmtOptions, f: &mut dyn Write,
+fn kv_fmt(
+    key: Key, value: &dyn FmtRepr, options: FmtOptions, f: &mut dyn Write,
 ) -> std::fmt::Result {
     let mut key_options = options;
     key_options.key_ctx = true;
@@ -702,6 +702,20 @@ fn kv_fmt<T: FmtRepr>(
     f.write_str(PAIR)?;
     f.write_char(' ')?;
     value.fmt(options, f)
+}
+
+impl<T: FmtRepr + ?Sized> FmtRepr for &T {
+    fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
+        (*self).fmt(options, f)
+    }
+
+    fn get_type(&self) -> ReprType {
+        (*self).get_type()
+    }
+
+    fn to_pair(&self) -> Pair<&dyn FmtRepr, &dyn FmtRepr> {
+        (*self).to_pair()
+    }
 }
 
 macro_rules! impl_display_debug_for_fmt_repr {

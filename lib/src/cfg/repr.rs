@@ -112,7 +112,13 @@ impl FmtRepr for LinkVal {
 impl FmtRepr for Cfg {
     fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
         f.write_str(CFG)?;
-        FmtRepr::fmt(&**self, options, f)
+        let mut map: Map<Key, &dyn FmtRepr> = Map::default();
+        let is_aborted = Bit::from(self.is_aborted());
+        let steps = Int::from(self.steps());
+        map.insert(Key::from_str_unchecked("is_aborted"), &is_aborted);
+        map.insert(Key::from_str_unchecked("steps"), &steps);
+        map.insert(Key::from_str_unchecked("map"), &**self);
+        FmtRepr::fmt(&map, options, f)
     }
 
     fn get_type(&self) -> ReprType {
