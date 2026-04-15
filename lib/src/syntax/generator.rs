@@ -2,6 +2,7 @@ use std::fmt::Debug;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Write;
+use std::ops::Deref;
 
 use bigdecimal::BigDecimal;
 use derive_more::IsVariant;
@@ -667,7 +668,14 @@ impl<T: FmtRepr> FmtRepr for Map<Key, T> {
         }
 
         f.write_char(MAP_LEFT)?;
-        if options.key_encoding || options.space.is_compact() {
+        if options.key_encoding {
+            let mut pairs: Vec<_> = self.iter().collect();
+            pairs.sort_unstable_by_key(|(k, _)| (*k).deref());
+            for (key, value) in pairs {
+                kv_fmt(key.clone(), value, options, f)?;
+                f.write_char(SEPARATOR)?;
+            }
+        } else if options.space.is_compact() {
             for (key, value) in self {
                 kv_fmt(key.clone(), value, options, f)?;
                 f.write_char(SEPARATOR)?;

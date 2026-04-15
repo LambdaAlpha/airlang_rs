@@ -240,8 +240,8 @@ fn prefix<'a, T: ParseRepr>(prefix: &str, ctx: ParseCtx) -> impl Parser<&'a str,
         let i: &mut &str = i;
         match prefix {
             TOKEN => match i.chars().next().unwrap() {
-                LIST_LEFT => raw_list(ctx).parse_next(i),
-                MAP_LEFT => raw_map(ctx).parse_next(i),
+                LIST_LEFT => list_token(ctx).parse_next(i),
+                MAP_LEFT => map_token(ctx).parse_next(i),
                 _ => fail.context(label("prefix token")).parse_next(i),
             },
             EMPTY => quote(ctx).parse_next(i),
@@ -447,7 +447,7 @@ fn list<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     f.context(label("list"))
 }
 
-fn raw_list<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
+fn list_token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     let items = move |i: &mut _| {
         let mut opt_void = opt(void(ctx));
         let mut opt_repr = opt(repr(ctx));
@@ -465,7 +465,7 @@ fn raw_list<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
         Ok(T::from(List::from(list)))
     };
     let f = delimited_cut(LIST_LEFT, items, LIST_RIGHT);
-    f.context(label("raw list"))
+    f.context(label("token list"))
 }
 
 fn map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
@@ -507,7 +507,7 @@ fn map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     f.context(label("map"))
 }
 
-fn raw_map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
+fn map_token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     let items = move |i: &mut _| {
         let mut opt_void = opt(void(ctx));
         let mut void = void(ctx);
@@ -533,7 +533,7 @@ fn raw_map<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
         Ok(T::from(map))
     };
     let f = delimited_cut(MAP_LEFT, items, MAP_RIGHT);
-    f.context(label("raw map"))
+    f.context(label("token map"))
 }
 
 fn any_key(i: &mut &str) -> ModalResult<Key> {
