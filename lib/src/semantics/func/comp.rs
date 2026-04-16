@@ -11,7 +11,7 @@ use crate::semantics::val::LinkVal;
 use crate::semantics::val::Val;
 use crate::type_::Key;
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone)]
 pub struct CompFunc {
     pub(crate) prelude: Val,
     pub(crate) body: Val,
@@ -19,13 +19,13 @@ pub struct CompFunc {
     pub(crate) input: CompInput,
 }
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone)]
 pub(crate) enum CompCtx {
     Free,
     Aware { name: Key, const_: bool },
 }
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone)]
 pub(crate) enum CompInput {
     Free,
     Aware { name: Key },

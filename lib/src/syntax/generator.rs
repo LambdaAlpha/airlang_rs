@@ -47,7 +47,9 @@ use crate::type_::Unit;
 
 #[derive(Default, Copy, Clone)]
 pub struct FmtOptions {
-    pub key_encoding: bool,
+    /// key encoding, compact, deterministic
+    pub id_mode: bool,
+    /// quoted, prefixed, no shorthands
     pub normalized: bool,
     pub space: SpaceFmt,
     pub direction: Direction,
@@ -159,7 +161,7 @@ impl FmtRepr for Text {
                 has_cr = false;
             }
             if c == '\n' {
-                if options.key_encoding || options.normalized || options.space.is_compact() {
+                if options.id_mode || options.normalized || options.space.is_compact() {
                     switch_state(&mut state, State::Token, f)?;
                     if has_cr {
                         f.write_str("cr lf")?;
@@ -195,7 +197,7 @@ impl FmtRepr for Text {
                 f.write_char(c)?;
                 continue;
             }
-            if !options.key_encoding && !options.normalized && !c.is_ascii() {
+            if !options.id_mode && !options.normalized && !c.is_ascii() {
                 if state == State::Token {
                     switch_state(&mut state, State::Text, f)?;
                 }
@@ -631,7 +633,7 @@ impl<T: FmtRepr> FmtRepr for List<T> {
         }
 
         f.write_char(LIST_LEFT)?;
-        if options.key_encoding || options.space.is_compact() {
+        if options.id_mode || options.space.is_compact() {
             for repr in self {
                 repr.fmt(options, f)?;
                 f.write_char(SEPARATOR)?;
@@ -668,7 +670,7 @@ impl<T: FmtRepr> FmtRepr for Map<Key, T> {
         }
 
         f.write_char(MAP_LEFT)?;
-        if options.key_encoding {
+        if options.id_mode {
             let mut pairs: Vec<_> = self.iter().collect();
             pairs.sort_unstable_by_key(|(k, _)| (*k).deref());
             for (key, value) in pairs {

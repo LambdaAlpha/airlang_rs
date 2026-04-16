@@ -47,7 +47,7 @@ pub(crate) use box_wrap;
 
 macro_rules! rc_wrap {
     ($visibility:vis $name:ident($value:ty)) => {
-        #[derive(std::clone::Clone, std::cmp::PartialEq, std::cmp::Eq)]
+        #[derive(std::clone::Clone)]
         $visibility struct $name(::std::rc::Rc<$value>);
 
         impl $name {

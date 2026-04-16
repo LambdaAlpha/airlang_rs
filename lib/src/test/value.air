@@ -403,7 +403,7 @@ _ do _[
 -----
 false
 =====
-= function
+= function false
 -----
 _ do _[
     _a set _ function {
@@ -412,7 +412,19 @@ _ do _[
     _b set _ function {
         code : (. : .) : .,
     },
-    (a = b) and _ not a = .
+    a = b
+]
+-----
+false
+=====
+= function true
+-----
+_ do _[
+    _a set _ function {
+        code : (. : .) : .,
+    },
+    _b set a,
+    a = b
 ]
 -----
 true

@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use derive_more::Deref;
 use derive_more::From;
 
@@ -17,7 +19,7 @@ pub enum FuncVal {
     Comp(CompFuncVal),
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Deref)]
+#[derive(Copy, Clone, Deref)]
 pub struct PrimFuncVal(&'static PrimFunc);
 
 impl From<PrimFunc> for PrimFuncVal {
@@ -26,7 +28,23 @@ impl From<PrimFunc> for PrimFuncVal {
     }
 }
 
+impl PartialEq for PrimFuncVal {
+    fn eq(&self, other: &Self) -> bool {
+        std::ptr::eq(self.0, other.0)
+    }
+}
+
+impl Eq for PrimFuncVal {}
+
 rc_wrap!(pub CompFuncVal(CompFunc));
+
+impl PartialEq for CompFuncVal {
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.0, &other.0)
+    }
+}
+
+impl Eq for CompFuncVal {}
 
 impl DynFunc<Cfg, Val, Val, Val> for FuncVal {
     fn call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
@@ -63,6 +81,13 @@ impl FuncVal {
         match self {
             FuncVal::Prim(_) => None,
             FuncVal::Comp(f) => Some(&f.prelude),
+        }
+    }
+
+    pub fn id(&self) -> usize {
+        match self {
+            FuncVal::Prim(f) => (f.0 as *const PrimFunc).addr(),
+            FuncVal::Comp(f) => Rc::as_ptr(&f.0).addr(),
         }
     }
 }

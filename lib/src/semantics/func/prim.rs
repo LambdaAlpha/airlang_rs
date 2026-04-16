@@ -11,14 +11,14 @@ pub struct PrimFunc {
     pub(crate) input: PrimInput,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone)]
 pub enum PrimCtx {
     Free,
     Const_,
     Mut,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone)]
 pub enum PrimInput {
     Free,
     Aware,
@@ -29,14 +29,6 @@ impl DynFunc<Cfg, Val, Val, Val> for PrimFunc {
         self.fn_.call(cfg, ctx, input)
     }
 }
-
-impl PartialEq for PrimFunc {
-    fn eq(&self, other: &PrimFunc) -> bool {
-        std::ptr::eq(&self.fn_, &other.fn_) && self.ctx == other.ctx && self.input == other.input
-    }
-}
-
-impl Eq for PrimFunc {}
 
 pub struct CtxMutInputAwareFunc<F> {
     pub fn_: F,

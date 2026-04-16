@@ -127,10 +127,17 @@ impl FmtRepr for Cfg {
 }
 
 impl FmtRepr for FuncVal {
-    fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
+    fn fmt(&self, mut options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
         f.write_str(FUNC)?;
-        let repr = generate_func(self.clone());
-        FmtRepr::fmt(&*repr, options, f)
+        if options.id_mode {
+            let id = self.id();
+            let id = Key::from_string_unchecked(format!("{id:x}"));
+            options.normalized = true;
+            FmtRepr::fmt(&id, options, f)
+        } else {
+            let repr = generate_func(self.clone());
+            FmtRepr::fmt(&*repr, options, f)
+        }
     }
 
     fn get_type(&self) -> ReprType {
