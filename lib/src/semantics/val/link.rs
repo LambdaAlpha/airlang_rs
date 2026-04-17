@@ -3,6 +3,8 @@ use std::cell::BorrowMutError;
 use std::cell::Ref;
 use std::cell::RefCell;
 use std::cell::RefMut;
+use std::hash::Hash;
+use std::hash::Hasher;
 use std::rc::Rc;
 
 use derive_more::From;
@@ -44,3 +46,10 @@ impl PartialEq for LinkVal {
 }
 
 impl Eq for LinkVal {}
+
+impl Hash for LinkVal {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        Rc::as_ptr(&self.cell).addr().hash(state);
+        self.const_.hash(state);
+    }
+}

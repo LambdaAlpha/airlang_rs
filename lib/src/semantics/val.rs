@@ -20,7 +20,7 @@ use derive_more::From;
 use derive_more::IsVariant;
 
 use crate::semantics::ctx::DynCtx;
-use crate::trait_::dyn_safe::dyn_any_fmt_clone_eq;
+use crate::trait_::dyn_safe::dyn_any_fmt_clone_eq_hash;
 use crate::type_::Bit;
 use crate::type_::Byte;
 use crate::type_::Call;
@@ -39,9 +39,9 @@ pub trait Value: DynCtx<Val, Val> {
     fn type_name(&self) -> Key;
 }
 
-dyn_any_fmt_clone_eq!(pub DynVal : Value);
+dyn_any_fmt_clone_eq_hash!(pub DynVal : Value);
 
-#[derive(Clone, PartialEq, Eq, From, IsVariant)]
+#[derive(Clone, PartialEq, Eq, Hash, From, IsVariant)]
 pub enum Val {
     Unit(Unit),
     Bit(Bit),

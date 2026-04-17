@@ -28,7 +28,7 @@ use crate::type_::Quote;
 use crate::type_::Text;
 use crate::type_::Unit;
 
-#[derive(PartialEq, Eq, Clone, From, IsVariant)]
+#[derive(Clone, PartialEq, Eq, Hash, From, IsVariant)]
 pub enum Repr {
     Unit(Unit),
     Bit(Bit),

@@ -1,6 +1,6 @@
 macro_rules! box_wrap {
     ($visibility:vis $name:ident($value:ty)) => {
-        #[derive(std::clone::Clone, std::cmp::PartialEq, std::cmp::Eq)]
+        #[derive(std::clone::Clone, std::cmp::PartialEq, std::cmp::Eq, std::hash::Hash)]
         $visibility struct $name(::std::boxed::Box<$value>);
 
         impl $name {

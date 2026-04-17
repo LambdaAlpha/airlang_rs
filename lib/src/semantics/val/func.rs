@@ -1,3 +1,5 @@
+use std::hash::Hash;
+use std::hash::Hasher;
 use std::rc::Rc;
 
 use derive_more::Deref;
@@ -13,7 +15,7 @@ use crate::semantics::val::Val;
 use crate::type_::wrap::rc_wrap;
 use crate::utils::memory::leak_const;
 
-#[derive(Clone, PartialEq, Eq, From)]
+#[derive(Clone, PartialEq, Eq, Hash, From)]
 pub enum FuncVal {
     Prim(PrimFuncVal),
     Comp(CompFuncVal),
@@ -36,6 +38,12 @@ impl PartialEq for PrimFuncVal {
 
 impl Eq for PrimFuncVal {}
 
+impl Hash for PrimFuncVal {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        std::ptr::hash(self.0, state);
+    }
+}
+
 rc_wrap!(pub CompFuncVal(CompFunc));
 
 impl PartialEq for CompFuncVal {
@@ -45,6 +53,12 @@ impl PartialEq for CompFuncVal {
 }
 
 impl Eq for CompFuncVal {}
+
+impl Hash for CompFuncVal {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        Rc::as_ptr(&self.0).hash(state);
+    }
+}
 
 impl DynFunc<Cfg, Val, Val, Val> for FuncVal {
     fn call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {

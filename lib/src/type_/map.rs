@@ -1,10 +1,14 @@
 use std::collections::hash_map::IntoKeys;
 use std::collections::hash_map::IntoValues;
+use std::hash::BuildHasher;
 use std::hash::Hash;
+use std::hash::Hasher;
+use std::ops::BitXor;
 
 use derive_more::Deref;
 use derive_more::DerefMut;
 use derive_more::IntoIterator;
+use rustc_hash::FxBuildHasher;
 use rustc_hash::FxHashMap;
 
 #[derive(Clone, IntoIterator, Deref, DerefMut)]
@@ -44,6 +48,14 @@ impl<K: Eq + Hash, V: PartialEq> PartialEq for Map<K, V> {
 }
 
 impl<K: Eq + Hash, V: Eq> Eq for Map<K, V> {}
+
+impl<K: Hash, V: Hash> Hash for Map<K, V> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        // deterministic hash independent on order of kv
+        let hash = self.iter().map(|kv| FxBuildHasher.hash_one(kv)).fold(0, u64::bitxor);
+        state.write_u64(hash);
+    }
+}
 
 impl<K, V> Default for Map<K, V> {
     fn default() -> Self {

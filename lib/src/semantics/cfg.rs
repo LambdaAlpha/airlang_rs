@@ -12,7 +12,7 @@ use crate::type_::Text;
 use crate::utils::hint::cold_path;
 
 // todo design invariant
-#[derive(Clone, PartialEq, Eq, Deref, DerefMut)]
+#[derive(Clone, PartialEq, Eq, Hash, Deref, DerefMut)]
 pub struct Cfg {
     steps: u128,
     aborted: bool,
