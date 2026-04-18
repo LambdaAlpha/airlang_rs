@@ -3,7 +3,6 @@ use const_format::concatcp;
 pub use self::error::ParseError;
 pub use self::generator::FmtOptions;
 pub use self::generator::FmtRepr;
-pub use self::generator::SpaceFmt;
 pub use self::parser::ParseRepr;
 pub use self::parser::parse;
 

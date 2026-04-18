@@ -5,7 +5,6 @@ use std::fmt::Write;
 use std::ops::Deref;
 
 use bigdecimal::BigDecimal;
-use derive_more::IsVariant;
 use num_traits::Signed;
 
 use super::BYTE;
@@ -51,16 +50,10 @@ pub struct FmtOptions {
     pub id_mode: bool,
     /// quoted, prefixed, no shorthands
     pub normalized: bool,
-    pub space: SpaceFmt,
+    /// newline, indent, gap
+    pub pretty: bool,
     pub direction: Direction,
     pub key_ctx: bool,
-}
-
-#[derive(Default, Copy, Clone, IsVariant)]
-pub enum SpaceFmt {
-    #[default]
-    Compact,
-    Pretty,
 }
 
 pub trait FmtRepr {
@@ -75,10 +68,7 @@ pub trait FmtRepr {
 
 impl<'a> From<&Formatter<'a>> for FmtOptions {
     fn from(f: &Formatter<'a>) -> Self {
-        Self {
-            space: if f.alternate() { SpaceFmt::Pretty } else { SpaceFmt::Compact },
-            ..Default::default()
-        }
+        Self { pretty: f.alternate(), ..Default::default() }
     }
 }
 
@@ -112,10 +102,16 @@ impl FmtRepr for Key {
         for c in self.chars() {
             if is_key && c == KEY_QUOTE {
                 f.write_char(KEY_QUOTE)?;
+                if options.pretty {
+                    f.write_str(EMPTY)?;
+                }
                 f.write_char(TEXT_QUOTE)?;
                 is_key = false;
             } else if !is_key && c == TEXT_QUOTE {
                 f.write_char(TEXT_QUOTE)?;
+                if options.pretty {
+                    f.write_str(EMPTY)?;
+                }
                 f.write_char(KEY_QUOTE)?;
                 is_key = true;
             }
@@ -156,13 +152,13 @@ impl FmtRepr for Text {
         let mut has_cr = false;
         for c in self.chars() {
             if has_cr && c != '\n' {
-                switch_state(&mut state, State::Token, f)?;
+                switch_state(&mut state, State::Token, options, f)?;
                 f.write_str("cr")?;
                 has_cr = false;
             }
             if c == '\n' {
-                if options.id_mode || options.normalized || options.space.is_compact() {
-                    switch_state(&mut state, State::Token, f)?;
+                if options.id_mode || options.normalized || !options.pretty {
+                    switch_state(&mut state, State::Token, options, f)?;
                     if has_cr {
                         f.write_str("cr lf")?;
                     } else {
@@ -181,30 +177,30 @@ impl FmtRepr for Text {
                 continue;
             }
             if c == KEY_QUOTE && state == State::Key {
-                switch_state(&mut state, State::Text, f)?;
+                switch_state(&mut state, State::Text, options, f)?;
                 f.write_char(KEY_QUOTE)?;
                 continue;
             }
             if c == TEXT_QUOTE && state == State::Text {
-                switch_state(&mut state, State::Key, f)?;
+                switch_state(&mut state, State::Key, options, f)?;
                 f.write_char(TEXT_QUOTE)?;
                 continue;
             }
             if Key::is_key(c) {
                 if state == State::Token {
-                    switch_state(&mut state, State::Text, f)?;
+                    switch_state(&mut state, State::Text, options, f)?;
                 }
                 f.write_char(c)?;
                 continue;
             }
             if !options.id_mode && !options.normalized && !c.is_ascii() {
                 if state == State::Token {
-                    switch_state(&mut state, State::Text, f)?;
+                    switch_state(&mut state, State::Text, options, f)?;
                 }
                 f.write_char(c)?;
                 continue;
             }
-            switch_state(&mut state, State::Token, f)?;
+            switch_state(&mut state, State::Token, options, f)?;
             let token = match c {
                 '\u{00}' => "nul",
                 '\u{01}' => "soh",
@@ -249,7 +245,7 @@ impl FmtRepr for Text {
             f.write_str(token)?;
         }
         if has_cr {
-            switch_state(&mut state, State::Token, f)?;
+            switch_state(&mut state, State::Token, options, f)?;
             f.write_str("cr")?;
         }
         end_state(state, f)
@@ -267,7 +263,9 @@ enum State {
     Token,
 }
 
-fn switch_state(state: &mut State, target: State, f: &mut dyn Write) -> std::fmt::Result {
+fn switch_state(
+    state: &mut State, target: State, options: FmtOptions, f: &mut dyn Write,
+) -> std::fmt::Result {
     if *state == target {
         if target == State::Token {
             f.write_char(' ')?;
@@ -276,10 +274,13 @@ fn switch_state(state: &mut State, target: State, f: &mut dyn Write) -> std::fmt
     }
     end_state(*state, f)?;
     *state = target;
-    begin_state(target, f)
+    begin_state(target, options, f)
 }
 
-fn begin_state(state: State, f: &mut dyn Write) -> std::fmt::Result {
+fn begin_state(state: State, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
+    if options.pretty {
+        f.write_str(EMPTY)?;
+    }
     match state {
         State::Key => f.write_char(KEY_QUOTE),
         State::Text => f.write_char(TEXT_QUOTE),
@@ -633,7 +634,7 @@ impl<T: FmtRepr> FmtRepr for List<T> {
         }
 
         f.write_char(LIST_LEFT)?;
-        if options.id_mode || options.space.is_compact() {
+        if options.id_mode || !options.pretty {
             for repr in self {
                 repr.fmt(options, f)?;
                 f.write_char(SEPARATOR)?;
@@ -677,7 +678,7 @@ impl<T: FmtRepr> FmtRepr for Map<Key, T> {
                 kv_fmt(key.clone(), value, options, f)?;
                 f.write_char(SEPARATOR)?;
             }
-        } else if options.space.is_compact() {
+        } else if !options.pretty {
             for (key, value) in self {
                 kv_fmt(key.clone(), value, options, f)?;
                 f.write_char(SEPARATOR)?;

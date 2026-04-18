@@ -37,7 +37,7 @@ a.b.c
 '[0, 1, 2]'
 ➔ [0, 1, 2]
 
-'"a"'(this is a comment)[X3f ' " ) ( sp]"'a'"
+'"a"'_(this is a comment)_[X3f ' " ) ( sp]_"'a'"
 ➔ "a"?'")( 'a'
 
 'abcdefghijklmnopqrstuvwxyz'_
@@ -57,7 +57,7 @@ a.b.c
 "🜁: Alchemical Symbol For Air"
 ➔ 🜁: Alchemical Symbol For Air
 
-"'a'"(this is a comment)[X1f701 ' " sp ht cr lf]'"a"'
+"'a'"_(this is a comment)_[X1f701 ' " sp ht cr lf]_'"a"'
 ➔ 'a'🜁'" \t\r\n"a"
 
     "()[]{}<>\|/'"_

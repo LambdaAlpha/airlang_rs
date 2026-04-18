@@ -32,7 +32,7 @@ key quote
 =====
 key concat
 -----
-'"a"'(this is a comment)[X3f ' " ) ( sp]"'a'"
+'"a"'_(this is a comment)_[X3f ' " ) ( sp]_"'a'"
 =====
 key all
 -----
@@ -53,7 +53,7 @@ text unicode
 =====
 text concat
 -----
-"'a'"(this is a comment)[X1f701 ' " sp ht cr lf]'"a"'
+"'a'"_(this is a comment)_[X1f701 ' " sp ht cr lf]_'"a"'
 =====
 text multiline
 -----

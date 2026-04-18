@@ -15,7 +15,6 @@ use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::syntax::FmtOptions;
 use crate::syntax::FmtRepr;
-use crate::syntax::SpaceFmt;
 use crate::type_::Cell;
 use crate::type_::Key;
 use crate::type_::Text;
@@ -74,7 +73,7 @@ pub fn generate_pretty(_cfg: &mut Cfg, val: &Val) -> Val {
 
 pub fn generate_key(_cfg: &mut Cfg, val: &Val) -> Val {
     let mut str = String::new();
-    let options = FmtOptions { id_mode: true, space: SpaceFmt::Compact, ..Default::default() };
+    let options = FmtOptions { id_mode: true, pretty: false, ..Default::default() };
     val.fmt(options, &mut str).unwrap();
     Val::Key(Key::from_string_unchecked(str))
 }
