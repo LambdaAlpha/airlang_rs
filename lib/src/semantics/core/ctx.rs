@@ -5,176 +5,181 @@ use crate::bug;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::ctx::DynCtx;
+use crate::semantics::val::CALL;
+use crate::semantics::val::CELL;
 use crate::semantics::val::CallVal;
 use crate::semantics::val::CellVal;
 use crate::semantics::val::IntVal;
+use crate::semantics::val::LIST;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
+use crate::semantics::val::PAIR;
 use crate::semantics::val::PairVal;
+use crate::semantics::val::QUOTE;
 use crate::semantics::val::QuoteVal;
 use crate::semantics::val::Val;
 use crate::type_::Key;
 
-pub(crate) const VALUE: &str = concatcp!(PREFIX_CELL, "value");
+pub(crate) const CELL_VALUE: &str = concatcp!(PREFIX_CELL, CELL, ".value");
 
 impl DynCtx<Key, Val> for CellVal {
     fn ref_(&self, cfg: &mut Cfg, key: Key) -> Option<&Val> {
-        if &*key == VALUE {
+        if &*key == CELL_VALUE {
             return Some(&self.value);
         }
-        bug!(cfg, "context cell: expected key to be {VALUE}, but got {key}");
+        bug!(cfg, "context cell: expected key to be {CELL_VALUE}, but got {key}");
         None
     }
 
     fn ref_mut(&mut self, cfg: &mut Cfg, key: Key) -> Option<&mut Val> {
-        if &*key == VALUE {
+        if &*key == CELL_VALUE {
             return Some(&mut self.value);
         }
-        bug!(cfg, "context cell: expected key to be {VALUE}, but got {key}");
+        bug!(cfg, "context cell: expected key to be {CELL_VALUE}, but got {key}");
         None
     }
 
     fn set(&mut self, cfg: &mut Cfg, key: Key, value: Val) -> Option<()> {
-        if &*key == VALUE {
+        if &*key == CELL_VALUE {
             self.value = value;
             return Some(());
         }
-        bug!(cfg, "context cell: expected key to be {VALUE}, but got {key}");
+        bug!(cfg, "context cell: expected key to be {CELL_VALUE}, but got {key}");
         None
     }
 }
 
-pub(crate) const SOURCE: &str = concatcp!(PREFIX_CELL, "source");
+pub(crate) const QUOTE_VALUE: &str = concatcp!(PREFIX_CELL, QUOTE, ".value");
 
 impl DynCtx<Key, Val> for QuoteVal {
     fn ref_(&self, cfg: &mut Cfg, key: Key) -> Option<&Val> {
-        if &*key == SOURCE {
-            return Some(&self.source);
+        if &*key == QUOTE_VALUE {
+            return Some(&self.value);
         }
-        bug!(cfg, "context quote: expected key to be {SOURCE}, but got {key}");
+        bug!(cfg, "context quote: expected key to be {QUOTE_VALUE}, but got {key}");
         None
     }
 
     fn ref_mut(&mut self, cfg: &mut Cfg, key: Key) -> Option<&mut Val> {
-        if &*key == SOURCE {
-            return Some(&mut self.source);
+        if &*key == QUOTE_VALUE {
+            return Some(&mut self.value);
         }
-        bug!(cfg, "context quote: expected key to be {SOURCE}, but got {key}");
+        bug!(cfg, "context quote: expected key to be {QUOTE_VALUE}, but got {key}");
         None
     }
 
     fn set(&mut self, cfg: &mut Cfg, key: Key, value: Val) -> Option<()> {
-        if &*key == SOURCE {
-            self.source = value;
+        if &*key == QUOTE_VALUE {
+            self.value = value;
             return Some(());
         }
-        bug!(cfg, "context quote: expected key to be {SOURCE}, but got {key}");
+        bug!(cfg, "context quote: expected key to be {QUOTE_VALUE}, but got {key}");
         None
     }
 }
 
-pub(crate) const LEFT: &str = concatcp!(PREFIX_CELL, "left");
-pub(crate) const RIGHT: &str = concatcp!(PREFIX_CELL, "right");
+pub(crate) const PAIR_LEFT: &str = concatcp!(PREFIX_CELL, PAIR, ".left");
+pub(crate) const PAIR_RIGHT: &str = concatcp!(PREFIX_CELL, PAIR, ".right");
 
 impl DynCtx<Key, Val> for PairVal {
     fn ref_(&self, cfg: &mut Cfg, key: Key) -> Option<&Val> {
         match &*key {
-            LEFT => return Some(&self.left),
-            RIGHT => return Some(&self.right),
+            PAIR_LEFT => return Some(&self.left),
+            PAIR_RIGHT => return Some(&self.right),
             _ => {},
         }
-        bug!(cfg, "context pair: expected key to be {LEFT} or {RIGHT}, but got {key}");
+        bug!(cfg, "context pair: expected key to be {PAIR_LEFT} or {PAIR_RIGHT}, but got {key}");
         None
     }
 
     fn ref_mut(&mut self, cfg: &mut Cfg, key: Key) -> Option<&mut Val> {
         match &*key {
-            LEFT => return Some(&mut self.left),
-            RIGHT => return Some(&mut self.right),
+            PAIR_LEFT => return Some(&mut self.left),
+            PAIR_RIGHT => return Some(&mut self.right),
             _ => {},
         }
-        bug!(cfg, "context pair: expected key to be {LEFT} or {RIGHT}, but got {key}");
+        bug!(cfg, "context pair: expected key to be {PAIR_LEFT} or {PAIR_RIGHT}, but got {key}");
         None
     }
 
     fn set(&mut self, cfg: &mut Cfg, key: Key, value: Val) -> Option<()> {
         match &*key {
-            LEFT => {
+            PAIR_LEFT => {
                 self.left = value;
                 return Some(());
             },
-            RIGHT => {
+            PAIR_RIGHT => {
                 self.right = value;
                 return Some(());
             },
             _ => {},
         }
-        bug!(cfg, "context pair: expected key to be {LEFT} or {RIGHT}, but got {key}");
+        bug!(cfg, "context pair: expected key to be {PAIR_LEFT} or {PAIR_RIGHT}, but got {key}");
         None
     }
 }
 
-pub(crate) const FUNCTION: &str = concatcp!(PREFIX_CELL, "function");
-pub(crate) const INPUT: &str = concatcp!(PREFIX_CELL, "input");
+pub(crate) const CALL_FUNCTION: &str = concatcp!(PREFIX_CELL, CALL, ".function");
+pub(crate) const CALL_INPUT: &str = concatcp!(PREFIX_CELL, CALL, ".input");
 
 impl DynCtx<Key, Val> for CallVal {
     fn ref_(&self, cfg: &mut Cfg, key: Key) -> Option<&Val> {
         match &*key {
-            FUNCTION => return Some(&self.func),
-            INPUT => return Some(&self.input),
+            CALL_FUNCTION => return Some(&self.func),
+            CALL_INPUT => return Some(&self.input),
             _ => {},
         }
-        bug!(cfg, "context call: expected key to be {FUNCTION} or {INPUT}, but got {key}");
+        bug!(cfg, "context call: expected key to be {CALL_FUNCTION} or {CALL_INPUT}, but got {key}");
         None
     }
 
     fn ref_mut(&mut self, cfg: &mut Cfg, key: Key) -> Option<&mut Val> {
         match &*key {
-            FUNCTION => return Some(&mut self.func),
-            INPUT => return Some(&mut self.input),
+            CALL_FUNCTION => return Some(&mut self.func),
+            CALL_INPUT => return Some(&mut self.input),
             _ => {},
         }
-        bug!(cfg, "context call: expected key to be {FUNCTION} or {INPUT}, but got {key}");
+        bug!(cfg, "context call: expected key to be {CALL_FUNCTION} or {CALL_INPUT}, but got {key}");
         None
     }
 
     fn set(&mut self, cfg: &mut Cfg, key: Key, value: Val) -> Option<()> {
         match &*key {
-            FUNCTION => {
+            CALL_FUNCTION => {
                 self.func = value;
                 return Some(());
             },
-            INPUT => {
+            CALL_INPUT => {
                 self.input = value;
                 return Some(());
             },
             _ => {},
         }
-        bug!(cfg, "context call: expected key to be {FUNCTION} or {INPUT}, but got {key}");
+        bug!(cfg, "context call: expected key to be {CALL_FUNCTION} or {CALL_INPUT}, but got {key}");
         None
     }
 }
 
-pub(crate) const FIRST: &str = concatcp!(PREFIX_CELL, "first");
-pub(crate) const LAST: &str = concatcp!(PREFIX_CELL, "last");
+pub(crate) const LIST_FIRST: &str = concatcp!(PREFIX_CELL, LIST, ".first");
+pub(crate) const LIST_LAST: &str = concatcp!(PREFIX_CELL, LIST, ".last");
 
 impl DynCtx<Key, Val> for ListVal {
     fn ref_(&self, cfg: &mut Cfg, key: Key) -> Option<&Val> {
         match &*key {
-            FIRST => {
+            LIST_FIRST => {
                 if let Some(first) = self.first() {
                     return Some(first);
                 }
                 bug!(cfg, "context list: get first item on an empty list");
             },
-            LAST => {
+            LIST_LAST => {
                 if let Some(last) = self.last() {
                     return Some(last);
                 }
                 bug!(cfg, "context list: get last item on an empty list");
             },
             s => {
-                bug!(cfg, "context list: expected key to be {FIRST} or {LAST}, but got {s}");
+                bug!(cfg, "context list: expected key to be {LIST_FIRST} or {LIST_LAST}, but got {s}");
             },
         }
         None
@@ -182,20 +187,20 @@ impl DynCtx<Key, Val> for ListVal {
 
     fn ref_mut(&mut self, cfg: &mut Cfg, key: Key) -> Option<&mut Val> {
         match &*key {
-            FIRST => {
+            LIST_FIRST => {
                 if let Some(first) = self.first_mut() {
                     return Some(first);
                 }
                 bug!(cfg, "context list: get first item on an empty list");
             },
-            LAST => {
+            LIST_LAST => {
                 if let Some(last) = self.last_mut() {
                     return Some(last);
                 }
                 bug!(cfg, "context list: get last item on an empty list");
             },
             s => {
-                bug!(cfg, "context list: expected key to be {FIRST} or {LAST}, but got {s}");
+                bug!(cfg, "context list: expected key to be {LIST_FIRST} or {LIST_LAST}, but got {s}");
             },
         }
         None
@@ -203,14 +208,14 @@ impl DynCtx<Key, Val> for ListVal {
 
     fn set(&mut self, cfg: &mut Cfg, key: Key, value: Val) -> Option<()> {
         match &*key {
-            FIRST => {
+            LIST_FIRST => {
                 if let Some(first) = self.first_mut() {
                     *first = value;
                     return Some(());
                 }
                 bug!(cfg, "context list: get first item on an empty list");
             },
-            LAST => {
+            LIST_LAST => {
                 if let Some(last) = self.last_mut() {
                     *last = value;
                     return Some(());
@@ -218,7 +223,7 @@ impl DynCtx<Key, Val> for ListVal {
                 bug!(cfg, "context list: get last item on an empty list");
             },
             s => {
-                bug!(cfg, "context list: expected key to be {FIRST} or {LAST}, but got {s}");
+                bug!(cfg, "context list: expected key to be {LIST_FIRST} or {LIST_LAST}, but got {s}");
             },
         }
         None

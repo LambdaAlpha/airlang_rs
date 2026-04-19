@@ -398,7 +398,7 @@ impl<T: FmtRepr> FmtRepr for Cell<T> {
 impl<T: FmtRepr> FmtRepr for Quote<T> {
     fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
         f.write_str(EMPTY)?;
-        fmt_delimited(&self.source, options, f)
+        fmt_delimited(&self.value, options, f)
     }
 
     fn get_type(&self) -> ReprType {

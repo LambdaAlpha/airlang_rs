@@ -14,10 +14,10 @@ get
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_source set _ import .quote.get_source,
+    _get_value set _ import .quote.get_value,
     _v set _ any .,
     _q set _ quote v,
-    v = _q which get_source : .
+    v = _q which get_value : .
 ]
 -----
 true
@@ -26,12 +26,12 @@ set get
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_source set _ import .quote.get_source,
-    _set_source set _ import .quote.set_source,
+    _get_value set _ import .quote.get_value,
+    _set_value set _ import .quote.set_value,
     _q set _ any .quote,
     _v1 set _ any .,
-    _q which set_source : v1,
-    _v2 set _q which get_source : .,
+    _q which set_value : v1,
+    _v2 set _q which get_value : .,
     v1 = v2
 ]
 -----
@@ -41,10 +41,10 @@ set return
 -----
 _ do _[
     _any set _ import .value.any,
-    _set_source set _ import .quote.set_source,
+    _set_value set _ import .quote.set_value,
     _v1 set _ any .,
     _q set _ quote v1,
-    _v2 set _q which set_source : _ any .,
+    _v2 set _q which set_value : _ any .,
     v1 = v2
 ]
 -----

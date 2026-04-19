@@ -18,20 +18,20 @@ use crate::type_::Quote;
 #[derive(Copy, Clone)]
 pub struct QuoteLib {
     pub make: PrimFuncVal,
-    pub get_source: PrimFuncVal,
-    pub set_source: PrimFuncVal,
+    pub get_value: PrimFuncVal,
+    pub set_value: PrimFuncVal,
 }
 
 pub const MAKE: &str = concatcp!(PREFIX_CELL, QUOTE, ".make");
-pub const GET_SOURCE: &str = concatcp!(PREFIX_CELL, QUOTE, ".get_source");
-pub const SET_SOURCE: &str = concatcp!(PREFIX_CELL, QUOTE, ".set_source");
+pub const GET_VALUE: &str = concatcp!(PREFIX_CELL, QUOTE, ".get_value");
+pub const SET_VALUE: &str = concatcp!(PREFIX_CELL, QUOTE, ".set_value");
 
 impl Default for QuoteLib {
     fn default() -> Self {
         Self {
             make: CtxFreeInputAwareFunc { fn_: make }.build(),
-            get_source: CtxConstInputFreeFunc { fn_: get_source }.build(),
-            set_source: CtxMutInputAwareFunc { fn_: set_source }.build(),
+            get_value: CtxConstInputFreeFunc { fn_: get_value }.build(),
+            set_value: CtxMutInputAwareFunc { fn_: set_value }.build(),
         }
     }
 }
@@ -39,8 +39,8 @@ impl Default for QuoteLib {
 impl CfgMod for QuoteLib {
     fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, MAKE, self.make);
-        extend_func(cfg, GET_SOURCE, self.get_source);
-        extend_func(cfg, SET_SOURCE, self.set_source);
+        extend_func(cfg, GET_VALUE, self.get_value);
+        extend_func(cfg, SET_VALUE, self.set_value);
     }
 }
 
@@ -48,17 +48,17 @@ pub fn make(_cfg: &mut Cfg, input: Val) -> Val {
     Val::Quote(Quote::new(input).into())
 }
 
-pub fn get_source(cfg: &mut Cfg, ctx: &Val) -> Val {
+pub fn get_value(cfg: &mut Cfg, ctx: &Val) -> Val {
     let Val::Quote(quote) = ctx else {
-        return bug!(cfg, "{GET_SOURCE}: expected context to be a quote, but got {ctx}");
+        return bug!(cfg, "{GET_VALUE}: expected context to be a quote, but got {ctx}");
     };
-    quote.source.clone()
+    quote.value.clone()
 }
 
-pub fn set_source(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
+pub fn set_value(cfg: &mut Cfg, ctx: &mut Val, mut input: Val) -> Val {
     let Val::Quote(quote) = ctx else {
-        return bug!(cfg, "{SET_SOURCE}: expected context to be a quote, but got {ctx}");
+        return bug!(cfg, "{SET_VALUE}: expected context to be a quote, but got {ctx}");
     };
-    swap(&mut quote.source, &mut input);
+    swap(&mut quote.value, &mut input);
     input
 }

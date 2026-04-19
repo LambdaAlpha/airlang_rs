@@ -22,7 +22,7 @@ pub(crate) struct QuoteEval;
 impl DynFunc<Cfg, Val, QuoteVal, Val> for QuoteEval {
     fn call(&self, _cfg: &mut Cfg, _ctx: &mut Val, quote: QuoteVal) -> Val {
         let quote = Quote::from(quote);
-        quote.source
+        quote.value
     }
 }
 

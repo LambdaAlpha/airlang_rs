@@ -69,8 +69,8 @@ impl PatternParse for CellVal {
 impl PatternParse for QuoteVal {
     fn parse(self, cfg: &mut Cfg, tag: &str) -> Option<Pattern> {
         let quote = Quote::from(self);
-        let source = quote.source.parse(cfg, tag)?;
-        Some(Pattern::Quote(Box::new(Quote::new(source))))
+        let value = quote.value.parse(cfg, tag)?;
+        Some(Pattern::Quote(Box::new(Quote::new(value))))
     }
 }
 
@@ -169,7 +169,7 @@ impl PatternMatch<Val> for Quote<Pattern> {
             }
             return false;
         };
-        self.source.match_(cfg, force, tag, &val.source)
+        self.value.match_(cfg, force, tag, &val.value)
     }
 }
 
@@ -307,7 +307,7 @@ impl PatternAssign<Val, Val> for Quote<Pattern> {
             return None;
         };
         let val = Quote::from(val);
-        self.source.assign(cfg, tag, ctx, val.source)?;
+        self.value.assign(cfg, tag, ctx, val.value)?;
         Some(())
     }
 }

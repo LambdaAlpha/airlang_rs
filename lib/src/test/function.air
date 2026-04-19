@@ -82,8 +82,8 @@ _ do _[
     _link.which set _ import .link.which,
     _f set _(_ function {
         code : _((. : .) : _ do _[
-            _i set a link.which get : .value,
-            a link.which set : .value : i + 1,
+            _i set a link.which get : .cell.value,
+            a link.which set : .cell.value : i + 1,
             i
         ]),
         prelude : {

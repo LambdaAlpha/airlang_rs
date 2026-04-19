@@ -190,8 +190,8 @@ represent pair ctx
 -----
 _ do _[
     _p set 1 : 2,
-    _p which set : .left : 3,
-    _p which get : .left
+    _p which set : .pair.left : 3,
+    _p which get : .pair.left
 ]
 -----
 3
@@ -200,8 +200,8 @@ represent call ctx
 -----
 _ do _[
     _c set _(_ func input),
-    _c which set : .function : .f,
-    _c which get : .function
+    _c which set : .call.function : .f,
+    _c which get : .call.function
 ]
 -----
 .f
@@ -211,7 +211,7 @@ represent list ctx
 _ do _[
     _list.get set _ import .list.get,
     _l set [1, 2, 3],
-    _l which set : .first : 4,
+    _l which set : .list.first : 4,
     _l which list.get : 0
 ]
 -----
