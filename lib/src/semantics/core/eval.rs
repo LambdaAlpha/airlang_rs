@@ -12,10 +12,12 @@ use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::PairVal;
 use crate::semantics::val::QuoteVal;
+use crate::semantics::val::SolveVal;
 use crate::semantics::val::Val;
 use crate::type_::Call;
 use crate::type_::Key;
 use crate::type_::Quote;
+use crate::type_::Solve;
 
 pub(crate) struct QuoteEval;
 
@@ -51,6 +53,35 @@ where
     }
 }
 
+pub(crate) struct SolveEval<'a, Func, Output> {
+    pub(crate) func: &'a Func,
+    pub(crate) output: &'a Output,
+}
+
+impl<'a, Func, Output> DynFunc<Cfg, Val, SolveVal, Val> for SolveEval<'a, Func, Output>
+where
+    Func: DynFunc<Cfg, Val, Val, Val>,
+    Output: DynFunc<Cfg, Val, Val, Val>,
+{
+    fn call(&self, cfg: &mut Cfg, ctx: &mut Val, solve: SolveVal) -> Val {
+        let solve = Solve::from(solve);
+        let func = self.func.call(cfg, ctx, solve.func);
+        let Val::Func(func) = func else {
+            let msg = format!("eval: expected a function, but got {func}");
+            return abort_by_bug_with_msg(cfg, msg.into());
+        };
+        let output = self.output.call(cfg, ctx, solve.output);
+        if cfg.is_aborted() {
+            return Val::default();
+        }
+        let Some(input) = cfg.fact_solve(func, output) else {
+            let msg = "eval: can't solve the problem".to_owned();
+            return abort_by_bug_with_msg(cfg, msg.into());
+        };
+        input
+    }
+}
+
 #[derive(Default, Copy, Clone)]
 pub struct Eval;
 
@@ -67,6 +98,7 @@ impl DynFunc<Cfg, Val, Val, Val> for Eval {
             Val::Map(map) => self.call(cfg, ctx, map),
             Val::Quote(quote) => self.call(cfg, ctx, quote),
             Val::Call(call) => self.call(cfg, ctx, call),
+            Val::Solve(solve) => self.call(cfg, ctx, solve),
             v => v,
         }
     }
@@ -111,5 +143,11 @@ impl DynFunc<Cfg, Val, QuoteVal, Val> for Eval {
 impl DynFunc<Cfg, Val, CallVal, Val> for Eval {
     fn call(&self, cfg: &mut Cfg, ctx: &mut Val, call: CallVal) -> Val {
         CallEval { func: self, input: self }.call(cfg, ctx, call)
+    }
+}
+
+impl DynFunc<Cfg, Val, SolveVal, Val> for Eval {
+    fn call(&self, cfg: &mut Cfg, ctx: &mut Val, solve: SolveVal) -> Val {
+        SolveEval { func: self, output: self }.call(cfg, ctx, solve)
     }
 }

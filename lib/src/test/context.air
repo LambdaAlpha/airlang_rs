@@ -123,6 +123,15 @@ _ do _[
 -----
 [1, 2, 3]
 =====
+represent solve
+-----
+_ do _[
+    _(? f a) represent _(? 1 2),
+    [f, a]
+]
+-----
+[1, 2]
+=====
 represent list equal length
 -----
 _ do _[

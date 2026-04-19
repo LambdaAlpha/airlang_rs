@@ -25,6 +25,7 @@ use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Quote;
+use crate::type_::Solve;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -47,6 +48,7 @@ pub enum Repr {
 
     Quote(Box<QuoteRepr>),
     Call(Box<CallRepr>),
+    Solve(Box<SolveRepr>),
 }
 
 pub type CellRepr = Cell<Repr>;
@@ -60,6 +62,8 @@ pub type MapRepr = Map<Key, Repr>;
 pub type QuoteRepr = Quote<Repr>;
 
 pub type CallRepr = Call<Repr, Repr>;
+
+pub type SolveRepr = Solve<Repr, Repr>;
 
 impl Default for Repr {
     fn default() -> Self {
@@ -91,6 +95,12 @@ impl From<CallRepr> for Repr {
     }
 }
 
+impl From<SolveRepr> for Repr {
+    fn from(solve: SolveRepr) -> Self {
+        Repr::Solve(Box::new(solve))
+    }
+}
+
 impl ParseRepr for Repr {}
 
 impl FromStr for Repr {
@@ -116,6 +126,7 @@ impl FmtRepr for Repr {
             Repr::Map(map) => <MapRepr as FmtRepr>::fmt(map, options, f),
             Repr::Quote(quote) => <QuoteRepr as FmtRepr>::fmt(quote, options, f),
             Repr::Call(call) => <CallRepr as FmtRepr>::fmt(call, options, f),
+            Repr::Solve(solve) => <SolveRepr as FmtRepr>::fmt(solve, options, f),
         }
     }
 
@@ -134,6 +145,7 @@ impl FmtRepr for Repr {
             Repr::Map(_) => ReprType::Map,
             Repr::Quote(_) => ReprType::Quote,
             Repr::Call(_) => ReprType::Call,
+            Repr::Solve(_) => ReprType::Solve,
         }
     }
 

@@ -30,6 +30,7 @@ use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Quote;
+use crate::type_::Solve;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -38,7 +39,7 @@ pub(crate) struct Any;
 
 impl Distribution<Val> for Any {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Val {
-        match rng.random_range(0 ..= 15) {
+        match rng.random_range(0 ..= 16) {
             0 => Val::Unit(Distribution::<Unit>::sample(self, rng)),
             1 => Val::Bit(Distribution::<Bit>::sample(self, rng)),
             2 => Val::Key(Distribution::<Key>::sample(self, rng)),
@@ -52,9 +53,10 @@ impl Distribution<Val> for Any {
             10 => Val::Map(Distribution::<Map<Key, Val>>::sample(self, rng).into()),
             11 => Val::Quote(Distribution::<Quote<Val>>::sample(self, rng).into()),
             12 => Val::Call(Distribution::<Call<Val, Val>>::sample(self, rng).into()),
-            13 => Val::Link(Distribution::<LinkVal>::sample(self, rng)),
-            14 => Val::Cfg(Distribution::<Cfg>::sample(self, rng).into()),
-            15 => Val::Func(Distribution::<FuncVal>::sample(self, rng)),
+            13 => Val::Solve(Distribution::<Solve<Val, Val>>::sample(self, rng).into()),
+            14 => Val::Link(Distribution::<LinkVal>::sample(self, rng)),
+            15 => Val::Cfg(Distribution::<Cfg>::sample(self, rng).into()),
+            16 => Val::Func(Distribution::<FuncVal>::sample(self, rng)),
             _ => unreachable!(),
         }
     }
@@ -167,6 +169,14 @@ where Any: Distribution<Func> + Distribution<Input>
 {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Call<Func, Input> {
         Call { func: self.sample(rng), input: self.sample(rng) }
+    }
+}
+
+impl<Func, Output> Distribution<Solve<Func, Output>> for Any
+where Any: Distribution<Func> + Distribution<Output>
+{
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Solve<Func, Output> {
+        Solve { func: self.sample(rng), output: self.sample(rng) }
     }
 }
 

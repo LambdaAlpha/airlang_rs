@@ -12,7 +12,7 @@
 
 ### Minimalist Syntax
 
-Air's syntax is extremely concise. It only includes comments and 13 data types, with no semantic-specific syntax for control flows, functions, types, modules, etc. Its rules are very simple, using prefixes to avoid ambiguity, and it has only 5 keywords (`_`, `.`, `:`, `true`, `false`). This makes it highly suitable for configuration or data interchange.
+Air's syntax is extremely concise. It only includes comments and 14 data types, with no semantic-specific syntax for control flows, functions, types, modules, etc. Its rules are very simple, using prefixes to avoid ambiguity, and it has only 6 keywords (`_`, `.`, `:`, `?`, `true`, `false`). This makes it highly suitable for configuration or data interchange.
 
 **unit**
 
@@ -181,6 +181,16 @@ _ not true
 a and b or c
 ```
 
+**solve**
+
+- `? function output`
+- `output function ?`
+
+```air
+? * 21
+true is_carmichael_number ?
+```
+
 **comment**
 
 - `!(t1 t2 ... tn)`
@@ -197,7 +207,7 @@ a and b or c
 
 ### Minimalist Semantics
 
-Air's evaluation rules are very concise, consisting of only five rules.
+Air's evaluation rules are very concise, consisting of only six rules.
 
 First, the evaluation rules for keys are as follows:
 
@@ -209,14 +219,16 @@ Second, the evaluation rule for quotes is `_(v)` ➔ `v`.
 
 Third, the evaluation rule for calls is `_ f i ➔ f'(i')`, where `x'` denotes the result of evaluating `x` (the same applies below).
 
-Fourth, the evaluation rules for cells, pairs, lists, and maps are as follows:
+Fourth, the evaluation rule for solving is `? f o` ➔ `i`, where `f'(i) = o'` is a fact in the configuration's fact database.
+
+Fifth, the evaluation rules for cells, pairs, lists, and maps are as follows:
 
 - `.(v)` ➔ `.(v')`
 - `v1 : v2` ➔ `v1' : v2'`
 - `[v1, v2, ..., vn]` ➔ `[v1', v2', ..., vn']`
 - `{k1 : v1, k2 : v2, ..., kn : vn}` ➔ `{k1 : v1', k2 : v2', kn : vn'}`
 
-Fifth, the evaluation rule for other values is `v` ➔ `v`.
+Sixth, the evaluation rule for other values is `v` ➔ `v`.
 
 ### Context
 

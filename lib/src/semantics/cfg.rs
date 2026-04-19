@@ -4,19 +4,23 @@ use const_format::concatcp;
 use derive_more::Deref;
 use derive_more::DerefMut;
 
+use crate::semantics::cfg::fact::Facts;
+use crate::semantics::cfg::fact::ValId;
 use crate::semantics::core::PREFIX_CELL;
+use crate::semantics::func::DynFunc;
+use crate::semantics::val::FuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Key;
 use crate::type_::Map;
 use crate::utils::hint::cold_path;
 
-// todo design invariant
 #[derive(Default, Clone, PartialEq, Eq, Hash, Deref, DerefMut)]
 pub struct Cfg {
     aborted: bool,
     #[deref]
     #[deref_mut]
     map: Map<Key, Val>,
+    facts: Facts,
 }
 
 impl Cfg {
@@ -73,11 +77,44 @@ impl Cfg {
             false
         }
     }
+
+    pub(crate) fn facts(&self) -> &Facts {
+        &self.facts
+    }
+
+    pub fn fact_put(&mut self, ctx: &mut Val, func: FuncVal, input: Val) {
+        let output = func.call(self, ctx, input.clone());
+        let input = ValId::from(input);
+        let output = ValId::from(output);
+        self.facts.put(func, input, output);
+    }
+
+    pub fn fact_call(&self, func: FuncVal, input: Val) -> Option<Val> {
+        let outputs = self.facts.call(func, ValId::from(input))?;
+        if outputs.is_empty() {
+            return None;
+        }
+        Some(Val::clone(&outputs[0]))
+    }
+
+    pub fn fact_solve(&self, func: FuncVal, output: Val) -> Option<Val> {
+        let inputs = self.facts.solve(func, ValId::from(output))?;
+        if inputs.is_empty() {
+            return None;
+        }
+        Some(Val::clone(&inputs[0]))
+    }
+
+    pub fn fact_exist(&self, func: FuncVal, input: Val, output: Val) -> bool {
+        let input = ValId::from(input);
+        let output = ValId::from(output);
+        self.facts.exist(func, input, output)
+    }
 }
 
 impl From<Map<Key, Val>> for Cfg {
     fn from(map: Map<Key, Val>) -> Self {
-        Self { aborted: false, map }
+        Self { map, ..Cfg::default() }
     }
 }
 
@@ -86,3 +123,5 @@ impl From<Cfg> for Map<Key, Val> {
         cfg.map
     }
 }
+
+pub(crate) mod fact;

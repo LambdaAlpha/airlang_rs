@@ -159,6 +159,11 @@ fn test_call() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_solve() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/solve.air"), "test/solve.air")
+}
+
+#[test]
 fn test_link() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/link.air"), "test/link.air")
 }
@@ -191,6 +196,11 @@ fn test_value() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_error() -> Result<(), Box<dyn Error>> {
     test(include_str!("test/error.air"), "test/error.air")
+}
+
+#[test]
+fn test_fact() -> Result<(), Box<dyn Error>> {
+    test(include_str!("test/fact.air"), "test/fact.air")
 }
 
 #[test]

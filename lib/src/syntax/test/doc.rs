@@ -11,6 +11,7 @@ use crate::syntax::test::list;
 use crate::syntax::test::map;
 use crate::syntax::test::pair;
 use crate::syntax::test::quote;
+use crate::syntax::test::solve;
 use crate::syntax::test::text;
 use crate::syntax::test::unit;
 
@@ -88,6 +89,8 @@ pub(super) fn expected() -> Vec<Repr> {
         call(key("not"), bit(true)),
         infix_call(int("1", 10), key("+"), int("1", 10)),
         infix_call(key("a"), key("and"), infix_call(key("b"), key("or"), key("c"))),
+        solve(key("*"), int("21", 10)),
+        solve(key("is_carmichael_number"), bit(true)),
         unit(),
         unit(),
         unit(),

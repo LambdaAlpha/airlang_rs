@@ -7,6 +7,7 @@ use self::ctrl::CtrlLib;
 use self::ctx::CtxLib;
 use self::decimal::DecimalLib;
 use self::error::ErrorLib;
+use self::fact::FactLib;
 use self::func::FuncLib;
 use self::int::IntLib;
 use self::key::KeyLib;
@@ -16,6 +17,7 @@ use self::list::ListLib;
 use self::map::MapLib;
 use self::pair::PairLib;
 use self::quote::QuoteLib;
+use self::solve::SolveLib;
 use self::text::TextLib;
 use self::unit::UnitLib;
 use self::value::ValueLib;
@@ -37,6 +39,7 @@ pub struct BasePrimLib {
     pub map: MapLib,
     pub quote: QuoteLib,
     pub call: CallLib,
+    pub solve: SolveLib,
     pub link: LinkLib,
     pub cfg: CfgLib,
     pub func: FuncLib,
@@ -44,6 +47,7 @@ pub struct BasePrimLib {
     pub ctrl: CtrlLib,
     pub value: ValueLib,
     pub error: ErrorLib,
+    pub fact: FactLib,
     pub lang: LangLib,
 }
 
@@ -62,6 +66,7 @@ impl CfgMod for BasePrimLib {
         self.map.extend(cfg);
         self.quote.extend(cfg);
         self.call.extend(cfg);
+        self.solve.extend(cfg);
         self.link.extend(cfg);
         self.cfg.extend(cfg);
         self.func.extend(cfg);
@@ -69,6 +74,7 @@ impl CfgMod for BasePrimLib {
         self.ctrl.extend(cfg);
         self.value.extend(cfg);
         self.error.extend(cfg);
+        self.fact.extend(cfg);
         self.lang.extend(cfg);
     }
 }
@@ -99,6 +105,8 @@ pub mod quote;
 
 pub mod call;
 
+pub mod solve;
+
 pub mod link;
 
 pub mod cfg;
@@ -114,5 +122,7 @@ pub mod ctrl;
 pub mod value;
 
 pub mod error;
+
+pub mod fact;
 
 pub mod lang;

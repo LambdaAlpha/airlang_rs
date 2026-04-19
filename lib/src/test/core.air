@@ -116,6 +116,15 @@ _ do _[
 -----
 [func, input]
 =====
+solve ref
+-----
+_ do _[
+    _s set _(? function output),
+    _s which eval : [get call .solve.function, get call .solve.output]
+]
+-----
+[function, output]
+=====
 cell eval
 -----
 .(_ not false)
@@ -155,6 +164,15 @@ _ not true
 call eval recursive
 -----
 _ not _ not true
+-----
+true
+=====
+solve eval
+-----
+_ do _[
+    not fact true,
+    ? not false
+]
 -----
 true
 =====
@@ -247,3 +265,21 @@ _ do _[
 ]
 -----
 input
+=====
+solve ctx func
+-----
+_ do _[
+    _s set _(? function output),
+    _s which get : .solve.function
+]
+-----
+function
+=====
+call ctx output
+-----
+_ do _[
+    _s set _(? function output),
+    _s which get : .solve.output
+]
+-----
+output

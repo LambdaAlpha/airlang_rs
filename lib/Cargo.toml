@@ -52,6 +52,12 @@ version = "1"
 [dependencies.rand]
 version = "0.10"
 
+# fact
+[dependencies.internment]
+version = "0.8"
+default-features = false
+features = ["arc"]
+
 # const str
 [dependencies.const_format]
 version = "0.2"

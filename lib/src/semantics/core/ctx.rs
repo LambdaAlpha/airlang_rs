@@ -17,6 +17,8 @@ use crate::semantics::val::PAIR;
 use crate::semantics::val::PairVal;
 use crate::semantics::val::QUOTE;
 use crate::semantics::val::QuoteVal;
+use crate::semantics::val::SOLVE;
+use crate::semantics::val::SolveVal;
 use crate::semantics::val::Val;
 use crate::type_::Key;
 
@@ -160,6 +162,47 @@ impl DynCtx<Key, Val> for CallVal {
     }
 }
 
+pub(crate) const SOLVE_FUNCTION: &str = concatcp!(PREFIX_CELL, SOLVE, ".function");
+pub(crate) const SOLVE_OUTPUT: &str = concatcp!(PREFIX_CELL, SOLVE, ".output");
+
+impl DynCtx<Key, Val> for SolveVal {
+    fn ref_(&self, cfg: &mut Cfg, key: Key) -> Option<&Val> {
+        match &*key {
+            SOLVE_FUNCTION => return Some(&self.func),
+            SOLVE_OUTPUT => return Some(&self.output),
+            _ => {},
+        }
+        bug!(cfg, "context call: expected key to be {SOLVE_FUNCTION} or {SOLVE_OUTPUT}, but got {key}");
+        None
+    }
+
+    fn ref_mut(&mut self, cfg: &mut Cfg, key: Key) -> Option<&mut Val> {
+        match &*key {
+            SOLVE_FUNCTION => return Some(&mut self.func),
+            SOLVE_OUTPUT => return Some(&mut self.output),
+            _ => {},
+        }
+        bug!(cfg, "context call: expected key to be {SOLVE_FUNCTION} or {SOLVE_OUTPUT}, but got {key}");
+        None
+    }
+
+    fn set(&mut self, cfg: &mut Cfg, key: Key, value: Val) -> Option<()> {
+        match &*key {
+            SOLVE_FUNCTION => {
+                self.func = value;
+                return Some(());
+            },
+            SOLVE_OUTPUT => {
+                self.output = value;
+                return Some(());
+            },
+            _ => {},
+        }
+        bug!(cfg, "context call: expected key to be {SOLVE_FUNCTION} or {SOLVE_OUTPUT}, but got {key}");
+        None
+    }
+}
+
 pub(crate) const LIST_FIRST: &str = concatcp!(PREFIX_CELL, LIST, ".first");
 pub(crate) const LIST_LAST: &str = concatcp!(PREFIX_CELL, LIST, ".last");
 
@@ -262,6 +305,7 @@ impl DynCtx<Key, Val> for Val {
             Val::Map(map) => map.ref_(cfg, key),
             Val::Quote(quote) => quote.ref_(cfg, key),
             Val::Call(call) => call.ref_(cfg, key),
+            Val::Solve(solve) => solve.ref_(cfg, key),
             Val::Dyn(val) => val.ref_(cfg, Val::Key(key)),
             v => {
                 bug!(cfg, "context: value not found for key {key} in {v}");
@@ -278,6 +322,7 @@ impl DynCtx<Key, Val> for Val {
             Val::Map(map) => map.ref_mut(cfg, key),
             Val::Quote(quote) => quote.ref_mut(cfg, key),
             Val::Call(call) => call.ref_mut(cfg, key),
+            Val::Solve(solve) => solve.ref_mut(cfg, key),
             Val::Dyn(val) => val.ref_mut(cfg, Val::Key(key)),
             v => {
                 bug!(cfg, "context: value not found for key {key} in {v}");
@@ -294,6 +339,7 @@ impl DynCtx<Key, Val> for Val {
             Val::Map(map) => map.set(cfg, key, value),
             Val::Quote(quote) => quote.set(cfg, key, value),
             Val::Call(call) => call.set(cfg, key, value),
+            Val::Solve(solve) => solve.set(cfg, key, value),
             Val::Dyn(val) => val.set(cfg, Val::Key(key), value),
             v => {
                 bug!(cfg, "context: value not found for key {key} in {v}");

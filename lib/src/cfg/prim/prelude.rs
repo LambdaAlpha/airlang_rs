@@ -38,6 +38,8 @@ pub struct BasePrimPrelude {
 
     pub call: PrimFuncVal,
 
+    pub solve: PrimFuncVal,
+
     pub exist: PrimFuncVal,
     pub import: PrimFuncVal,
     pub export: PrimFuncVal,
@@ -62,6 +64,8 @@ pub struct BasePrimPrelude {
 
     pub abort: PrimFuncVal,
     pub assert: PrimFuncVal,
+
+    pub fact: PrimFuncVal,
 
     pub eval: PrimFuncVal,
 }
@@ -105,6 +109,8 @@ impl BasePrimPrelude {
 
             call: lib.call.make,
 
+            solve: lib.solve.make,
+
             exist: lib.cfg.exist,
             import: lib.cfg.import,
             export: lib.cfg.export,
@@ -129,6 +135,8 @@ impl BasePrimPrelude {
 
             abort: lib.error.abort,
             assert: lib.error.assert,
+
+            fact: lib.fact.put,
 
             eval: lib.lang.eval,
         }
@@ -169,6 +177,8 @@ impl Prelude for BasePrimPrelude {
 
         map_put_func(map, "call", self.call);
 
+        map_put_func(map, "solve", self.solve);
+
         map_put_func(map, "exist", self.exist);
         map_put_func(map, "import", self.import);
         map_put_func(map, "export", self.export);
@@ -193,6 +203,8 @@ impl Prelude for BasePrimPrelude {
 
         map_put_func(map, "abort", self.abort);
         map_put_func(map, "assert", self.assert);
+
+        map_put_func(map, "fact", self.fact);
 
         map_put_func(map, "eval", self.eval);
     }

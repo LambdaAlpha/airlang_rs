@@ -1,0 +1,57 @@
+put ?
+-----
+_ do _[
+    _any set _ import .value.any,
+    _i1 set _ any .integer,
+    _i2 set _ any .integer,
+    _sum set i1 + i2,
+    + fact i1 : i2,
+    _(i3 : i4) represent ? + sum,
+    sum = i3 + i4
+]
+-----
+true
+=====
+put call
+-----
+_ do _[
+    _fact.call set _ import .fact.call,
+    _any set _ import .value.any,
+    _i1 set _ any .integer,
+    _i2 set _ any .integer,
+    _sum1 set i1 + i2,
+    + fact i1 : i2,
+    .(_sum2) represent + fact.call i1 : i2,
+    sum1 = sum2
+]
+-----
+true
+=====
+put solve
+-----
+_ do _[
+    _fact.solve set _ import .fact.solve,
+    _any set _ import .value.any,
+    _i1 set _ any .integer,
+    _i2 set _ any .integer,
+    _sum set i1 + i2,
+    + fact i1 : i2,
+    .(_i3 : _i4) represent + fact.solve sum,
+    sum = i3 + i4
+]
+-----
+true
+=====
+put exist
+-----
+_ do _[
+    _fact.exist set _ import .fact.exist,
+    _any set _ import .value.any,
+    _i1 set _ any .integer,
+    _i2 set _ any .integer,
+    _sum set i1 + i2,
+    + fact i1 : i2,
+    + fact.exist (i1 : i2) : sum
+]
+-----
+true

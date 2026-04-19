@@ -9,6 +9,7 @@ use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
 use crate::semantics::val::PairVal;
 use crate::semantics::val::QuoteVal;
+use crate::semantics::val::SolveVal;
 use crate::semantics::val::Val;
 use crate::type_::Call;
 use crate::type_::Cell;
@@ -17,6 +18,7 @@ use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Quote;
+use crate::type_::Solve;
 
 pub(in crate::cfg) enum Pattern {
     Any(Option<Key>),
@@ -27,6 +29,7 @@ pub(in crate::cfg) enum Pattern {
     Map(Map<Key, Pattern>),
     Quote(Box<Quote<Pattern>>),
     Call(Box<Call<Pattern, Pattern>>),
+    Solve(Box<Solve<Pattern, Pattern>>),
 }
 
 pub(in crate::cfg) trait PatternParse {
@@ -43,6 +46,7 @@ impl PatternParse for Val {
             Val::Map(map) => map.parse(cfg, tag),
             Val::Quote(quote) => quote.parse(cfg, tag),
             Val::Call(call) => call.parse(cfg, tag),
+            Val::Solve(solve) => solve.parse(cfg, tag),
             val => Some(Pattern::Val(val)),
         }
     }
@@ -92,6 +96,15 @@ impl PatternParse for CallVal {
     }
 }
 
+impl PatternParse for SolveVal {
+    fn parse(self, cfg: &mut Cfg, tag: &str) -> Option<Pattern> {
+        let solve = Solve::from(self);
+        let func = solve.func.parse(cfg, tag)?;
+        let output = solve.output.parse(cfg, tag)?;
+        Some(Pattern::Solve(Box::new(Solve { func, output })))
+    }
+}
+
 impl PatternParse for ListVal {
     fn parse(self, cfg: &mut Cfg, tag: &str) -> Option<Pattern> {
         let list = List::from(self);
@@ -129,6 +142,7 @@ impl PatternMatch<Val> for Pattern {
             Pattern::Map(map) => map.match_(cfg, force, tag, val),
             Pattern::Quote(quote) => quote.match_(cfg, force, tag, val),
             Pattern::Call(call) => call.match_(cfg, force, tag, val),
+            Pattern::Solve(solve) => solve.match_(cfg, force, tag, val),
         }
     }
 }
@@ -201,6 +215,20 @@ impl PatternMatch<Val> for Call<Pattern, Pattern> {
     }
 }
 
+impl PatternMatch<Val> for Solve<Pattern, Pattern> {
+    fn match_(&self, cfg: &mut Cfg, force: bool, tag: &str, val: &Val) -> bool {
+        let Val::Solve(val) = val else {
+            if force {
+                bug!(cfg, "{tag}: expected a solve, but got {val}");
+            }
+            return false;
+        };
+        let func = self.func.match_(cfg, force, tag, &val.func);
+        let output = self.output.match_(cfg, force, tag, &val.output);
+        func && output
+    }
+}
+
 impl PatternMatch<Val> for List<Pattern> {
     fn match_(&self, cfg: &mut Cfg, force: bool, tag: &str, val: &Val) -> bool {
         let Val::List(val) = val else {
@@ -265,6 +293,7 @@ impl PatternAssign<Val, Val> for Pattern {
             Pattern::Map(map) => map.assign(cfg, tag, ctx, val),
             Pattern::Quote(quote) => quote.assign(cfg, tag, ctx, val),
             Pattern::Call(call) => call.assign(cfg, tag, ctx, val),
+            Pattern::Solve(solve) => solve.assign(cfg, tag, ctx, val),
         }
     }
 }
@@ -334,6 +363,19 @@ impl PatternAssign<Val, Val> for Call<Pattern, Pattern> {
         let val = Call::from(val);
         self.func.assign(cfg, tag, c, val.func)?;
         self.input.assign(cfg, tag, c, val.input)?;
+        Some(())
+    }
+}
+
+impl PatternAssign<Val, Val> for Solve<Pattern, Pattern> {
+    fn assign(self, cfg: &mut Cfg, tag: &str, c: &mut Val, val: Val) -> Option<()> {
+        let Val::Solve(val) = val else {
+            bug!(cfg, "{tag}: expected a solve, but got {val}");
+            return None;
+        };
+        let val = Solve::from(val);
+        self.func.assign(cfg, tag, c, val.func)?;
+        self.output.assign(cfg, tag, c, val.output)?;
         Some(())
     }
 }

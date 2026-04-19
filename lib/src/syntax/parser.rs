@@ -53,6 +53,7 @@ use super::RIGHT;
 use super::SCOPE_LEFT;
 use super::SCOPE_RIGHT;
 use super::SEPARATOR;
+use super::SOLVE;
 use super::SPACE;
 use super::TEXT_QUOTE;
 use super::TOKEN;
@@ -70,6 +71,7 @@ use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Quote;
+use crate::type_::Solve;
 use crate::type_::Text;
 use crate::type_::Unit;
 use crate::utils::conversion::bin_str_to_vec_u8;
@@ -87,6 +89,7 @@ pub trait ParseRepr:
     + From<Quote<Self>>
     + From<Pair<Self, Self>>
     + From<Call<Self, Self>>
+    + From<Solve<Self, Self>>
     + From<List<Self>>
     + From<Map<Key, Self>> {
 }
@@ -173,7 +176,7 @@ macro_rules! impl_parse_repr_for_comment {
 }
 
 impl_parse_repr_for_comment!(Unit Bit Key Text Int Decimal Byte);
-impl_parse_repr_for_comment!(Cell<C> Quote<C> Pair<C, C> Call<C, C> List<C> Map<Key, C>);
+impl_parse_repr_for_comment!(Cell<C> Quote<C> Pair<C, C> Call<C, C> Solve<C, C> List<C> Map<Key, C>);
 impl ParseRepr for C {}
 
 fn delimited_cut<'a, T, F>(left: char, f: F, right: char) -> impl Parser<&'a str, T, E>
@@ -195,39 +198,40 @@ fn is_key(c: char) -> bool {
     Key::is_key(c)
 }
 
-fn token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<'a, T>, E> {
+fn token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Either<'a, T, Token>, E> {
     let f = move |i: &mut _| match peek(any).parse_next(i)? {
-        LIST_LEFT => list(ctx).map(Token::Default).parse_next(i),
+        LIST_LEFT => list(ctx).map(Either::Repr).parse_next(i),
         LIST_RIGHT => fail.parse_next(i),
-        MAP_LEFT => map(ctx).map(Token::Default).parse_next(i),
+        MAP_LEFT => map(ctx).map(Either::Repr).parse_next(i),
         MAP_RIGHT => fail.parse_next(i),
-        SCOPE_LEFT => scope(ctx).map(Token::Default).parse_next(i),
+        SCOPE_LEFT => scope(ctx).map(Either::Repr).parse_next(i),
         SCOPE_RIGHT => fail.parse_next(i),
         SEPARATOR => fail.parse_next(i),
         SPACE => fail.parse_next(i),
-        TEXT_QUOTE => text.map(T::from).map(Token::Default).parse_next(i),
-        KEY_QUOTE => key.map(T::from).map(Token::Default).parse_next(i),
-        '0' ..= '9' => number.map(Token::Default).parse_next(i),
+        TEXT_QUOTE => text.map(T::from).map(Either::Repr).parse_next(i),
+        KEY_QUOTE => key.map(T::from).map(Either::Repr).parse_next(i),
+        '0' ..= '9' => number.map(Either::Repr).parse_next(i),
         _ => cut_err(key_token(ctx)).parse_next(i),
     };
     f.context(label("token"))
 }
 
-fn key_token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Token<'a, T>, E> {
+fn key_token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Either<'a, T, Token>, E> {
     move |i: &mut _| {
         let i: &mut &str = i;
         let checkpoint = i.checkpoint();
         let key = trivial_key1.context(label("key")).parse_next(i)?;
         if i.starts_with(LEFT_DELIMITERS) {
-            return prefix(key, ctx).map(Token::Default).parse_next(i);
+            return prefix(key, ctx).map(Either::Repr).parse_next(i);
         }
         let token = match key {
-            EMPTY => Token::Empty(checkpoint),
-            UNIT => Token::Default(T::from(Unit)),
-            PAIR => Token::Pair(checkpoint),
-            TRUE => Token::Default(T::from(Bit::true_())),
-            FALSE => Token::Default(T::from(Bit::false_())),
-            key => Token::Default(T::from(Key::from_str_unchecked(key))),
+            EMPTY => Either::Token { checkpoint, token: Token::Empty },
+            UNIT => Either::Repr(T::from(Unit)),
+            PAIR => Either::Token { checkpoint, token: Token::Pair },
+            SOLVE => Either::Token { checkpoint, token: Token::Solve },
+            TRUE => Either::Repr(T::from(Bit::true_())),
+            FALSE => Either::Repr(T::from(Bit::false_())),
+            key => Either::Repr(T::from(Key::from_str_unchecked(key))),
         };
         Ok(token)
     }
@@ -282,20 +286,37 @@ fn compose_left<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
         };
         void.parse_next(i)?;
         let right = input.parse_next(i)?;
-        let mut left = compose_infix(left, middle, right);
+        let mut left = compose_infix(i, left, middle, right)?;
         loop {
             let Some(middle) = opt_func.parse_next(i)? else {
                 return Ok(left);
             };
             void.parse_next(i)?;
             let right = input.parse_next(i)?;
-            let input = match right {
-                InputToken::Default(right) => T::from(Pair::new(left, right)),
-                InputToken::Empty(_) => left,
-            };
-            left = compose_func_input(middle, input);
+            left = compose_left_one(i, left, middle, right)?;
         }
     }
+}
+
+fn compose_left_one<'a, T: ParseRepr>(
+    i: &mut &'a str, left: T, middle: Either<'a, T, FuncToken>, right: Either<'a, T, InputToken>,
+) -> ModalResult<T> {
+    let func = match middle {
+        Either::Repr(func) => func,
+        Either::Token { checkpoint, token } => {
+            let FuncToken::Pair = token;
+            return if let Either::Repr(right) = right {
+                Ok(T::from(Pair::new(left, right)))
+            } else {
+                reset_expect(i, checkpoint, QUOTE_PAIR)
+            };
+        },
+    };
+    let (is_solve, argument) = match right {
+        Either::Repr(right) => (false, T::from(Pair::new(left, right))),
+        Either::Token { token: right, .. } => (right == InputToken::Solve, left),
+    };
+    Ok(call_solve(is_solve, func, argument))
 }
 
 fn compose_right<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
@@ -310,24 +331,36 @@ fn compose_right<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> 
 }
 
 fn compose_right_recursive<'a, T: ParseRepr>(
-    ctx: ParseCtx, i: &mut &'a str, left: InputToken<'a, T>, middle: FuncToken<T>,
+    ctx: ParseCtx, i: &mut &'a str, left: Either<'a, T, InputToken>,
+    middle: Either<'a, T, FuncToken>,
 ) -> ModalResult<T> {
     let right = input_token(ctx).parse_next(i)?;
     let Some(middle2) = opt_func_token(ctx).parse_next(i)? else {
-        return Ok(compose_infix(left, middle, right));
+        return compose_infix(i, left, middle, right);
     };
     void(ctx).parse_next(i)?;
     let right = compose_right_recursive(ctx, i, right, middle2)?;
-    let input = match left {
-        InputToken::Default(left) => T::from(Pair::new(left, right)),
-        InputToken::Empty(_) => right,
+    let func = match middle {
+        Either::Repr(func) => func,
+        Either::Token { checkpoint, token } => {
+            let FuncToken::Pair = token;
+            return if let Either::Repr(left) = left {
+                Ok(T::from(Pair::new(left, right)))
+            } else {
+                reset_expect(i, checkpoint, QUOTE_PAIR)
+            };
+        },
     };
-    Ok(compose_func_input(middle, input))
+    let (is_solve, argument) = match left {
+        Either::Repr(left) => (false, T::from(Pair::new(left, right))),
+        Either::Token { token: left, .. } => (left == InputToken::Solve, right),
+    };
+    Ok(call_solve(is_solve, func, argument))
 }
 
 fn opt_func_token<'a, T: ParseRepr>(
     ctx: ParseCtx,
-) -> impl Parser<&'a str, Option<FuncToken<T>>, E> {
+) -> impl Parser<&'a str, Option<Either<'a, T, FuncToken>>, E> {
     move |i: &mut _| {
         // consume void
         if opt(void(ctx)).parse_next(i)?.is_none() {
@@ -338,71 +371,128 @@ fn opt_func_token<'a, T: ParseRepr>(
 }
 
 fn compose_infix<'a, T: ParseRepr>(
-    left: InputToken<'a, T>, func: FuncToken<T>, right: InputToken<'a, T>,
-) -> T {
-    let input = match (left, right) {
-        (InputToken::Default(left), InputToken::Default(right)) => T::from(Pair::new(left, right)),
-        (InputToken::Default(left), InputToken::Empty(_)) => left,
-        (InputToken::Empty(_), InputToken::Default(right)) => right,
-        (InputToken::Empty(_), InputToken::Empty(_)) => T::from(Unit),
+    i: &mut &'a str, left: Either<'a, T, InputToken>, func: Either<'a, T, FuncToken>,
+    right: Either<'a, T, InputToken>,
+) -> ModalResult<T> {
+    let func = match func {
+        Either::Repr(func) => func,
+        Either::Token { checkpoint, token } => {
+            let FuncToken::Pair = token;
+            return if let Either::Repr(left) = left
+                && let Either::Repr(right) = right
+            {
+                Ok(T::from(Pair::new(left, right)))
+            } else {
+                reset_expect(i, checkpoint, QUOTE_PAIR)
+            };
+        },
     };
-    compose_func_input(func, input)
+    let (is_solve, argument) = match (left, right) {
+        (Either::Repr(left), Either::Repr(right)) => (false, T::from(Pair::new(left, right))),
+        (Either::Repr(left), Either::Token { token: right, .. }) => {
+            (right == InputToken::Solve, left)
+        },
+        (Either::Token { token: left, .. }, Either::Repr(right)) => {
+            (left == InputToken::Solve, right)
+        },
+        (Either::Token { token: left, .. }, Either::Token { token: right, .. }) => {
+            (left == InputToken::Solve || right == InputToken::Solve, T::from(Unit))
+        },
+    };
+    Ok(call_solve(is_solve, func, argument))
 }
 
-fn compose_func_input<T: ParseRepr>(func: FuncToken<T>, input: T) -> T {
-    match func {
-        FuncToken::Pair => input,
-        FuncToken::Default(func) => T::from(Call::new(func, input)),
-    }
+fn call_solve<T: ParseRepr>(is_solve: bool, func: T, argument: T) -> T {
+    if is_solve { T::from(Solve::new(func, argument)) } else { T::from(Call::new(func, argument)) }
 }
 
-enum Token<'a, T> {
-    Empty(Checkpoint<&'a str, &'a str>),
-    Pair(Checkpoint<&'a str, &'a str>),
-    Default(T),
+enum Either<'a, Repr, Token> {
+    Repr(Repr),
+    Token { checkpoint: Checkpoint<&'a str, &'a str>, token: Token },
 }
 
-enum FuncToken<T> {
+#[derive(Copy, Clone, PartialEq, Eq)]
+enum Token {
+    Empty,
     Pair,
-    Default(T),
+    Solve,
 }
 
-enum InputToken<'a, T> {
-    Empty(Checkpoint<&'a str, &'a str>),
-    Default(T),
+#[derive(Copy, Clone, PartialEq, Eq)]
+enum FuncToken {
+    Pair,
+}
+
+#[derive(Copy, Clone, PartialEq, Eq)]
+enum InputToken {
+    Empty,
+    Solve,
 }
 
 const QUOTE_EMPTY: &str = concatcp!(KEY_QUOTE, EMPTY, KEY_QUOTE);
 const QUOTE_PAIR: &str = concatcp!(KEY_QUOTE, PAIR, KEY_QUOTE);
+const QUOTE_SOLVE: &str = concatcp!(KEY_QUOTE, SOLVE, KEY_QUOTE);
 
-fn func_token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, FuncToken<T>, E> {
+fn func_token<'a, T: ParseRepr>(
+    ctx: ParseCtx,
+) -> impl Parser<&'a str, Either<'a, T, FuncToken>, E> {
     move |i: &mut _| match token(ctx).parse_next(i)? {
-        Token::Empty(checkpoint) => reset_expect(i, checkpoint, QUOTE_EMPTY),
-        Token::Pair(_) => Ok(FuncToken::Pair),
-        Token::Default(token) => Ok(FuncToken::Default(token)),
+        Either::Repr(repr) => Ok(Either::Repr(repr)),
+        Either::Token { checkpoint, token } => {
+            let expect = match token {
+                Token::Empty => QUOTE_EMPTY,
+                Token::Pair => {
+                    return Ok(Either::Token { checkpoint, token: FuncToken::Pair });
+                },
+                Token::Solve => QUOTE_SOLVE,
+            };
+            reset_expect(i, checkpoint, expect)
+        },
     }
 }
 
-fn input_token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, InputToken<'a, T>, E> {
+fn input_token<'a, T: ParseRepr>(
+    ctx: ParseCtx,
+) -> impl Parser<&'a str, Either<'a, T, InputToken>, E> {
     move |i: &mut _| match token(ctx).parse_next(i)? {
-        Token::Empty(checkpoint) => Ok(InputToken::Empty(checkpoint)),
-        Token::Pair(checkpoint) => reset_expect(i, checkpoint, QUOTE_PAIR),
-        Token::Default(token) => Ok(InputToken::Default(token)),
+        Either::Repr(repr) => Ok(Either::Repr(repr)),
+        Either::Token { checkpoint, token } => {
+            let token = match token {
+                Token::Empty => InputToken::Empty,
+                Token::Pair => return reset_expect(i, checkpoint, QUOTE_PAIR),
+                Token::Solve => InputToken::Solve,
+            };
+            Ok(Either::Token { checkpoint, token })
+        },
     }
 }
 
 fn repr<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     move |i: &mut _| match token(ctx).parse_next(i)? {
-        Token::Empty(checkpoint) => reset_expect(i, checkpoint, QUOTE_EMPTY),
-        Token::Pair(checkpoint) => reset_expect(i, checkpoint, QUOTE_PAIR),
-        Token::Default(token) => Ok(token),
+        Either::Repr(repr) => Ok(repr),
+        Either::Token { checkpoint, token } => {
+            let expect = match token {
+                Token::Empty => QUOTE_EMPTY,
+                Token::Pair => QUOTE_PAIR,
+                Token::Solve => QUOTE_SOLVE,
+            };
+            reset_expect(i, checkpoint, expect)
+        },
     }
 }
 
-fn input_repr<'a, T: ParseRepr>(i: &mut &'a str, input: InputToken<'a, T>) -> ModalResult<T> {
+fn input_repr<'a, T: ParseRepr>(
+    i: &mut &'a str, input: Either<'a, T, InputToken>,
+) -> ModalResult<T> {
     match input {
-        InputToken::Default(token) => Ok(token),
-        InputToken::Empty(checkpoint) => reset_expect(i, checkpoint, QUOTE_EMPTY),
+        Either::Repr(token) => Ok(token),
+        Either::Token { checkpoint, token } => {
+            let expect = match token {
+                InputToken::Empty => QUOTE_EMPTY,
+                InputToken::Solve => QUOTE_SOLVE,
+            };
+            reset_expect(i, checkpoint, expect)
+        },
     }
 }
 

@@ -25,6 +25,7 @@ use super::ReprType;
 use super::SCOPE_LEFT;
 use super::SCOPE_RIGHT;
 use super::SEPARATOR;
+use super::SOLVE;
 use super::TEXT_QUOTE;
 use super::TRUE;
 use super::UNIT;
@@ -41,6 +42,7 @@ use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Quote;
+use crate::type_::Solve;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -546,29 +548,42 @@ fn call_fmt_normalized(
     func: &dyn FmtRepr, input: &dyn FmtRepr, options: FmtOptions, f: &mut dyn Write,
 ) -> std::fmt::Result {
     match options.direction {
-        Direction::Left => call_fmt_left(func, input, options, f),
-        Direction::Right => call_fmt_right(func, input, options, f),
+        Direction::Left => fmt_left(EMPTY, func, input, options, f),
+        Direction::Right => fmt_right(EMPTY, func, input, options, f),
     }
 }
 
-fn call_fmt_left(
-    func: &dyn FmtRepr, input: &dyn FmtRepr, options: FmtOptions, f: &mut dyn Write,
-) -> std::fmt::Result {
-    input.fmt(options, f)?;
-    f.write_char(' ')?;
-    closure(func, options, f)?;
-    f.write_char(' ')?;
-    f.write_str(EMPTY)
+impl<T: FmtRepr> FmtRepr for Solve<T, T> {
+    fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
+        match options.direction {
+            Direction::Left => fmt_left(SOLVE, &self.func, &self.output, options, f),
+            Direction::Right => fmt_right(SOLVE, &self.func, &self.output, options, f),
+        }
+    }
+
+    fn get_type(&self) -> ReprType {
+        ReprType::Solve
+    }
 }
 
-fn call_fmt_right(
-    func: &dyn FmtRepr, input: &dyn FmtRepr, options: FmtOptions, f: &mut dyn Write,
+fn fmt_left(
+    tag: &str, func: &dyn FmtRepr, argument: &dyn FmtRepr, options: FmtOptions, f: &mut dyn Write,
 ) -> std::fmt::Result {
-    f.write_str(EMPTY)?;
+    argument.fmt(options, f)?;
     f.write_char(' ')?;
     closure(func, options, f)?;
     f.write_char(' ')?;
-    input.fmt(options, f)
+    f.write_str(tag)
+}
+
+fn fmt_right(
+    tag: &str, func: &dyn FmtRepr, argument: &dyn FmtRepr, options: FmtOptions, f: &mut dyn Write,
+) -> std::fmt::Result {
+    f.write_str(tag)?;
+    f.write_char(' ')?;
+    closure(func, options, f)?;
+    f.write_char(' ')?;
+    argument.fmt(options, f)
 }
 
 fn best_left(options: FmtOptions, left: &dyn FmtRepr, right: &dyn FmtRepr) -> bool {
@@ -608,7 +623,7 @@ fn best_direction(direction: Direction, left: &dyn FmtRepr, right: &dyn FmtRepr)
 }
 
 fn is_open(repr: &dyn FmtRepr) -> bool {
-    matches!(repr.get_type(), ReprType::Pair | ReprType::Call)
+    matches!(repr.get_type(), ReprType::Pair | ReprType::Call | ReprType::Solve)
 }
 
 fn closure(repr: &dyn FmtRepr, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
@@ -771,6 +786,7 @@ impl_display_debug_for_fmt_repr!(<T> List<T>);
 impl_display_debug_for_fmt_repr!(<T> Map<Key, T>);
 impl_display_debug_for_fmt_repr!(<T> Quote<T>);
 impl_display_debug_for_fmt_repr!(<T> Call<T, T>);
+impl_display_debug_for_fmt_repr!(<T> Solve<T, T>);
 
 struct Indent<'a> {
     writer: &'a mut dyn Write,

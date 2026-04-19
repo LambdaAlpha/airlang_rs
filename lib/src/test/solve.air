@@ -1,0 +1,60 @@
+make
+-----
+_ do _[
+    _any set _ import .value.any,
+    _f1 set _ any .,
+    _o1 set _ any .,
+    _s set f1 solve o1,
+    _(? f2 o2) represent s,
+    (f1 = f2) and (o1 = o2)
+]
+-----
+true
+=====
+get
+-----
+_ do _[
+    _any set _ import .value.any,
+    _get_function set _ import .solve.get_function,
+    _get_output set _ import .solve.get_output,
+    _f set _ any .,
+    _o set _ any .,
+    _s set f solve o,
+    (f = _s which get_function : .) and (o = _s which get_output : .)
+]
+-----
+true
+=====
+set get
+-----
+_ do _[
+    _any set _ import .value.any,
+    _get_function set _ import .solve.get_function,
+    _get_output set _ import .solve.get_output,
+    _set_function set _ import .solve.set_function,
+    _set_output set _ import .solve.set_output,
+    _s set _ any .solve,
+    _f set _ any .,
+    _o set _ any .,
+    _s which set_function : f,
+    _s which set_output : o,
+    (f = _s which get_function : .) and (o = _s which get_output : .)
+]
+-----
+true
+=====
+set return
+-----
+_ do _[
+    _any set _ import .value.any,
+    _set_function set _ import .solve.set_function,
+    _set_output set _ import .solve.set_output,
+    _f1 set _ any .,
+    _o1 set _ any .,
+    _s set f1 solve o1,
+    _f2 set _s which set_function : _ any .,
+    _o2 set _s which set_output : _ any .,
+    (f1 = f2) and (o1 = o2)
+]
+-----
+true

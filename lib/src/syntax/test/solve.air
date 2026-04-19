@@ -1,0 +1,159 @@
+left
+-----
+? a b
+=====
+right
+-----
+a b ?
+=====
+both
+-----
+? a ?
+=====
+omit left
+-----
+_ a ?
+=====
+omit right
+-----
+? a _
+=====
+< left left
+-----
+<(? a b c d)
+=====
+< left left pair
+-----
+<(? a b : d)
+=====
+< left right
+-----
+<(a b ? c d)
+=====
+< left right pair
+-----
+<(a b ? : d)
+=====
+< left both
+-----
+<(? a ? b c)
+=====
+< left both pair
+-----
+<(? a ? : c)
+=====
+< left omit left
+-----
+<(_ a ? b c)
+=====
+< left omit left pair
+-----
+<(_ a ? : c)
+=====
+< left omit right
+-----
+<(? a _ b c)
+=====
+< left omit right pair
+-----
+<(? a _ : c)
+=====
+< right right
+-----
+<(a b c d ?)
+=====
+< right right pair
+-----
+<(a : c d ?)
+=====
+< left left right right
+-----
+<(? a b c ?)
+=====
+< both right
+-----
+<(a b ? c ?)
+=====
+< all
+-----
+<(? a ? b ?)
+=====
+> left left
+-----
+>(? a b c d)
+=====
+> left left pair
+-----
+>(? a b : d)
+=====
+> right left
+-----
+>(a b ? c d)
+=====
+> right left pair
+-----
+>(a : ? c d)
+=====
+> right right
+-----
+>(a b c d ?)
+=====
+> right right pair
+-----
+>(a : c d ?)
+=====
+> right both
+-----
+>(a b ? c ?)
+=====
+> right both pair
+-----
+>(a : ? c ?)
+=====
+> right omit left
+-----
+>(a b _ c ?)
+=====
+> right omit left pair
+-----
+>(a : _ c ?)
+=====
+> right omit right
+-----
+>(a b ? c _)
+=====
+> right omit right pair
+-----
+>(a : ? c _)
+=====
+> left left right right
+-----
+>(? a b c ?)
+=====
+> both left
+-----
+>(? a ? b c)
+=====
+> all
+-----
+>(? a ? b ?)
+=====
+non-atomic func
+-----
+? [a, b] c
+=====
+non-atomic input
+-----
+? a [b, c]
+=====
+list item
+-----
+[? a b]
+=====
+map value
+-----
+{a : ? b c}
+=====
+'?'
+-----
+? '?' '?'

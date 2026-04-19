@@ -34,6 +34,7 @@ pub(crate) const EMPTY: &str = concatcp!(EMPTY_CHAR);
 pub(crate) const EMPTY_CHAR: char = '_';
 pub(crate) const UNIT: &str = ".";
 pub(crate) const PAIR: &str = ":";
+pub(crate) const SOLVE: &str = "?";
 
 pub(crate) const TRUE: &str = "true";
 pub(crate) const FALSE: &str = "false";
@@ -67,7 +68,7 @@ pub(crate) fn is_delimiter(c: char) -> bool {
 }
 
 pub(crate) fn keyword(s: &str) -> bool {
-    matches!(s, EMPTY | UNIT | PAIR | TRUE | FALSE)
+    matches!(s, EMPTY | UNIT | PAIR | SOLVE | TRUE | FALSE)
 }
 
 #[derive(Default, Copy, Clone, PartialEq, Eq, IsVariant)]
@@ -92,6 +93,7 @@ pub enum ReprType {
     Map,
     Quote,
     Call,
+    Solve,
     Other,
 }
 

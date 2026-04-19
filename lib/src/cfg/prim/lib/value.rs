@@ -30,6 +30,7 @@ use crate::semantics::val::MAP;
 use crate::semantics::val::PAIR;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::QUOTE;
+use crate::semantics::val::SOLVE;
 use crate::semantics::val::TEXT;
 use crate::semantics::val::UNIT;
 use crate::semantics::val::Val;
@@ -44,6 +45,7 @@ use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Quote;
+use crate::type_::Solve;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -92,6 +94,7 @@ const TYPE_LIST: &str = concatcp!(PREFIX_CELL, LIST);
 const TYPE_MAP: &str = concatcp!(PREFIX_CELL, MAP);
 const TYPE_QUOTE: &str = concatcp!(PREFIX_CELL, QUOTE);
 const TYPE_CALL: &str = concatcp!(PREFIX_CELL, CALL);
+const TYPE_SOLVE: &str = concatcp!(PREFIX_CELL, SOLVE);
 const TYPE_LINK: &str = concatcp!(PREFIX_CELL, LINK);
 const TYPE_CFG: &str = concatcp!(PREFIX_CELL, CFG);
 const TYPE_FUNC: &str = concatcp!(PREFIX_CELL, FUNC);
@@ -115,6 +118,7 @@ pub fn any(cfg: &mut Cfg, input: Val) -> Val {
             TYPE_MAP => Val::Map(Distribution::<Map<Key, Val>>::sample(&Any, rng).into()),
             TYPE_QUOTE => Val::Quote(Distribution::<Quote<Val>>::sample(&Any, rng).into()),
             TYPE_CALL => Val::Call(Distribution::<Call<Val, Val>>::sample(&Any, rng).into()),
+            TYPE_SOLVE => Val::Solve(Distribution::<Solve<Val, Val>>::sample(&Any, rng).into()),
             TYPE_LINK => Val::Link(Distribution::<LinkVal>::sample(&Any, rng)),
             TYPE_CFG => Val::Cfg(Distribution::<Cfg>::sample(&Any, rng).into()),
             TYPE_FUNC => Val::Func(Distribution::<FuncVal>::sample(&Any, rng)),
@@ -139,6 +143,7 @@ pub fn get_type(_cfg: &mut Cfg, ctx: &Val) -> Val {
         Val::Map(_) => TYPE_MAP,
         Val::Quote(_) => TYPE_QUOTE,
         Val::Call(_) => TYPE_CALL,
+        Val::Solve(_) => TYPE_SOLVE,
         Val::Link(_) => TYPE_LINK,
         Val::Cfg(_) => TYPE_CFG,
         Val::Func(_) => TYPE_FUNC,

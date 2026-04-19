@@ -271,6 +271,14 @@ call recursive
 -----
 a and b or c
 =====
+solve left
+-----
+? * 21
+=====
+solve right
+-----
+true is_carmichael_number ?
+=====
 comment scope
 -----
 !(t1 t2 ... tn) .

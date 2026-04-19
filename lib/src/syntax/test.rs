@@ -17,6 +17,7 @@ use crate::type_::Int;
 use crate::type_::Key;
 use crate::type_::Map;
 use crate::type_::Pair;
+use crate::type_::Solve;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -81,6 +82,11 @@ fn call(func: Repr, input: Repr) -> Repr {
 fn infix_call(left: Repr, middle: Repr, right: Repr) -> Repr {
     let call = Call { func: middle, input: Repr::Pair(Box::new(Pair::new(left, right))) };
     Repr::Call(Box::new(call))
+}
+
+fn solve(func: Repr, output: Repr) -> Repr {
+    let solve = Solve { func, output };
+    Repr::Solve(Box::new(solve))
 }
 
 fn test_parse(
@@ -285,6 +291,16 @@ fn test_generate_call() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn test_parse_solve() -> Result<(), Box<dyn Error>> {
+    test_parse(include_str!("test/solve.air"), "test/solve.air", solve::expected)
+}
+
+#[test]
+fn test_generate_solve() -> Result<(), Box<dyn Error>> {
+    test_generate(include_str!("test/solve.air"), "test/solve.air")
+}
+
+#[test]
 fn test_parse_scope() -> Result<(), Box<dyn Error>> {
     test_parse(include_str!("test/scope.air"), "test/scope.air", scope::expected)
 }
@@ -334,11 +350,13 @@ mod quote;
 
 mod pair;
 
-mod call;
-
 mod list;
 
 mod map;
+
+mod call;
+
+mod solve;
 
 mod space;
 

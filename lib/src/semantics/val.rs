@@ -12,6 +12,7 @@ pub use self::list::ListVal;
 pub use self::map::MapVal;
 pub use self::pair::PairVal;
 pub use self::quote::QuoteVal;
+pub use self::solve::SolveVal;
 pub use self::text::TextVal;
 
 _____!();
@@ -32,6 +33,7 @@ use crate::type_::List;
 use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Quote;
+use crate::type_::Solve;
 use crate::type_::Text;
 use crate::type_::Unit;
 
@@ -60,6 +62,7 @@ pub enum Val {
 
     Quote(QuoteVal),
     Call(CallVal),
+    Solve(SolveVal),
 
     Link(LinkVal),
     Cfg(CfgVal),
@@ -81,6 +84,7 @@ pub(crate) const LIST: &str = "list";
 pub(crate) const MAP: &str = "map";
 pub(crate) const QUOTE: &str = "quote";
 pub(crate) const CALL: &str = "call";
+pub(crate) const SOLVE: &str = "solve";
 pub(crate) const LINK: &str = "link";
 pub(crate) const CFG: &str = "config";
 pub(crate) const FUNC: &str = "function";
@@ -151,6 +155,12 @@ impl From<Call<Val, Val>> for Val {
     }
 }
 
+impl From<Solve<Val, Val>> for Val {
+    fn from(value: Solve<Val, Val>) -> Self {
+        Val::Solve(SolveVal::from(value))
+    }
+}
+
 mod text;
 
 mod int;
@@ -170,6 +180,8 @@ mod map;
 mod quote;
 
 mod call;
+
+mod solve;
 
 mod link;
 

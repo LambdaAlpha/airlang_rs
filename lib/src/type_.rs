@@ -12,6 +12,7 @@ pub use self::list::List;
 pub use self::map::Map;
 pub use self::pair::Pair;
 pub use self::quote::Quote;
+pub use self::solve::Solve;
 pub use self::text::Text;
 pub use self::unit::Unit;
 
@@ -44,3 +45,5 @@ mod map;
 mod quote;
 
 mod call;
+
+mod solve;
