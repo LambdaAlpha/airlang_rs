@@ -44,7 +44,7 @@ where
             return abort_by_bug_with_msg(cfg, msg.into());
         };
         let input = self.input.call(cfg, ctx, call.input);
-        if !cfg.step() {
+        if cfg.is_aborted() {
             return Val::default();
         }
         func.call(cfg, ctx, input)
@@ -56,7 +56,7 @@ pub struct Eval;
 
 impl DynFunc<Cfg, Val, Val, Val> for Eval {
     fn call(&self, cfg: &mut Cfg, ctx: &mut Val, val: Val) -> Val {
-        if !cfg.step() {
+        if cfg.is_aborted() {
             return Val::default();
         }
         match val {

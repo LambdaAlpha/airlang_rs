@@ -19,20 +19,3 @@ _ do _[
 ]
 -----
 .
-=====
-resource
------
-_ do _[
-    _get_self set _ import .config.get_self,
-    _where set _ import .config.where,
-    _is_aborted set _ import .error.is_aborted,
-    _c set _ get_self .,
-    _c where _(_ do _[
-        _set_steps set _ import .resource.set_steps,
-        _ set_steps 100,
-        true loop []
-    ]),
-    _c which is_aborted : .,
-]
------
-true

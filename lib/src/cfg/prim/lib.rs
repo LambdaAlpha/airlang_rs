@@ -16,7 +16,6 @@ use self::list::ListLib;
 use self::map::MapLib;
 use self::pair::PairLib;
 use self::quote::QuoteLib;
-use self::resource::ResourceLib;
 use self::text::TextLib;
 use self::unit::UnitLib;
 use self::value::ValueLib;
@@ -44,7 +43,6 @@ pub struct BasePrimLib {
     pub ctx: CtxLib,
     pub ctrl: CtrlLib,
     pub value: ValueLib,
-    pub resource: ResourceLib,
     pub error: ErrorLib,
     pub lang: LangLib,
 }
@@ -70,7 +68,6 @@ impl CfgMod for BasePrimLib {
         self.ctx.extend(cfg);
         self.ctrl.extend(cfg);
         self.value.extend(cfg);
-        self.resource.extend(cfg);
         self.error.extend(cfg);
         self.lang.extend(cfg);
     }
@@ -115,8 +112,6 @@ pub mod ctx;
 pub mod ctrl;
 
 pub mod value;
-
-pub mod resource;
 
 pub mod error;
 

@@ -6,7 +6,7 @@
   A language is a consensus among programmers. The simpler the language, the stronger the consensus and the easier the code is to understand. Therefore, we strive to avoid unnecessary complexity. Based on this principle, we do not build in features such as modules, control flow, assignment, pattern matching, or type constructors into the language core.
 
 - **Universal**  
-  The broader a language's applicable scenarios, the higher the return on investment in learning it, and the better the interoperability between projects. Therefore, we aim to make the language adaptable to various goals and resource scales. Based on this principle, we provide users with the ability to manage context, configuration, and resources.
+  The broader a language's applicable scenarios, the higher the return on investment in learning it, and the better the interoperability between projects. Therefore, we aim to make the language adaptable to various goals and resource scales. Based on this principle, we provide users with the ability to manage context and configuration.
 
 ## Language Features
 
@@ -241,18 +241,6 @@ _ do _[
     _push set _ import .list.push,
     .list.add export push,
     .list.append export push,
-]
-```
-
-### Resources
-
-Resources are scarce, consumable entities required during execution, with the most critical being execution time and storage space. Available execution steps can be read via `get_steps`, measured via `measure_steps`, or limited via `set_steps`. We will gradually build a resource management framework around these basic capabilities to provide essential foundational support for the development of resource-sensitive applications such as artificial intelligence.
-
-```air
-_ do _[
-    _set_steps set _ import .resource.set_steps,
-    _ set_steps 100,
-    true loop []
 ]
 ```
 

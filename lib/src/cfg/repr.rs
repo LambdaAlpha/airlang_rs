@@ -114,9 +114,7 @@ impl FmtRepr for Cfg {
         f.write_str(CFG)?;
         let mut map: Map<Key, &dyn FmtRepr> = Map::default();
         let aborted = Bit::from(self.is_aborted());
-        let steps = Int::from(self.steps());
         map.insert(Key::from_str_unchecked("aborted"), &aborted);
-        map.insert(Key::from_str_unchecked("steps"), &steps);
         map.insert(Key::from_str_unchecked("map"), &**self);
         FmtRepr::fmt(&map, options, f)
     }
