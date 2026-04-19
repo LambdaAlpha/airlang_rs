@@ -16,7 +16,7 @@ use crate::semantics::val::Val;
 use crate::type_::Call;
 use crate::type_::Pair;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct CallLib {
     pub make: PrimFuncVal,
     pub get_function: PrimFuncVal,
@@ -33,7 +33,7 @@ pub const SET_INPUT: &str = concatcp!(PREFIX_CELL, CALL, ".set_input");
 
 impl Default for CallLib {
     fn default() -> Self {
-        CallLib {
+        Self {
             make: CtxFreeInputAwareFunc { fn_: make }.build(),
             get_function: CtxConstInputFreeFunc { fn_: get_function }.build(),
             set_function: CtxMutInputAwareFunc { fn_: set_function }.build(),

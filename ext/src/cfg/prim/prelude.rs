@@ -6,7 +6,7 @@ use airlang::type_::Map;
 
 use crate::cfg::prim::lib::ExtPrimLib;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct ExtPrimPrelude {
     base: BasePrimPrelude,
 }

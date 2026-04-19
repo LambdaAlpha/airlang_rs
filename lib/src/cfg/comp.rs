@@ -13,14 +13,12 @@ impl BaseCompCfg {
     pub fn generate() -> Cfg {
         let mut cfg = Cfg::default();
         BasePrimCfg::default().extend(&mut cfg);
-        Self::extend(&mut cfg);
+        let mut ctx = prelude(&mut cfg);
+        Self::extend(&mut cfg, &mut ctx);
         cfg
     }
 
-    pub fn extend(cfg: &mut Cfg) {
-        let mut ctx = prelude(cfg);
-        let ctx = &mut ctx;
-
+    pub fn extend(cfg: &mut Cfg, ctx: &mut Val) {
         Self::run(cfg, ctx, include_str!("../air/first.air"), "/first");
 
         // don't depend on the execution order {

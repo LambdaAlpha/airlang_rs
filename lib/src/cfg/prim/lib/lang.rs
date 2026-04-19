@@ -20,7 +20,7 @@ use crate::type_::Key;
 use crate::type_::Text;
 use crate::utils::memory::leak_const;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct LangLib {
     pub eval: PrimFuncVal,
     pub parse: PrimFuncVal,
@@ -37,7 +37,7 @@ pub const GENERATE_KEY: &str = concatcp!(PREFIX_CELL, LANGUAGE, ".syntax.generat
 
 impl Default for LangLib {
     fn default() -> Self {
-        LangLib {
+        Self {
             eval: PrimFunc { fn_: leak_const(Eval), ctx: PrimCtx::Mut, input: PrimInput::Aware }
                 .into(),
             parse: CtxFreeInputAwareFunc { fn_: parse }.build(),

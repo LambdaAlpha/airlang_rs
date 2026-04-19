@@ -5,7 +5,7 @@ use airlang_ext::cfg::prim::lib::ExtPrimLib;
 use self::cmd::CmdLib;
 use self::repl::ReplLib;
 
-#[derive(Default, Clone)]
+#[derive(Default, Copy, Clone)]
 pub struct BinPrimLib {
     pub repl: ReplLib,
     pub cmd: CmdLib,

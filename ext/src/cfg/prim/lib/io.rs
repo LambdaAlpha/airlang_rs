@@ -16,7 +16,7 @@ use airlang::semantics::val::Val;
 use const_format::concatcp;
 
 // todo design
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct IoLib {
     pub read_line: PrimFuncVal,
     pub print: PrimFuncVal,

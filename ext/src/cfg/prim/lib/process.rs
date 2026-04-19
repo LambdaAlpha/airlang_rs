@@ -17,7 +17,7 @@ use airlang::type_::Map;
 use airlang::type_::Text;
 use const_format::concatcp;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct ProcessLib {
     pub call: PrimFuncVal,
 }

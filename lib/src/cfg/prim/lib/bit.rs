@@ -10,7 +10,7 @@ use crate::semantics::val::BIT;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct BitLib {
     pub not: PrimFuncVal,
     pub and: PrimFuncVal,
@@ -27,7 +27,7 @@ pub const IMPLY: &str = concatcp!(PREFIX_CELL, BIT, ".imply");
 
 impl Default for BitLib {
     fn default() -> Self {
-        BitLib {
+        Self {
             not: CtxFreeInputAwareFunc { fn_: not }.build(),
             and: CtxFreeInputAwareFunc { fn_: and }.build(),
             or: CtxFreeInputAwareFunc { fn_: or }.build(),

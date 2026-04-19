@@ -13,7 +13,7 @@ use crate::semantics::val::CELL;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct CellLib {
     pub get_value: PrimFuncVal,
     pub set_value: PrimFuncVal,
@@ -24,7 +24,7 @@ pub const SET_VALUE: &str = concatcp!(PREFIX_CELL, CELL, ".set_value");
 
 impl Default for CellLib {
     fn default() -> Self {
-        CellLib {
+        Self {
             get_value: CtxConstInputFreeFunc { fn_: get_value }.build(),
             set_value: CtxMutInputAwareFunc { fn_: set_value }.build(),
         }

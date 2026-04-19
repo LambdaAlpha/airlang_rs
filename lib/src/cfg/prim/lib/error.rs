@@ -15,7 +15,7 @@ use crate::semantics::val::Val;
 use crate::type_::Pair;
 use crate::type_::Text;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct ErrorLib {
     pub abort: PrimFuncVal,
     pub assert: PrimFuncVal,
@@ -32,7 +32,7 @@ pub const RECOVER: &str = concatcp!(PREFIX_CELL, ERROR, ".recover");
 
 impl Default for ErrorLib {
     fn default() -> Self {
-        ErrorLib {
+        Self {
             abort: CtxFreeInputFreeFunc { fn_: abort }.build(),
             assert: CtxFreeInputAwareFunc { fn_: assert }.build(),
             is_aborted: CtxConstInputFreeFunc { fn_: is_aborted }.build(),

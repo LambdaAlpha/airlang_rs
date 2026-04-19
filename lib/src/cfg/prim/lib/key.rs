@@ -17,7 +17,7 @@ use crate::type_::Key;
 use crate::type_::Text;
 
 // todo design add more
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct KeyLib {
     pub from_text: PrimFuncVal,
     pub into_text: PrimFuncVal,
@@ -32,7 +32,7 @@ pub const JOIN: &str = concatcp!(PREFIX_CELL, KEY, ".join");
 
 impl Default for KeyLib {
     fn default() -> Self {
-        KeyLib {
+        Self {
             from_text: CtxFreeInputAwareFunc { fn_: from_text }.build(),
             into_text: CtxFreeInputAwareFunc { fn_: into_text }.build(),
             get_length: CtxConstInputFreeFunc { fn_: get_length }.build(),

@@ -9,7 +9,7 @@ use airlang::semantics::val::Val;
 use airlang::type_::Text;
 use const_format::concatcp;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct FileLib {
     pub read_to_text: PrimFuncVal,
 }

@@ -8,7 +8,7 @@ use crate::semantics::val::LinkVal;
 use crate::semantics::val::Val;
 use crate::type_::Key;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct BasePrimCfg {
     pub lib: BasePrimLib,
     pub prelude: BasePrimPrelude,

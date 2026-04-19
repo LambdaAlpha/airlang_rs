@@ -13,7 +13,7 @@ use crate::semantics::val::PAIR;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct PairLib {
     pub get_left: PrimFuncVal,
     pub set_left: PrimFuncVal,
@@ -28,7 +28,7 @@ pub const SET_RIGHT: &str = concatcp!(PREFIX_CELL, PAIR, ".set_right");
 
 impl Default for PairLib {
     fn default() -> Self {
-        PairLib {
+        Self {
             get_left: CtxConstInputFreeFunc { fn_: get_left }.build(),
             set_left: CtxMutInputAwareFunc { fn_: set_left }.build(),
             get_right: CtxConstInputFreeFunc { fn_: get_right }.build(),

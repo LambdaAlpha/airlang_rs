@@ -19,7 +19,7 @@ use crate::type_::Key;
 use crate::type_::Pair;
 
 // todo design
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct LinkLib {
     pub make: PrimFuncVal,
     pub make_constant: PrimFuncVal,
@@ -39,7 +39,7 @@ pub const WHICH: &str = concatcp!(PREFIX_CELL, LINK, ".which");
 
 impl Default for LinkLib {
     fn default() -> Self {
-        LinkLib {
+        Self {
             make: CtxFreeInputAwareFunc { fn_: make }.build(),
             make_constant: CtxFreeInputAwareFunc { fn_: make_constant }.build(),
             is_constant: CtxFreeInputAwareFunc { fn_: is_constant }.build(),

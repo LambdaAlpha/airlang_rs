@@ -9,7 +9,7 @@ use airlang::type_::Key;
 use self::lib::ExtPrimLib;
 use crate::cfg::prim::prelude::ExtPrimPrelude;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct ExtPrimCfg {
     pub lib: ExtPrimLib,
     pub prelude: ExtPrimPrelude,

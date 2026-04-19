@@ -47,7 +47,7 @@ use crate::type_::Quote;
 use crate::type_::Text;
 use crate::type_::Unit;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct ValueLib {
     /// should be overridden if there are extension types
     pub any: PrimFuncVal,
@@ -63,7 +63,7 @@ pub const EQUAL: &str = concatcp!(PREFIX_CELL, VALUE, ".equal");
 
 impl Default for ValueLib {
     fn default() -> Self {
-        ValueLib {
+        Self {
             any: CtxFreeInputAwareFunc { fn_: any }.build(),
             get_type: CtxConstInputFreeFunc { fn_: get_type }.build(),
             equal: CtxFreeInputAwareFunc { fn_: equal }.build(),

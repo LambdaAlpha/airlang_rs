@@ -4,7 +4,7 @@ use crate::semantics::val::Val;
 use crate::type_::Key;
 use crate::type_::Map;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct BasePrimPrelude {
     pub not: PrimFuncVal,
     pub and: PrimFuncVal,

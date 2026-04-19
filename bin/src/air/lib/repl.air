@@ -1,0 +1,14 @@
+_ do _[
+    _help set "keyboard shortcuts:
+    .    Ctrl + C: exit this program
+    .    Up/Down: switch through command history
+    .    Alt + M: switch multiline mode
+    .
+    .prelude:
+    .    help: help message
+    .    ;: call a program, i.e. `git ; .[commit --amend]`
+    .
+    .library:
+    .    repl.help: help message, named "_'"help" in prelude
+    .    command.call: call a program, named ";" in prelude',
+]

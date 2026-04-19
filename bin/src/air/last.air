@@ -1,0 +1,6 @@
+_ do _[
+    _prelude set _ import .prelude,
+    _link.which set _ import .link.which,
+    
+    prelude link.which set : _help : help,
+]

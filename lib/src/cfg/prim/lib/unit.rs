@@ -10,7 +10,7 @@ use crate::semantics::val::UNIT;
 use crate::semantics::val::Val;
 use crate::type_::Unit;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct UnitLib {
     pub default: PrimFuncVal,
 }
@@ -19,7 +19,7 @@ pub const DEFAULT: &str = concatcp!(PREFIX_CELL, UNIT, ".default");
 
 impl Default for UnitLib {
     fn default() -> Self {
-        UnitLib { default: CtxFreeInputFreeFunc { fn_: default }.build() }
+        Self { default: CtxFreeInputFreeFunc { fn_: default }.build() }
     }
 }
 

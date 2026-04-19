@@ -16,7 +16,7 @@ use crate::type_::Int;
 use crate::type_::Text;
 
 // todo design add more
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct TextLib {
     pub from_utf8: PrimFuncVal,
     pub into_utf8: PrimFuncVal,
@@ -33,7 +33,7 @@ pub const JOIN: &str = concatcp!(PREFIX_CELL, TEXT, ".join");
 
 impl Default for TextLib {
     fn default() -> Self {
-        TextLib {
+        Self {
             from_utf8: CtxFreeInputAwareFunc { fn_: from_utf8 }.build(),
             into_utf8: CtxFreeInputAwareFunc { fn_: into_utf8 }.build(),
             get_length: CtxConstInputFreeFunc { fn_: get_length }.build(),

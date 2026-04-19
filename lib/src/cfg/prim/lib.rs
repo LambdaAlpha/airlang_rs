@@ -22,7 +22,7 @@ use self::value::ValueLib;
 use crate::cfg::CfgMod;
 use crate::semantics::cfg::Cfg;
 
-#[derive(Default, Clone)]
+#[derive(Default, Copy, Clone)]
 pub struct BasePrimLib {
     pub unit: UnitLib,
     pub bit: BitLib,

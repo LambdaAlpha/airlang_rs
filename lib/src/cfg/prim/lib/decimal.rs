@@ -19,7 +19,7 @@ use crate::type_::Pair;
 use crate::type_::RoundingMode;
 
 // todo design
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct DecimalLib {
     pub add: PrimFuncVal,
     pub subtract: PrimFuncVal,
@@ -44,7 +44,7 @@ pub const LESS_GREATER: &str = concatcp!(PREFIX_CELL, DECIMAL, ".less_greater");
 
 impl Default for DecimalLib {
     fn default() -> Self {
-        DecimalLib {
+        Self {
             add: CtxFreeInputAwareFunc { fn_: add }.build(),
             subtract: CtxFreeInputAwareFunc { fn_: subtract }.build(),
             multiply: CtxFreeInputAwareFunc { fn_: multiply }.build(),

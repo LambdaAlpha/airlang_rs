@@ -13,7 +13,7 @@ use airlang::type_::Pair;
 use airlang::type_::Text;
 use const_format::concatcp;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct CmdLib {
     pub call: PrimFuncVal,
 }

@@ -7,7 +7,7 @@ use self::file::FileLib;
 use self::io::IoLib;
 use self::process::ProcessLib;
 
-#[derive(Default, Clone)]
+#[derive(Default, Copy, Clone)]
 pub struct ExtPrimLib {
     pub io: IoLib,
     pub file: FileLib,

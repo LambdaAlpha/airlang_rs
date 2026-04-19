@@ -13,7 +13,7 @@ use crate::semantics::val::Val;
 use crate::type_::Int;
 use crate::type_::Pair;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct IntLib {
     pub add: PrimFuncVal,
     pub subtract: PrimFuncVal,
@@ -42,7 +42,7 @@ pub const LESS_GREATER: &str = concatcp!(PREFIX_CELL, INT, ".less_greater");
 
 impl Default for IntLib {
     fn default() -> Self {
-        IntLib {
+        Self {
             add: CtxFreeInputAwareFunc { fn_: add }.build(),
             subtract: CtxFreeInputAwareFunc { fn_: subtract }.build(),
             multiply: CtxFreeInputAwareFunc { fn_: multiply }.build(),

@@ -10,7 +10,7 @@ use log::info;
 use crate::cfg::prim::lib::BinPrimLib;
 use crate::cfg::prim::prelude::BinPrimPrelude;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct BinPrimCfg {
     pub lib: BinPrimLib,
     pub prelude: BinPrimPrelude,

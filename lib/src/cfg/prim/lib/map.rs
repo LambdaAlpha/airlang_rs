@@ -24,7 +24,7 @@ use crate::type_::Map;
 use crate::type_::Pair;
 
 // todo design
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct MapLib {
     pub make: PrimFuncVal,
     pub make_set: PrimFuncVal,
@@ -71,7 +71,7 @@ pub const CLEAR: &str = concatcp!(PREFIX_CELL, MAP, ".clear");
 
 impl Default for MapLib {
     fn default() -> Self {
-        MapLib {
+        Self {
             make: CtxFreeInputAwareFunc { fn_: make }.build(),
             make_set: CtxFreeInputAwareFunc { fn_: make_set }.build(),
             get_length: CtxConstInputFreeFunc { fn_: get_length }.build(),

@@ -22,7 +22,7 @@ use crate::type_::Map;
 use crate::type_::Pair;
 
 // todo design more
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct CfgLib {
     pub make: PrimFuncVal,
     pub represent: PrimFuncVal,
@@ -48,7 +48,7 @@ pub const WHERE: &str = concatcp!(PREFIX_CELL, CFG, ".where");
 
 impl Default for CfgLib {
     fn default() -> Self {
-        CfgLib {
+        Self {
             make: CtxFreeInputAwareFunc { fn_: make }.build(),
             represent: CtxFreeInputAwareFunc { fn_: represent }.build(),
             exist: CtxFreeInputAwareFunc { fn_: exist }.build(),

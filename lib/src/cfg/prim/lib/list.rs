@@ -20,7 +20,7 @@ use crate::type_::List;
 use crate::type_::Pair;
 
 // todo design
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct ListLib {
     pub get_length: PrimFuncVal,
     pub set: PrimFuncVal,
@@ -55,7 +55,7 @@ pub const CLEAR: &str = concatcp!(PREFIX_CELL, LIST, ".clear");
 
 impl Default for ListLib {
     fn default() -> Self {
-        ListLib {
+        Self {
             get_length: CtxConstInputFreeFunc { fn_: get_length }.build(),
             set: CtxMutInputAwareFunc { fn_: set }.build(),
             set_many: CtxMutInputAwareFunc { fn_: set_many }.build(),

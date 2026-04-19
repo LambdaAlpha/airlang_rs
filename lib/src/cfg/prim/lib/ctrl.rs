@@ -32,7 +32,7 @@ use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Text;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct CtrlLib {
     pub do_: PrimFuncVal,
     pub test: PrimFuncVal,
@@ -53,7 +53,7 @@ pub const ITERATE: &str = concatcp!(PREFIX_CELL, CTRL, ".iterate");
 
 impl Default for CtrlLib {
     fn default() -> Self {
-        CtrlLib {
+        Self {
             do_: CtxMutInputAwareFunc { fn_: do_ }.build(),
             test: CtxMutInputAwareFunc { fn_: test }.build(),
             switch: CtxMutInputAwareFunc { fn_: switch }.build(),

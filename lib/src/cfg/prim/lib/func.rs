@@ -18,7 +18,7 @@ use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::Key;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct FuncLib {
     pub make: PrimFuncVal,
     pub represent: PrimFuncVal,
@@ -43,7 +43,7 @@ pub const GET_ID: &str = concatcp!(PREFIX_CELL, FUNC, ".get_id");
 
 impl Default for FuncLib {
     fn default() -> Self {
-        FuncLib {
+        Self {
             make: CtxFreeInputAwareFunc { fn_: make }.build(),
             represent: CtxFreeInputAwareFunc { fn_: represent }.build(),
             is_free: CtxConstInputFreeFunc { fn_: is_free }.build(),

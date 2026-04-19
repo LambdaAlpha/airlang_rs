@@ -15,7 +15,7 @@ use crate::semantics::val::QUOTE;
 use crate::semantics::val::Val;
 use crate::type_::Quote;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct QuoteLib {
     pub make: PrimFuncVal,
     pub get_source: PrimFuncVal,
@@ -28,7 +28,7 @@ pub const SET_SOURCE: &str = concatcp!(PREFIX_CELL, QUOTE, ".set_source");
 
 impl Default for QuoteLib {
     fn default() -> Self {
-        QuoteLib {
+        Self {
             make: CtxFreeInputAwareFunc { fn_: make }.build(),
             get_source: CtxConstInputFreeFunc { fn_: get_source }.build(),
             set_source: CtxMutInputAwareFunc { fn_: set_source }.build(),

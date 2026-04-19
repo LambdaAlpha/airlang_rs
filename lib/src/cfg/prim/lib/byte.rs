@@ -16,7 +16,7 @@ use crate::type_::Int;
 use crate::type_::Pair;
 
 // todo design add more
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct ByteLib {
     pub get_length: PrimFuncVal,
     pub push: PrimFuncVal,
@@ -29,7 +29,7 @@ pub const JOIN: &str = concatcp!(PREFIX_CELL, BYTE, ".join");
 
 impl Default for ByteLib {
     fn default() -> Self {
-        ByteLib {
+        Self {
             get_length: CtxConstInputFreeFunc { fn_: get_length }.build(),
             push: CtxMutInputAwareFunc { fn_: push }.build(),
             join: CtxFreeInputAwareFunc { fn_: join }.build(),

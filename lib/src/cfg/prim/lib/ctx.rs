@@ -17,7 +17,7 @@ use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Pair;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct CtxLib {
     pub get: PrimFuncVal,
     pub set: PrimFuncVal,
@@ -37,7 +37,7 @@ pub const WHICH: &str = concatcp!(PREFIX_CELL, CTX, ".which");
 
 impl Default for CtxLib {
     fn default() -> Self {
-        CtxLib {
+        Self {
             get: CtxConstInputAwareFunc { fn_: get }.build(),
             set: CtxMutInputAwareFunc { fn_: set }.build(),
             represent: CtxMutInputAwareFunc { fn_: represent }.build(),
