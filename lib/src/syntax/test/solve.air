@@ -6,18 +6,6 @@ right
 -----
 a b ?
 =====
-both
------
-? a ?
-=====
-omit left
------
-_ a ?
-=====
-omit right
------
-? a _
-=====
 < left left
 -----
 <(? a b c d)
@@ -34,30 +22,6 @@ omit right
 -----
 <(a b ? : d)
 =====
-< left both
------
-<(? a ? b c)
-=====
-< left both pair
------
-<(? a ? : c)
-=====
-< left omit left
------
-<(_ a ? b c)
-=====
-< left omit left pair
------
-<(_ a ? : c)
-=====
-< left omit right
------
-<(? a _ b c)
-=====
-< left omit right pair
------
-<(? a _ : c)
-=====
 < right right
 -----
 <(a b c d ?)
@@ -73,10 +37,6 @@ omit right
 < both right
 -----
 <(a b ? c ?)
-=====
-< all
------
-<(? a ? b ?)
 =====
 > left left
 -----
@@ -102,30 +62,6 @@ omit right
 -----
 >(a : c d ?)
 =====
-> right both
------
->(a b ? c ?)
-=====
-> right both pair
------
->(a : ? c ?)
-=====
-> right omit left
------
->(a b _ c ?)
-=====
-> right omit left pair
------
->(a : _ c ?)
-=====
-> right omit right
------
->(a b ? c _)
-=====
-> right omit right pair
------
->(a : ? c _)
-=====
 > left left right right
 -----
 >(? a b c ?)
@@ -133,10 +69,6 @@ omit right
 > both left
 -----
 >(? a ? b c)
-=====
-> all
------
->(? a ? b ?)
 =====
 non-atomic func
 -----

@@ -10,10 +10,6 @@ omit right
 -----
 a b _
 =====
-omit both
------
-_ a _
-=====
 < omit none
 -----
 <(a b c d e)
@@ -42,14 +38,6 @@ _ a _
 -----
 <(a b _ : d)
 =====
-< left omit both
------
-<(_ a _ b c)
-=====
-< left omit both pair
------
-<(_ a _ : c)
-=====
 < right omit right
 -----
 <(a b c d _)
@@ -65,10 +53,6 @@ _ a _
 < both omit right
 -----
 <(a b _ c _)
-=====
-< omit all
------
-<(_ a _ b _)
 =====
 > omit none
 -----
@@ -106,14 +90,6 @@ _ a _
 -----
 >(a : c d _)
 =====
-> right omit both
------
->(a b _ c _)
-=====
-> right omit both pair
------
->(a : _ c _)
-=====
 > left omit left right omit right
 -----
 >(_ a b c _)
@@ -121,10 +97,6 @@ _ a _
 > both omit left
 -----
 >(_ a _ b c)
-=====
-> omit all
------
->(_ a _ b _)
 =====
 non-atomic func
 -----

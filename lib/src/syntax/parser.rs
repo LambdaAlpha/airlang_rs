@@ -303,12 +303,13 @@ fn compose_left_one<'a, T: ParseRepr>(
 ) -> ModalResult<T> {
     let func = match middle {
         Either::Repr(func) => func,
-        Either::Token { checkpoint, token } => {
+        Either::Token { token, .. } => {
             let FuncToken::Pair = token;
-            return if let Either::Repr(right) = right {
-                Ok(T::from(Pair::new(left, right)))
-            } else {
-                reset_expect(i, checkpoint, QUOTE_PAIR)
+            return match right {
+                Either::Repr(right) => Ok(T::from(Pair::new(left, right))),
+                Either::Token { checkpoint, token } => {
+                    reset_expect(i, checkpoint, input_token_expect(token))
+                },
             };
         },
     };
@@ -378,13 +379,17 @@ fn compose_infix<'a, T: ParseRepr>(
         Either::Repr(func) => func,
         Either::Token { checkpoint, token } => {
             let FuncToken::Pair = token;
-            return if let Either::Repr(left) = left
-                && let Either::Repr(right) = right
-            {
-                Ok(T::from(Pair::new(left, right)))
-            } else {
-                reset_expect(i, checkpoint, QUOTE_PAIR)
+            let left = match left {
+                Either::Repr(left) => left,
+                Either::Token { .. } => return reset_expect(i, checkpoint, QUOTE_PAIR),
             };
+            let right = match right {
+                Either::Repr(right) => right,
+                Either::Token { checkpoint, token } => {
+                    return reset_expect(i, checkpoint, input_token_expect(token));
+                },
+            };
+            return Ok(T::from(Pair::new(left, right)));
         },
     };
     let (is_solve, argument) = match (left, right) {
@@ -395,8 +400,12 @@ fn compose_infix<'a, T: ParseRepr>(
         (Either::Token { token: left, .. }, Either::Repr(right)) => {
             (left == InputToken::Solve, right)
         },
-        (Either::Token { token: left, .. }, Either::Token { token: right, .. }) => {
-            (left == InputToken::Solve || right == InputToken::Solve, T::from(Unit))
+        (Either::Token { .. }, Either::Token { checkpoint, token: right }) => {
+            let expect = match right {
+                InputToken::Empty => QUOTE_EMPTY,
+                InputToken::Solve => QUOTE_SOLVE,
+            };
+            return reset_expect(i, checkpoint, expect);
         },
     };
     Ok(call_solve(is_solve, func, argument))
@@ -487,12 +496,15 @@ fn input_repr<'a, T: ParseRepr>(
     match input {
         Either::Repr(token) => Ok(token),
         Either::Token { checkpoint, token } => {
-            let expect = match token {
-                InputToken::Empty => QUOTE_EMPTY,
-                InputToken::Solve => QUOTE_SOLVE,
-            };
-            reset_expect(i, checkpoint, expect)
+            reset_expect(i, checkpoint, input_token_expect(token))
         },
+    }
+}
+
+fn input_token_expect(token: InputToken) -> &'static str {
+    match token {
+        InputToken::Empty => QUOTE_EMPTY,
+        InputToken::Solve => QUOTE_SOLVE,
     }
 }
 
