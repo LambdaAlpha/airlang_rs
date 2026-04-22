@@ -138,7 +138,7 @@ impl BasePrimPrelude {
 
             fact: lib.fact.put,
 
-            eval: lib.lang.eval,
+            eval: lib.lang.semantics_eval,
         }
     }
 }

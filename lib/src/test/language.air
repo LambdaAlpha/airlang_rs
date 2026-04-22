@@ -85,3 +85,23 @@ _ do _[
 ]
 -----
 ""'"1"'
+=====
+syntax is_valid true
+-----
+_ do _[
+    _is_valid set _ import .language.syntax.is_valid,
+    _a set [., 0, "a" : {b : _b}, _(_ f _(c))],
+    _a which is_valid : .
+]
+-----
+true
+=====
+syntax is_valid false
+-----
+_ do _[
+    _is_valid set _ import .language.syntax.is_valid,
+    _a set [., 0, "a" : {b : not}, _(_ f _(c))],
+    _a which is_valid : .
+]
+-----
+false
