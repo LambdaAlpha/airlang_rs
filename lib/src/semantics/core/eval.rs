@@ -1,5 +1,4 @@
 use crate::semantics::cfg::Cfg;
-use crate::semantics::core::abort_by_bug_with_msg;
 use crate::semantics::core::form::CellForm;
 use crate::semantics::core::form::ListForm;
 use crate::semantics::core::form::MapForm;
@@ -42,8 +41,8 @@ where
         let call = Call::from(call);
         let func = self.func.call(cfg, ctx, call.func);
         let Val::Func(func) = func else {
-            let msg = format!("eval: expected a function, but got {func}");
-            return abort_by_bug_with_msg(cfg, msg.into());
+            cfg.abort();
+            return Val::default();
         };
         let input = self.input.call(cfg, ctx, call.input);
         if cfg.is_aborted() {
@@ -67,16 +66,16 @@ where
         let solve = Solve::from(solve);
         let func = self.func.call(cfg, ctx, solve.func);
         let Val::Func(func) = func else {
-            let msg = format!("eval: expected a function, but got {func}");
-            return abort_by_bug_with_msg(cfg, msg.into());
+            cfg.abort();
+            return Val::default();
         };
         let output = self.output.call(cfg, ctx, solve.output);
         if cfg.is_aborted() {
             return Val::default();
         }
         let Some(input) = cfg.fact_solve(func, output) else {
-            let msg = "eval: can't solve the problem".to_owned();
-            return abort_by_bug_with_msg(cfg, msg.into());
+            cfg.abort();
+            return Val::default();
         };
         input
     }

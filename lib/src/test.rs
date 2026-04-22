@@ -6,6 +6,8 @@ use log::error;
 use log::trace;
 
 use crate::cfg::comp::BaseCompCfg;
+use crate::cfg::error::ABORT_MSG;
+use crate::cfg::error::ABORT_TYPE;
 use crate::cfg::prelude;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
@@ -83,8 +85,8 @@ fn log_abort(cfg: &Cfg) {
     if !cfg.is_aborted() {
         return;
     }
-    let type_ = cfg.import(Key::from_str_unchecked(Cfg::ABORT_TYPE));
-    let msg = cfg.import(Key::from_str_unchecked(Cfg::ABORT_MSG));
+    let type_ = cfg.import(Key::from_str_unchecked(ABORT_TYPE));
+    let msg = cfg.import(Key::from_str_unchecked(ABORT_MSG));
     match (type_, msg) {
         (Some(type_), Some(msg)) => error!("aborted by {type_}: {msg}"),
         (None, Some(msg)) => error!("aborted: {msg}"),

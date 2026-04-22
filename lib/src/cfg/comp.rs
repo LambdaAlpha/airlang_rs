@@ -1,4 +1,6 @@
 use crate::cfg::CfgMod;
+use crate::cfg::error::ABORT_MSG;
+use crate::cfg::error::ABORT_TYPE;
 use crate::cfg::prelude;
 use crate::cfg::prim::BasePrimCfg;
 use crate::semantics::cfg::Cfg;
@@ -52,8 +54,8 @@ impl BaseCompCfg {
         };
         let output = Eval.call(cfg, ctx, input);
         if cfg.is_aborted() {
-            let type_ = cfg.import(Key::from_str_unchecked(Cfg::ABORT_TYPE));
-            let msg = cfg.import(Key::from_str_unchecked(Cfg::ABORT_MSG));
+            let type_ = cfg.import(Key::from_str_unchecked(ABORT_TYPE));
+            let msg = cfg.import(Key::from_str_unchecked(ABORT_MSG));
             match (type_, msg) {
                 (Some(type_), Some(msg)) => panic!("stage 2: aborted by {type_}: {msg}"),
                 (None, Some(msg)) => panic!("stage 2: aborted: {msg}"),

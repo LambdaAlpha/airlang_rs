@@ -1,12 +1,10 @@
 use std::collections::hash_map::Entry;
 
-use const_format::concatcp;
 use derive_more::Deref;
 use derive_more::DerefMut;
 
 use crate::semantics::cfg::fact::Facts;
 use crate::semantics::cfg::fact::ValId;
-use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::DynFunc;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::Val;
@@ -24,11 +22,6 @@ pub struct Cfg {
 }
 
 impl Cfg {
-    pub const ABORT_TYPE: &str = concatcp!(PREFIX_CELL, "error.abort.type");
-    pub const ABORT_MSG: &str = concatcp!(PREFIX_CELL, "error.abort.message");
-
-    pub const ABORT_TYPE_BUG: &str = concatcp!(PREFIX_CELL, "bug");
-
     pub fn import(&self, key: Key) -> Option<&Val> {
         self.map.get(&key)
     }

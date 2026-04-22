@@ -6,6 +6,8 @@ use std::io::Write;
 use std::io::stdin;
 use std::mem::take;
 
+use airlang::cfg::error::ABORT_MSG;
+use airlang::cfg::error::ABORT_TYPE;
 use airlang::cfg::prelude;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::Eval;
@@ -425,8 +427,8 @@ impl<T: ReplTerminal> Repl<T> {
     }
 
     fn print_abort(&mut self) -> Result<()> {
-        let type_ = self.cfg.import(Key::from_str_unchecked(Cfg::ABORT_TYPE));
-        let msg = self.cfg.import(Key::from_str_unchecked(Cfg::ABORT_MSG));
+        let type_ = self.cfg.import(Key::from_str_unchecked(ABORT_TYPE));
+        let msg = self.cfg.import(Key::from_str_unchecked(ABORT_MSG));
         match (type_, msg) {
             (Some(type_), Some(msg)) => self.terminal.eprint(format!("aborted by {type_}: {msg}")),
             (None, Some(msg)) => self.terminal.eprint(format!("aborted: {msg}")),
@@ -436,8 +438,8 @@ impl<T: ReplTerminal> Repl<T> {
     }
 
     fn recover(&mut self) {
-        self.cfg.remove(&Key::from_str_unchecked(Cfg::ABORT_TYPE));
-        self.cfg.remove(&Key::from_str_unchecked(Cfg::ABORT_MSG));
+        self.cfg.remove(&Key::from_str_unchecked(ABORT_TYPE));
+        self.cfg.remove(&Key::from_str_unchecked(ABORT_MSG));
         self.cfg.recover();
     }
 

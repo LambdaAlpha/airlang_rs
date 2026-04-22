@@ -2,10 +2,10 @@ use const_format::concatcp;
 
 use crate::bug;
 use crate::cfg::CfgMod;
+use crate::cfg::error::abort_by_bug_with_msg;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
-use crate::semantics::core::abort_by_bug_with_msg;
 use crate::semantics::func::CtxConstInputFreeFunc;
 use crate::semantics::func::CtxFreeInputAwareFunc;
 use crate::semantics::func::CtxFreeInputFreeFunc;
