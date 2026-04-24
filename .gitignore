@@ -1,4 +1,45 @@
+# build
 /target
+
+# editor, IDE
 .idea
 *.iml
 .vscode
+
+# AI
+
+SKILL.md
+skills/
+AGENTS.md
+.agent/
+
+## Cursor
+.cursor/
+.cursorrules
+.cursorignore
+
+## Copilot
+.github/copilot-instructions.md
+.github/instructions/
+.copilot/
+
+## Claude Code
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+.claude.json
+
+## OpenAI Codex
+.codex/
+
+## Gemini Code Assist
+GEMINI.md
+.gemini/
+
+## OpenCode
+.opencode/
+OPENCODE.md
+
+## OpenClaw
+.clawignore
+.openclaw/
