@@ -104,6 +104,3 @@ mod parser;
 mod generator;
 
 mod error;
-
-#[cfg(test)]
-mod test;

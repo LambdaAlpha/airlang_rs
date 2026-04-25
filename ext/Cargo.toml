@@ -8,6 +8,9 @@ repository = "https://github.com/LambdaAlpha/airlang_rs"
 keywords = ["programming-language", "dsl", "config", "configuration", "serde"]
 categories = ["compilers"]
 
+[[test]]
+name = "semantics"
+
 [lints]
 workspace = true
 

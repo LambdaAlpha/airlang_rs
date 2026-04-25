@@ -8,12 +8,22 @@ repository = "https://github.com/LambdaAlpha/airlang_rs"
 keywords = ["programming-language", "dsl", "config", "configuration", "serde"]
 categories = ["compilers"]
 
-[[bench]]
-name = "main"
-harness = false
+[[test]]
+name = "syntax"
 
 [[test]]
-name = "main"
+name = "semantics"
+
+[[test]]
+name = "bench"
+
+[[bench]]
+name = "syntax"
+harness = false
+
+[[bench]]
+name = "semantics"
+harness = false
 
 [lints]
 workspace = true
@@ -84,16 +94,6 @@ features = [
     "display",
 ]
 
-# bench
-[dev-dependencies.criterion]
-version = "0.8"
-
-# log
+# macro, test, bench, log
 [dev-dependencies.airlang_dev]
 path = "../dev"
-
-# log
-[dev-dependencies.log]
-version = "0.4"
-default-features = false
-features = ["release_max_level_off"]

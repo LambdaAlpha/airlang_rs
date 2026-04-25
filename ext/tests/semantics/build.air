@@ -1,0 +1,20 @@
+nest(current_dir is crate root)
+-----
+_ do _[
+    _load set _ import .build.load,
+    .(_a) represent _ load "tests/semantics/build/nest/a/b.air",
+    .(_b) represent _ load "tests/semantics/build/nest/a/c/d.air",
+    a + b
+]
+-----
+5
+=====
+bom(current_dir is crate root)
+-----
+_ do _[
+    _load set _ import .build.load,
+    .(_a) represent _ load "tests/semantics/build/bom/a.air",
+    a
+]
+-----
+true

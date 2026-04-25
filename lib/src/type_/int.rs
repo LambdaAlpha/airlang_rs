@@ -10,6 +10,7 @@ use derive_more::DerefMut;
 use derive_more::From;
 use num_bigint::BigInt;
 use num_integer::Integer;
+use num_traits::Num;
 
 use crate::type_::bit::Bit;
 
@@ -24,6 +25,11 @@ impl Int {
 
     pub(crate) fn unwrap(self) -> BigInt {
         self.0
+    }
+
+    pub fn from_str_radix(s: &str, radix: u32) -> Option<Self> {
+        let i = BigInt::from_str_radix(s, radix).ok()?;
+        Some(Self(i))
     }
 
     #[expect(clippy::should_implement_trait)]

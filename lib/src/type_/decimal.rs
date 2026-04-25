@@ -11,6 +11,7 @@ use num_traits::One;
 use num_traits::Zero;
 
 use crate::type_::Bit;
+use crate::type_::Int;
 
 // todo design
 #[derive(Clone, PartialEq, Eq, Hash, From, Deref, DerefMut)]
@@ -43,6 +44,10 @@ impl Decimal {
     #[expect(dead_code)]
     pub(crate) fn unwrap(self) -> BigDecimal {
         self.0
+    }
+
+    pub fn from_int_scale(i: Int, scale: i64) -> Self {
+        Self(BigDecimal::from_bigint(i.unwrap(), scale))
     }
 
     pub fn is_zero(&self) -> bool {

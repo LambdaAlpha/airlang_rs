@@ -19,6 +19,3 @@ pub mod trait_;
 
 #[expect(dead_code)]
 pub(crate) mod utils;
-
-#[cfg(test)]
-pub(crate) mod test;
