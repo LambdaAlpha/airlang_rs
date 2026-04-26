@@ -34,12 +34,15 @@ use crate::type_::Solve;
 use crate::type_::Text;
 use crate::type_::Unit;
 
-#[derive(Copy, Clone)]
-pub(crate) struct Any;
+#[derive(Default, Copy, Clone)]
+pub(crate) struct Any {
+    pub(crate) syntax: bool,
+}
 
 impl Distribution<Val> for Any {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Val {
-        match rng.random_range(0 ..= 16) {
+        let max = if self.syntax { 13 } else { 16 };
+        match rng.random_range(0 ..= max) {
             0 => Val::Unit(Distribution::<Unit>::sample(self, rng)),
             1 => Val::Bit(Distribution::<Bit>::sample(self, rng)),
             2 => Val::Key(Distribution::<Key>::sample(self, rng)),

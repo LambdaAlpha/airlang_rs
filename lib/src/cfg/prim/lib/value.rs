@@ -99,29 +99,44 @@ const TYPE_LINK: &str = concatcp!(PREFIX_CELL, LINK);
 const TYPE_CFG: &str = concatcp!(PREFIX_CELL, CFG);
 const TYPE_FUNC: &str = concatcp!(PREFIX_CELL, FUNC);
 
+const SYNTAX: &str = concatcp!(PREFIX_CELL, "syntax");
+
 pub fn any(cfg: &mut Cfg, input: Val) -> Val {
     let mut rng = rng();
     let rng = &mut rng;
     match input {
-        Val::Unit(_) => Any.sample(rng),
+        Val::Unit(_) => Any { syntax: false }.sample(rng),
         Val::Key(s) => match &*s {
-            TYPE_UNIT => Val::Unit(Distribution::<Unit>::sample(&Any, rng)),
-            TYPE_BIT => Val::Bit(Distribution::<Bit>::sample(&Any, rng)),
-            TYPE_KEY => Val::Key(Distribution::<Key>::sample(&Any, rng)),
-            TYPE_TEXT => Val::Text(Distribution::<Text>::sample(&Any, rng).into()),
-            TYPE_INT => Val::Int(Distribution::<Int>::sample(&Any, rng).into()),
-            TYPE_DECIMAL => Val::Decimal(Distribution::<Decimal>::sample(&Any, rng).into()),
-            TYPE_BYTE => Val::Byte(Distribution::<Byte>::sample(&Any, rng).into()),
-            TYPE_CELL => Val::Cell(Distribution::<Cell<Val>>::sample(&Any, rng).into()),
-            TYPE_PAIR => Val::Pair(Distribution::<Pair<Val, Val>>::sample(&Any, rng).into()),
-            TYPE_LIST => Val::List(Distribution::<List<Val>>::sample(&Any, rng).into()),
-            TYPE_MAP => Val::Map(Distribution::<Map<Key, Val>>::sample(&Any, rng).into()),
-            TYPE_QUOTE => Val::Quote(Distribution::<Quote<Val>>::sample(&Any, rng).into()),
-            TYPE_CALL => Val::Call(Distribution::<Call<Val, Val>>::sample(&Any, rng).into()),
-            TYPE_SOLVE => Val::Solve(Distribution::<Solve<Val, Val>>::sample(&Any, rng).into()),
-            TYPE_LINK => Val::Link(Distribution::<LinkVal>::sample(&Any, rng)),
-            TYPE_CFG => Val::Cfg(Distribution::<Cfg>::sample(&Any, rng).into()),
-            TYPE_FUNC => Val::Func(Distribution::<FuncVal>::sample(&Any, rng)),
+            SYNTAX => Any { syntax: true }.sample(rng),
+            TYPE_UNIT => Val::Unit(Distribution::<Unit>::sample(&Any::default(), rng)),
+            TYPE_BIT => Val::Bit(Distribution::<Bit>::sample(&Any::default(), rng)),
+            TYPE_KEY => Val::Key(Distribution::<Key>::sample(&Any::default(), rng)),
+            TYPE_TEXT => Val::Text(Distribution::<Text>::sample(&Any::default(), rng).into()),
+            TYPE_INT => Val::Int(Distribution::<Int>::sample(&Any::default(), rng).into()),
+            TYPE_DECIMAL => {
+                Val::Decimal(Distribution::<Decimal>::sample(&Any::default(), rng).into())
+            },
+            TYPE_BYTE => Val::Byte(Distribution::<Byte>::sample(&Any::default(), rng).into()),
+            TYPE_CELL => Val::Cell(Distribution::<Cell<Val>>::sample(&Any::default(), rng).into()),
+            TYPE_PAIR => {
+                Val::Pair(Distribution::<Pair<Val, Val>>::sample(&Any::default(), rng).into())
+            },
+            TYPE_LIST => Val::List(Distribution::<List<Val>>::sample(&Any::default(), rng).into()),
+            TYPE_MAP => {
+                Val::Map(Distribution::<Map<Key, Val>>::sample(&Any::default(), rng).into())
+            },
+            TYPE_QUOTE => {
+                Val::Quote(Distribution::<Quote<Val>>::sample(&Any::default(), rng).into())
+            },
+            TYPE_CALL => {
+                Val::Call(Distribution::<Call<Val, Val>>::sample(&Any::default(), rng).into())
+            },
+            TYPE_SOLVE => {
+                Val::Solve(Distribution::<Solve<Val, Val>>::sample(&Any::default(), rng).into())
+            },
+            TYPE_LINK => Val::Link(Distribution::<LinkVal>::sample(&Any::default(), rng)),
+            TYPE_CFG => Val::Cfg(Distribution::<Cfg>::sample(&Any::default(), rng).into()),
+            TYPE_FUNC => Val::Func(Distribution::<FuncVal>::sample(&Any::default(), rng)),
             s => bug!(cfg, "{ANY}: unknown type {s}"),
         },
         v => bug!(cfg, "{ANY}: expected input to be a key or a unit, but got {v}"),

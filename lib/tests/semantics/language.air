@@ -1,35 +1,17 @@
-parse generate_pretty
+parse generate_pretty generate_key
 -----
 _ do _[
     _any set _ import .value.any,
     _parse set _ import .language.syntax.parse,
     _generate_pretty set _ import .language.syntax.generate_pretty,
-    _get set _ import .list.get,
-    _% set _ import .integer.remainder,
-    _atom set [.unit, .bit, .key, .text, .integer, .decimal, .byte],
-    _i set 3 + (_ any .integer) % 4,
-    _a set _ any _atom which get : i,
-    _(_ any .bit) loop _[
-        (_ any .bit) test _[
-            _i set 3 + (_ any .integer) % 4,
-            _b set _ any _atom which get : i,
-            _i set (4 + (_ any .integer) % 4) % 4,
-            _a set (_ any .bit) test _[a : b] : _[a call b],
-        ] : _[
-            (_ any .bit) test _[
-                _i set 3 + (_ any .integer) % 4,
-                _b set _ any _atom which get : i,
-                _a set [a, b],
-            ] : _[
-                _i set 3 + (_ any .integer) % 4,
-                _b set _ any _atom which get : i,
-                _a set {a : b},
-            ]
-        ]
-    ],
+    _generate_key set _ import .language.syntax.generate_key,
+    _into_text set _ import .key.into_text,
+    _a set _ any .syntax,
     _repr set _a which generate_pretty : .,
     .(_a1) represent _ parse repr,
-    a = a1
+    _k set _a which generate_key : .,
+    .(_a2) represent _ parse _ into_text k,
+    (a = a1) and (a = a2)
 ]
 -----
 true
@@ -85,6 +67,17 @@ _ do _[
 ]
 -----
 ""'"1"'
+=====
+any .syntax syntax is_valid
+-----
+_ do _[
+    _any set _ import .value.any,
+    _is_valid set _ import .language.syntax.is_valid,
+    _a set _ any .syntax,
+    _a which is_valid : .
+]
+-----
+true
 =====
 syntax is_valid true
 -----
