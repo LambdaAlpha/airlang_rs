@@ -9,10 +9,10 @@ use airlang::semantics::core::Eval;
 use airlang::semantics::func::DynFunc;
 use airlang::semantics::val::Val;
 use airlang::type_::Key;
-use airlang_ext::cfg::comp::ExtCompCfg;
 use log::error;
 use log::trace;
 
+use crate::cfg::comp::DevCompCfg;
 use crate::log::init_logger;
 
 const MAIN_DELIMITER: &str = "\n=====\n";
@@ -35,7 +35,7 @@ pub fn parse_file<'a, const N: usize>(input: &'a str, file_name: &str) -> Vec<[&
 
 pub fn test_eval(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     init_logger();
-    let mut cfg = ExtCompCfg::generate();
+    let mut cfg = DevCompCfg::generate();
     let ctx = prelude(&mut cfg);
     run_test_eval(cfg, ctx, input, file_name)
 }

@@ -1,3 +1,5 @@
+pub mod cfg;
+
 pub mod test;
 
 pub mod bench;

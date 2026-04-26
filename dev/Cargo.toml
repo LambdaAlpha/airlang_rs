@@ -11,9 +11,17 @@ path = "../lib"
 [dependencies.airlang_ext]
 path = "../ext"
 
+# const str
+[dependencies.const_format]
+version = "0.2"
+
 # macro
 [dependencies.paste]
 version = "1"
+
+# val generation
+[dependencies.rand]
+version = "0.10"
 
 # log
 [dependencies.log]

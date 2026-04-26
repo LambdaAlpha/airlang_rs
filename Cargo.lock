@@ -59,10 +59,12 @@ version = "0.0.0"
 dependencies = [
  "airlang",
  "airlang_ext",
+ "const_format",
  "criterion",
  "env_logger",
  "log",
  "paste",
+ "rand",
 ]
 
 [[package]]
