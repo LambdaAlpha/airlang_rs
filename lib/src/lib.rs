@@ -1,3 +1,9 @@
+pub const VERSION_MAJOR: &str = env!("CARGO_PKG_VERSION_MAJOR");
+
+pub const VERSION_MINOR: &str = env!("CARGO_PKG_VERSION_MINOR");
+
+pub const VERSION_PATCH: &str = env!("CARGO_PKG_VERSION_PATCH");
+
 // https://github.com/rust-lang/rustfmt/issues/4070
 #[macro_export]
 macro_rules! _____ {

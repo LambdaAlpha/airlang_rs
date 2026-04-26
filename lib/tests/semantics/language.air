@@ -98,3 +98,12 @@ _ do _[
 ]
 -----
 false
+=====
+version
+-----
+_ do _[
+    _check_version set _ import .dev.language.check_version,
+    _ check_version _ import .language.version
+]
+-----
+true
