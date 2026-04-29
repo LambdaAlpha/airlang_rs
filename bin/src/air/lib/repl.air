@@ -6,9 +6,9 @@ _ do _[
     .
     .prelude:
     .    help: help message
-    .    ;: call a program, i.e. `git ; .[commit --amend]`
+    .    run: run a command, i.e. `_ run "'"git commit --amend"'"`
     .
     .library:
-    .    repl.help: help message, named "_'"help" in prelude
-    .    command.call: call a program, named ";" in prelude',
+    .    .repl.help: help message, named 'help' in prelude
+    .    .command.run: run a command, named 'run' in prelude",
 ]

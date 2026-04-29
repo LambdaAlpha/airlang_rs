@@ -11,18 +11,18 @@ use crate::cfg::prim::lib::BinPrimLib;
 #[derive(Copy, Clone)]
 pub struct BinPrimPrelude {
     pub ext: ExtPrimPrelude,
-    pub call: PrimFuncVal,
+    pub run: PrimFuncVal,
 }
 
 impl BinPrimPrelude {
     pub fn new(lib: &BinPrimLib) -> Self {
-        Self { ext: ExtPrimPrelude::new(&lib.ext), call: lib.cmd.call }
+        Self { ext: ExtPrimPrelude::new(&lib.ext), run: lib.cmd.run }
     }
 }
 
 impl Prelude for BinPrimPrelude {
     fn extend(&self, map: &mut Map<Key, Val>) {
         self.ext.extend(map);
-        map_put_func(map, ";", self.call);
+        map_put_func(map, "run", self.run);
     }
 }
