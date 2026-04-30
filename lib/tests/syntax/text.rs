@@ -8,6 +8,7 @@ pub(super) fn expected() -> Vec<Repr> {
         text("()[]{}<>\\|/'\"`^*+=-~_.,:;!?@#$%&"),
         text("abc ABC 0123"),
         text("🜁🜂🜃🜄"),
+        text("\t"),
         text(
             "\u{00}\u{01}\u{02}\u{03}\u{04}\u{05}\u{06}\u{07}\
             \u{08}\u{09}\u{0A}\u{0B}\u{0C}\u{0D}\u{0E}\u{0F}\

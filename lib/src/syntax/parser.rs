@@ -655,8 +655,8 @@ fn key(i: &mut &str) -> ModalResult<Key> {
 }
 
 fn text(i: &mut &str) -> ModalResult<Text> {
-    let key = take_while(1 .., |c| !matches!(c, KEY_QUOTE | '\r' | '\n' | '\t'));
-    let text = take_while(1 .., |c| !matches!(c, TEXT_QUOTE | '\r' | '\n' | '\t'));
+    let key = take_until(1 .., (KEY_QUOTE, '\r', '\n'));
+    let text = take_until(1 .., (TEXT_QUOTE, '\r', '\n'));
     let comment = take_until(0 .., (SCOPE_RIGHT, '\n')).void();
     let token =
         take_while(1 .., |c| is_key(c) && c != ' ' && c != LIST_RIGHT).verify_map(character);
