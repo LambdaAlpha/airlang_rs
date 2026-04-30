@@ -708,8 +708,6 @@ fn key_text<'a>(
     }
     move |i: &mut _| {
         let i: &mut &str = i;
-        let mut space_tab1 = space_tab(1 ..);
-        let mut tab = take_while(1 .., '\t').void();
         let mut peek_one = peek(any);
 
         let mut state = State::Clean;
@@ -747,13 +745,11 @@ fn key_text<'a>(
                 State::Key => match peek_one.parse_next(i)? {
                     KEY_QUOTE => clean(i, &mut state)?,
                     '\r' | '\n' => s.push_str(newline.parse_next(i)?),
-                    '\t' => tab.parse_next(i)?,
                     _ => s.push_str(key.parse_next(i)?),
                 },
                 State::Text => match peek_one.parse_next(i)? {
                     TEXT_QUOTE => clean(i, &mut state)?,
                     '\r' | '\n' => s.push_str(newline.parse_next(i)?),
-                    '\t' => tab.parse_next(i)?,
                     _ => s.push_str(text.parse_next(i)?),
                 },
                 State::Comment => match peek_one.parse_next(i)? {
@@ -764,7 +760,7 @@ fn key_text<'a>(
                 State::Token => match peek_one.parse_next(i)? {
                     LIST_RIGHT => clean(i, &mut state)?,
                     '\r' | '\n' => s.push_str(newline.parse_next(i)?),
-                    ' ' | '\t' => space_tab1.parse_next(i)?,
+                    ' ' => any.void().parse_next(i)?,
                     _ => s.push(token.parse_next(i)?),
                 },
             }

@@ -24,11 +24,11 @@ byte'Xff'
 =====
 binary group
 -----
-byte'B0000111100001111	00001111'
+byte'B0000111100001111'_'00001111'
 =====
 hexadecimal group
 -----
-byte'X0011	ff	ee'
+byte'X0011'_'ff'_'ee'
 =====
 default base
 -----

@@ -22,10 +22,6 @@ escape unicode
 -----
 ""[a X3f X1f701]
 =====
-tab format
------
-"a	b"
-=====
 multiline
 -----
 "a"_

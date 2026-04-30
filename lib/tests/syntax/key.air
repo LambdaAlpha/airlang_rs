@@ -142,13 +142,9 @@ alphabet + number
 -----
 abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789
 =====
-tab format
------
-'a	b'
-=====
 concat
 -----
-'"a"'[a b ' " ) (	sp X3f]_"'a'"
+'"a"'[a b ' " ) ( sp X3f]_"'a'"
 =====
 multiline
 -----

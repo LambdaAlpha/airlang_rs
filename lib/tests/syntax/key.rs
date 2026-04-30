@@ -40,7 +40,6 @@ pub(super) fn expected() -> Vec<Repr> {
         key("="),
         key(" ()[]{}<>\\|/'\"`^*+=-~_.,:;!?@#$%&"),
         key("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"),
-        key("ab"),
         key("\"a\"ab'\")( ?'a'"),
         key("ab "),
         key("ab "),
