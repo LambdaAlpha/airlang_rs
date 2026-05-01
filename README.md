@@ -271,14 +271,13 @@ _ do _[
 
 ## Roadmap
 
-1. **Enhance Language Expressiveness**  
-   Focus on expanding core expressiveness to lay the foundation for subsequent capabilities.
+Many goals do not yet have clear design proposals. The following directions will be explored in the future:
 
-2. **Introduce Abstract Semantics and Program Optimization Framework**  
-   Introduce an abstract semantics model based on "concrete value + abstract constraint", enabling optimization of values within the same class while maintaining semantic equivalence, and build a general program optimization framework based on this.
-
-3. **Develop Intelligent Optimization Algorithms**  
-   Develop automated, intelligent optimization algorithms based on abstract semantics to systematically optimize program resource usage.
+- Logical framework, paraconsistent logic, and error management
+- Non-computable semantics based on solving
+- Program analysis and optimization based on abstract interpretation theory
+- Algorithm complexity analysis and resource management
+- Concurrency model
 
 ## Installation and Running
 
