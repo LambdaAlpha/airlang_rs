@@ -10,9 +10,7 @@
 
 ## Language Features
 
-### Minimalist Syntax
-
-Air's syntax is extremely concise. It only includes comments and 14 data types, with no semantic-specific syntax for control flows, functions, types, modules, etc. Its rules are very simple, using prefixes to avoid ambiguity, and it has only 6 keywords (`_`, `.`, `:`, `?`, `true`, `false`). This makes it highly suitable for configuration or data interchange.
+### Syntax
 
 **unit**
 
@@ -205,30 +203,45 @@ true is_carmichael_number ?
 {a : !(1, b :) 2}
 ```
 
-### Minimalist Semantics
+### Semantics
 
-Air's evaluation rules are very concise, consisting of only six rules.
-
-First, the evaluation rules for keys are as follows:
+**key**
 
 1. `_a` ➔ `a`
 2. `.a` ➔ `.a`
 3. `a` ➔ `v`, where `v` is the value bound to key `a` in the context
 
-Second, the evaluation rule for quotes is `_(v)` ➔ `v`.
+**quote**
 
-Third, the evaluation rule for calls is `_ f i ➔ f'(i')`, where `x'` denotes the result of evaluating `x` (the same applies below).
+`_(v)` ➔ `v`
 
-Fourth, the evaluation rule for solving is `? f o` ➔ `i`, where `f'(i) = o'` is a fact in the configuration's fact database.
+**call**
 
-Fifth, the evaluation rules for cells, pairs, lists, and maps are as follows:
+`_ f i` ➔ `f'(i')`, where `x'` denotes the result of evaluating `x` (the same applies below)
 
-- `.(v)` ➔ `.(v')`
-- `v1 : v2` ➔ `v1' : v2'`
-- `[v1, v2, ..., vn]` ➔ `[v1', v2', ..., vn']`
-- `{k1 : v1, k2 : v2, ..., kn : vn}` ➔ `{k1 : v1', k2 : v2', kn : vn'}`
+**solve**
 
-Sixth, the evaluation rule for other values is `v` ➔ `v`.
+`? f o` ➔ `i`, where `f'(i) = o'` is a fact in the configuration's fact database
+
+**cell**,
+
+`.(v)` ➔ `.(v')`
+
+**pair**
+
+`v1 : v2` ➔ `v1' : v2'`
+
+**list**
+
+`[v1, v2, ..., vn]` ➔ `[v1', v2', ..., vn']`
+
+**map**
+
+`{k1 : v1, k2 : v2, ..., kn : vn}` ➔ `{k1 : v1', k2 : v2', kn : vn'}`
+
+**others**
+
+`v` ➔ `v`
 
 ### Context
 
