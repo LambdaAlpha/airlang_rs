@@ -2,11 +2,14 @@
 
 ## Design Goals
 
-- **Minimalist**  
-  A language is a consensus among programmers. The simpler the language, the stronger the consensus and the easier the code is to understand. Therefore, we strive to avoid unnecessary complexity. Based on this principle, we do not build in features such as modules, control flow, assignment, pattern matching, or type constructors into the language core.
-
 - **Universal**  
-  The broader a language's applicable scenarios, the higher the return on investment in learning it, and the better the interoperability between projects. Therefore, we aim to make the language adaptable to various goals and resource scales. Based on this principle, we provide users with the ability to manage context and configuration.
+  The boundaries of a programming language are the boundaries of a programmer's ability, so the language should be applicable to any need and should not self-limit.
+
+- **Reliable**  
+  Continuous error accumulation will eventually make a system unusable. Only reliable systems can develop sustainably, so the language should be able to prevent and manage errors.
+
+- **Lean**  
+  The common language among programmers should be easy to learn, understand, and use, so the language should avoid unnecessary complexity.
 
 ## Language Features
 
