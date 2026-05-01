@@ -260,14 +260,16 @@ _ do _[
 
 ### 配置
 
-配置是执行过程中的全局信息坏境，通过仅追加与局域覆盖等机制，兼顾了灵活性和可预测性。可通过 `import` 函数导入配置项，或通过 `export` 函数导出配置项，亦可通过 `with` 函数局域覆盖配置项。我们将基于配置机制实现模块管理、测试框架和错误处理等特性，并在初始配置中提供了原生函数和标准库。
+配置是执行过程中的全局信息坏境，通过仅追加与局域覆盖等机制，兼顾了灵活性和可预测性。可通过 `import` 函数导入配置项，或通过 `export` 函数导出配置项，亦可通过 `with` 函数局域覆盖配置项。我们将基于配置机制实现模块管理、任务管理、错误管理和测试框架等特性，并在初始配置中提供了原生函数和标准库。
 
 ```air
-_ do _[
-    _push set _ import .list.push,
-    .list.add export push,
-    .list.append export push,
-]
+_ with {
+    .decimal.rounding.mode : .half_even,
+    .decimal.rounding.precision : 28,
+} : _(_ do _[
+    _/ set _ import .decimal.divide,
+    281366922235. / 230.
+])
 ```
 
 ## 路线图

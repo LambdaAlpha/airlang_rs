@@ -12,10 +12,12 @@ _ do _[
 =====
 configuration
 -----
-_ do _[
-    _push set _ import .list.push,
-    .list.add export push,
-    .list.append export push,
-]
+_ with {
+    .decimal.rounding.mode : .half_even,
+    .decimal.rounding.precision : 28,
+} : _(_ do _[
+    _/ set _ import .decimal.divide,
+    281366922235. / 230.
+])
 -----
-.
+0E9*1.2233344445

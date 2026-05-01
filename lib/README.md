@@ -262,14 +262,16 @@ _ do _[
 
 ### Configuration
 
-Configuration is the global information environment during execution. Through mechanisms like append-only and scoped override, it balances flexibility and predictability. Configuration items can be imported via the `import` function, exported via the `export` function, or locally overridden via the `with` function. We will implement features like module management, testing frameworks, and error handling based on the configuration mechanism, and provide native functions and standard libraries in the initial configuration.
+Configuration is the global information environment during execution. Through mechanisms like append-only and scoped override, it balances flexibility and predictability. Configuration items can be imported via the `import` function, exported via the `export` function, or locally overridden via the `with` function. We will implement features like module management, task management, error handling, and testing frameworks based on the configuration mechanism, and provide native functions and standard libraries in the initial configuration.
 
 ```air
-_ do _[
-    _push set _ import .list.push,
-    .list.add export push,
-    .list.append export push,
-]
+_ with {
+    .decimal.rounding.mode : .half_even,
+    .decimal.rounding.precision : 28,
+} : _(_ do _[
+    _/ set _ import .decimal.divide,
+    281366922235. / 230.
+])
 ```
 
 ## Roadmap
