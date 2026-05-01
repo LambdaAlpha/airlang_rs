@@ -52,7 +52,7 @@ fn run_test_eval(cfg: Cfg, ctx: Val, input: &str, file_name: &str) -> Result<(),
         let mut cfg = backup_cfg.clone();
         let mut ctx = backup_ctx.clone();
         let ret = Eval.call(&mut cfg, &mut ctx, src);
-        log_abort(&cfg);
+        check_abort(&cfg, file_name, title);
         let ret_expected = o.parse().map_err(|e| {
             eprintln!("file {file_name} case ({title}): output ({o}) parse failed\n{e}");
             e
@@ -79,16 +79,28 @@ fn run_test_eval(cfg: Cfg, ctx: Val, input: &str, file_name: &str) -> Result<(),
     Ok(())
 }
 
-pub fn log_abort(cfg: &Cfg) {
+fn check_abort(cfg: &Cfg, file_name: &str, title: &str) {
     if !cfg.is_aborted() {
         return;
     }
     let type_ = cfg.import(Key::from_str_unchecked(ABORT_TYPE));
     let msg = cfg.import(Key::from_str_unchecked(ABORT_MSG));
     match (type_, msg) {
-        (Some(type_), Some(msg)) => error!("aborted by {type_}: {msg}"),
-        (None, Some(msg)) => error!("aborted: {msg}"),
-        (Some(type_), None) => error!("aborted by {type_}"),
-        (None, None) => error!("aborted"),
+        (Some(type_), Some(msg)) => {
+            error!("file {file_name} case ({title}): aborted by {type_}: {msg}");
+            panic!("file {file_name} case ({title}): aborted by {type_}: {msg}")
+        },
+        (None, Some(msg)) => {
+            error!("file {file_name} case ({title}): aborted: {msg}");
+            panic!("file {file_name} case ({title}): aborted: {msg}")
+        },
+        (Some(type_), None) => {
+            error!("file {file_name} case ({title}): aborted by {type_}");
+            panic!("file {file_name} case ({title}): aborted by {type_}")
+        },
+        (None, None) => {
+            error!("file {file_name} case ({title}): aborted");
+            panic!("file {file_name} case ({title}): aborted")
+        },
     }
 }
