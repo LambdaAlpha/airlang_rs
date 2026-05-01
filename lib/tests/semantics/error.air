@@ -51,7 +51,7 @@ _ do _[
             assert : assert,
         },
     },
-    _cfg where _(false assert "not a bug"),
+    _cfg where _(_ assert false),
     _cfg which is_aborted : .,
 ]
 -----
@@ -69,7 +69,7 @@ _ do _[
             assert : assert,
         },
     },
-    _cfg where _(true assert "is a bug"),
+    _cfg where _(_ assert true),
     _cfg which is_aborted : .,
 ]
 -----

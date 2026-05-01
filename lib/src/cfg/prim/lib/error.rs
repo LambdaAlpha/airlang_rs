@@ -2,7 +2,6 @@ use const_format::concatcp;
 
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::error::abort_by_bug_with_msg;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
@@ -12,8 +11,6 @@ use crate::semantics::func::CtxFreeInputFreeFunc;
 use crate::semantics::func::CtxMutInputFreeFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
-use crate::type_::Pair;
-use crate::type_::Text;
 
 #[derive(Copy, Clone)]
 pub struct ErrorLib {
@@ -56,19 +53,11 @@ pub fn abort(cfg: &mut Cfg) -> Val {
 }
 
 pub fn assert(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return bug!(cfg, "{ASSERT}: expected input to be a pair, but got {input}");
+    let Val::Bit(bit) = input else {
+        return bug!(cfg, "{ASSERT}: expected input.left to be a bit, but got {input}");
     };
-    let pair = Pair::from(pair);
-    let Val::Bit(bit) = pair.left else {
-        return bug!(cfg, "{ASSERT}: expected input.left to be a bit, but got {}", pair.left);
-    };
-    let Val::Text(message) = pair.right else {
-        return bug!(cfg, "{ASSERT}: expected input.right to be a text, but got {}", pair.right);
-    };
-    let message = Text::from(message);
     if !*bit {
-        return abort_by_bug_with_msg(cfg, message);
+        cfg.abort();
     }
     Val::default()
 }
