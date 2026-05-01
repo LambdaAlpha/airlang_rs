@@ -267,8 +267,22 @@ _ do _[
 3. **Develop Intelligent Optimization Algorithms**  
    Develop automated, intelligent optimization algorithms based on abstract semantics to systematically optimize program resource usage.
 
-## Installation
+## Installation and Running
+
+Install:
 
 ```bash
 cargo install airlang_bin
+```
+
+Run the interactive interpreter:
+
+```bash
+airlang_bin
+```
+
+Run a file:
+
+```bash
+airlang_bin path/to/your/file.air
 ```

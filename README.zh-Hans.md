@@ -266,10 +266,24 @@ _ do _[
 3. **开发智能优化算法**  
    研发自动化、智能化的抽象语义程序优化算法，实现对程序资源使用的系统性优化。
 
-## 安装
+## 安装运行
+
+安装：
 
 ```bash
 cargo install airlang_bin
+```
+
+运行交互式解释器：
+
+```bash
+airlang_bin
+```
+
+运行文件：
+
+```bash
+airlang_bin path/to/your/file.air
 ```
 
 ## 许可证
