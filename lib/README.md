@@ -224,7 +224,7 @@ true is_carmichael_number ?
 
 `? f o` ➔ `i`, where `f'(i) = o'` is a fact in the configuration's fact database
 
-**cell**,
+**cell**
 
 `.(v)` ➔ `.(v')`
 
@@ -238,7 +238,7 @@ true is_carmichael_number ?
 
 **map**
 
-`{k1 : v1, k2 : v2, ..., kn : vn}` ➔ `{k1 : v1', k2 : v2', kn : vn'}`
+`{k1 : v1, k2 : v2, ..., kn : vn}` ➔ `{k1 : v1', k2 : v2', ..., kn : vn'}`
 
 **others**
 
@@ -274,7 +274,7 @@ _ with {
 
 ### Error Management
 
-Bugs are unexpected errors by programmers. Since we cannot predict the program state when a bug occurs, such errors are essentially unrecoverable. Air allows you to manage tasks per configuration, using `assert` to check the current state, or `abort` to terminate the current task when a program bug is detected.
+Bugs are errors that programmers do not anticipate. Since we cannot predict the program state when a bug occurs, such errors are essentially unrecoverable. Air allows you to manage tasks per configuration, using `assert` to check the current state, or `abort` to terminate the current task when a program bug is detected.
 
 ```air
 _ do _[
