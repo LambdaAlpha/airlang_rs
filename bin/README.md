@@ -272,6 +272,50 @@ _ with {
 ])
 ```
 
+### Error Management
+
+Bugs are unexpected errors by programmers. Since we cannot predict the program state when a bug occurs, such errors are essentially unrecoverable. Air allows you to manage tasks per configuration, using `assert` to check the current state, or `abort` to terminate the current task when a program bug is detected.
+
+```air
+_ do _[
+    _any set _ import .value.any,
+    _a set _ any .integer,
+    _b set a * 1,
+    (a <> b) test _[
+        _ abort .
+    ],
+    _ assert 1 = b / a
+]
+```
+
+### Solve
+
+**Solve** is used to express the need to solve a problem. For example, "find an assignment that makes a Boolean formula true" is a need to solve a problem, where the "Boolean formula" is a function `formula` whose expected output is `true`, which can be expressed as a solve `? formula true`. The solve mechanism allows any need to be expressed formally, without caring about the specific implementation. However, the solve mechanism is not magic and cannot automatically solve problems; it still requires the implementer of the need to actually solve the problem.
+
+```air
+_ do _[
+    _formula set _ function {
+        code : _(. : i) : _(_ do _[
+            _[a1, a2, a3, a4, a5] := i,
+            ((_ not a1) or a3) and
+            (a1 or a2) and
+            (_ not a2) and
+            (a4 or a5) and
+            ((_ not a4) or _ not a5)
+        ]),
+        prelude : {
+            := : _ import .context.represent,
+            do : do,
+            not : not,
+            and : and,
+            or : or,
+        },
+    },
+    formula fact [true, false, true, true, false],
+    ? formula true
+]
+```
+
 ## Roadmap
 
 Many goals do not yet have clear design proposals. The following directions will be explored in the future:

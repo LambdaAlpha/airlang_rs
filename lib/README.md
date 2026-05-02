@@ -4,10 +4,8 @@
 
 - **Universal**  
   The boundaries of a programming language are the boundaries of a programmer's ability, so the language should be applicable to any need and should not self-limit.
-
 - **Reliable**  
   Continuous error accumulation will eventually make a system unusable. Only reliable systems can develop sustainably, so the language should be able to prevent and manage errors.
-
 - **Lean**  
   The common language among programmers should be easy to learn, understand, and use, so the language should avoid unnecessary complexity.
 
@@ -272,6 +270,50 @@ _ with {
     _/ set _ import .decimal.divide,
     281366922235. / 230.
 ])
+```
+
+### Error Management
+
+Bugs are unexpected errors by programmers. Since we cannot predict the program state when a bug occurs, such errors are essentially unrecoverable. Air allows you to manage tasks per configuration, using `assert` to check the current state, or `abort` to terminate the current task when a program bug is detected.
+
+```air
+_ do _[
+    _any set _ import .value.any,
+    _a set _ any .integer,
+    _b set a * 1,
+    (a <> b) test _[
+        _ abort .
+    ],
+    _ assert 1 = b / a
+]
+```
+
+### Solve
+
+**Solve** is used to express the need to solve a problem. For example, "find an assignment that makes a Boolean formula true" is a need to solve a problem, where the "Boolean formula" is a function `formula` whose expected output is `true`, which can be expressed as a solve `? formula true`. The solve mechanism allows any need to be expressed formally, without caring about the specific implementation. However, the solve mechanism is not magic and cannot automatically solve problems; it still requires the implementer of the need to actually solve the problem.
+
+```air
+_ do _[
+    _formula set _ function {
+        code : _(. : i) : _(_ do _[
+            _[a1, a2, a3, a4, a5] := i,
+            ((_ not a1) or a3) and
+            (a1 or a2) and
+            (_ not a2) and
+            (a4 or a5) and
+            ((_ not a4) or _ not a5)
+        ]),
+        prelude : {
+            := : _ import .context.represent,
+            do : do,
+            not : not,
+            and : and,
+            or : or,
+        },
+    },
+    formula fact [true, false, true, true, false],
+    ? formula true
+]
 ```
 
 ## Roadmap

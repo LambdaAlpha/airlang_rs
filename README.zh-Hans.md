@@ -272,6 +272,50 @@ _ with {
 ])
 ```
 
+### 错误管理
+
+代码缺陷是程序员意料之外的错误，我们无法预期错误发生时的程序状态，因此这种错误本质上是无法恢复的。Air 语言允许你以配置为单元进行任务管理，通过 `assert` 断言当前状态，或者在检测到程序缺陷时通过 `abort` 中止当前任务。
+
+```air
+_ do _[
+    _any set _ import .value.any,
+    _a set _ any .integer,
+    _b set a * 1,
+    (a <> b) test _[
+        _ abort .
+    ],
+    _ assert 1 = b / a
+]
+```
+
+### 求解
+
+**求解**用于表达解决问题的需求。例如，“找出一个使布尔公式为真的赋值”是一个解决问题的需求，其中“布尔公式”是一个函数 `formula`，这个函数的的预期输出是“真”（`true`），这个需求可以表示为一个求解 `? formula true`。求解机制允许形式化地表达任意需求，无需关心具体实现。但求解机制并非魔法，并不能自动解决问题，仍需要需求实现方解决问题。
+
+```air
+_ do _[
+    _formula set _ function {
+        code : _(. : i) : _(_ do _[
+            _[a1, a2, a3, a4, a5] := i,
+            ((_ not a1) or a3) and
+            (a1 or a2) and
+            (_ not a2) and
+            (a4 or a5) and
+            ((_ not a4) or _ not a5)
+        ]),
+        prelude : {
+            := : _ import .context.represent,
+            do : do,
+            not : not,
+            and : and,
+            or : or,
+        },
+    },
+    formula fact [true, false, true, true, false],
+    ? formula true
+]
+```
+
 ## 路线图
 
 许多目标还没有确定清晰的设计方案，未来将探索以下方向
