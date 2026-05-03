@@ -284,7 +284,7 @@ _ do _[
     (a <> b) test _[
         _ abort .
     ],
-    _ assert 1 = b / a
+    _ assert a = b / 1
 ]
 ```
 
