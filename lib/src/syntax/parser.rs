@@ -133,7 +133,12 @@ fn cut_expect_desc(description: &'static str) -> E {
 
 fn spaces(i: &mut &str) -> ModalResult<()> {
     let spaces = take_while(1 .., |c| matches!(c, ' ' | '\t' | '\n'));
-    let f = repeat(1 .., alt((spaces, "\r\n")).void());
+    let fail_spaces = fail
+        .context(expect_char(' '))
+        .context(expect_char('\t'))
+        .context(expect_desc("`\\n`"))
+        .context(expect_desc("`\\r\\n`"));
+    let f = repeat(1 .., alt((spaces, "\r\n", fail_spaces)).void());
     f.context(label("spaces")).parse_next(i)
 }
 
@@ -143,7 +148,13 @@ fn space_tab<'a>(range: impl Into<Range>) -> impl Parser<&'a str, (), E> {
 }
 
 fn void<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
-    repeat(1 .., alt((spaces, comment(ctx))))
+    let fail_void = fail
+        .context(expect_char(' '))
+        .context(expect_char('\t'))
+        .context(expect_desc("`\\n`"))
+        .context(expect_desc("`\\r\\n`"))
+        .context(expect_desc("comment"));
+    repeat(1 .., alt((spaces, comment(ctx), fail_void))).context(label("void"))
 }
 
 fn comment<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
@@ -660,10 +671,14 @@ fn text(i: &mut &str) -> ModalResult<Text> {
     let comment = take_until(0 .., (SCOPE_RIGHT, '\n')).void();
     let token =
         take_while(1 .., |c| is_key(c) && c != ' ' && c != LIST_RIGHT).verify_map(character);
-    let newline = alt(('|'.value(NewLine::None), '.'.value(NewLine::Lf), ':'.value(NewLine::Crlf)))
-        .context(expect_char('|'))
-        .context(expect_char('.'))
-        .context(expect_char(':'));
+    let fail_newline =
+        fail.context(expect_char('|')).context(expect_char('.')).context(expect_char(':'));
+    let newline = alt((
+        '|'.value(NewLine::None),
+        '.'.value(NewLine::Lf),
+        ':'.value(NewLine::Crlf),
+        fail_newline,
+    ));
     #[expect(clippy::redundant_closure_for_method_calls)]
     let newline = preceded((line_ending, space_tab(0 ..)), newline).map(|newline| newline.as_str());
     let text = key_text(key, text, comment, token, newline).map(Text::from);
@@ -738,7 +753,16 @@ fn key_text<'a>(
                             s.push_str(newline.parse_next(i)?);
                             continue;
                         },
-                        _ => return fail.parse_next(i),
+                        _ => {
+                            return fail
+                                .context(expect_char(KEY_QUOTE))
+                                .context(expect_char(TEXT_QUOTE))
+                                .context(expect_char(SCOPE_LEFT))
+                                .context(expect_char(LIST_LEFT))
+                                .context(expect_desc("`\\n`"))
+                                .context(expect_desc("`\\r\\n`"))
+                                .parse_next(i);
+                        },
                     };
                     any.parse_next(i)?;
                 },

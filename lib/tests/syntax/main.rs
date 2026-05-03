@@ -159,12 +159,12 @@ macro_rules! test_syntax {
     ($($name:ident)*) => {
         airlang_dev::macro_::paste!{
             $(#[test]
-            fn [< test_parse $name >] () -> Result<(), Box<dyn Error>> {
+            fn [< test_parse_ $name >] () -> Result<(), Box<dyn Error>> {
                 test_parse(include_str!(concat!(stringify!($name), ".air")), concat!("syntax/", stringify!($name), ".air"), $name::expected)
             }
 
             #[test]
-            fn [< test_generate $name >] () -> Result<(), Box<dyn Error>> {
+            fn [< test_generate_ $name >] () -> Result<(), Box<dyn Error>> {
                 test_generate(include_str!(concat!(stringify!($name), ".air")), concat!("syntax/", stringify!($name), ".air"))
             })*
         }

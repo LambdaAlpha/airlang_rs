@@ -343,6 +343,10 @@ map duplicate keys
 -----
 {a : 2, a : 3}
 =====
+map text key
+-----
+{"a" : b}
+=====
 raw map duplicate keys
 -----
 #{a 2 a 3}
