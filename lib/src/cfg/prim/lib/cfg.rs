@@ -32,8 +32,7 @@ pub struct CfgLib {
     pub get_length: PrimFuncVal,
     pub with: PrimFuncVal,
     pub get_self: PrimFuncVal,
-    // todo rename
-    pub where_: PrimFuncVal,
+    pub let_: PrimFuncVal,
 }
 
 pub const MAKE: &str = concatcp!(PREFIX_CELL, CFG, ".make");
@@ -44,7 +43,7 @@ pub const EXPORT: &str = concatcp!(PREFIX_CELL, CFG, ".export");
 pub const GET_LENGTH: &str = concatcp!(PREFIX_CELL, CFG, ".get_length");
 pub const WITH: &str = concatcp!(PREFIX_CELL, CFG, ".with");
 pub const GET_SELF: &str = concatcp!(PREFIX_CELL, CFG, ".get_self");
-pub const WHERE: &str = concatcp!(PREFIX_CELL, CFG, ".where");
+pub const LET: &str = concatcp!(PREFIX_CELL, CFG, ".let");
 
 impl Default for CfgLib {
     fn default() -> Self {
@@ -57,7 +56,7 @@ impl Default for CfgLib {
             get_length: CtxConstInputFreeFunc { fn_: get_length }.build(),
             with: CtxMutInputAwareFunc { fn_: with }.build(),
             get_self: CtxFreeInputFreeFunc { fn_: get_self }.build(),
-            where_: CtxMutInputAwareFunc { fn_: where_ }.build(),
+            let_: CtxMutInputAwareFunc { fn_: let_ }.build(),
         }
     }
 }
@@ -72,7 +71,7 @@ impl CfgMod for CfgLib {
         extend_func(cfg, GET_LENGTH, self.get_length);
         extend_func(cfg, WITH, self.with);
         extend_func(cfg, GET_SELF, self.get_self);
-        extend_func(cfg, WHERE, self.where_);
+        extend_func(cfg, LET, self.let_);
     }
 }
 
@@ -158,16 +157,16 @@ pub fn get_self(cfg: &mut Cfg) -> Val {
     Val::Cfg(cfg.clone().into())
 }
 
-pub fn where_(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn let_(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{WHERE}: expected input to be a pair, but got {input}");
+        return bug!(cfg, "{LET}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Some(ctx) = ctx.ref_mut(cfg, pair.left.clone()) else {
         return Val::default();
     };
     let Val::Cfg(new_cfg) = ctx else {
-        return bug!(cfg, "{WHERE}: expected context to be a config, but got {ctx}");
+        return bug!(cfg, "{LET}: expected context to be a config, but got {ctx}");
     };
-    eval_with_prelude(new_cfg, WHERE, pair.right)
+    eval_with_prelude(new_cfg, LET, pair.right)
 }

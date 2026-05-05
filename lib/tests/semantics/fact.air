@@ -6,7 +6,7 @@ _ do _[
     _i2 set _ any .integer,
     _sum set i1 + i2,
     + fact i1 : i2,
-    _(i3 : i4) represent ? + sum,
+    _(i3 : i4) is ? + sum,
     sum = i3 + i4
 ]
 -----
@@ -21,7 +21,7 @@ _ do _[
     _i2 set _ any .integer,
     _sum1 set i1 + i2,
     + fact i1 : i2,
-    .(_sum2) represent + fact.call i1 : i2,
+    .(_sum2) is + fact.call i1 : i2,
     sum1 = sum2
 ]
 -----
@@ -36,7 +36,7 @@ _ do _[
     _i2 set _ any .integer,
     _sum set i1 + i2,
     + fact i1 : i2,
-    .(_i3 : _i4) represent + fact.solve sum,
+    .(_i3 : _i4) is + fact.solve sum,
     sum = i3 + i4
 ]
 -----

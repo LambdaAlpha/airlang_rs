@@ -71,195 +71,195 @@ _ do _[
 set special key 2
 -----
 _ do _[
-    _get_left set _ import .pair.get_left,
+    _get_left set _ import .pair.get_left.context.let,
     __p set 1 : 2,
-    __p which get_left : .
+    __p get_left .
 ]
 -----
 1
 =====
-represent cell
+is cell
 -----
 _ do _[
-    .(_v) represent .(true),
+    .(_v) is .(true),
     v
 ]
 -----
 true
 =====
-represent pair
+is pair
 -----
 _ do _[
-    _(a : b) represent 1 : 2,
+    _(a : b) is 1 : 2,
     a : b
 ]
 -----
 1 : 2
 =====
-represent recursive
+is recursive
 -----
 _ do _[
-    _(a : b : c) represent 1 : 2 : 3,
+    _(a : b : c) is 1 : 2 : 3,
     [a, b, c]
 ]
 -----
 [1, 2, 3]
 =====
-represent call
+is call
 -----
 _ do _[
-    _(_ f a) represent _(_ 1 2),
+    _(_ f a) is _(_ 1 2),
     [f, a]
 ]
 -----
 [1, 2]
 =====
-represent infix
+is infix
 -----
 _ do _[
-    _(a b c) represent _(1 2 3),
+    _(a b c) is _(1 2 3),
     [a, b, c]
 ]
 -----
 [1, 2, 3]
 =====
-represent solve
+is solve
 -----
 _ do _[
-    _(? f a) represent _(? 1 2),
+    _(? f a) is _(? 1 2),
     [f, a]
 ]
 -----
 [1, 2]
 =====
-represent list equal length
+is list equal length
 -----
 _ do _[
-    _[a, b, c] represent [1, 2, 3],
+    _[a, b, c] is [1, 2, 3],
     [a, b, c]
 ]
 -----
 [1, 2, 3]
 =====
-represent list more value
+is list more value
 -----
 _ do _[
-    _[a, b] represent [1, 2, 3],
+    _[a, b] is [1, 2, 3],
     [a, b]
 ]
 -----
 [1, 2]
 =====
-represent list more pattern
+is list more pattern
 -----
 _ do _[
     _config.make set _ import .config.make,
     _link.make set _ import .link.make,
-    _where set _ import .config.where,
-    _is_aborted set _ import .error.is_aborted,
+    _config.let set _ import .config.let,
+    _is_aborted set _ import .error.is_aborted.context.let,
     _c set _ config.make {
         .prelude : _ link.make {
-            represent : represent,
+            is : is,
         },
     },
-    _c where _(_[a, b] represent [3]),
-    _c which is_aborted : .,
+    _c config.let _(_[a, b] is [3]),
+    _c is_aborted .,
 ]
 -----
 true
 =====
-represent map key
+is map key
 -----
 _ do _[
-    _{a : a, b : b} represent {a : 1, b : 2, c : 3},
+    _{a : a, b : b} is {a : 1, b : 2, c : 3},
     [a, b]
 ]
 -----
 [1, 2]
 =====
-represent map other key
+is map other key
 -----
 _ do _[
-    _{1 : a, 3 : b} represent {1 : 2, 3 : 4},
+    _{1 : a, 3 : b} is {1 : 2, 3 : 4},
     [a, b]
 ]
 -----
 [2, 4]
 =====
-represent match
+is match
 -----
 _ do _[
-    _[a, 2, c] represent [1, 2, 3],
+    _[a, 2, c] is [1, 2, 3],
     [a, c]
 ]
 -----
 [1, 3]
 =====
-represent pair ctx
+get set pair ctx
 -----
 _ do _[
     _p set 1 : 2,
-    _p which set : .pair.left : 3,
-    _p which get : .pair.left
+    _p let set : .pair.left : 3,
+    _p let get : .pair.left
 ]
 -----
 3
 =====
-represent call ctx
+get set call ctx
 -----
 _ do _[
     _c set _(_ func input),
-    _c which set : .call.function : .f,
-    _c which get : .call.function
+    _c let set : .call.function : .f,
+    _c let get : .call.function
 ]
 -----
 .f
 =====
-represent list ctx
+get set list ctx
 -----
 _ do _[
-    _list.get set _ import .list.get,
+    _list.get set _ import .list.get.context.let,
     _l set [1, 2, 3],
-    _l which set : .list.first : 4,
-    _l which list.get : 0
+    _l let set : .list.first : 4,
+    _l list.get 0
 ]
 -----
 4
 =====
-represent map ctx
+get set map ctx
 -----
 _ do _[
-    _map.get set _ import .map.get,
+    _map.get set _ import .map.get.context.let,
     _m set {a : 1, b : 2},
-    _m which set : .a : 3,
-    _m which map.get : .a
+    _m let set : .a : 3,
+    _m map.get .a
 ]
 -----
 .(3)
 =====
-represent map ctx not exist
+set map ctx not exist
 -----
 _ do _[
-    _map.get set _ import .map.get,
+    _map.get set _ import .map.get.context.let,
     _m set {},
-    _m which set : .a : 3,
-    _m which map.get : .a
+    _m let set : .a : 3,
+    _m map.get .a
 ]
 -----
 .(3)
 =====
-which 1
+let 1
 -----
 _ do _[
     _set_left set _ import .pair.set_left,
     .a set {.p : 1 : 2},
-    .a which eval : which call .p : set_left : 3,
-    .a which move : .p,
+    .a let eval : let call .p : set_left : 3,
+    .a let move : .p,
 ]
 -----
 3 : 2
 =====
-which 2
+let 2
 -----
 _ do _[
     _set_left set _ import .pair.set_left,
@@ -267,13 +267,13 @@ _ do _[
         .p : 1 : 2,
         .b : 3,
     },
-    .a which eval : which call .p : set_left : get call .b,
-    .a which move : .p,
+    .a let eval : let call .p : set_left : get call .b,
+    .a let move : .p,
 ]
 -----
 3 : 2
 =====
-which 3
+let 3
 -----
 _ do _[
     _set_left set _ import .pair.set_left,
@@ -282,27 +282,27 @@ _ do _[
         .p : 1 : 2,
         b : 3,
     },
-    .a which eval : which call .p : _set_left : _b,
-    .a which move : .p,
+    .a let eval : let call .p : _set_left : _b,
+    .a let move : .p,
 ]
 -----
 3 : 2
 =====
-which recursive
+let recursive
 -----
 _ do _[
     .a set {.b : {.c : 1}},
-    .a which eval : which call .b : get : .c
+    .a let eval : let call .b : get : .c
 ]
 -----
 1
 =====
-which get_self
+let get_self
 -----
 _ do _[
     _get_self set _ import .context.get_self,
     _u set 1,
-    _u which get_self : .
+    _u let get_self : .
 ]
 -----
 1
@@ -313,7 +313,7 @@ _ do _[
     _get_self set _ import .context.get_self,
     .a set 1,
     _b set _ get_self .,
-    _b which get : .a
+    _b let get : .a
 ]
 -----
 1
@@ -323,10 +323,10 @@ get_self non-sync
 _ do _[
     _any set _ import .value.any,
     _get_self set _ import .context.get_self,
-    _contain set _ import .map.contain,
+    _contain set _ import .map.contain.context.let,
     _a set _ get_self .,
     .b set _ any .,
-    _a which contain : .b
+    _a contain .b
 ]
 -----
 false

@@ -500,10 +500,10 @@ _ do _[
 iterate list map
 -----
 _ do _[
-    _push set _ import .list.push,
+    _push set _ import .list.push.context.let,
     _a set [],
     [1, 2, 3, 4, 5] iterate _i : _[
-        _a which push : i + 1
+        _a push i + 1
     ],
     a
 ]
@@ -539,15 +539,15 @@ iterate integer negative
 _ do _[
     _config.make set _ import .config.make,
     _link.make set _ import .link.make,
-    _where set _ import .config.where,
-    _is_aborted set _ import .error.is_aborted,
+    _config.let set _ import .config.let,
+    _is_aborted set _ import .error.is_aborted.context.let,
     _c set _ config.make {
         .prelude : _ link.make {
             iterate : iterate,
         },
     },
-    _c where _(0-1 iterate _i : []),
-    _c which is_aborted : .,
+    _c config.let _(0-1 iterate _i : []),
+    _c is_aborted .,
 ]
 -----
 true
@@ -555,10 +555,10 @@ true
 iterate byte
 -----
 _ do _[
-    _push set _ import .list.push,
+    _push set _ import .list.push.context.let,
     _b set [],
     byte'1122334455' iterate _i : _[
-        _b which push : i
+        _b push i
     ],
     b
 ]
@@ -568,10 +568,10 @@ _ do _[
 iterate key
 -----
 _ do _[
-    _push set _ import .list.push,
+    _push set _ import .list.push.context.let,
     _s set [],
     _abc iterate _i : _[
-        _s which push : i
+        _s push i
     ],
     s
 ]
@@ -581,10 +581,10 @@ _ do _[
 iterate text
 -----
 _ do _[
-    _push set _ import .list.push,
+    _push set _ import .list.push.context.let,
     _t set [],
     "hello" iterate _i : _[
-        _t which push : i
+        _t push i
     ],
     t
 ]
@@ -594,11 +594,11 @@ _ do _[
 iterate map
 -----
 _ do _[
-    _push set _ import .list.push,
+    _push set _ import .list.push.context.let,
     _map.make set _ import .map.make,
     _kv set [],
     {1 : 2, 3 : 4} iterate _i : _[
-        _kv which push : i
+        _kv push i
     ],
     _ map.make kv
 ]

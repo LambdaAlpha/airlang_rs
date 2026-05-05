@@ -2,14 +2,14 @@ get_length join
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_length set _ import .key.get_length,
+    _get_length set _ import .key.get_length.context.let,
     _join set _ import .key.join,
     _a set _ any .key,
-    _la set _a which get_length : .,
+    _la set _a get_length .,
     _b set _ any .key,
-    _lb set _b which get_length : .,
+    _lb set _b get_length .,
     _ab set empty join [a, b],
-    _lab set _ab which get_length : .,
+    _lab set _ab get_length .,
     lab = la + lb
 ]
 -----
@@ -18,8 +18,8 @@ true
 get_length empty
 -----
 _ do _[
-    _get_length set _ import .key.get_length,
-    _empty which get_length : .
+    _get_length set _ import .key.get_length.context.let,
+    _empty get_length .
 ]
 -----
 0
@@ -27,9 +27,9 @@ _ do _[
 get_length else
 -----
 _ do _[
-    _get_length set _ import .key.get_length,
+    _get_length set _ import .key.get_length.context.let,
     _s set .a,
-    _s which get_length : .
+    _s get_length .
 ]
 -----
 2

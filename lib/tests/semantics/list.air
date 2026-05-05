@@ -2,12 +2,12 @@ get_length push
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_length set _ import .list.get_length,
-    _push set _ import .list.push,
+    _get_length set _ import .list.get_length.context.let,
+    _push set _ import .list.push.context.let,
     _a set _ any .list,
-    _l1 set _a which get_length : .,
-    _a which push : .,
-    _l2 set _a which get_length : .,
+    _l1 set _a get_length .,
+    _a push .,
+    _l2 set _a get_length .,
     l2 = l1 + 1
 ]
 -----
@@ -17,14 +17,14 @@ get_length push_many
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_length set _ import .list.get_length,
-    _push_many set _ import .list.push_many,
+    _get_length set _ import .list.get_length.context.let,
+    _push_many set _ import .list.push_many.context.let,
     _a set _ any .list,
-    _la set _a which get_length : .,
+    _la set _a get_length .,
     _b set _ any .list,
-    _lb set _b which get_length : .,
-    _a which push_many : b,
-    _lab set _a which get_length : .,
+    _lb set _b get_length .,
+    _a push_many b,
+    _lab set _a get_length .,
     lab = la + lb
 ]
 -----
@@ -34,15 +34,15 @@ get_length pop_many
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_length set _ import .list.get_length,
-    _pop_many set _ import .list.pop_many,
+    _get_length set _ import .list.get_length.context.let,
+    _pop_many set _ import .list.pop_many.context.let,
     _% set _ import .integer.remainder,
     _a set _ any .list,
-    _l1 set _a which get_length : .,
+    _l1 set _a get_length .,
     _ .try (l1 = 0) test [.(true)],
     _i set (l1 + (_ any .integer) % l1) % l1,
-    _a which pop_many : i,
-    _l2 set _a which get_length : .,
+    _a pop_many i,
+    _l2 set _a get_length .,
     l2 = l1 - i
 ]
 -----
@@ -52,20 +52,20 @@ set get
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_length set _ import .list.get_length,
-    _list.set set _ import .list.set,
-    _list.get set _ import .list.get,
+    _get_length set _ import .list.get_length.context.let,
+    _list.set set _ import .list.set.context.let,
+    _list.get set _ import .list.get.context.let,
     _% set _ import .integer.remainder,
     _a set _ any .list,
     _b set a,
-    _l set _a which get_length : .,
+    _l set _a get_length .,
     _ .try (l = 0) test [.(true)],
     _i set (l + (_ any .integer) % l) % l,
-    _v1 set _a which list.get : i,
+    _v1 set _a list.get i,
     _v2 set _ any .,
-    _v3 set _a which list.set : i : v2,
-    _v4 set _a which list.get : i,
-    _a which list.set : i : v1,
+    _v3 set _a list.set i : v2,
+    _v4 set _a list.get i,
+    _a list.set i : v1,
     (v1 = v3) and (v2 = v4) and (a = b)
 ]
 -----
@@ -75,15 +75,15 @@ set_many get_many
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_length set _ import .list.get_length,
-    _get_many set _ import .list.get_many,
-    _set_many set _ import .list.set_many,
+    _get_length set _ import .list.get_length.context.let,
+    _get_many set _ import .list.get_many.context.let,
+    _set_many set _ import .list.set_many.context.let,
     _% set _ import .integer.remainder,
     _a set _ any .list,
-    _la set _a which get_length : .,
+    _la set _a get_length .,
     _ .try (la = 0) test [.(true)],
     _b set _ any .list,
-    _lb set _b which get_length : .,
+    _lb set _b get_length .,
     _ .try (lb = 0) test [.(true)],
     (la < lb) test _[
         _t set a,
@@ -96,10 +96,10 @@ _ do _[
     _a1 set a,
     _d set la - lb,
     _i set (d = 0) test [0] : _[(d + (_ any .integer) % d) % d],
-    _c1 set _a which get_many : i : i + lb,
-    _c2 set _a which set_many : i : b,
-    _b1 set _a which get_many : i : i + lb,
-    _a which set_many : i : c1,
+    _c1 set _a get_many i : i + lb,
+    _c2 set _a set_many i : b,
+    _b1 set _a get_many i : i + lb,
+    _a set_many i : c1,
     (b = b1) and (c1 = c2) and (a = a1)
 ]
 -----
@@ -109,17 +109,17 @@ insert get get_length
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_length set _ import .list.get_length,
-    _insert set _ import .list.insert,
-    _get set _ import .list.get,
+    _get_length set _ import .list.get_length.context.let,
+    _insert set _ import .list.insert.context.let,
+    _list.get set _ import .list.get.context.let,
     _% set _ import .integer.remainder,
     _a set _ any .list,
-    _l set 1 + _a which get_length : .,
+    _l set 1 + _a get_length .,
     _i set (l + (_ any .integer) % l) % l,
     _v set _ any .,
-    _a which insert : i : v,
-    _v1 set _a which get : i,
-    _l1 set _a which get_length : .,
+    _a insert i : v,
+    _v1 set _a list.get i,
+    _l1 set _a get_length .,
     (v = v1) and (l = l1)
 ]
 -----
@@ -129,17 +129,17 @@ insert remove
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_length set _ import .list.get_length,
-    _insert set _ import .list.insert,
-    _remove set _ import .list.remove,
+    _get_length set _ import .list.get_length.context.let,
+    _insert set _ import .list.insert.context.let,
+    _remove set _ import .list.remove.context.let,
     _% set _ import .integer.remainder,
     _a set _ any .list,
     _b set a,
-    _l set 1 + _a which get_length : .,
+    _l set 1 + _a get_length .,
     _i set (l + (_ any .integer) % l) % l,
     _v1 set _ any .,
-    _a which insert : i : v1,
-    _v2 set _a which remove : i,
+    _a insert i : v1,
+    _v2 set _a remove i,
     (v1 = v2) and a = b
 ]
 -----
@@ -149,18 +149,18 @@ insert_many get_many get_length
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_length set _ import .list.get_length,
-    _insert_many set _ import .list.insert_many,
-    _get_many set _ import .list.get_many,
+    _get_length set _ import .list.get_length.context.let,
+    _insert_many set _ import .list.insert_many.context.let,
+    _get_many set _ import .list.get_many.context.let,
     _% set _ import .integer.remainder,
     _a set _ any .list,
-    _l1 set 1 + _a which get_length : .,
+    _l1 set 1 + _a get_length .,
     _i set (l1 + (_ any .integer) % l1) % l1,
     _v1 set _ any .list,
-    _vl set _v1 which get_length : .,
-    _a which insert_many : i : v1,
-    _v2 set _a which get_many : i : i + vl,
-    _l2 set _a which get_length : .,
+    _vl set _v1 get_length .,
+    _a insert_many i : v1,
+    _v2 set _a get_many i : i + vl,
+    _l2 set _a get_length .,
     (v1 = v2) and l2 = l1 + vl - 1,
 ]
 -----
@@ -170,18 +170,18 @@ insert_many remove_many
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_length set _ import .list.get_length,
-    _insert_many set _ import .list.insert_many,
-    _remove_many set _ import .list.remove_many,
+    _get_length set _ import .list.get_length.context.let,
+    _insert_many set _ import .list.insert_many.context.let,
+    _remove_many set _ import .list.remove_many.context.let,
     _% set _ import .integer.remainder,
     _a set _ any .list,
     _b set a,
-    _l set 1 + _a which get_length : .,
+    _l set 1 + _a get_length .,
     _i set (l + (_ any .integer) % l) % l,
     _v1 set _ any .list,
-    _v1l set _v1 which get_length : .,
-    _a which insert_many : i : v1,
-    _v2 set _a which remove_many : i : i + v1l,
+    _v1l set _v1 get_length .,
+    _a insert_many i : v1,
+    _v2 set _a remove_many i : i + v1l,
     (v1 = v2) and a = b
 ]
 -----
@@ -191,13 +191,13 @@ push pop
 -----
 _ do _[
     _any set _ import .value.any,
-    _push set _ import .list.push,
-    _pop set _ import .list.pop,
+    _push set _ import .list.push.context.let,
+    _pop set _ import .list.pop.context.let,
     _a1 set _ any .list,
     _a2 set a1,
     _v1 set _ any .,
-    _a1 which push : v1,
-    _v2 set _a1 which pop : .,
+    _a1 push v1,
+    _v2 set _a1 pop .,
     (v1 = v2) and (a1 = a2)
 ]
 -----
@@ -207,15 +207,15 @@ push_many pop_many
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_length set _ import .list.get_length,
-    _push_many set _ import .list.push_many,
-    _pop_many set _ import .list.pop_many,
+    _get_length set _ import .list.get_length.context.let,
+    _push_many set _ import .list.push_many.context.let,
+    _pop_many set _ import .list.pop_many.context.let,
     _a1 set _ any .list,
     _a2 set a1,
     _b1 set _ any .list,
-    _lb set _b1 which get_length : .,
-    _a1 which push_many : b1,
-    _b2 set _a1 which pop_many : lb,
+    _lb set _b1 get_length .,
+    _a1 push_many b1,
+    _b2 set _a1 pop_many lb,
     (b1 = b2) and a1 = a2
 ]
 -----
@@ -225,9 +225,9 @@ clear
 -----
 _ do _[
     _any set _ import .value.any,
-    _clear set _ import .list.clear,
+    _clear set _ import .list.clear.context.let,
     _a set _ any .list,
-    _a which clear : .,
+    _a clear .,
     a = []
 ]
 -----
@@ -236,9 +236,9 @@ true
 get_length empty
 -----
 _ do _[
-    _get_length set _ import .list.get_length,
+    _get_length set _ import .list.get_length.context.let,
     _l set [],
-    _l which get_length : .
+    _l get_length .
 ]
 -----
 0
@@ -246,9 +246,9 @@ _ do _[
 get_length else
 -----
 _ do _[
-    _get_length set _ import .list.get_length,
+    _get_length set _ import .list.get_length.context.let,
     _l set [1, 2],
-    _l which get_length : .
+    _l get_length .
 ]
 -----
 2
@@ -256,9 +256,9 @@ _ do _[
 set 1
 -----
 _ do _[
-    _list.set set _ import .list.set,
+    _list.set set _ import .list.set.context.let,
     _a set [1],
-    _a which list.set : 0 : 2,
+    _a list.set 0 : 2,
     a
 ]
 -----
@@ -267,9 +267,9 @@ _ do _[
 set 2
 -----
 _ do _[
-    _list.set set _ import .list.set,
+    _list.set set _ import .list.set.context.let,
     _a set [1, 2],
-    _a which list.set : 1 : 3,
+    _a list.set 1 : 3,
     a
 ]
 -----
@@ -278,24 +278,23 @@ _ do _[
 set length
 -----
 _ do _[
-    _list.set set _ import .list.set,
+    _list.set set _ import .list.set.context.let,
     _config.make set _ import .config.make,
     _link.make set _ import .link.make,
-    _where set _ import .config.where,
-    _is_aborted set _ import .error.is_aborted,
+    _config.let set _ import .config.let,
+    _is_aborted set _ import .error.is_aborted.context.let,
     _c set _ config.make {
         .prelude : _ link.make {
             do : do,
             set : set,
-            which : which,
             list.set : list.set,
         },
     },
-    _c where _(_ do _[
+    _c config.let _(_ do _[
         _a set [],
-        _a which list.set : 1 : 1,
+        _a list.set 1 : 1,
     ]),
-    _c which is_aborted : .,
+    _c is_aborted .,
 ]
 -----
 true
@@ -303,9 +302,9 @@ true
 set_many empty
 -----
 _ do _[
-    _set_many set _ import .list.set_many,
+    _set_many set _ import .list.set_many.context.let,
     _a set [0, 1, 2],
-    _a which set_many : 0 : []
+    _a set_many 0 : []
 ]
 -----
 []
@@ -313,9 +312,9 @@ _ do _[
 set_many 1
 -----
 _ do _[
-    _set_many set _ import .list.set_many,
+    _set_many set _ import .list.set_many.context.let,
     _a set [0, 1, 2],
-    _a which set_many : 0 : [3, 4],
+    _a set_many 0 : [3, 4],
     a
 ]
 -----
@@ -324,9 +323,9 @@ _ do _[
 set_many 2
 -----
 _ do _[
-    _set_many set _ import .list.set_many,
+    _set_many set _ import .list.set_many.context.let,
     _a set [0, 1, 2],
-    _a which set_many : 1 : [3, 4],
+    _a set_many 1 : [3, 4],
     a
 ]
 -----
@@ -335,9 +334,9 @@ _ do _[
 set_many last
 -----
 _ do _[
-    _set_many set _ import .list.set_many,
+    _set_many set _ import .list.set_many.context.let,
     _a set [0, 1, 2],
-    _a which set_many : 2 : [],
+    _a set_many 2 : [],
     a
 ]
 -----
@@ -346,24 +345,23 @@ _ do _[
 get out of bound
 -----
 _ do _[
-    _list.get set _ import .list.get,
+    _list.get set _ import .list.get.context.let,
     _config.make set _ import .config.make,
     _link.make set _ import .link.make,
-    _where set _ import .config.where,
-    _is_aborted set _ import .error.is_aborted,
+    _config.let set _ import .config.let,
+    _is_aborted set _ import .error.is_aborted.context.let,
     _c set _ config.make {
         .prelude : _ link.make {
             do : do,
             set : set,
-            which : which,
             list.get : list.get,
         },
     },
-    _c where _(_ do _[
+    _c config.let _(_ do _[
         _l set [],
-        _l which list.get : 0
+        _l list.get 0
     ]),
-    _c which is_aborted : .,
+    _c is_aborted .,
 ]
 -----
 true
@@ -371,9 +369,9 @@ true
 get 0
 -----
 _ do _[
-    _get set _ import .list.get,
+    _get set _ import .list.get.context.let,
     _l set [1],
-    _l which get : 0
+    _l get 0
 ]
 -----
 1
@@ -381,9 +379,9 @@ _ do _[
 get else
 -----
 _ do _[
-    _get set _ import .list.get,
+    _get set _ import .list.get.context.let,
     _l set [1, 2],
-    _l which get : 1
+    _l get 1
 ]
 -----
 2
@@ -391,9 +389,9 @@ _ do _[
 get_many 1
 -----
 _ do _[
-    _get_many set _ import .list.get_many,
+    _get_many set _ import .list.get_many.context.let,
     _l set [1, 2],
-    _l which get_many : 0 : 1
+    _l get_many 0 : 1
 ]
 -----
 [1]
@@ -401,9 +399,9 @@ _ do _[
 get_many 2
 -----
 _ do _[
-    _get_many set _ import .list.get_many,
+    _get_many set _ import .list.get_many.context.let,
     _l set [1, 2],
-    _l which get_many : 1 : 2
+    _l get_many 1 : 2
 ]
 -----
 [2]
@@ -411,9 +409,9 @@ _ do _[
 get_many . 1
 -----
 _ do _[
-    _get_many set _ import .list.get_many,
+    _get_many set _ import .list.get_many.context.let,
     _l set [1, 2],
-    _l which get_many : . : .
+    _l get_many . : .
 ]
 -----
 [1, 2]
@@ -421,9 +419,9 @@ _ do _[
 get_many . 2
 -----
 _ do _[
-    _get_many set _ import .list.get_many,
+    _get_many set _ import .list.get_many.context.let,
     _l set [1, 2],
-    _l which get_many : 1 : .
+    _l get_many 1 : .
 ]
 -----
 [2]
@@ -431,9 +429,9 @@ _ do _[
 get_many . 3
 -----
 _ do _[
-    _get_many set _ import .list.get_many,
+    _get_many set _ import .list.get_many.context.let,
     _l set [1, 2],
-    _l which get_many : . : 1
+    _l get_many . : 1
 ]
 -----
 [1]
@@ -441,24 +439,23 @@ _ do _[
 insert out of bound
 -----
 _ do _[
-    _insert set _ import .list.insert,
+    _insert set _ import .list.insert.context.let,
     _config.make set _ import .config.make,
     _link.make set _ import .link.make,
-    _where set _ import .config.where,
-    _is_aborted set _ import .error.is_aborted,
+    _config.let set _ import .config.let,
+    _is_aborted set _ import .error.is_aborted.context.let,
     _c set _ config.make {
         .prelude : _ link.make {
             do : do,
             set : set,
-            which : which,
             insert : insert,
         },
     },
-    _c where _(_ do _[
+    _c config.let _(_ do _[
         _l set [],
-        _l which insert : 1 : 1,
+        _l insert 1 : 1,
     ]),
-    _c which is_aborted : .,
+    _c is_aborted .,
 ]
 -----
 true
@@ -466,9 +463,9 @@ true
 insert
 -----
 _ do _[
-    _insert set _ import .list.insert,
+    _insert set _ import .list.insert.context.let,
     _l set [1, 2],
-    _l which insert : 1 : 3,
+    _l insert 1 : 3,
     l
 ]
 -----
@@ -477,9 +474,9 @@ _ do _[
 insert length
 -----
 _ do _[
-    _insert set _ import .list.insert,
+    _insert set _ import .list.insert.context.let,
     _a set [],
-    _a which insert : 0 : 1,
+    _a insert 0 : 1,
     a
 ]
 -----
@@ -488,9 +485,9 @@ _ do _[
 insert_many
 -----
 _ do _[
-    _insert_many set _ import .list.insert_many,
+    _insert_many set _ import .list.insert_many.context.let,
     _l set [1, 2],
-    _l which insert_many : 1 : [3, 4],
+    _l insert_many 1 : [3, 4],
     l
 ]
 -----
@@ -499,9 +496,9 @@ _ do _[
 remove
 -----
 _ do _[
-    _remove set _ import .list.remove,
+    _remove set _ import .list.remove.context.let,
     _l set [1, 2, 3],
-    [_l which remove : 1, l]
+    [_l remove 1, l]
 ]
 -----
 [2, [1, 3]]
@@ -509,9 +506,9 @@ _ do _[
 remove_many
 -----
 _ do _[
-    _remove_many set _ import .list.remove_many,
+    _remove_many set _ import .list.remove_many.context.let,
     _l set [1, 2, 3],
-    [_l which remove_many : 1 : 3, l]
+    [_l remove_many 1 : 3, l]
 ]
 -----
 [[2, 3], [1]]
@@ -519,9 +516,9 @@ _ do _[
 remove_many .
 -----
 _ do _[
-    _remove_many set _ import .list.remove_many,
+    _remove_many set _ import .list.remove_many.context.let,
     _l set [1, 2, 3],
-    _l which remove_many : . : .,
+    _l remove_many . : .,
     l
 ]
 -----
@@ -530,9 +527,9 @@ _ do _[
 push
 -----
 _ do _[
-    _push set _ import .list.push,
+    _push set _ import .list.push.context.let,
     _l set [1],
-    _l which push : 2,
+    _l push 2,
     l
 ]
 -----
@@ -541,9 +538,9 @@ _ do _[
 push_many
 -----
 _ do _[
-    _push_many set _ import .list.push_many,
+    _push_many set _ import .list.push_many.context.let,
     _l set [1],
-    _l which push_many : [2, 3],
+    _l push_many [2, 3],
     l
 ]
 -----
@@ -552,9 +549,9 @@ _ do _[
 push_many empty
 -----
 _ do _[
-    _push_many set _ import .list.push_many,
+    _push_many set _ import .list.push_many.context.let,
     _l set [1],
-    _l which push_many : [],
+    _l push_many [],
     l
 ]
 -----
@@ -563,24 +560,23 @@ _ do _[
 pop empty
 -----
 _ do _[
-    _pop set _ import .list.pop,
+    _pop set _ import .list.pop.context.let,
     _config.make set _ import .config.make,
     _link.make set _ import .link.make,
-    _where set _ import .config.where,
-    _is_aborted set _ import .error.is_aborted,
+    _config.let set _ import .config.let,
+    _is_aborted set _ import .error.is_aborted.context.let,
     _c set _ config.make {
         .prelude : _ link.make {
             do : do,
             set : set,
-            which : which,
             pop : pop,
         },
     },
-    _c where _(_ do _[
+    _c config.let _(_ do _[
         _l set [],
-        _l which pop : .,
+        _l pop .,
     ]),
-    _c which is_aborted : .,
+    _c is_aborted .,
 ]
 -----
 true
@@ -588,9 +584,9 @@ true
 pop 1
 -----
 _ do _[
-    _pop set _ import .list.pop,
+    _pop set _ import .list.pop.context.let,
     _l set [1],
-    [_l which pop : ., l]
+    [_l pop ., l]
 ]
 -----
 [1, []]
@@ -598,9 +594,9 @@ _ do _[
 pop 2
 -----
 _ do _[
-    _pop set _ import .list.pop,
+    _pop set _ import .list.pop.context.let,
     _l set [1, 2],
-    [_l which pop : ., l]
+    [_l pop ., l]
 ]
 -----
 [2, [1]]
@@ -608,9 +604,9 @@ _ do _[
 pop_many 0
 -----
 _ do _[
-    _pop_many set _ import .list.pop_many,
+    _pop_many set _ import .list.pop_many.context.let,
     _l set [1, 2],
-    [_l which pop_many : 0, l]
+    [_l pop_many 0, l]
 ]
 -----
 [[], [1, 2]]
@@ -618,9 +614,9 @@ _ do _[
 pop_many 1
 -----
 _ do _[
-    _pop_many set _ import .list.pop_many,
+    _pop_many set _ import .list.pop_many.context.let,
     _l set [1, 2],
-    [_l which pop_many : 1, l]
+    [_l pop_many 1, l]
 ]
 -----
 [[2], [1]]
@@ -628,9 +624,9 @@ _ do _[
 pop_many else
 -----
 _ do _[
-    _pop_many set _ import .list.pop_many,
+    _pop_many set _ import .list.pop_many.context.let,
     _l set [1, 2],
-    [_l which pop_many : 2, l]
+    [_l pop_many 2, l]
 ]
 -----
 [[1, 2], []]
@@ -638,24 +634,23 @@ _ do _[
 pop_many out of bound
 -----
 _ do _[
-    _pop_many set _ import .list.pop_many,
+    _pop_many set _ import .list.pop_many.context.let,
     _config.make set _ import .config.make,
     _link.make set _ import .link.make,
-    _where set _ import .config.where,
-    _is_aborted set _ import .error.is_aborted,
+    _config.let set _ import .config.let,
+    _is_aborted set _ import .error.is_aborted.context.let,
     _c set _ config.make {
         .prelude : _ link.make {
             do : do,
             set : set,
-            which : which,
             pop_many : pop_many,
         },
     },
-    _c where _(_ do _[
+    _c config.let _(_ do _[
         _l set [1, 2],
-        _l which pop_many : 3,
+        _l pop_many 3,
     ]),
-    _c which is_aborted : .,
+    _c is_aborted .,
 ]
 -----
 true
@@ -663,9 +658,9 @@ true
 clear
 -----
 _ do _[
-    _clear set _ import .list.clear,
+    _clear set _ import .list.clear.context.let,
     _l set [1, 2],
-    _l which clear : .,
+    _l clear .,
     l
 ]
 -----

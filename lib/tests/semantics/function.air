@@ -54,19 +54,20 @@ stateful
 -----
 _ do _[
     _link.make set _ import .link.make,
-    _link.which set _ import .link.which,
+    _map.get set _ import .map.get.link.let,
+    _map.set set _ import .map.set.link.let,
     _f set _ function {
         code : (. : .) : _(_ do _[
-            _i set a link.which get : .i,
-            a link.which set : .i : i + 1,
+            .(_i) is a map.get .i,
+            a map.set .i : i + 1,
             i
         ]),
         prelude : {
             a : _ link.make {.i : 0},
             do : do,
-            set : set,
-            link.which : link.which,
-            get : get,
+            is : is,
+            map.set : map.set,
+            map.get : map.get,
             + : +,
         },
     },
@@ -79,19 +80,20 @@ multiple stateful
 -----
 _ do _[
     _link.make set _ import .link.make,
-    _link.which set _ import .link.which,
+    _cell.get_value set _ import .cell.get_value.link.let,
+    _cell.set_value set _ import .cell.set_value.link.let,
     _f set _(_ function {
         code : _((. : .) : _ do _[
-            _i set a link.which get : .cell.value,
-            a link.which set : .cell.value : i + 1,
+            _i set a cell.get_value .,
+            a cell.set_value i + 1,
             i
         ]),
         prelude : {
             a : _ link.make .(0),
             do : do,
             set : set,
-            link.which : link.which,
-            get : get,
+            cell.get_value : cell.get_value,
+            cell.set_value : cell.set_value,
             + : +,
         },
     }),
@@ -105,72 +107,68 @@ _ do _[
 const const
 -----
 _ do _[
-    _link.which set _ import .link.which,
+    _map.get set _ import .map.get.link.let,
     .a set 1,
     _f set _ function {
-        code : _((c : .) : c link.which get : .a),
+        code : _((c : .) : c map.get .a),
         constant : true,
         prelude : {
-            link.which : link.which,
-            get : get,
+            map.get : map.get,
         },
     },
-    _ f .
+    .(1) = _ f .
 ]
 -----
-1
+true
 =====
 mutable const
 -----
 _ do _[
-    _link.which set _ import .link.which,
+    _map.get set _ import .map.get.link.let,
     .a set 1,
     _f set _ function {
-        code : _((c : .) : c link.which get : .a),
+        code : _((c : .) : c map.get .a),
         constant : false,
         prelude : {
-            link.which : link.which,
-            get : get,
+            map.get : map.get,
         },
     },
-    _ f .
+    .(1) = _ f .
 ]
 -----
-1
+true
 =====
 mutable mutate
 -----
 _ do _[
-    _link.which set _ import .link.which,
+    _map.set set _ import .map.set.link.let,
     _f set _ function {
-        code : _((c : i) : c link.which set : i : 2),
+        code : _((c : i) : c map.set i : 2),
         constant : false,
         prelude : {
-            link.which : link.which,
-            set : set,
+            map.set : map.set,
         },
     },
     _a set 1,
     _ f _a,
-    a
+    a = 2
 ]
 -----
-2
+true
 =====
 const mutate fail
 -----
 _ do _[
-    _link.which set _ import .link.which,
+    _map.set set _ import .map.set.link.let,
     _config.make set _ import .config.make,
     _link.make set _ import .link.make,
-    _where set _ import .config.where,
-    _is_aborted set _ import .error.is_aborted,
+    _config.let set _ import .config.let,
+    _is_aborted set _ import .error.is_aborted.context.let,
     _f set _ function {
-        code : _((c : i) : c link.which set : i : 2),
+        code : _((c : i) : c map.set i : 2),
         constant : true,
         prelude : {
-            link.which : link.which,
-            set : set,
+            map.set : map.set,
         },
     },
     _c set _ config.make {
@@ -179,8 +177,8 @@ _ do _[
             a : 1,
         },
     },
-    _c where _(_ f _a),
-    _c which is_aborted : .,
+    _c config.let _(_ f _a),
+    _c is_aborted .,
 ]
 -----
 true
@@ -194,7 +192,7 @@ _ do _[
         constant : true,
         prelude : {},
     },
-    _a which f : .
+    _a let f : .
 ]
 -----
 1
@@ -219,17 +217,15 @@ true
 ctx explicit
 -----
 _ do _[
-    _link.which set _ import .link.which,
-    _set_left set _ import .pair.set_left,
+    _set_left set _ import .pair.set_left.link.let,
     _a set 1 : 2,
     _f set _ function {
-        code : _((p : i) : p link.which set_left : i),
+        code : _((p : i) : p set_left i),
         prelude : {
-            link.which : link.which,
             set_left : set_left,
         },
     },
-    _a which f : 3,
+    _a let f : 3,
     a
 ]
 -----
@@ -256,8 +252,8 @@ repr primitive free
 -----
 _ do _[
     _represent set _ import .function.represent,
-    _function.get_code set _ import .function.get_code,
-    _not_code set _not which function.get_code : .,
+    _function.get_code set _ import .function.get_code.context.let,
+    _not_code set _not function.get_code .,
     _repr set {
         constant : true,
         code : not_code,
@@ -287,13 +283,14 @@ repr primitive const
 -----
 _ do _[
     _represent set _ import .function.represent,
-    _function.get_code set _ import .function.get_code,
-    _type_code set _get_type which function.get_code : .,
+    _get_code set _ import .function.get_code.context.let,
+    _cell.get_value set _ import .cell.get_value,
+    _type_code set _cell.get_value get_code .,
     _repr set {
         constant : true,
         code : type_code,
     },
-    repr = _ represent get_type
+    repr = _ represent cell.get_value
 ]
 -----
 true
@@ -316,8 +313,8 @@ true
 is_free free
 -----
 _ do _[
-    _is_free set _ import .function.is_free,
-    _function which is_free : .
+    _is_free set _ import .function.is_free.context.let,
+    _function is_free .
 ]
 -----
 true
@@ -325,8 +322,8 @@ true
 is_free constant
 -----
 _ do _[
-    _is_free set _ import .function.is_free,
-    _get which is_free : .
+    _is_free set _ import .function.is_free.context.let,
+    _get is_free .
 ]
 -----
 false
@@ -334,8 +331,8 @@ false
 is_free mutable
 -----
 _ do _[
-    _is_free set _ import .function.is_free,
-    _eval which is_free : .
+    _is_free set _ import .function.is_free.context.let,
+    _eval is_free .
 ]
 -----
 false
@@ -343,8 +340,8 @@ false
 is_constant free
 -----
 _ do _[
-    _is_constant set _ import .function.is_constant,
-    _function which is_constant : .
+    _is_constant set _ import .function.is_constant.context.let,
+    _function is_constant .
 ]
 -----
 true
@@ -352,8 +349,8 @@ true
 is_constant constant
 -----
 _ do _[
-    _is_constant set _ import .function.is_constant,
-    _get which is_constant : .
+    _is_constant set _ import .function.is_constant.context.let,
+    _get is_constant .
 ]
 -----
 true
@@ -361,8 +358,8 @@ true
 is_constant mutable
 -----
 _ do _[
-    _is_constant set _ import .function.is_constant,
-    _eval which is_constant : .
+    _is_constant set _ import .function.is_constant.context.let,
+    _eval is_constant .
 ]
 -----
 false
@@ -370,8 +367,8 @@ false
 is_input_free free
 -----
 _ do _[
-    _is_input_free set _ import .function.is_input_free,
-    _abort which is_input_free : .
+    _is_input_free set _ import .function.is_input_free.context.let,
+    _abort is_input_free .
 ]
 -----
 true
@@ -379,8 +376,8 @@ true
 is_input_free aware
 -----
 _ do _[
-    _is_input_free set _ import .function.is_input_free,
-    _not which is_input_free : .
+    _is_input_free set _ import .function.is_input_free.context.let,
+    _not is_input_free .
 ]
 -----
 false
@@ -388,8 +385,8 @@ false
 is_primitive primitive
 -----
 _ do _[
-    _is_primitive set _ import .function.is_primitive,
-    _not which is_primitive : .
+    _is_primitive set _ import .function.is_primitive.context.let,
+    _not is_primitive .
 ]
 -----
 true
@@ -397,9 +394,9 @@ true
 is_primitive composite
 -----
 _ do _[
-    _is_primitive set _ import .function.is_primitive,
+    _is_primitive set _ import .function.is_primitive.context.let,
     _f set _ function {code : (. : .) : .},
-    _f which is_primitive : .
+    _f is_primitive .
 ]
 -----
 false
@@ -407,11 +404,11 @@ false
 get_code
 -----
 _ do _[
-    _function.get_code set _ import .function.get_code,
+    _function.get_code set _ import .function.get_code.context.let,
     _f set _ function {
         code : (.ctx : _i) : _i
     },
-    _f which function.get_code : .
+    _f function.get_code .
 ]
 -----
 (.ctx : i) : i
@@ -419,14 +416,14 @@ _ do _[
 prelude
 -----
 _ do _[
-    _function.get_prelude set _ import .function.get_prelude,
+    _function.get_prelude set _ import .function.get_prelude.context.let,
     _any set _ import .value.any,
     _prelude set _ any .,
     _f set _ function {
         code : (. : .) : .,
         prelude : prelude
     },
-    (_f which function.get_prelude : .) = prelude
+    (_f function.get_prelude .) = prelude
 ]
 -----
 true
@@ -436,7 +433,7 @@ recurse
 _ do _[
     _g set _ function {
         code : _((. : fi) : _ do _[
-            _(f : i) represent fi,
+            _(f : i) is fi,
             (i < 1) test _[
                 0
             ] : _[
@@ -445,7 +442,7 @@ _ do _[
         ]),
         prelude : {
             do : do,
-            represent : represent,
+            is : is,
             < : <,
             test : test,
             + : +,

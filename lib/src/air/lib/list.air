@@ -1,2 +1,18 @@
 _ do _[
+    _ export_let_bind_many [
+        .list.get_length,
+        .list.set,
+        .list.set_many,
+        .list.get,
+        .list.get_many,
+        .list.insert,
+        .list.insert_many,
+        .list.remove,
+        .list.remove_many,
+        .list.push,
+        .list.push_many,
+        .list.pop,
+        .list.pop_many,
+        .list.clear,
+    ],
 ]

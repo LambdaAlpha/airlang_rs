@@ -1,28 +1,28 @@
-make which get_self
+make let get_self
 -----
 _ do _[
     _any set _ import .value.any,
     _make set _ import .link.make,
-    _which set _ import .link.which,
+    _let set _ import .link.let,
     _get_self set _ import .context.get_self,
     _a set _ any .,
     _l set _ make a,
-    _a1 set l which get_self : .,
+    _a1 set l let get_self : .,
     a = a1
 ]
 -----
 true
 =====
-make_constant which get_self
+make_constant let get_self
 -----
 _ do _[
     _any set _ import .value.any,
     _make set _ import .link.make_constant,
-    _which set _ import .link.which,
+    _let set _ import .link.let,
     _get_self set _ import .context.get_self,
     _a set _ any .,
     _l set _ make a,
-    _a1 set l which get_self : .,
+    _a1 set l let get_self : .,
     a = a1
 ]
 -----
@@ -66,9 +66,9 @@ is_available false
 _ do _[
     _make set _ import .link.make,
     _is_available set _ import .link.is_available,
-    _which set _ import .link.which,
+    _let set _ import .link.let,
     _l set _ make {},
-    l which is_available : l,
+    l let is_available : l,
 ]
 -----
 false
@@ -85,7 +85,7 @@ _ do _[
     _id_l1 set _ get_id l1,
     _id_l2 set _ get_id l2,
     _id_l3 set _ get_id l3,
-    _id_type set _id_l1 which get_type : .,
+    _id_type set _id_l1 type .,
     (id_type = .key) and (id_l1 = id_l2) and (_ not l1 = l3) and _ not id_l1 = id_l3
 ]
 -----
@@ -96,12 +96,12 @@ sync
 _ do _[
     _any set _ import .value.any,
     _make set _ import .link.make,
-    _which set _ import .link.which,
+    _let set _ import .link.let,
     _l set _ make {},
     _l1 set l,
     _a set _ any .,
-    l which set : .a : a,
-    _a1 set l1 which get : .a,
+    l let set : .a : a,
+    _a1 set l1 let get : .a,
     a = a1
 ]
 -----
@@ -112,9 +112,9 @@ leak no panic
 _ do _[
     _any set _ import .value.any,
     _make set _ import .link.make,
-    _which set _ import .link.which,
+    _let set _ import .link.let,
     _l set _ make {},
-    l which set : .a : l,
+    l let set : .a : l,
     _l move _,
     .
 ]
@@ -126,10 +126,10 @@ cycle recover
 _ do _[
     _any set _ import .value.any,
     _make set _ import .link.make,
-    _which set _ import .link.which,
+    _let set _ import .link.let,
     _l set _ make {},
-    l which set : .a : l,
-    _l1 set l which move : .a,
+    l let set : .a : l,
+    _l1 set l let move : .a,
     l = l1
 ]
 -----

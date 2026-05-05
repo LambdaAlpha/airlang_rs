@@ -1,3 +1,7 @@
 _ do _[
     _empty set _'',
+    
+    _ export_let_bind_many [
+        .key.get_length,
+    ],
 ]

@@ -1,2 +1,8 @@
 _ do _[
+    _ export_let_bind_many [
+        .pair.get_left,
+        .pair.set_left,
+        .pair.get_right,
+        .pair.set_right,
+    ],
 ]

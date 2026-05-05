@@ -1,10 +1,10 @@
 _ do _[
     _version set _ import .language.version,
-    _generate_pretty set _ import .language.syntax.generate_pretty,
+    _generate_pretty set _ import .language.syntax.generate_pretty.context.let,
     _join set _ import .text.join,
-    _(major : minor : patch) represent version,
-    _major set _major which generate_pretty : .,
-    _minor set _minor which generate_pretty : .,
-    _patch set _patch which generate_pretty : .,
+    _(major : minor : patch) is version,
+    _major set _major generate_pretty .,
+    _minor set _minor generate_pretty .,
+    _patch set _patch generate_pretty .,
     "" join ["v", major, ".", minor, ".", patch]
 ]

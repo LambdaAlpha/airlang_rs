@@ -3,14 +3,14 @@ parse generate_pretty generate_key
 _ do _[
     _any set _ import .value.any,
     _parse set _ import .language.syntax.parse,
-    _generate_pretty set _ import .language.syntax.generate_pretty,
-    _generate_key set _ import .language.syntax.generate_key,
+    _generate_pretty set _ import .language.syntax.generate_pretty.context.let,
+    _generate_key set _ import .language.syntax.generate_key.context.let,
     _into_text set _ import .key.into_text,
     _a set _ any .syntax,
-    _repr set _a which generate_pretty : .,
-    .(_a1) represent _ parse repr,
-    _k set _a which generate_key : .,
-    .(_a2) represent _ parse _ into_text k,
+    _repr set _a generate_pretty .,
+    .(_a1) is _ parse repr,
+    _k set _a generate_key .,
+    .(_a2) is _ parse _ into_text k,
     (a = a1) and (a = a2)
 ]
 -----
@@ -20,11 +20,11 @@ generate_key equal
 -----
 _ do _[
     _any set _ import .value.any,
-    _generate_key set _ import .language.syntax.generate_key,
+    _generate_key set _ import .language.syntax.generate_key.context.let,
     _a set _ any .,
     _b set _ any .,
-    _a_key set _a which generate_key : .,
-    _b_key set _b which generate_key : .,
+    _a_key set _a generate_key .,
+    _b_key set _b generate_key .,
     (a = b) = (a_key = b_key)
 ]
 -----
@@ -61,9 +61,9 @@ _ do _[
 generate_pretty text
 -----
 _ do _[
-    _generate_pretty set _ import .language.syntax.generate_pretty,
+    _generate_pretty set _ import .language.syntax.generate_pretty.context.let,
     _a set "1",
-    _a which generate_pretty : .
+    _a generate_pretty .
 ]
 -----
 ""'"1"'
@@ -72,9 +72,9 @@ any .syntax syntax is_valid
 -----
 _ do _[
     _any set _ import .value.any,
-    _is_valid set _ import .language.syntax.is_valid,
+    _is_valid set _ import .language.syntax.is_valid.context.let,
     _a set _ any .syntax,
-    _a which is_valid : .
+    _a is_valid .
 ]
 -----
 true
@@ -82,9 +82,9 @@ true
 syntax is_valid true
 -----
 _ do _[
-    _is_valid set _ import .language.syntax.is_valid,
+    _is_valid set _ import .language.syntax.is_valid.context.let,
     _a set [., 0, "a" : {b : _b}, _(_ f _(c))],
-    _a which is_valid : .
+    _a is_valid .
 ]
 -----
 true
@@ -92,9 +92,9 @@ true
 syntax is_valid false
 -----
 _ do _[
-    _is_valid set _ import .language.syntax.is_valid,
+    _is_valid set _ import .language.syntax.is_valid.context.let,
     _a set [., 0, "a" : {b : not}, _(_ f _(c))],
-    _a which is_valid : .
+    _a is_valid .
 ]
 -----
 false

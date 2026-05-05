@@ -1,6 +1,6 @@
 _ do _[
     _prelude set _ import .prelude,
-    _link.which set _ import .link.which,
+    _map.set set _ import .map.set.link.let,
     
-    prelude link.which set : _help : help,
+    prelude map.set _help : help,
 ]

@@ -2,4 +2,87 @@ _ do _[
     _return set .(.),
     _continue set .(.),
     _break set .(.(.)),
+    
+    _context.let set _ import .context.let,
+    _link.let set _ import .link.let,
+    _get_type set _ import .value.get_type,
+    _context.let.bind set _ function {
+        code : _(. : f) : _(_ do _[
+            _ assert .function = _f context.let get_type : .,
+            _ function {
+                code : _(context : input) : _(_ do _[
+                    _(name : input) is _ move _input,
+                    context link.let context.let : name : function : input
+                ]),
+                prelude : {
+                    do : do,
+                    link.let : link.let,
+                    context.let : context.let,
+                    is : is,
+                    move : move,
+                    function : f,
+                },
+            }
+        ]),
+        prelude : {
+            do : do,
+            assert : assert,
+            = : =,
+            context.let : context.let,
+            link.let : link.let,
+            get_type : get_type,
+            function : function,
+            is : is,
+            move : move,
+        },
+    },
+    .context.let.bind export context.let.bind,
+    _link.let.bind set _ function {
+        code : _(. : f) : _(_ do _[
+            _ assert .function = _f context.let get_type : .,
+            _ function {
+                code : _(. : input) : _(_ do _[
+                    _(link : input) is _ move _input,
+                    link link.let function : input
+                ]),
+                prelude : {
+                    do : do,
+                    link.let : link.let,
+                    is : is,
+                    move : move,
+                    function : f,
+                },
+            }
+        ]),
+        prelude : {
+            do : do,
+            assert : assert,
+            = : =,
+            context.let : context.let,
+            link.let : link.let,
+            get_type : get_type,
+            function : function,
+            is : is,
+            move : move,
+        },
+    },
+    .link.let.bind export link.let.bind,
+    _export_let_bind_many set _ function {
+        code : _(. : keys) : _((_ move _keys) iterate _key : _[
+            _f set _ import key,
+            (empty join [key, .context.let]) export _ context.let.bind f,
+            (empty join [key, .link.let]) export _ link.let.bind f,
+        ]),
+        prelude : {
+            move : move,
+            iterate : iterate,
+            set : set,
+            import : import,
+            empty : _'',
+            join : _ import .key.join,
+            export : export,
+            context.let.bind : context.let.bind,
+            link.let.bind : link.let.bind,
+        },
+    },
 ]

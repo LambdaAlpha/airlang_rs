@@ -2,12 +2,12 @@ get_length push
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_length set _ import .byte.get_length,
-    _push set _ import .byte.push,
+    _get_length set _ import .byte.get_length.context.let,
+    _push set _ import .byte.push.context.let,
     _b set _ any .byte,
-    _l set _b which get_length : .,
-    _b which push : byte'00',
-    _l1 set _b which get_length : .,
+    _l set _b get_length .,
+    _b push byte'00',
+    _l1 set _b get_length .,
     l1 = l + 1
 ]
 -----
@@ -17,14 +17,14 @@ get_length join
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_length set _ import .byte.get_length,
+    _get_length set _ import .byte.get_length.context.let,
     _join set _ import .byte.join,
     _a set _ any .byte,
-    _la set _a which get_length : .,
+    _la set _a get_length .,
     _b set _ any .byte,
-    _lb set _b which get_length : .,
+    _lb set _b get_length .,
     _ab set byte'' join [a, b],
-    _lab set _ab which get_length : .,
+    _lab set _ab get_length .,
     lab = la + lb
 ]
 -----
@@ -33,9 +33,9 @@ true
 get_length empty
 -----
 _ do _[
-    _get_length set _ import .byte.get_length,
+    _get_length set _ import .byte.get_length.context.let,
     _b set byte'',
-    _b which get_length : .
+    _b get_length .
 ]
 -----
 0
@@ -43,9 +43,9 @@ _ do _[
 get_length else
 -----
 _ do _[
-    _get_length set _ import .byte.get_length,
+    _get_length set _ import .byte.get_length.context.let,
     _b set byte'ff',
-    _b which get_length : .
+    _b get_length .
 ]
 -----
 1
@@ -54,12 +54,12 @@ push join
 -----
 _ do _[
     _any set _ import .value.any,
-    _push set _ import .byte.push,
+    _push set _ import .byte.push.context.let,
     _join set _ import .byte.join,
     _a set _ any .byte,
     _b set _ any .byte,
     _ab set a,
-    _ab which push : b,
+    _ab push b,
     _ab1 set byte'' join [a, b],
     ab = ab1
 ]
@@ -69,10 +69,10 @@ true
 push
 -----
 _ do _[
-    _push set _ import .byte.push,
+    _push set _ import .byte.push.context.let,
     _a set byte'00',
     _b set byte'1122',
-    _a which push : b,
+    _a push b,
     a
 ]
 -----

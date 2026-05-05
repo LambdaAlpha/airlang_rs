@@ -2,8 +2,8 @@ nest(current_dir is crate root)
 -----
 _ do _[
     _load set _ import .build.load,
-    .(_a) represent _ load "tests/semantics/build/nest/a/b.air",
-    .(_b) represent _ load "tests/semantics/build/nest/a/c/d.air",
+    .(_a) is _ load "tests/semantics/build/nest/a/b.air",
+    .(_b) is _ load "tests/semantics/build/nest/a/c/d.air",
     a + b
 ]
 -----
@@ -13,7 +13,7 @@ bom(current_dir is crate root)
 -----
 _ do _[
     _load set _ import .build.load,
-    .(_a) represent _ load "tests/semantics/build/bom/a.air",
+    .(_a) is _ load "tests/semantics/build/bom/a.air",
     a
 ]
 -----

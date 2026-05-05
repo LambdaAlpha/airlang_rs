@@ -49,8 +49,8 @@ pub struct BasePrimPrelude {
 
     pub get: PrimFuncVal,
     pub set: PrimFuncVal,
-    pub represent: PrimFuncVal,
-    pub which: PrimFuncVal,
+    pub is: PrimFuncVal,
+    pub let_: PrimFuncVal,
 
     pub do_: PrimFuncVal,
     pub test: PrimFuncVal,
@@ -59,7 +59,6 @@ pub struct BasePrimPrelude {
     pub loop_: PrimFuncVal,
     pub iterate: PrimFuncVal,
 
-    pub get_type: PrimFuncVal,
     pub equal: PrimFuncVal,
 
     pub abort: PrimFuncVal,
@@ -120,8 +119,8 @@ impl BasePrimPrelude {
 
             get: lib.ctx.get,
             set: lib.ctx.set,
-            represent: lib.ctx.represent,
-            which: lib.ctx.which,
+            is: lib.ctx.is,
+            let_: lib.ctx.let_,
 
             do_: lib.ctrl.do_,
             test: lib.ctrl.test,
@@ -130,7 +129,6 @@ impl BasePrimPrelude {
             loop_: lib.ctrl.loop_,
             iterate: lib.ctrl.iterate,
 
-            get_type: lib.value.get_type,
             equal: lib.value.equal,
 
             abort: lib.error.abort,
@@ -188,8 +186,8 @@ impl Prelude for BasePrimPrelude {
 
         map_put_func(map, "get", self.get);
         map_put_func(map, "set", self.set);
-        map_put_func(map, "represent", self.represent);
-        map_put_func(map, "which", self.which);
+        map_put_func(map, "is", self.is);
+        map_put_func(map, "let", self.let_);
 
         map_put_func(map, "do", self.do_);
         map_put_func(map, "test", self.test);
@@ -198,7 +196,6 @@ impl Prelude for BasePrimPrelude {
         map_put_func(map, "loop", self.loop_);
         map_put_func(map, "iterate", self.iterate);
 
-        map_put_func(map, "get_type", self.get_type);
         map_put_func(map, "=", self.equal);
 
         map_put_func(map, "abort", self.abort);

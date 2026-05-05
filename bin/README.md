@@ -296,7 +296,7 @@ _ do _[
 _ do _[
     _formula set _ function {
         code : _(. : i) : _(_ do _[
-            _[a1, a2, a3, a4, a5] := i,
+            _[a1, a2, a3, a4, a5] is i,
             ((_ not a1) or a3) and
             (a1 or a2) and
             (_ not a2) and
@@ -304,8 +304,8 @@ _ do _[
             ((_ not a4) or _ not a5)
         ]),
         prelude : {
-            := : _ import .context.represent,
             do : do,
+            is : is,
             not : not,
             and : and,
             or : or,

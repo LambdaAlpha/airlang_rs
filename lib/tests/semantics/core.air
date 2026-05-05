@@ -66,7 +66,7 @@ cell ref
 -----
 _ do _[
     _c set .(1),
-    _c which get : .cell.value
+    _c let get : .cell.value
 ]
 -----
 1
@@ -75,7 +75,7 @@ pair ref
 -----
 _ do _[
     _p set 1 : 2,
-    _p which eval : [get call .pair.left, get call .pair.right]
+    _p let eval : [get call .pair.left, get call .pair.right]
 ]
 -----
 [1, 2]
@@ -84,7 +84,7 @@ list ref
 -----
 _ do _[
     _l set [0, 3, 6],
-    _l which eval : [get call .list.first, get call .list.last]
+    _l let eval : [get call .list.first, get call .list.last]
 ]
 -----
 [0, 6]
@@ -93,7 +93,7 @@ map ref
 -----
 _ do _[
     _m set {a : 1, b : 2},
-    _m which eval : [_a, _b]
+    _m let eval : [_a, _b]
 ]
 -----
 [1, 2]
@@ -102,7 +102,7 @@ quote ref
 -----
 _ do _[
     _c set _(_(1)),
-    _c which get : .quote.value
+    _c let get : .quote.value
 ]
 -----
 1
@@ -111,7 +111,7 @@ call ref
 -----
 _ do _[
     _c set _(_ func input),
-    _c which eval : [get call .call.function, get call .call.input]
+    _c let eval : [get call .call.function, get call .call.input]
 ]
 -----
 [func, input]
@@ -120,7 +120,7 @@ solve ref
 -----
 _ do _[
     _s set _(? function output),
-    _s which eval : [get call .solve.function, get call .solve.output]
+    _s let eval : [get call .solve.function, get call .solve.output]
 ]
 -----
 [function, output]
@@ -180,7 +180,7 @@ cell ctx value
 -----
 _ do _[
     _c set .(1),
-    _c which get : .cell.value
+    _c let get : .cell.value
 ]
 -----
 1
@@ -189,7 +189,7 @@ pair ctx left
 -----
 _ do _[
     _p set 1 : 2,
-    _p which get : .pair.left
+    _p let get : .pair.left
 ]
 -----
 1
@@ -198,7 +198,7 @@ pair ctx right
 -----
 _ do _[
     _p set 1 : 2,
-    _p which get : .pair.right
+    _p let get : .pair.right
 ]
 -----
 2
@@ -207,7 +207,7 @@ list ctx index
 -----
 _ do _[
     _l set [0, 2, 4],
-    _l which get : 1
+    _l let get : 1
 ]
 -----
 2
@@ -216,7 +216,7 @@ list ctx first
 -----
 _ do _[
     _l set [0, 2, 4],
-    _l which get : .list.first
+    _l let get : .list.first
 ]
 -----
 0
@@ -225,7 +225,7 @@ list ctx last
 -----
 _ do _[
     _l set [0, 2, 4],
-    _l which get : .list.last
+    _l let get : .list.last
 ]
 -----
 4
@@ -234,7 +234,7 @@ map ctx key
 -----
 _ do _[
     _m set {a : 1, b : 2},
-    _m which get : _a
+    _m let get : _a
 ]
 -----
 1
@@ -243,7 +243,7 @@ quote ctx value
 -----
 _ do _[
     _c set _(_(1)),
-    _c which get : .quote.value
+    _c let get : .quote.value
 ]
 -----
 1
@@ -252,7 +252,7 @@ call ctx func
 -----
 _ do _[
     _c set _(_ func input),
-    _c which get : .call.function
+    _c let get : .call.function
 ]
 -----
 func
@@ -261,7 +261,7 @@ call ctx input
 -----
 _ do _[
     _c set _(_ func input),
-    _c which get : .call.input
+    _c let get : .call.input
 ]
 -----
 input
@@ -270,7 +270,7 @@ solve ctx func
 -----
 _ do _[
     _s set _(? function output),
-    _s which get : .solve.function
+    _s let get : .solve.function
 ]
 -----
 function
@@ -279,7 +279,7 @@ call ctx output
 -----
 _ do _[
     _s set _(? function output),
-    _s which get : .solve.output
+    _s let get : .solve.output
 ]
 -----
 output

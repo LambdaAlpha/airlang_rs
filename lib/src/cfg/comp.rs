@@ -37,10 +37,13 @@ impl BaseCompCfg {
         Self::run(cfg, ctx, include_str!("../air/lib/map.air"), "lib/map");
         Self::run(cfg, ctx, include_str!("../air/lib/quote.air"), "/lib/quote");
         Self::run(cfg, ctx, include_str!("../air/lib/call.air"), "/lib/call");
+        Self::run(cfg, ctx, include_str!("../air/lib/solve.air"), "/lib/solve");
         Self::run(cfg, ctx, include_str!("../air/lib/link.air"), "/lib/link");
         Self::run(cfg, ctx, include_str!("../air/lib/config.air"), "/lib/config");
         Self::run(cfg, ctx, include_str!("../air/lib/function.air"), "/lib/function");
 
+        Self::run(cfg, ctx, include_str!("../air/lib/value.air"), "/lib/value");
+        Self::run(cfg, ctx, include_str!("../air/lib/error.air"), "/lib/error");
         Self::run(cfg, ctx, include_str!("../air/lib/language.air"), "/lib/language");
         // } don't depend on the execution order
 
@@ -50,7 +53,7 @@ impl BaseCompCfg {
     pub fn run(cfg: &mut Cfg, ctx: &mut Val, source: &str, path: &str) -> Val {
         let input: Val = match source.parse() {
             Ok(input) => input,
-            Err(_) => panic!("stage 2: failed to parse {path}"),
+            Err(err) => panic!("stage 2: failed to parse {path}: {err}"),
         };
         let output = Eval.call(cfg, ctx, input);
         if cfg.is_aborted() {

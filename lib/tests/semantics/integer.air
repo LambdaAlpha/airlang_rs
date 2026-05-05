@@ -88,8 +88,8 @@ _ do _[
     _any set _ import .value.any,
     _config.make set _ import .config.make,
     _link.make set _ import .link.make,
-    _where set _ import .config.where,
-    _is_aborted set _ import .error.is_aborted,
+    _config.let set _ import .config.let,
+    _is_aborted set _ import .error.is_aborted.context.let,
     _a set _ any .integer,
     _c set _ config.make {
         .prelude : _ link.make {
@@ -97,8 +97,8 @@ _ do _[
             / : /,
         },
     },
-    _c where _(a / 0),
-    _c which is_aborted : .,
+    _c config.let _(a / 0),
+    _c is_aborted .,
 ]
 -----
 true
@@ -153,8 +153,8 @@ _ do _[
     _any set _ import .value.any,
     _config.make set _ import .config.make,
     _link.make set _ import .link.make,
-    _where set _ import .config.where,
-    _is_aborted set _ import .error.is_aborted,
+    _config.let set _ import .config.let,
+    _is_aborted set _ import .error.is_aborted.context.let,
     _a set _ any .integer,
     _c set _ config.make {
         .prelude : _ link.make {
@@ -162,8 +162,8 @@ _ do _[
             % : %,
         },
     },
-    _c where _(a % 0),
-    _c which is_aborted : .,
+    _c config.let _(a % 0),
+    _c is_aborted .,
 ]
 -----
 true

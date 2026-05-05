@@ -26,8 +26,7 @@ pub struct LinkLib {
     pub is_constant: PrimFuncVal,
     pub is_available: PrimFuncVal,
     pub get_id: PrimFuncVal,
-    // todo rename
-    pub which: PrimFuncVal,
+    pub let_: PrimFuncVal,
 }
 
 pub const MAKE: &str = concatcp!(PREFIX_CELL, LINK, ".make");
@@ -35,7 +34,7 @@ pub const MAKE_CONSTANT: &str = concatcp!(PREFIX_CELL, LINK, ".make_constant");
 pub const IS_CONSTANT: &str = concatcp!(PREFIX_CELL, LINK, ".is_constant");
 pub const IS_AVAILABLE: &str = concatcp!(PREFIX_CELL, LINK, ".is_available");
 pub const GET_ID: &str = concatcp!(PREFIX_CELL, LINK, ".get_id");
-pub const WHICH: &str = concatcp!(PREFIX_CELL, LINK, ".which");
+pub const LET: &str = concatcp!(PREFIX_CELL, LINK, ".let");
 
 impl Default for LinkLib {
     fn default() -> Self {
@@ -45,7 +44,7 @@ impl Default for LinkLib {
             is_constant: CtxFreeInputAwareFunc { fn_: is_constant }.build(),
             is_available: CtxFreeInputAwareFunc { fn_: is_available }.build(),
             get_id: CtxFreeInputAwareFunc { fn_: get_id }.build(),
-            which: CtxFreeInputAwareFunc { fn_: which }.build(),
+            let_: CtxFreeInputAwareFunc { fn_: let_ }.build(),
         }
     }
 }
@@ -57,7 +56,7 @@ impl CfgMod for LinkLib {
         extend_func(cfg, IS_CONSTANT, self.is_constant);
         extend_func(cfg, IS_AVAILABLE, self.is_available);
         extend_func(cfg, GET_ID, self.get_id);
-        extend_func(cfg, WHICH, self.which);
+        extend_func(cfg, LET, self.let_);
     }
 }
 
@@ -93,29 +92,29 @@ pub fn get_id(cfg: &mut Cfg, input: Val) -> Val {
     Val::Key(id)
 }
 
-pub fn which(cfg: &mut Cfg, input: Val) -> Val {
+pub fn let_(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{WHICH}: expected input to be a pair, but got {input}");
+        return bug!(cfg, "{LET}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Link(link) = pair.left else {
-        return bug!(cfg, "{WHICH}: expected input.left to be a link, but got {}", pair.left);
+        return bug!(cfg, "{LET}: expected input.left to be a link, but got {}", pair.left);
     };
     let Val::Pair(func_input) = pair.right else {
-        return bug!(cfg, "{WHICH}: expected input.right to be a pair, but got {}", pair.right);
+        return bug!(cfg, "{LET}: expected input.right to be a pair, but got {}", pair.right);
     };
     let func_input = Pair::from(func_input);
     let Val::Func(func) = func_input.left else {
-        return bug!(cfg, "{WHICH}: expected input.right.left to be a function, \
+        return bug!(cfg, "{LET}: expected input.right.left to be a function, \
             but got {}", func_input.left);
     };
     // todo design support control flow
     if link.is_const() && matches!(func.ctx(), PrimCtx::Mut) {
-        return bug!(cfg, "{WHICH}: expected input.right.left to be a context-constant function, \
+        return bug!(cfg, "{LET}: expected input.right.left to be a context-constant function, \
             but got {func}");
     }
     let Ok(mut ctx) = link.try_borrow_mut() else {
-        return bug!(cfg, "{WHICH}: link is not available");
+        return bug!(cfg, "{LET}: link is not available");
     };
     func.call(cfg, ctx.deref_mut(), func_input.right)
 }

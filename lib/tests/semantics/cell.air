@@ -2,10 +2,10 @@ get
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_value set _ import .cell.get_value,
+    _get_value set _ import .cell.get_value.context.let,
     _v set _ any .,
     _c set .(v),
-    v = _c which get_value : .
+    v = _c get_value .
 ]
 -----
 true
@@ -14,12 +14,12 @@ set get
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_value set _ import .cell.get_value,
-    _set_value set _ import .cell.set_value,
+    _get_value set _ import .cell.get_value.context.let,
+    _set_value set _ import .cell.set_value.context.let,
     _c set _ any .cell,
     _v set _ any .,
-    _c which set_value : v,
-    _v1 set _c which get_value : .,
+    _c set_value v,
+    _v1 set _c get_value .,
     v = v1
 ]
 -----
@@ -29,10 +29,10 @@ set return
 -----
 _ do _[
     _any set _ import .value.any,
-    _set_value set _ import .cell.set_value,
+    _set_value set _ import .cell.set_value.context.let,
     _v1 set _ any .,
     _c set .(v1),
-    _v2 set _c which set_value : _ any .,
+    _v2 set _c set_value _ any .,
     v1 = v2
 ]
 -----

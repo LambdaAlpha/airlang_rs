@@ -1,2 +1,22 @@
 _ do _[
+    _ export_let_bind_many [
+        .map.get_length,
+        .map.get_items,
+        .map.into_items,
+        .map.get_keys,
+        .map.into_keys,
+        .map.get_values,
+        .map.into_values,
+        .map.contain,
+        .map.contain_all,
+        .map.contain_any,
+        .map.set,
+        .map.set_many,
+        .map.get,
+        .map.get_many,
+        .map.remove,
+        .map.remove_many,
+        .map.move,
+        .map.clear,
+    ],
 ]

@@ -5,7 +5,7 @@ _ do _[
     _f1 set _ any .,
     _o1 set _ any .,
     _s set f1 solve o1,
-    _(? f2 o2) represent s,
+    _(? f2 o2) is s,
     (f1 = f2) and (o1 = o2)
 ]
 -----
@@ -15,12 +15,12 @@ get
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_function set _ import .solve.get_function,
-    _get_output set _ import .solve.get_output,
+    _get_function set _ import .solve.get_function.context.let,
+    _get_output set _ import .solve.get_output.context.let,
     _f set _ any .,
     _o set _ any .,
     _s set f solve o,
-    (f = _s which get_function : .) and (o = _s which get_output : .)
+    (f = _s get_function .) and (o = _s get_output .)
 ]
 -----
 true
@@ -29,16 +29,16 @@ set get
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_function set _ import .solve.get_function,
-    _get_output set _ import .solve.get_output,
-    _set_function set _ import .solve.set_function,
-    _set_output set _ import .solve.set_output,
+    _get_function set _ import .solve.get_function.context.let,
+    _get_output set _ import .solve.get_output.context.let,
+    _set_function set _ import .solve.set_function.context.let,
+    _set_output set _ import .solve.set_output.context.let,
     _s set _ any .solve,
     _f set _ any .,
     _o set _ any .,
-    _s which set_function : f,
-    _s which set_output : o,
-    (f = _s which get_function : .) and (o = _s which get_output : .)
+    _s set_function f,
+    _s set_output o,
+    (f = _s get_function .) and (o = _s get_output .)
 ]
 -----
 true
@@ -47,13 +47,13 @@ set return
 -----
 _ do _[
     _any set _ import .value.any,
-    _set_function set _ import .solve.set_function,
-    _set_output set _ import .solve.set_output,
+    _set_function set _ import .solve.set_function.context.let,
+    _set_output set _ import .solve.set_output.context.let,
     _f1 set _ any .,
     _o1 set _ any .,
     _s set f1 solve o1,
-    _f2 set _s which set_function : _ any .,
-    _o2 set _s which set_output : _ any .,
+    _f2 set _s set_function _ any .,
+    _o2 set _s set_output _ any .,
     (f1 = f2) and (o1 = o2)
 ]
 -----

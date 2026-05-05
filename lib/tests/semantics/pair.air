@@ -2,12 +2,12 @@ get
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_left set _ import .pair.get_left,
-    _get_right set _ import .pair.get_right,
+    _get_left set _ import .pair.get_left.context.let,
+    _get_right set _ import .pair.get_right.context.let,
     _l set _ any .,
     _r set _ any .,
     _p set l : r,
-    (l = _p which get_left : .) and (r = _p which get_right : .)
+    (l = _p get_left .) and (r = _p get_right .)
 ]
 -----
 true
@@ -16,17 +16,17 @@ set get
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_left set _ import .pair.get_left,
-    _get_right set _ import .pair.get_right,
-    _set_left set _ import .pair.set_left,
-    _set_right set _ import .pair.set_right,
+    _get_left set _ import .pair.get_left.context.let,
+    _get_right set _ import .pair.get_right.context.let,
+    _set_left set _ import .pair.set_left.context.let,
+    _set_right set _ import .pair.set_right.context.let,
     _p set _ any .pair,
     _l set _ any .,
     _r set _ any .,
-    _p which set_left : l,
-    _p which set_right : r,
-    _l1 set _p which get_left : .,
-    _r1 set _p which get_right : .,
+    _p set_left l,
+    _p set_right r,
+    _l1 set _p get_left .,
+    _r1 set _p get_right .,
     (l = l1) and (r = r1)
 ]
 -----
@@ -36,13 +36,13 @@ set return
 -----
 _ do _[
     _any set _ import .value.any,
-    _set_left set _ import .pair.set_left,
-    _set_right set _ import .pair.set_right,
+    _set_left set _ import .pair.set_left.context.let,
+    _set_right set _ import .pair.set_right.context.let,
     _l1 set _ any .,
     _r1 set _ any .,
     _p set l1 : r1,
-    _l2 set _p which set_left : _ any .,
-    _r2 set _p which set_right : _ any .,
+    _l2 set _p set_left _ any .,
+    _r2 set _p set_right _ any .,
     (l1 = l2) and r1 = r2
 ]
 -----

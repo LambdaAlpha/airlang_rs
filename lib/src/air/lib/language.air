@@ -1,3 +1,9 @@
 _ do _[
-    .language.version export 0 : 26 : 0
+    .language.version export 0 : 26 : 0,
+    
+    _ export_let_bind_many [
+        .language.syntax.generate_pretty,
+        .language.syntax.generate_key,
+        .language.syntax.is_valid,
+    ],
 ]

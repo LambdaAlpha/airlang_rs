@@ -1,2 +1,6 @@
 _ do _[
+    _ export_let_bind_many [
+        .byte.get_length,
+        .byte.push,
+    ],
 ]

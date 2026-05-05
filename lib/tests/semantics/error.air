@@ -3,19 +3,19 @@ abort
 _ do _[
     _config.make set _ import .config.make,
     _link.make set _ import .link.make,
-    _where set _ import .config.where,
-    _is_aborted set _ import .error.is_aborted,
+    _config.let set _ import .config.let,
+    _is_aborted set _ import .error.is_aborted.context.let,
     _cfg set _ config.make {
         .prelude : _ link.make {
             do : do,
             abort : abort,
         },
     },
-    _a set _cfg where _(_ do _[
+    _a set _cfg config.let _(_ do _[
         _ abort .,
         1
     ]),
-    _b set _cfg which is_aborted : .,
+    _b set _cfg is_aborted .,
     b and a = .
 ]
 -----
@@ -26,15 +26,15 @@ abort is_aborted
 _ do _[
     _config.make set _ import .config.make,
     _link.make set _ import .link.make,
-    _where set _ import .config.where,
-    _is_aborted set _ import .error.is_aborted,
+    _config.let set _ import .config.let,
+    _is_aborted set _ import .error.is_aborted.context.let,
     _cfg set _ config.make {
         .prelude : _ link.make {
             abort : abort,
         },
     },
-    _cfg where _(_ abort .),
-    _cfg which is_aborted : .,
+    _cfg config.let _(_ abort .),
+    _cfg is_aborted .,
 ]
 -----
 true
@@ -44,15 +44,15 @@ assert false
 _ do _[
     _config.make set _ import .config.make,
     _link.make set _ import .link.make,
-    _where set _ import .config.where,
-    _is_aborted set _ import .error.is_aborted,
+    _config.let set _ import .config.let,
+    _is_aborted set _ import .error.is_aborted.context.let,
     _cfg set _ config.make {
         .prelude : _ link.make {
             assert : assert,
         },
     },
-    _cfg where _(_ assert false),
-    _cfg which is_aborted : .,
+    _cfg config.let _(_ assert false),
+    _cfg is_aborted .,
 ]
 -----
 true
@@ -62,15 +62,15 @@ assert true
 _ do _[
     _config.make set _ import .config.make,
     _link.make set _ import .link.make,
-    _where set _ import .config.where,
-    _is_aborted set _ import .error.is_aborted,
+    _config.let set _ import .config.let,
+    _is_aborted set _ import .error.is_aborted.context.let,
     _cfg set _ config.make {
         .prelude : _ link.make {
             assert : assert,
         },
     },
-    _cfg where _(_ assert true),
-    _cfg which is_aborted : .,
+    _cfg config.let _(_ assert true),
+    _cfg is_aborted .,
 ]
 -----
 false
@@ -80,18 +80,18 @@ recover
 _ do _[
     _config.make set _ import .config.make,
     _link.make set _ import .link.make,
-    _where set _ import .config.where,
-    _is_aborted set _ import .error.is_aborted,
-    _recover set _ import .error.recover,
+    _config.let set _ import .config.let,
+    _is_aborted set _ import .error.is_aborted.context.let,
+    _recover set _ import .error.recover.context.let,
     _cfg set _ config.make {
         .prelude : _ link.make {
             abort : abort,
         },
     },
-    _cfg where _(_ abort .),
-    _a1 set _cfg which is_aborted : .,
-    _cfg which recover : .,
-    _a2 set _cfg which is_aborted : .,
+    _cfg config.let _(_ abort .),
+    _a1 set _cfg is_aborted .,
+    _cfg recover .,
+    _a2 set _cfg is_aborted .,
     a1 and _ not a2,
 ]
 -----

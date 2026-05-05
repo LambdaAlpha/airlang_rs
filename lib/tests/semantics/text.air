@@ -2,12 +2,12 @@ length push
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_length set _ import .text.get_length,
-    _push set _ import .text.push,
+    _get_length set _ import .text.get_length.context.let,
+    _push set _ import .text.push.context.let,
     _t set _ any .text,
-    _l set _t which get_length : .,
-    _t which push : "a",
-    _l1 set _t which get_length : .,
+    _l set _t get_length .,
+    _t push "a",
+    _l1 set _t get_length .,
     l1 = l + 1
 ]
 -----
@@ -17,14 +17,14 @@ get_length join
 -----
 _ do _[
     _any set _ import .value.any,
-    _get_length set _ import .text.get_length,
+    _get_length set _ import .text.get_length.context.let,
     _join set _ import .text.join,
     _a set _ any .text,
-    _la set _a which get_length : .,
+    _la set _a get_length .,
     _b set _ any .text,
-    _lb set _b which get_length : .,
+    _lb set _b get_length .,
     _ab set "" join [a, b],
-    _lab set _ab which get_length : .,
+    _lab set _ab get_length .,
     lab = la + lb
 ]
 -----
@@ -33,9 +33,9 @@ true
 get_length empty
 -----
 _ do _[
-    _get_length set _ import .text.get_length,
+    _get_length set _ import .text.get_length.context.let,
     _t set "",
-    _t which get_length : .
+    _t get_length .
 ]
 -----
 0
@@ -43,9 +43,9 @@ _ do _[
 get_length else
 -----
 _ do _[
-    _get_length set _ import .text.get_length,
+    _get_length set _ import .text.get_length.context.let,
     _t set "1",
-    _t which get_length : .
+    _t get_length .
 ]
 -----
 1
@@ -54,12 +54,12 @@ push join
 -----
 _ do _[
     _any set _ import .value.any,
-    _push set _ import .text.push,
+    _push set _ import .text.push.context.let,
     _join set _ import .text.join,
     _a set _ any .text,
     _b set _ any .text,
     _t set a,
-    _t which push : b,
+    _t push b,
     _t1 set "" join [a, b],
     t = t1
 ]
@@ -69,11 +69,11 @@ true
 push
 -----
 _ do _[
-    _push set _ import .text.push,
+    _push set _ import .text.push.context.let,
     _a set "hello",
     _b set "world",
-    _a which push : " ",
-    _a which push : b,
+    _a push " ",
+    _a push b,
     a
 ]
 -----

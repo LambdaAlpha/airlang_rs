@@ -1,9 +1,11 @@
 _ do _[
     _prelude set _ import .prelude,
-    _link.which set _ import .link.which,
+    _map.set set _ import .map.set.link.let,
     
-    prelude link.which set : _empty : empty,
-    prelude link.which set : _return : return,
-    prelude link.which set : _continue : continue,
-    prelude link.which set : _break : break,
+    prelude map.set _empty : empty,
+    prelude map.set _return : return,
+    prelude map.set _continue : continue,
+    prelude map.set _break : break,
+    
+    prelude map.set _type : _ import .value.get_type.context.let,
 ]

@@ -1,2 +1,8 @@
 _ do _[
+    _ export_let_bind_many [
+        .call.get_function,
+        .call.set_function,
+        .call.get_input,
+        .call.set_input,
+    ],
 ]
