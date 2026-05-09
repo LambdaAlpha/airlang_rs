@@ -1,4 +1,5 @@
 use crate::semantics::cfg::Cfg;
+use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::func::DynFunc;
 use crate::semantics::val::Val;
@@ -26,12 +27,12 @@ impl KeyEval {
 }
 
 impl DynFunc<Cfg, Val, Key, Val> for KeyEval {
-    fn call(&self, cfg: &mut Cfg, ctx: &mut Val, key: Key) -> Val {
+    fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, key: Key) -> Val {
         let (mode, key) = self.recognize(key);
         if matches!(mode, KeyMode::Quote | KeyMode::Cell) {
             return Val::Key(key);
         }
-        let Some(val) = ctx.ref_(cfg, key) else {
+        let Some(val) = ctx.val.ref_(cfg, key) else {
             return Val::default();
         };
         val.clone()

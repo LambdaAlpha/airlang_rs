@@ -6,6 +6,7 @@ use derive_more::Deref;
 use derive_more::From;
 
 use crate::semantics::cfg::Cfg;
+use crate::semantics::ctx::Ctx;
 use crate::semantics::func::CompFunc;
 use crate::semantics::func::DynFunc;
 use crate::semantics::func::PrimCtx;
@@ -61,7 +62,7 @@ impl Hash for CompFuncVal {
 }
 
 impl DynFunc<Cfg, Val, Val, Val> for FuncVal {
-    fn call(&self, cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+    fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
         match self {
             FuncVal::Prim(prim) => prim.call(cfg, ctx, input),
             FuncVal::Comp(comp) => comp.call(cfg, ctx, input),
@@ -73,14 +74,14 @@ impl FuncVal {
     pub fn input(&self) -> PrimInput {
         match self {
             FuncVal::Prim(f) => f.input,
-            FuncVal::Comp(f) => f.input.to_prim_input(),
+            FuncVal::Comp(f) => f.input.prim,
         }
     }
 
     pub fn ctx(&self) -> PrimCtx {
         match self {
             FuncVal::Prim(f) => f.ctx,
-            FuncVal::Comp(f) => f.ctx.to_prim_ctx(),
+            FuncVal::Comp(f) => f.ctx.prim,
         }
     }
 

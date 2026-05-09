@@ -3,6 +3,7 @@ use std::hint::black_box;
 use airlang::cfg::comp::BaseCompCfg;
 use airlang::cfg::prelude;
 use airlang::semantics::core::Eval;
+use airlang::semantics::ctx::Ctx;
 use airlang::semantics::func::DynFunc;
 use airlang::semantics::val::Val;
 use airlang_dev::bench::BatchSize;
@@ -27,7 +28,7 @@ fn bench_interpret(c: &mut Criterion) {
         let src_val: Val = s.parse().expect("parse failed");
         b.iter_batched(
             || src_val.clone(),
-            |val| Eval.call(&mut cfg, &mut ctx, black_box(val)),
+            |val| Eval.call(&mut cfg, Ctx::new_mut(&mut ctx), black_box(val)),
             BatchSize::SmallInput,
         );
     });

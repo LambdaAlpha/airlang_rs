@@ -9,7 +9,7 @@ use airlang::cfg::eval_with_prelude;
 use airlang::cfg::extend_func;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_CELL;
-use airlang::semantics::func::CtxFreeInputAwareFunc;
+use airlang::semantics::func::CtxFreeFunc;
 use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Cell;
@@ -28,7 +28,7 @@ pub const LOAD: &str = concatcp!(PREFIX_CELL, BUILD, ".load");
 
 impl Default for BuildLib {
     fn default() -> Self {
-        Self { load: CtxFreeInputAwareFunc { fn_: load }.build() }
+        Self { load: CtxFreeFunc { fn_: load }.build() }
     }
 }
 

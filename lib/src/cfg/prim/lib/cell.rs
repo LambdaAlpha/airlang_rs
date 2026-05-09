@@ -7,8 +7,8 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
-use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxMutInputAwareFunc;
+use crate::semantics::func::ConstInputFreeFunc;
+use crate::semantics::func::MutFunc;
 use crate::semantics::val::CELL;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -25,8 +25,8 @@ pub const SET_VALUE: &str = concatcp!(PREFIX_CELL, CELL, ".set_value");
 impl Default for CellLib {
     fn default() -> Self {
         Self {
-            get_value: CtxConstInputFreeFunc { fn_: get_value }.build(),
-            set_value: CtxMutInputAwareFunc { fn_: set_value }.build(),
+            get_value: ConstInputFreeFunc { fn_: get_value }.build(),
+            set_value: MutFunc { fn_: set_value }.build(),
         }
     }
 }

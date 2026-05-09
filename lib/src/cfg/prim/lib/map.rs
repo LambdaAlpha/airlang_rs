@@ -7,11 +7,11 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
-use crate::semantics::func::CtxConstInputAwareFunc;
-use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxFreeInputAwareFunc;
-use crate::semantics::func::CtxMutInputAwareFunc;
-use crate::semantics::func::CtxMutInputFreeFunc;
+use crate::semantics::func::ConstFunc;
+use crate::semantics::func::ConstInputFreeFunc;
+use crate::semantics::func::CtxFreeFunc;
+use crate::semantics::func::MutFunc;
+use crate::semantics::func::MutInputFreeFunc;
 use crate::semantics::val::MAP;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -72,26 +72,26 @@ pub const CLEAR: &str = concatcp!(PREFIX_CELL, MAP, ".clear");
 impl Default for MapLib {
     fn default() -> Self {
         Self {
-            make: CtxFreeInputAwareFunc { fn_: make }.build(),
-            make_set: CtxFreeInputAwareFunc { fn_: make_set }.build(),
-            get_length: CtxConstInputFreeFunc { fn_: get_length }.build(),
-            get_items: CtxConstInputFreeFunc { fn_: get_items }.build(),
-            into_items: CtxMutInputFreeFunc { fn_: into_items }.build(),
-            get_keys: CtxConstInputFreeFunc { fn_: get_keys }.build(),
-            into_keys: CtxMutInputFreeFunc { fn_: into_keys }.build(),
-            get_values: CtxConstInputFreeFunc { fn_: get_values }.build(),
-            into_values: CtxMutInputFreeFunc { fn_: into_values }.build(),
-            contain: CtxConstInputAwareFunc { fn_: contain }.build(),
-            contain_all: CtxConstInputAwareFunc { fn_: contain_all }.build(),
-            contain_any: CtxConstInputAwareFunc { fn_: contain_any }.build(),
-            set: CtxMutInputAwareFunc { fn_: set }.build(),
-            set_many: CtxMutInputAwareFunc { fn_: set_many }.build(),
-            get: CtxConstInputAwareFunc { fn_: get }.build(),
-            get_many: CtxConstInputAwareFunc { fn_: get_many }.build(),
-            remove: CtxMutInputAwareFunc { fn_: remove }.build(),
-            remove_many: CtxMutInputAwareFunc { fn_: remove_many }.build(),
-            move_: CtxMutInputAwareFunc { fn_: move_ }.build(),
-            clear: CtxMutInputFreeFunc { fn_: clear }.build(),
+            make: CtxFreeFunc { fn_: make }.build(),
+            make_set: CtxFreeFunc { fn_: make_set }.build(),
+            get_length: ConstInputFreeFunc { fn_: get_length }.build(),
+            get_items: ConstInputFreeFunc { fn_: get_items }.build(),
+            into_items: MutInputFreeFunc { fn_: into_items }.build(),
+            get_keys: ConstInputFreeFunc { fn_: get_keys }.build(),
+            into_keys: MutInputFreeFunc { fn_: into_keys }.build(),
+            get_values: ConstInputFreeFunc { fn_: get_values }.build(),
+            into_values: MutInputFreeFunc { fn_: into_values }.build(),
+            contain: ConstFunc { fn_: contain }.build(),
+            contain_all: ConstFunc { fn_: contain_all }.build(),
+            contain_any: ConstFunc { fn_: contain_any }.build(),
+            set: MutFunc { fn_: set }.build(),
+            set_many: MutFunc { fn_: set_many }.build(),
+            get: ConstFunc { fn_: get }.build(),
+            get_many: ConstFunc { fn_: get_many }.build(),
+            remove: MutFunc { fn_: remove }.build(),
+            remove_many: MutFunc { fn_: remove_many }.build(),
+            move_: MutFunc { fn_: move_ }.build(),
+            clear: MutInputFreeFunc { fn_: clear }.build(),
         }
     }
 }

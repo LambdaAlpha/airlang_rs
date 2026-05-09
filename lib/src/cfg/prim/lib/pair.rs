@@ -7,8 +7,8 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
-use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxMutInputAwareFunc;
+use crate::semantics::func::ConstInputFreeFunc;
+use crate::semantics::func::MutFunc;
 use crate::semantics::val::PAIR;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -29,10 +29,10 @@ pub const SET_RIGHT: &str = concatcp!(PREFIX_CELL, PAIR, ".set_right");
 impl Default for PairLib {
     fn default() -> Self {
         Self {
-            get_left: CtxConstInputFreeFunc { fn_: get_left }.build(),
-            set_left: CtxMutInputAwareFunc { fn_: set_left }.build(),
-            get_right: CtxConstInputFreeFunc { fn_: get_right }.build(),
-            set_right: CtxMutInputAwareFunc { fn_: set_right }.build(),
+            get_left: ConstInputFreeFunc { fn_: get_left }.build(),
+            set_left: MutFunc { fn_: set_left }.build(),
+            get_right: ConstInputFreeFunc { fn_: get_right }.build(),
+            set_right: MutFunc { fn_: set_right }.build(),
         }
     }
 }

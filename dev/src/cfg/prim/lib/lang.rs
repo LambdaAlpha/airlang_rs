@@ -6,7 +6,7 @@ use airlang::cfg::CfgMod;
 use airlang::cfg::extend_func;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_CELL;
-use airlang::semantics::func::CtxFreeInputAwareFunc;
+use airlang::semantics::func::CtxFreeFunc;
 use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Bit;
@@ -24,7 +24,7 @@ pub const CHECK_VERSION: &str = concatcp!(PREFIX_CELL, DEV_LANGUAGE, ".check_ver
 
 impl Default for LangLib {
     fn default() -> Self {
-        Self { check_version: CtxFreeInputAwareFunc { fn_: check_version }.build() }
+        Self { check_version: CtxFreeFunc { fn_: check_version }.build() }
     }
 }
 

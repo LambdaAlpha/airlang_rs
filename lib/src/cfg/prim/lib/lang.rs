@@ -6,8 +6,8 @@ use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::PREFIX_CELL;
-use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxFreeInputAwareFunc;
+use crate::semantics::func::ConstInputFreeFunc;
+use crate::semantics::func::CtxFreeFunc;
 use crate::semantics::func::PrimCtx;
 use crate::semantics::func::PrimFunc;
 use crate::semantics::func::PrimInput;
@@ -44,14 +44,14 @@ impl Default for LangLib {
         Self {
             semantics_eval: PrimFunc {
                 fn_: leak_const(Eval),
-                ctx: PrimCtx::Mut,
-                input: PrimInput::Aware,
+                ctx: PrimCtx::Default,
+                input: PrimInput::Default,
             }
             .into(),
-            syntax_parse: CtxFreeInputAwareFunc { fn_: syntax_parse }.build(),
-            syntax_generate_pretty: CtxConstInputFreeFunc { fn_: syntax_generate_pretty }.build(),
-            syntax_generate_key: CtxConstInputFreeFunc { fn_: syntax_generate_key }.build(),
-            syntax_is_valid: CtxConstInputFreeFunc { fn_: syntax_is_valid }.build(),
+            syntax_parse: CtxFreeFunc { fn_: syntax_parse }.build(),
+            syntax_generate_pretty: ConstInputFreeFunc { fn_: syntax_generate_pretty }.build(),
+            syntax_generate_key: ConstInputFreeFunc { fn_: syntax_generate_key }.build(),
+            syntax_is_valid: ConstInputFreeFunc { fn_: syntax_is_valid }.build(),
         }
     }
 }

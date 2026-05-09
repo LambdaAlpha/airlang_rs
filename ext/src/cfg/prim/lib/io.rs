@@ -8,9 +8,9 @@ use airlang::cfg::CfgMod;
 use airlang::cfg::extend_func;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_CELL;
-use airlang::semantics::func::CtxFreeInputAwareFunc;
-use airlang::semantics::func::CtxFreeInputFreeFunc;
-use airlang::semantics::func::CtxMutInputFreeFunc;
+use airlang::semantics::func::CtxFreeFunc;
+use airlang::semantics::func::FreeFunc;
+use airlang::semantics::func::MutInputFreeFunc;
 use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
 use const_format::concatcp;
@@ -40,13 +40,13 @@ pub const ERROR_FLUSH: &str = concatcp!(PREFIX_CELL, IO, ".error_flush");
 impl Default for IoLib {
     fn default() -> Self {
         Self {
-            read_line: CtxMutInputFreeFunc { fn_: read_line }.build(),
-            print: CtxFreeInputAwareFunc { fn_: print }.build(),
-            print_line: CtxFreeInputAwareFunc { fn_: print_line }.build(),
-            flush: CtxFreeInputFreeFunc { fn_: flush }.build(),
-            error_print: CtxFreeInputAwareFunc { fn_: error_print }.build(),
-            error_print_line: CtxFreeInputAwareFunc { fn_: error_print_line }.build(),
-            error_flush: CtxFreeInputFreeFunc { fn_: error_flush }.build(),
+            read_line: MutInputFreeFunc { fn_: read_line }.build(),
+            print: CtxFreeFunc { fn_: print }.build(),
+            print_line: CtxFreeFunc { fn_: print_line }.build(),
+            flush: FreeFunc { fn_: flush }.build(),
+            error_print: CtxFreeFunc { fn_: error_print }.build(),
+            error_print_line: CtxFreeFunc { fn_: error_print_line }.build(),
+            error_flush: FreeFunc { fn_: error_flush }.build(),
         }
     }
 }

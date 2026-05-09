@@ -11,6 +11,7 @@ use airlang::cfg::error::ABORT_TYPE;
 use airlang::cfg::prelude;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::Eval;
+use airlang::semantics::ctx::Ctx;
 use airlang::semantics::func::DynFunc;
 use airlang::semantics::val::Val;
 use airlang::type_::Key;
@@ -413,7 +414,7 @@ impl<T: ReplTerminal> Repl<T> {
     fn eval(&mut self, input: &str) -> Result<()> {
         match input.parse::<Val>() {
             Ok(input) => {
-                let output = Eval.call(&mut self.cfg, &mut self.ctx, input);
+                let output = Eval.call(&mut self.cfg, Ctx::new_mut(&mut self.ctx), input);
                 if self.cfg.is_aborted() {
                     self.print_abort()?;
                     self.recover();
@@ -450,7 +451,7 @@ impl<T: ReplTerminal> Repl<T> {
         self.terminal.print(Self::TITLE)?;
         self.terminal.print(" ")?;
         match include_str!("air/version.air").parse::<Val>() {
-            Ok(repr) => match Eval.call(&mut self.cfg, &mut self.ctx, repr) {
+            Ok(repr) => match Eval.call(&mut self.cfg, Ctx::new_mut(&mut self.ctx), repr) {
                 Val::Text(text) => self.terminal.print(&***text),
                 _ => self.terminal.eprint("unknown version"),
             },

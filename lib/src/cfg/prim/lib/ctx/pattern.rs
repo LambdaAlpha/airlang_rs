@@ -2,6 +2,7 @@ use crate::bug;
 use crate::cfg::utils::key;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_QUOTE;
+use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::DynCtx;
 use crate::semantics::val::CallVal;
 use crate::semantics::val::CellVal;
@@ -278,12 +279,12 @@ impl PatternMatch<Val> for Map<Key, Pattern> {
     }
 }
 
-pub(in crate::cfg) trait PatternAssign<Ctx, Val> {
-    fn assign(self, cfg: &mut Cfg, tag: &str, ctx: &mut Ctx, val: Val) -> Option<()>;
+pub(in crate::cfg) trait PatternAssign<CtxVal, Val> {
+    fn assign(self, cfg: &mut Cfg, tag: &str, ctx: Ctx<CtxVal>, val: Val) -> Option<()>;
 }
 
 impl PatternAssign<Val, Val> for Pattern {
-    fn assign(self, cfg: &mut Cfg, tag: &str, ctx: &mut Val, val: Val) -> Option<()> {
+    fn assign(self, cfg: &mut Cfg, tag: &str, ctx: Ctx<Val>, val: Val) -> Option<()> {
         match self {
             Pattern::Any(name) => name.assign(cfg, tag, ctx, val),
             Pattern::Val(expected) => expected.assign(cfg, tag, ctx, val),
@@ -299,11 +300,15 @@ impl PatternAssign<Val, Val> for Pattern {
 }
 
 impl PatternAssign<Val, Val> for Option<Key> {
-    fn assign(self, cfg: &mut Cfg, _tag: &str, ctx: &mut Val, val: Val) -> Option<()> {
+    fn assign(self, cfg: &mut Cfg, tag: &str, ctx: Ctx<Val>, val: Val) -> Option<()> {
         let Some(key) = self else {
             return Some(());
         };
-        ctx.set(cfg, key, val);
+        if ctx.const_ {
+            bug!(cfg, "{tag}: context should be mutable");
+            return None;
+        }
+        ctx.val.set(cfg, key, val);
         if cfg.is_aborted() {
             return None;
         }
@@ -312,13 +317,13 @@ impl PatternAssign<Val, Val> for Option<Key> {
 }
 
 impl PatternAssign<Val, Val> for Val {
-    fn assign(self, _cfg: &mut Cfg, _tag: &str, _ctx: &mut Val, _val: Val) -> Option<()> {
+    fn assign(self, _cfg: &mut Cfg, _tag: &str, _ctx: Ctx<Val>, _val: Val) -> Option<()> {
         Some(())
     }
 }
 
 impl PatternAssign<Val, Val> for Cell<Pattern> {
-    fn assign(self, cfg: &mut Cfg, tag: &str, ctx: &mut Val, val: Val) -> Option<()> {
+    fn assign(self, cfg: &mut Cfg, tag: &str, ctx: Ctx<Val>, val: Val) -> Option<()> {
         let Val::Cell(val) = val else {
             bug!(cfg, "{tag}: expected a cell, but got {val}");
             return None;
@@ -330,7 +335,7 @@ impl PatternAssign<Val, Val> for Cell<Pattern> {
 }
 
 impl PatternAssign<Val, Val> for Quote<Pattern> {
-    fn assign(self, cfg: &mut Cfg, tag: &str, ctx: &mut Val, val: Val) -> Option<()> {
+    fn assign(self, cfg: &mut Cfg, tag: &str, ctx: Ctx<Val>, val: Val) -> Option<()> {
         let Val::Quote(val) = val else {
             bug!(cfg, "{tag}: expected a quote, but got {val}");
             return None;
@@ -342,46 +347,46 @@ impl PatternAssign<Val, Val> for Quote<Pattern> {
 }
 
 impl PatternAssign<Val, Val> for Pair<Pattern, Pattern> {
-    fn assign(self, cfg: &mut Cfg, tag: &str, ctx: &mut Val, val: Val) -> Option<()> {
+    fn assign(self, cfg: &mut Cfg, tag: &str, mut ctx: Ctx<Val>, val: Val) -> Option<()> {
         let Val::Pair(val) = val else {
             bug!(cfg, "{tag}: expected a pair, but got {val}");
             return None;
         };
         let val = Pair::from(val);
-        self.left.assign(cfg, tag, ctx, val.left)?;
+        self.left.assign(cfg, tag, ctx.reborrow(), val.left)?;
         self.right.assign(cfg, tag, ctx, val.right)?;
         Some(())
     }
 }
 
 impl PatternAssign<Val, Val> for Call<Pattern, Pattern> {
-    fn assign(self, cfg: &mut Cfg, tag: &str, c: &mut Val, val: Val) -> Option<()> {
+    fn assign(self, cfg: &mut Cfg, tag: &str, mut c: Ctx<Val>, val: Val) -> Option<()> {
         let Val::Call(val) = val else {
             bug!(cfg, "{tag}: expected a call, but got {val}");
             return None;
         };
         let val = Call::from(val);
-        self.func.assign(cfg, tag, c, val.func)?;
+        self.func.assign(cfg, tag, c.reborrow(), val.func)?;
         self.input.assign(cfg, tag, c, val.input)?;
         Some(())
     }
 }
 
 impl PatternAssign<Val, Val> for Solve<Pattern, Pattern> {
-    fn assign(self, cfg: &mut Cfg, tag: &str, c: &mut Val, val: Val) -> Option<()> {
+    fn assign(self, cfg: &mut Cfg, tag: &str, mut c: Ctx<Val>, val: Val) -> Option<()> {
         let Val::Solve(val) = val else {
             bug!(cfg, "{tag}: expected a solve, but got {val}");
             return None;
         };
         let val = Solve::from(val);
-        self.func.assign(cfg, tag, c, val.func)?;
+        self.func.assign(cfg, tag, c.reborrow(), val.func)?;
         self.output.assign(cfg, tag, c, val.output)?;
         Some(())
     }
 }
 
 impl PatternAssign<Val, Val> for List<Pattern> {
-    fn assign(self, cfg: &mut Cfg, tag: &str, ctx: &mut Val, val: Val) -> Option<()> {
+    fn assign(self, cfg: &mut Cfg, tag: &str, mut ctx: Ctx<Val>, val: Val) -> Option<()> {
         let Val::List(val) = val else {
             bug!(cfg, "{tag}: expected a list, but got {val}");
             return None;
@@ -393,14 +398,14 @@ impl PatternAssign<Val, Val> for List<Pattern> {
         }
         let mut val_iter = List::from(val).into_iter();
         for p in self {
-            p.assign(cfg, tag, ctx, val_iter.next().unwrap())?;
+            p.assign(cfg, tag, ctx.reborrow(), val_iter.next().unwrap())?;
         }
         Some(())
     }
 }
 
 impl PatternAssign<Val, Val> for Map<Key, Pattern> {
-    fn assign(self, cfg: &mut Cfg, tag: &str, ctx: &mut Val, val: Val) -> Option<()> {
+    fn assign(self, cfg: &mut Cfg, tag: &str, mut ctx: Ctx<Val>, val: Val) -> Option<()> {
         let Val::Map(mut val) = val else {
             bug!(cfg, "{tag}: expected a map, but got {val}");
             return None;
@@ -410,7 +415,7 @@ impl PatternAssign<Val, Val> for Map<Key, Pattern> {
                 bug!(cfg, "{tag}: value not found for key {k} in map {val}");
                 return None;
             };
-            pattern.assign(cfg, tag, ctx, val)?;
+            pattern.assign(cfg, tag, ctx.reborrow(), val)?;
         }
         Some(())
     }

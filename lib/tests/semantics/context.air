@@ -78,6 +78,27 @@ _ do _[
 -----
 1
 =====
+is_constant true
+-----
+_ do _[
+    _link.make_constant set _ import .link.make_constant,
+    _link.let set _ import .link.let,
+    _c set _ link.make_constant .,
+    _is_constant set _ import .context.is_constant,
+    c link.let is_constant : .
+]
+-----
+true
+=====
+is_constant false
+-----
+_ do _[
+    _is_constant set _ import .context.is_constant,
+    _ is_constant .
+]
+-----
+false
+=====
 is cell
 -----
 _ do _[

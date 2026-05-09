@@ -14,8 +14,9 @@ use crate::cfg::prim::lib::ctx::pattern::PatternParse;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::PREFIX_CELL;
+use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::DynCtx;
-use crate::semantics::func::CtxMutInputAwareFunc;
+use crate::semantics::func::DefaultFunc;
 use crate::semantics::func::DynFunc;
 use crate::semantics::val::ListVal;
 use crate::semantics::val::MapVal;
@@ -54,12 +55,12 @@ pub const ITERATE: &str = concatcp!(PREFIX_CELL, CTRL, ".iterate");
 impl Default for CtrlLib {
     fn default() -> Self {
         Self {
-            do_: CtxMutInputAwareFunc { fn_: do_ }.build(),
-            test: CtxMutInputAwareFunc { fn_: test }.build(),
-            switch: CtxMutInputAwareFunc { fn_: switch }.build(),
-            match_: CtxMutInputAwareFunc { fn_: match_ }.build(),
-            loop_: CtxMutInputAwareFunc { fn_: loop_ }.build(),
-            iterate: CtxMutInputAwareFunc { fn_: iterate }.build(),
+            do_: DefaultFunc { fn_: do_ }.build(),
+            test: DefaultFunc { fn_: test }.build(),
+            switch: DefaultFunc { fn_: switch }.build(),
+            match_: DefaultFunc { fn_: match_ }.build(),
+            loop_: DefaultFunc { fn_: loop_ }.build(),
+            iterate: DefaultFunc { fn_: iterate }.build(),
         }
     }
 }
@@ -101,13 +102,13 @@ impl Block {
         Ok(Block { statements })
     }
 
-    fn flow(self, cfg: &mut Cfg, tag: &str, ctx: &mut Val) -> Option<Val> {
+    fn flow(self, cfg: &mut Cfg, tag: &str, mut ctx: Ctx<Val>) -> Option<Val> {
         let mut output = Val::default();
         for statement in self.statements {
+            output = Eval.call(cfg, ctx.reborrow(), statement.body);
             if cfg.is_aborted() {
                 return None;
             }
-            output = Eval.call(cfg, ctx, statement.body);
             if !statement.try_ {
                 continue;
             }
@@ -116,7 +117,7 @@ impl Block {
                 Val::Unit(_) => {},
                 output => {
                     bug!(cfg, "{tag}: expected body of {TRY} to be a cell or unit, \
-                        but got {output:?}");
+                        but got {output}");
                     return None;
                 },
             }
@@ -145,14 +146,14 @@ impl Statement {
     }
 }
 
-pub fn do_(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn do_(cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
     let Ok(block) = Block::parse(cfg, DO, input) else {
         return Val::default();
     };
     block.flow(cfg, DO, ctx).unwrap_or_default()
 }
 
-pub fn test(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn test(cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
     let Ok(test) = Test::parse(cfg, input) else {
         return Val::default();
     };
@@ -189,7 +190,7 @@ impl Test {
         }
     }
 
-    fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
+    fn eval(self, cfg: &mut Cfg, ctx: Ctx<Val>) -> Val {
         if *self.condition {
             return self.body.flow(cfg, TEST, ctx).unwrap_or_default();
         }
@@ -200,7 +201,7 @@ impl Test {
     }
 }
 
-pub fn switch(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn switch(cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
     let Ok(switch) = Switch::parse(cfg, input) else {
         return Val::default();
     };
@@ -252,7 +253,7 @@ impl Switch {
         Ok(block_map)
     }
 
-    fn eval(mut self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
+    fn eval(mut self, cfg: &mut Cfg, ctx: Ctx<Val>) -> Val {
         let Some(body) = self.map.remove(&self.val).or(self.default) else {
             return Val::default();
         };
@@ -260,7 +261,7 @@ impl Switch {
     }
 }
 
-pub fn match_(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn match_(cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
     let Ok(match_) = Match::parse(cfg, input) else {
         return Val::default();
     };
@@ -300,20 +301,19 @@ impl Match {
         Ok(arms)
     }
 
-    fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
+    fn eval(self, cfg: &mut Cfg, mut ctx: Ctx<Val>) -> Val {
         for (pattern, block) in self.arms {
+            let pattern = Eval.call(cfg, ctx.reborrow(), pattern);
             if cfg.is_aborted() {
                 return Val::default();
             }
-            let pattern = Eval.call(cfg, ctx, pattern);
             let Some(pattern) = pattern.parse(cfg, MATCH) else {
                 return Val::default();
             };
             if !pattern.match_(cfg, false, MATCH, &self.val) {
                 continue;
             }
-            // todo design
-            let result = pattern.assign(cfg, MATCH, ctx, self.val);
+            let result = pattern.assign(cfg, MATCH, ctx.reborrow(), self.val);
             if result.is_none() {
                 return Val::default();
             }
@@ -323,7 +323,7 @@ impl Match {
     }
 }
 
-pub fn loop_(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn loop_(cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
     let Ok(loop_) = Loop::parse(cfg, input) else {
         return Val::default();
     };
@@ -346,16 +346,16 @@ impl Loop {
         Ok(Self { condition, body })
     }
 
-    fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
+    fn eval(self, cfg: &mut Cfg, mut ctx: Ctx<Val>) -> Val {
         loop {
-            let cond = Eval.call(cfg, ctx, self.condition.clone());
+            let cond = Eval.call(cfg, ctx.reborrow(), self.condition.clone());
             let Val::Bit(bit) = cond else {
                 return bug!(cfg, "{LOOP}: expected condition to be a bit, but got {cond}");
             };
             if !*bit {
                 break;
             }
-            let Some(output) = self.body.clone().flow(cfg, LOOP, ctx) else {
+            let Some(output) = self.body.clone().flow(cfg, LOOP, ctx.reborrow()) else {
                 return Val::default();
             };
             match output {
@@ -363,7 +363,7 @@ impl Loop {
                 Val::Unit(_) => {},
                 output => {
                     bug!(cfg, "{LOOP}: expected return value of body to be a cell or unit, \
-                        but got {output:?}");
+                        but got {output}");
                     return Val::default();
                 },
             }
@@ -372,7 +372,7 @@ impl Loop {
     }
 }
 
-pub fn iterate(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn iterate(cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
     let Ok(iterate) = Iterate::parse(cfg, input) else {
         return Val::default();
     };
@@ -381,7 +381,7 @@ pub fn iterate(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
 
 struct Iterate {
     val: Val,
-    name: Key,
+    name: Option<Key>,
     body: Block,
 }
 
@@ -397,15 +397,20 @@ impl Iterate {
                 but got {}", pair.right));
         };
         let name_body = Pair::from(name_body);
-        let Val::Key(name) = name_body.left else {
-            return Err(bug!(cfg, "{ITERATE}: expected input.right.left to be a key, \
-                but got {}", name_body.left));
+        let name = match name_body.left {
+            Val::Key(key) => Some(key),
+            Val::Unit(_) => None,
+            v => {
+                return Err(
+                    bug!(cfg, "{ITERATE}: expected input.right.left to be a key, but got {v}"),
+                );
+            },
         };
         let body = Block::parse(cfg, ITERATE, name_body.right)?;
         Ok(Self { val, name, body })
     }
 
-    fn eval(self, cfg: &mut Cfg, ctx: &mut Val) -> Val {
+    fn eval(self, cfg: &mut Cfg, ctx: Ctx<Val>) -> Val {
         match self.val {
             Val::Int(i) => {
                 let i = Int::from(i);
@@ -462,17 +467,20 @@ impl Iterate {
 }
 
 fn iterate_val<ValIter>(
-    cfg: &mut Cfg, ctx: &mut Val, body: Block, name: Key, values: ValIter,
+    cfg: &mut Cfg, mut ctx: Ctx<Val>, body: Block, name: Option<Key>, values: ValIter,
 ) -> Val
 where ValIter: Iterator<Item = Val> {
     for val in values {
-        if cfg.is_aborted() {
-            return Val::default();
+        if let Some(name) = name.clone() {
+            if ctx.const_ {
+                return bug!(cfg, "{ITERATE}: expected name to be a unit in constant context, \
+                    but got {name}");
+            }
+            if ctx.val.set(cfg, name, val).is_none() {
+                return Val::default();
+            }
         }
-        if ctx.set(cfg, name.clone(), val).is_none() {
-            return Val::default();
-        }
-        let Some(output) = body.clone().flow(cfg, ITERATE, ctx) else {
+        let Some(output) = body.clone().flow(cfg, ITERATE, ctx.reborrow()) else {
             return Val::default();
         };
         match output {
@@ -480,7 +488,7 @@ where ValIter: Iterator<Item = Val> {
             Val::Unit(_) => {},
             output => {
                 bug!(cfg, "{ITERATE}: expected return value of body to be a cell or unit, \
-                    but got {output:?}");
+                    but got {output}");
                 return Val::default();
             },
         }

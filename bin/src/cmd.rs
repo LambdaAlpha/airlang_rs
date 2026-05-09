@@ -4,6 +4,7 @@ use std::io::stdout;
 
 use airlang::cfg::prelude;
 use airlang::semantics::core::Eval;
+use airlang::semantics::ctx::Ctx;
 use airlang::semantics::func::DynFunc;
 use airlang::semantics::val::Val;
 use airlang::syntax::FmtOptions;
@@ -31,7 +32,7 @@ pub fn interpret_file(path: &str) -> std::io::Result<()> {
     let mut ctx = prelude(&mut cfg);
     match source.parse::<Val>() {
         Ok(val) => {
-            let output = Eval.call(&mut cfg, &mut ctx, val);
+            let output = Eval.call(&mut cfg, Ctx::new_mut(&mut ctx), val);
             let mut lock = stdout().lock();
             writeln!(lock, "{output:#}")
         },

@@ -5,7 +5,8 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
-use crate::semantics::func::CtxFreeInputAwareFunc;
+use crate::semantics::ctx::Ctx;
+use crate::semantics::func::CtxFreeFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
@@ -30,10 +31,10 @@ pub const EXIST: &str = concatcp!(PREFIX_CELL, FACT, ".exist");
 impl Default for FactLib {
     fn default() -> Self {
         Self {
-            put: CtxFreeInputAwareFunc { fn_: put }.build(),
-            call: CtxFreeInputAwareFunc { fn_: call }.build(),
-            solve: CtxFreeInputAwareFunc { fn_: solve }.build(),
-            exist: CtxFreeInputAwareFunc { fn_: exist }.build(),
+            put: CtxFreeFunc { fn_: put }.build(),
+            call: CtxFreeFunc { fn_: call }.build(),
+            solve: CtxFreeFunc { fn_: solve }.build(),
+            exist: CtxFreeFunc { fn_: exist }.build(),
         }
     }
 }
@@ -55,7 +56,10 @@ pub fn put(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Func(func) = pair.left else {
         return bug!(cfg, "{PUT}: expected input.left to be a function, but got {}", pair.left);
     };
-    cfg.fact_put(&mut Val::default(), func, pair.right);
+    // todo design support ctx aware facts?
+    let mut ctx = Val::default();
+    let ctx = Ctx::new_mut(&mut ctx);
+    cfg.fact_put(ctx, func, pair.right);
     Val::default()
 }
 

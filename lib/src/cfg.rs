@@ -7,6 +7,7 @@ use crate::bug;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::PREFIX_CELL;
+use crate::semantics::ctx::Ctx;
 use crate::semantics::func::DynFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -63,10 +64,11 @@ pub fn eval_with_prelude(cfg: &mut Cfg, tag: &str, input: Val) -> Val {
     let Some(mut ctx) = opt_prelude(cfg, tag) else {
         return Val::default();
     };
+    let ctx = Ctx::new_mut(&mut ctx);
     // unwind safety:
     // ctx is local variable
     // cfg is aborted
-    let result = catch_unwind(AssertUnwindSafe(|| Eval.call(cfg, &mut ctx, input)));
+    let result = catch_unwind(AssertUnwindSafe(|| Eval.call(cfg, ctx, input)));
     match result {
         Ok(output) => output,
         Err(err) => {

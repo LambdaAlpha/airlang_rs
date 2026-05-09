@@ -5,6 +5,7 @@ use crate::cfg::prelude;
 use crate::cfg::prim::BasePrimCfg;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
+use crate::semantics::ctx::Ctx;
 use crate::semantics::func::DynFunc;
 use crate::semantics::val::Val;
 use crate::type_::Key;
@@ -55,7 +56,7 @@ impl BaseCompCfg {
             Ok(input) => input,
             Err(err) => panic!("stage 2: failed to parse {path}: {err}"),
         };
-        let output = Eval.call(cfg, ctx, input);
+        let output = Eval.call(cfg, Ctx::new_mut(ctx), input);
         if cfg.is_aborted() {
             let type_ = cfg.import(Key::from_str_unchecked(ABORT_TYPE));
             let msg = cfg.import(Key::from_str_unchecked(ABORT_MSG));

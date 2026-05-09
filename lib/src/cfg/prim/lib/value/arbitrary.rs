@@ -14,6 +14,8 @@ use crate::semantics::cfg::Cfg;
 use crate::semantics::func::CompCtx;
 use crate::semantics::func::CompFunc;
 use crate::semantics::func::CompInput;
+use crate::semantics::func::PrimCtx;
+use crate::semantics::func::PrimInput;
 use crate::semantics::val::CompFuncVal;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::LinkVal;
@@ -249,15 +251,18 @@ impl Distribution<FuncVal> for Any {
 
 impl Distribution<CompFuncVal> for Any {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> CompFuncVal {
-        let ctx = if rng.random() {
-            CompCtx::Aware { name: self.sample(rng), const_: rng.random() }
-        } else {
-            CompCtx::Free
+        let name = self.sample(rng);
+        let ctx = match rng.random_range(0 .. 4) {
+            0 => CompCtx { name: Key::default(), prim: PrimCtx::Free },
+            1 => CompCtx { name, prim: PrimCtx::Const_ },
+            2 => CompCtx { name, prim: PrimCtx::Mut },
+            3 => CompCtx { name, prim: PrimCtx::Default },
+            _ => unreachable!(),
         };
         let input = if rng.random() {
-            CompInput::Aware { name: self.sample(rng) }
+            CompInput { name: self.sample(rng), prim: PrimInput::Default }
         } else {
-            CompInput::Free
+            CompInput { name: Key::default(), prim: PrimInput::Free }
         };
         let func = CompFunc { prelude: self.sample(rng), body: self.sample(rng), input, ctx };
         CompFuncVal::from(func)

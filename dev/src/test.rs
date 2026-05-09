@@ -6,6 +6,7 @@ use airlang::cfg::error::ABORT_TYPE;
 use airlang::cfg::prelude;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::Eval;
+use airlang::semantics::ctx::Ctx;
 use airlang::semantics::func::DynFunc;
 use airlang::semantics::val::Val;
 use airlang::type_::Key;
@@ -51,7 +52,7 @@ fn run_test_eval(cfg: Cfg, ctx: Val, input: &str, file_name: &str) -> Result<(),
         trace!("file {file_name} case ({title})");
         let mut cfg = backup_cfg.clone();
         let mut ctx = backup_ctx.clone();
-        let ret = Eval.call(&mut cfg, &mut ctx, src);
+        let ret = Eval.call(&mut cfg, Ctx::new_mut(&mut ctx), src);
         check_abort(&cfg, file_name, title);
         let ret_expected = o.parse().map_err(|e| {
             eprintln!("file {file_name} case ({title}): output ({o}) parse failed\n{e}");

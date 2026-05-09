@@ -5,7 +5,7 @@ use airlang::cfg::CfgMod;
 use airlang::cfg::extend_func;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_CELL;
-use airlang::semantics::func::CtxFreeInputAwareFunc;
+use airlang::semantics::func::CtxFreeFunc;
 use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Byte;
@@ -28,7 +28,7 @@ pub const CALL: &str = concatcp!(PREFIX_CELL, PROCESS, ".call");
 
 impl Default for ProcessLib {
     fn default() -> Self {
-        Self { call: CtxFreeInputAwareFunc { fn_: call }.build() }
+        Self { call: CtxFreeFunc { fn_: call }.build() }
     }
 }
 

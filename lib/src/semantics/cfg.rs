@@ -5,6 +5,7 @@ use derive_more::DerefMut;
 
 use crate::semantics::cfg::fact::Facts;
 use crate::semantics::cfg::fact::ValId;
+use crate::semantics::ctx::Ctx;
 use crate::semantics::func::DynFunc;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::Val;
@@ -75,7 +76,7 @@ impl Cfg {
         &self.facts
     }
 
-    pub fn fact_put(&mut self, ctx: &mut Val, func: FuncVal, input: Val) {
+    pub fn fact_put(&mut self, ctx: Ctx<Val>, func: FuncVal, input: Val) {
         let output = func.call(self, ctx, input.clone());
         let input = ValId::from(input);
         let output = ValId::from(output);

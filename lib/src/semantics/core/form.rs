@@ -1,6 +1,7 @@
 use std::mem::take;
 
 use crate::semantics::cfg::Cfg;
+use crate::semantics::ctx::Ctx;
 use crate::semantics::func::DynFunc;
 use crate::semantics::val::CellVal;
 use crate::semantics::val::ListVal;
@@ -12,10 +13,10 @@ pub(crate) struct CellForm<'a, Value> {
     pub(crate) value: &'a Value,
 }
 
-impl<'a, Value, Ctx> DynFunc<Cfg, Ctx, CellVal, CellVal> for CellForm<'a, Value>
-where Value: DynFunc<Cfg, Ctx, Val, Val>
+impl<'a, Value, CtxVal> DynFunc<Cfg, CtxVal, CellVal, CellVal> for CellForm<'a, Value>
+where Value: DynFunc<Cfg, CtxVal, Val, Val>
 {
-    fn call(&self, cfg: &mut Cfg, ctx: &mut Ctx, mut cell: CellVal) -> CellVal {
+    fn call(&self, cfg: &mut Cfg, ctx: Ctx<CtxVal>, mut cell: CellVal) -> CellVal {
         cell.value = self.value.call(cfg, ctx, take(&mut cell.value));
         cell
     }
@@ -26,13 +27,13 @@ pub(crate) struct PairForm<'a, Left, Right> {
     pub(crate) right: &'a Right,
 }
 
-impl<'a, Left, Right, Ctx> DynFunc<Cfg, Ctx, PairVal, PairVal> for PairForm<'a, Left, Right>
+impl<'a, Left, Right, CtxVal> DynFunc<Cfg, CtxVal, PairVal, PairVal> for PairForm<'a, Left, Right>
 where
-    Left: DynFunc<Cfg, Ctx, Val, Val>,
-    Right: DynFunc<Cfg, Ctx, Val, Val>,
+    Left: DynFunc<Cfg, CtxVal, Val, Val>,
+    Right: DynFunc<Cfg, CtxVal, Val, Val>,
 {
-    fn call(&self, cfg: &mut Cfg, ctx: &mut Ctx, mut pair: PairVal) -> PairVal {
-        pair.left = self.left.call(cfg, ctx, take(&mut pair.left));
+    fn call(&self, cfg: &mut Cfg, mut ctx: Ctx<CtxVal>, mut pair: PairVal) -> PairVal {
+        pair.left = self.left.call(cfg, ctx.reborrow(), take(&mut pair.left));
         pair.right = self.right.call(cfg, ctx, take(&mut pair.right));
         pair
     }
@@ -42,12 +43,12 @@ pub(crate) struct ListForm<'a, Item> {
     pub(crate) item: &'a Item,
 }
 
-impl<'a, Item, Ctx> DynFunc<Cfg, Ctx, ListVal, ListVal> for ListForm<'a, Item>
-where Item: DynFunc<Cfg, Ctx, Val, Val>
+impl<'a, Item, CtxVal> DynFunc<Cfg, CtxVal, ListVal, ListVal> for ListForm<'a, Item>
+where Item: DynFunc<Cfg, CtxVal, Val, Val>
 {
-    fn call(&self, cfg: &mut Cfg, ctx: &mut Ctx, mut list: ListVal) -> ListVal {
+    fn call(&self, cfg: &mut Cfg, mut ctx: Ctx<CtxVal>, mut list: ListVal) -> ListVal {
         for v in list.iter_mut() {
-            *v = self.item.call(cfg, ctx, take(v));
+            *v = self.item.call(cfg, ctx.reborrow(), take(v));
         }
         list
     }
@@ -57,12 +58,12 @@ pub(crate) struct MapForm<'a, Value> {
     pub(crate) value: &'a Value,
 }
 
-impl<'a, Value, Ctx> DynFunc<Cfg, Ctx, MapVal, MapVal> for MapForm<'a, Value>
-where Value: DynFunc<Cfg, Ctx, Val, Val>
+impl<'a, Value, CtxVal> DynFunc<Cfg, CtxVal, MapVal, MapVal> for MapForm<'a, Value>
+where Value: DynFunc<Cfg, CtxVal, Val, Val>
 {
-    fn call(&self, cfg: &mut Cfg, ctx: &mut Ctx, mut map: MapVal) -> MapVal {
+    fn call(&self, cfg: &mut Cfg, mut ctx: Ctx<CtxVal>, mut map: MapVal) -> MapVal {
         for v in map.values_mut() {
-            *v = self.value.call(cfg, ctx, take(v));
+            *v = self.value.call(cfg, ctx.reborrow(), take(v));
         }
         map
     }

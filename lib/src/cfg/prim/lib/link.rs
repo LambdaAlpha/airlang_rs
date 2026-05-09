@@ -7,9 +7,9 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
-use crate::semantics::func::CtxFreeInputAwareFunc;
+use crate::semantics::ctx::Ctx;
+use crate::semantics::func::CtxFreeFunc;
 use crate::semantics::func::DynFunc;
-use crate::semantics::func::PrimCtx;
 use crate::semantics::val::LINK;
 use crate::semantics::val::LinkVal;
 use crate::semantics::val::PrimFuncVal;
@@ -39,12 +39,12 @@ pub const LET: &str = concatcp!(PREFIX_CELL, LINK, ".let");
 impl Default for LinkLib {
     fn default() -> Self {
         Self {
-            make: CtxFreeInputAwareFunc { fn_: make }.build(),
-            make_constant: CtxFreeInputAwareFunc { fn_: make_constant }.build(),
-            is_constant: CtxFreeInputAwareFunc { fn_: is_constant }.build(),
-            is_available: CtxFreeInputAwareFunc { fn_: is_available }.build(),
-            get_id: CtxFreeInputAwareFunc { fn_: get_id }.build(),
-            let_: CtxFreeInputAwareFunc { fn_: let_ }.build(),
+            make: CtxFreeFunc { fn_: make }.build(),
+            make_constant: CtxFreeFunc { fn_: make_constant }.build(),
+            is_constant: CtxFreeFunc { fn_: is_constant }.build(),
+            is_available: CtxFreeFunc { fn_: is_available }.build(),
+            get_id: CtxFreeFunc { fn_: get_id }.build(),
+            let_: CtxFreeFunc { fn_: let_ }.build(),
         }
     }
 }
@@ -108,13 +108,9 @@ pub fn let_(cfg: &mut Cfg, input: Val) -> Val {
         return bug!(cfg, "{LET}: expected input.right.left to be a function, \
             but got {}", func_input.left);
     };
-    // todo design support control flow
-    if link.is_const() && matches!(func.ctx(), PrimCtx::Mut) {
-        return bug!(cfg, "{LET}: expected input.right.left to be a context-constant function, \
-            but got {func}");
-    }
     let Ok(mut ctx) = link.try_borrow_mut() else {
         return bug!(cfg, "{LET}: link is not available");
     };
-    func.call(cfg, ctx.deref_mut(), func_input.right)
+    let ctx = Ctx { val: ctx.deref_mut(), const_: link.is_const() };
+    func.call(cfg, ctx, func_input.right)
 }

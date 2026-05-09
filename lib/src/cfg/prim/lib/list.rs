@@ -8,10 +8,10 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
-use crate::semantics::func::CtxConstInputAwareFunc;
-use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxMutInputAwareFunc;
-use crate::semantics::func::CtxMutInputFreeFunc;
+use crate::semantics::func::ConstFunc;
+use crate::semantics::func::ConstInputFreeFunc;
+use crate::semantics::func::MutFunc;
+use crate::semantics::func::MutInputFreeFunc;
 use crate::semantics::val::LIST;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -56,20 +56,20 @@ pub const CLEAR: &str = concatcp!(PREFIX_CELL, LIST, ".clear");
 impl Default for ListLib {
     fn default() -> Self {
         Self {
-            get_length: CtxConstInputFreeFunc { fn_: get_length }.build(),
-            set: CtxMutInputAwareFunc { fn_: set }.build(),
-            set_many: CtxMutInputAwareFunc { fn_: set_many }.build(),
-            get: CtxConstInputAwareFunc { fn_: get }.build(),
-            get_many: CtxConstInputAwareFunc { fn_: get_many }.build(),
-            insert: CtxMutInputAwareFunc { fn_: insert }.build(),
-            insert_many: CtxMutInputAwareFunc { fn_: insert_many }.build(),
-            remove: CtxMutInputAwareFunc { fn_: remove }.build(),
-            remove_many: CtxMutInputAwareFunc { fn_: remove_many }.build(),
-            push: CtxMutInputAwareFunc { fn_: push }.build(),
-            push_many: CtxMutInputAwareFunc { fn_: push_many }.build(),
-            pop: CtxMutInputFreeFunc { fn_: pop }.build(),
-            pop_many: CtxMutInputAwareFunc { fn_: pop_many }.build(),
-            clear: CtxMutInputFreeFunc { fn_: clear }.build(),
+            get_length: ConstInputFreeFunc { fn_: get_length }.build(),
+            set: MutFunc { fn_: set }.build(),
+            set_many: MutFunc { fn_: set_many }.build(),
+            get: ConstFunc { fn_: get }.build(),
+            get_many: ConstFunc { fn_: get_many }.build(),
+            insert: MutFunc { fn_: insert }.build(),
+            insert_many: MutFunc { fn_: insert_many }.build(),
+            remove: MutFunc { fn_: remove }.build(),
+            remove_many: MutFunc { fn_: remove_many }.build(),
+            push: MutFunc { fn_: push }.build(),
+            push_many: MutFunc { fn_: push_many }.build(),
+            pop: MutInputFreeFunc { fn_: pop }.build(),
+            pop_many: MutFunc { fn_: pop_many }.build(),
+            clear: MutInputFreeFunc { fn_: clear }.build(),
         }
     }
 }

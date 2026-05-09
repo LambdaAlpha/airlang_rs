@@ -5,7 +5,7 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
-use crate::semantics::func::CtxFreeInputAwareFunc;
+use crate::semantics::func::CtxFreeFunc;
 use crate::semantics::val::BIT;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -28,11 +28,11 @@ pub const IMPLY: &str = concatcp!(PREFIX_CELL, BIT, ".imply");
 impl Default for BitLib {
     fn default() -> Self {
         Self {
-            not: CtxFreeInputAwareFunc { fn_: not }.build(),
-            and: CtxFreeInputAwareFunc { fn_: and }.build(),
-            or: CtxFreeInputAwareFunc { fn_: or }.build(),
-            xor: CtxFreeInputAwareFunc { fn_: xor }.build(),
-            imply: CtxFreeInputAwareFunc { fn_: imply }.build(),
+            not: CtxFreeFunc { fn_: not }.build(),
+            and: CtxFreeFunc { fn_: and }.build(),
+            or: CtxFreeFunc { fn_: or }.build(),
+            xor: CtxFreeFunc { fn_: xor }.build(),
+            imply: CtxFreeFunc { fn_: imply }.build(),
         }
     }
 }

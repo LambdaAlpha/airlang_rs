@@ -104,6 +104,49 @@ _ do _[
 -----
 [0, 1, 2, 0, 1, 2]
 =====
+call default func inside const ctx
+-----
+_ do _[
+    _link.let set _ import .link.let,
+    _f set _ function {
+        code : _((c : .) : c link.let eval : 1),
+        prelude : {
+            link.let : link.let,
+            eval : eval,
+        },
+    },
+    1 = _ f .
+]
+-----
+true
+=====
+call mut func by default func inside const ctx
+-----
+_ do _[
+    _link.let set _ import .link.let,
+    _config.make set _ import .config.make,
+    _link.make set _ import .link.make,
+    _config.let set _ import .config.let,
+    _is_aborted set _ import .error.is_aborted.context.let,
+    _f set _ function {
+        code : _((c : .) : c link.let eval : _(_a set 1)),
+        constant : true,
+        prelude : {
+            link.let : link.let,
+            eval : eval,
+        },
+    },
+    _c set _ config.make {
+        .prelude : _ link.make {
+            f : f,
+        },
+    },
+    _c config.let _(_ f .),
+    _c is_aborted .,
+]
+-----
+true
+=====
 const const
 -----
 _ do _[
@@ -359,10 +402,19 @@ is_constant mutable
 -----
 _ do _[
     _is_constant set _ import .function.is_constant.context.let,
-    _eval is_constant .
+    _set is_constant .
 ]
 -----
 false
+=====
+is_constant default
+-----
+_ do _[
+    _is_constant set _ import .function.is_constant.context.let,
+    _eval is_constant .
+]
+-----
+.
 =====
 is_input_free free
 -----

@@ -7,9 +7,9 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
-use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxFreeInputAwareFunc;
-use crate::semantics::func::CtxMutInputAwareFunc;
+use crate::semantics::func::ConstInputFreeFunc;
+use crate::semantics::func::CtxFreeFunc;
+use crate::semantics::func::MutFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::SOLVE;
 use crate::semantics::val::Val;
@@ -34,11 +34,11 @@ pub const SET_OUTPUT: &str = concatcp!(PREFIX_CELL, SOLVE, ".set_output");
 impl Default for SolveLib {
     fn default() -> Self {
         Self {
-            make: CtxFreeInputAwareFunc { fn_: make }.build(),
-            get_function: CtxConstInputFreeFunc { fn_: get_function }.build(),
-            set_function: CtxMutInputAwareFunc { fn_: set_function }.build(),
-            get_output: CtxConstInputFreeFunc { fn_: get_output }.build(),
-            set_output: CtxMutInputAwareFunc { fn_: set_output }.build(),
+            make: CtxFreeFunc { fn_: make }.build(),
+            get_function: ConstInputFreeFunc { fn_: get_function }.build(),
+            set_function: MutFunc { fn_: set_function }.build(),
+            get_output: ConstInputFreeFunc { fn_: get_output }.build(),
+            set_output: MutFunc { fn_: set_output }.build(),
         }
     }
 }

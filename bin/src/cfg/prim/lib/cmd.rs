@@ -5,7 +5,7 @@ use airlang::cfg::CfgMod;
 use airlang::cfg::extend_func;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_CELL;
-use airlang::semantics::func::CtxFreeInputAwareFunc;
+use airlang::semantics::func::CtxFreeFunc;
 use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
 use const_format::concatcp;
@@ -21,7 +21,7 @@ pub const RUN: &str = concatcp!(PREFIX_CELL, COMMAND, ".run");
 
 impl Default for CmdLib {
     fn default() -> Self {
-        Self { run: CtxFreeInputAwareFunc { fn_: run }.build() }
+        Self { run: CtxFreeFunc { fn_: run }.build() }
     }
 }
 

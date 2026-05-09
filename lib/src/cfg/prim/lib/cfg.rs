@@ -7,12 +7,14 @@ use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::PREFIX_CELL;
+use crate::semantics::ctx::Ctx;
 use crate::semantics::ctx::DynCtx;
-use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxFreeInputAwareFunc;
-use crate::semantics::func::CtxFreeInputFreeFunc;
-use crate::semantics::func::CtxMutInputAwareFunc;
+use crate::semantics::func::ConstInputFreeFunc;
+use crate::semantics::func::CtxFreeFunc;
+use crate::semantics::func::DefaultFunc;
 use crate::semantics::func::DynFunc;
+use crate::semantics::func::FreeFunc;
+use crate::semantics::func::MutFunc;
 use crate::semantics::val::CFG;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -48,15 +50,15 @@ pub const LET: &str = concatcp!(PREFIX_CELL, CFG, ".let");
 impl Default for CfgLib {
     fn default() -> Self {
         Self {
-            make: CtxFreeInputAwareFunc { fn_: make }.build(),
-            represent: CtxFreeInputAwareFunc { fn_: represent }.build(),
-            exist: CtxFreeInputAwareFunc { fn_: exist }.build(),
-            import: CtxFreeInputAwareFunc { fn_: import }.build(),
-            export: CtxFreeInputAwareFunc { fn_: export }.build(),
-            get_length: CtxConstInputFreeFunc { fn_: get_length }.build(),
-            with: CtxMutInputAwareFunc { fn_: with }.build(),
-            get_self: CtxFreeInputFreeFunc { fn_: get_self }.build(),
-            let_: CtxMutInputAwareFunc { fn_: let_ }.build(),
+            make: CtxFreeFunc { fn_: make }.build(),
+            represent: CtxFreeFunc { fn_: represent }.build(),
+            exist: CtxFreeFunc { fn_: exist }.build(),
+            import: CtxFreeFunc { fn_: import }.build(),
+            export: CtxFreeFunc { fn_: export }.build(),
+            get_length: ConstInputFreeFunc { fn_: get_length }.build(),
+            with: DefaultFunc { fn_: with }.build(),
+            get_self: FreeFunc { fn_: get_self }.build(),
+            let_: MutFunc { fn_: let_ }.build(),
         }
     }
 }
@@ -129,7 +131,7 @@ pub fn get_length(cfg: &mut Cfg, ctx: &Val) -> Val {
     Val::Int(Int::from(new_cfg.len()).into())
 }
 
-pub fn with(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+pub fn with(cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
         return bug!(cfg, "{WITH}: expected input to be a pair, but got {input}");
     };

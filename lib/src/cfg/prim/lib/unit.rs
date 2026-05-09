@@ -4,7 +4,7 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
-use crate::semantics::func::CtxFreeInputFreeFunc;
+use crate::semantics::func::FreeFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::UNIT;
 use crate::semantics::val::Val;
@@ -19,7 +19,7 @@ pub const DEFAULT: &str = concatcp!(PREFIX_CELL, UNIT, ".default");
 
 impl Default for UnitLib {
     fn default() -> Self {
-        Self { default: CtxFreeInputFreeFunc { fn_: default }.build() }
+        Self { default: FreeFunc { fn_: default }.build() }
     }
 }
 

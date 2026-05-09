@@ -8,7 +8,7 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
-use crate::semantics::func::CtxFreeInputAwareFunc;
+use crate::semantics::func::CtxFreeFunc;
 use crate::semantics::val::DECIMAL;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -45,15 +45,15 @@ pub const LESS_GREATER: &str = concatcp!(PREFIX_CELL, DECIMAL, ".less_greater");
 impl Default for DecimalLib {
     fn default() -> Self {
         Self {
-            add: CtxFreeInputAwareFunc { fn_: add }.build(),
-            subtract: CtxFreeInputAwareFunc { fn_: subtract }.build(),
-            multiply: CtxFreeInputAwareFunc { fn_: multiply }.build(),
-            divide: CtxFreeInputAwareFunc { fn_: divide }.build(),
-            less: CtxFreeInputAwareFunc { fn_: less }.build(),
-            less_equal: CtxFreeInputAwareFunc { fn_: less_equal }.build(),
-            greater: CtxFreeInputAwareFunc { fn_: greater }.build(),
-            greater_equal: CtxFreeInputAwareFunc { fn_: greater_equal }.build(),
-            less_greater: CtxFreeInputAwareFunc { fn_: less_greater }.build(),
+            add: CtxFreeFunc { fn_: add }.build(),
+            subtract: CtxFreeFunc { fn_: subtract }.build(),
+            multiply: CtxFreeFunc { fn_: multiply }.build(),
+            divide: CtxFreeFunc { fn_: divide }.build(),
+            less: CtxFreeFunc { fn_: less }.build(),
+            less_equal: CtxFreeFunc { fn_: less_equal }.build(),
+            greater: CtxFreeFunc { fn_: greater }.build(),
+            greater_equal: CtxFreeFunc { fn_: greater_equal }.build(),
+            less_greater: CtxFreeFunc { fn_: less_greater }.build(),
         }
     }
 }

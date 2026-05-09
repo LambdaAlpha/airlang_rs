@@ -5,9 +5,9 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
-use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxFreeInputAwareFunc;
-use crate::semantics::func::CtxMutInputAwareFunc;
+use crate::semantics::func::ConstInputFreeFunc;
+use crate::semantics::func::CtxFreeFunc;
+use crate::semantics::func::MutFunc;
 use crate::semantics::val::BYTE;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
@@ -30,9 +30,9 @@ pub const JOIN: &str = concatcp!(PREFIX_CELL, BYTE, ".join");
 impl Default for ByteLib {
     fn default() -> Self {
         Self {
-            get_length: CtxConstInputFreeFunc { fn_: get_length }.build(),
-            push: CtxMutInputAwareFunc { fn_: push }.build(),
-            join: CtxFreeInputAwareFunc { fn_: join }.build(),
+            get_length: ConstInputFreeFunc { fn_: get_length }.build(),
+            push: MutFunc { fn_: push }.build(),
+            join: CtxFreeFunc { fn_: join }.build(),
         }
     }
 }

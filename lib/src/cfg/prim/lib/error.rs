@@ -5,10 +5,10 @@ use crate::cfg::CfgMod;
 use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
-use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxFreeInputAwareFunc;
-use crate::semantics::func::CtxFreeInputFreeFunc;
-use crate::semantics::func::CtxMutInputFreeFunc;
+use crate::semantics::func::ConstInputFreeFunc;
+use crate::semantics::func::CtxFreeFunc;
+use crate::semantics::func::FreeFunc;
+use crate::semantics::func::MutInputFreeFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 
@@ -30,10 +30,10 @@ pub const RECOVER: &str = concatcp!(PREFIX_CELL, ERROR, ".recover");
 impl Default for ErrorLib {
     fn default() -> Self {
         Self {
-            abort: CtxFreeInputFreeFunc { fn_: abort }.build(),
-            assert: CtxFreeInputAwareFunc { fn_: assert }.build(),
-            is_aborted: CtxConstInputFreeFunc { fn_: is_aborted }.build(),
-            recover: CtxMutInputFreeFunc { fn_: recover }.build(),
+            abort: FreeFunc { fn_: abort }.build(),
+            assert: CtxFreeFunc { fn_: assert }.build(),
+            is_aborted: ConstInputFreeFunc { fn_: is_aborted }.build(),
+            recover: MutInputFreeFunc { fn_: recover }.build(),
         }
     }
 }

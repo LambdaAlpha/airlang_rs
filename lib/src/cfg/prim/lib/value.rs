@@ -11,8 +11,8 @@ use crate::cfg::extend_func;
 use crate::cfg::prim::lib::value::arbitrary::Any;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
-use crate::semantics::func::CtxConstInputFreeFunc;
-use crate::semantics::func::CtxFreeInputAwareFunc;
+use crate::semantics::func::ConstInputFreeFunc;
+use crate::semantics::func::CtxFreeFunc;
 use crate::semantics::val::BIT;
 use crate::semantics::val::BYTE;
 use crate::semantics::val::CALL;
@@ -66,9 +66,9 @@ pub const EQUAL: &str = concatcp!(PREFIX_CELL, VALUE, ".equal");
 impl Default for ValueLib {
     fn default() -> Self {
         Self {
-            any: CtxFreeInputAwareFunc { fn_: any }.build(),
-            get_type: CtxConstInputFreeFunc { fn_: get_type }.build(),
-            equal: CtxFreeInputAwareFunc { fn_: equal }.build(),
+            any: CtxFreeFunc { fn_: any }.build(),
+            get_type: ConstInputFreeFunc { fn_: get_type }.build(),
+            equal: CtxFreeFunc { fn_: equal }.build(),
         }
     }
 }

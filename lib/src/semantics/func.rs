@@ -1,10 +1,12 @@
 pub use self::comp::CompFunc;
-pub use self::prim::CtxConstInputAwareFunc;
-pub use self::prim::CtxConstInputFreeFunc;
-pub use self::prim::CtxFreeInputAwareFunc;
-pub use self::prim::CtxFreeInputFreeFunc;
-pub use self::prim::CtxMutInputAwareFunc;
-pub use self::prim::CtxMutInputFreeFunc;
+pub use self::prim::ConstFunc;
+pub use self::prim::ConstInputFreeFunc;
+pub use self::prim::CtxFreeFunc;
+pub use self::prim::DefaultFunc;
+pub use self::prim::FreeFunc;
+pub use self::prim::InputFreeFunc;
+pub use self::prim::MutFunc;
+pub use self::prim::MutInputFreeFunc;
 pub use self::prim::PrimCtx;
 pub use self::prim::PrimFunc;
 pub use self::prim::PrimInput;
@@ -16,14 +18,16 @@ pub(crate) use self::comp::CompInput;
 
 _____!();
 
-pub trait DynFunc<Cfg, Ctx, I, O> {
-    fn call(&self, cfg: &mut Cfg, ctx: &mut Ctx, input: I) -> O;
+use crate::semantics::ctx::Ctx;
+
+pub trait DynFunc<Cfg, C, I, O> {
+    fn call(&self, cfg: &mut Cfg, ctx: Ctx<C>, input: I) -> O;
 }
 
-impl<Cfg, Ctx, I, O, T> DynFunc<Cfg, Ctx, I, O> for &T
-where T: ?Sized + DynFunc<Cfg, Ctx, I, O>
+impl<Cfg, C, I, O, T> DynFunc<Cfg, C, I, O> for &T
+where T: ?Sized + DynFunc<Cfg, C, I, O>
 {
-    fn call(&self, cfg: &mut Cfg, ctx: &mut Ctx, input: I) -> O {
+    fn call(&self, cfg: &mut Cfg, ctx: Ctx<C>, input: I) -> O {
         (**self).call(cfg, ctx, input)
     }
 }
