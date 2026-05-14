@@ -14,7 +14,7 @@ _ do _[
             _ function {
                 constant : constant,
                 code : _(context : input) : _(_ do _[
-                    _(name : input) is _ move _input,
+                    _(name : input) is _ take _input,
                     context link.let context.let : name : function : input
                 ]),
                 prelude : {
@@ -22,7 +22,7 @@ _ do _[
                     link.let : link.let,
                     context.let : context.let,
                     is : is,
-                    move : move,
+                    take : take,
                     function : f,
                 },
             }
@@ -38,7 +38,7 @@ _ do _[
             get_type : get_type,
             function : function,
             is : is,
-            move : move,
+            take : take,
         },
     },
     .context.let.bind export context.let.bind,
@@ -49,14 +49,14 @@ _ do _[
             _ function {
                 constant : constant,
                 code : _(. : input) : _(_ do _[
-                    _(link : input) is _ move _input,
+                    _(link : input) is _ take _input,
                     link link.let function : input
                 ]),
                 prelude : {
                     do : do,
                     link.let : link.let,
                     is : is,
-                    move : move,
+                    take : take,
                     function : f,
                 },
             }
@@ -72,18 +72,18 @@ _ do _[
             get_type : get_type,
             function : function,
             is : is,
-            move : move,
+            take : take,
         },
     },
     .link.let.bind export link.let.bind,
     _export_let_bind_many set _ function {
-        code : _(. : keys) : _((_ move _keys) iterate _key : _[
+        code : _(. : keys) : _((_ take _keys) iterate _key : _[
             _f set _ import key,
             (empty join [key, .context.let]) export _ context.let.bind f,
             (empty join [key, .link.let]) export _ link.let.bind f,
         ]),
         prelude : {
-            move : move,
+            take : take,
             iterate : iterate,
             set : set,
             import : import,

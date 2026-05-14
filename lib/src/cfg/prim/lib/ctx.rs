@@ -24,6 +24,7 @@ use crate::type_::Pair;
 #[derive(Copy, Clone)]
 pub struct CtxLib {
     pub get: PrimFuncVal,
+    pub take: PrimFuncVal,
     pub set: PrimFuncVal,
     pub is_constant: PrimFuncVal,
     pub is: PrimFuncVal,
@@ -34,6 +35,7 @@ pub struct CtxLib {
 const CTX: &str = "context";
 
 pub const GET: &str = concatcp!(PREFIX_CELL, CTX, ".get");
+pub const TAKE: &str = concatcp!(PREFIX_CELL, CTX, ".take");
 pub const SET: &str = concatcp!(PREFIX_CELL, CTX, ".set");
 pub const IS_CONSTANT: &str = concatcp!(PREFIX_CELL, CTX, ".is_constant");
 pub const IS: &str = concatcp!(PREFIX_CELL, CTX, ".is");
@@ -44,6 +46,7 @@ impl Default for CtxLib {
     fn default() -> Self {
         Self {
             get: ConstFunc { fn_: get }.build(),
+            take: MutFunc { fn_: take }.build(),
             set: MutFunc { fn_: set }.build(),
             is_constant: InputFreeFunc { fn_: is_constant }.build(),
             is: MutFunc { fn_: is }.build(),
@@ -56,6 +59,7 @@ impl Default for CtxLib {
 impl CfgMod for CtxLib {
     fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, GET, self.get);
+        extend_func(cfg, TAKE, self.take);
         extend_func(cfg, SET, self.set);
         extend_func(cfg, IS_CONSTANT, self.is_constant);
         extend_func(cfg, IS, self.is);
@@ -69,6 +73,13 @@ pub fn get(cfg: &mut Cfg, ctx: &Val, input: Val) -> Val {
         return Val::default();
     };
     val.clone()
+}
+
+pub fn take(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
+    let Some(val) = ctx.ref_mut(cfg, input) else {
+        return Val::default();
+    };
+    std::mem::take(val)
 }
 
 pub fn set(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {

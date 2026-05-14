@@ -44,7 +44,6 @@ pub struct MapLib {
     pub get_many: PrimFuncVal,
     pub remove: PrimFuncVal,
     pub remove_many: PrimFuncVal,
-    pub move_: PrimFuncVal,
     pub clear: PrimFuncVal,
 }
 
@@ -66,7 +65,6 @@ pub const GET: &str = concatcp!(PREFIX_CELL, MAP, ".get");
 pub const GET_MANY: &str = concatcp!(PREFIX_CELL, MAP, ".get_many");
 pub const REMOVE: &str = concatcp!(PREFIX_CELL, MAP, ".remove");
 pub const REMOVE_MANY: &str = concatcp!(PREFIX_CELL, MAP, ".remove_many");
-pub const MOVE: &str = concatcp!(PREFIX_CELL, MAP, ".move");
 pub const CLEAR: &str = concatcp!(PREFIX_CELL, MAP, ".clear");
 
 impl Default for MapLib {
@@ -90,7 +88,6 @@ impl Default for MapLib {
             get_many: ConstFunc { fn_: get_many }.build(),
             remove: MutFunc { fn_: remove }.build(),
             remove_many: MutFunc { fn_: remove_many }.build(),
-            move_: MutFunc { fn_: move_ }.build(),
             clear: MutInputFreeFunc { fn_: clear }.build(),
         }
     }
@@ -116,7 +113,6 @@ impl CfgMod for MapLib {
         extend_func(cfg, GET_MANY, self.get_many);
         extend_func(cfg, REMOVE, self.remove);
         extend_func(cfg, REMOVE_MANY, self.remove_many);
-        extend_func(cfg, MOVE, self.move_);
         extend_func(cfg, CLEAR, self.clear);
     }
 }
@@ -365,19 +361,6 @@ pub fn remove_many(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
         }
     }
     Val::Map(new_map.into())
-}
-
-pub fn move_(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
-    let Val::Map(map) = ctx else {
-        return bug!(cfg, "{MOVE}: expected context to be a map, but got {ctx}");
-    };
-    let Val::Key(key) = input else {
-        return bug!(cfg, "{MOVE}: expected input to be a key, but got {input}");
-    };
-    let Some(value) = map.remove(&key) else {
-        return bug!(cfg, "{MOVE}: value not found for key {key} in the map {map}");
-    };
-    value
 }
 
 pub fn clear(cfg: &mut Cfg, ctx: &mut Val) -> Val {

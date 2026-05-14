@@ -115,7 +115,7 @@ _ do _[
     _let set _ import .link.let,
     _l set _ make {},
     l let set : .a : l,
-    _l move _,
+    _l take _,
     .
 ]
 -----
@@ -129,7 +129,7 @@ _ do _[
     _let set _ import .link.let,
     _l set _ make {},
     l let set : .a : l,
-    _l1 set l let move : .a,
+    _l1 set l let take : .a,
     l = l1
 ]
 -----

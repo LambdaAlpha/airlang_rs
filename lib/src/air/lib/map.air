@@ -16,7 +16,6 @@ _ do _[
         .map.get_many,
         .map.remove,
         .map.remove_many,
-        .map.move,
         .map.clear,
     ],
 ]

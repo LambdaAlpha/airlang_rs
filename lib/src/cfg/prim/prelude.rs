@@ -32,8 +32,6 @@ pub struct BasePrimPrelude {
     pub decimal_greater_equal: PrimFuncVal,
     pub decimal_less_greater: PrimFuncVal,
 
-    pub move_: PrimFuncVal,
-
     pub quote: PrimFuncVal,
 
     pub call: PrimFuncVal,
@@ -48,6 +46,7 @@ pub struct BasePrimPrelude {
     pub function: PrimFuncVal,
 
     pub get: PrimFuncVal,
+    pub take: PrimFuncVal,
     pub set: PrimFuncVal,
     pub is: PrimFuncVal,
     pub let_: PrimFuncVal,
@@ -102,8 +101,6 @@ impl BasePrimPrelude {
             decimal_greater_equal: lib.decimal.greater_equal,
             decimal_less_greater: lib.decimal.less_greater,
 
-            move_: lib.map.move_,
-
             quote: lib.quote.make,
 
             call: lib.call.make,
@@ -118,6 +115,7 @@ impl BasePrimPrelude {
             function: lib.func.make,
 
             get: lib.ctx.get,
+            take: lib.ctx.take,
             set: lib.ctx.set,
             is: lib.ctx.is,
             let_: lib.ctx.let_,
@@ -169,8 +167,6 @@ impl Prelude for BasePrimPrelude {
         map_put_func(map, ">=.", self.decimal_greater_equal);
         map_put_func(map, "<>.", self.decimal_less_greater);
 
-        map_put_func(map, "move", self.move_);
-
         map_put_func(map, "quote", self.quote);
 
         map_put_func(map, "call", self.call);
@@ -185,6 +181,7 @@ impl Prelude for BasePrimPrelude {
         map_put_func(map, "function", self.function);
 
         map_put_func(map, "get", self.get);
+        map_put_func(map, "take", self.take);
         map_put_func(map, "set", self.set);
         map_put_func(map, "is", self.is);
         map_put_func(map, "let", self.let_);

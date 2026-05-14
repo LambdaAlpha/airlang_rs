@@ -19,6 +19,17 @@ _ do _[
 -----
 true
 =====
+take
+-----
+_ do _[
+    _any set _ import .value.any,
+    _a set _ any .,
+    _b set a,
+    (a = _b take _) and b = .
+]
+-----
+true
+=====
 set get
 -----
 _ do _[
@@ -275,7 +286,7 @@ _ do _[
     _set_left set _ import .pair.set_left,
     .a set {.p : 1 : 2},
     .a let eval : let call .p : set_left : 3,
-    .a let move : .p,
+    .a let take : .p,
 ]
 -----
 3 : 2
@@ -289,7 +300,7 @@ _ do _[
         .b : 3,
     },
     .a let eval : let call .p : set_left : get call .b,
-    .a let move : .p,
+    .a let take : .p,
 ]
 -----
 3 : 2
@@ -304,7 +315,7 @@ _ do _[
         b : 3,
     },
     .a let eval : let call .p : _set_left : _b,
-    .a let move : .p,
+    .a let take : .p,
 ]
 -----
 3 : 2
