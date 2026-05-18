@@ -22,33 +22,38 @@ impl BaseCompCfg {
     }
 
     pub fn extend(cfg: &mut Cfg, ctx: &mut Val) {
-        Self::run(cfg, ctx, include_str!("../air/first.air"), "/first");
+        Self::run_sequence(cfg, ctx, &[
+            (include_str!("../air/first.air"), "/first"),
+            // don't depend on the execution order {
+            (include_str!("../air/lib/unit.air"), "/lib/unit"),
+            (include_str!("../air/lib/bit.air"), "/lib/bit"),
+            (include_str!("../air/lib/key.air"), "/lib/key"),
+            (include_str!("../air/lib/text.air"), "/lib/text"),
+            (include_str!("../air/lib/integer.air"), "/lib/integer"),
+            (include_str!("../air/lib/decimal.air"), "/lib/decimal"),
+            (include_str!("../air/lib/byte.air"), "/lib/byte"),
+            (include_str!("../air/lib/cell.air"), "/lib/cell"),
+            (include_str!("../air/lib/pair.air"), "/lib/pair"),
+            (include_str!("../air/lib/list.air"), "/lib/list"),
+            (include_str!("../air/lib/map.air"), "lib/map"),
+            (include_str!("../air/lib/quote.air"), "/lib/quote"),
+            (include_str!("../air/lib/call.air"), "/lib/call"),
+            (include_str!("../air/lib/solve.air"), "/lib/solve"),
+            (include_str!("../air/lib/link.air"), "/lib/link"),
+            (include_str!("../air/lib/config.air"), "/lib/config"),
+            (include_str!("../air/lib/function.air"), "/lib/function"),
+            (include_str!("../air/lib/value.air"), "/lib/value"),
+            (include_str!("../air/lib/error.air"), "/lib/error"),
+            (include_str!("../air/lib/language.air"), "/lib/language"),
+            // } don't depend on the execution order
+            (include_str!("../air/last.air"), "/last"),
+        ]);
+    }
 
-        // don't depend on the execution order {
-        Self::run(cfg, ctx, include_str!("../air/lib/unit.air"), "/lib/unit");
-        Self::run(cfg, ctx, include_str!("../air/lib/bit.air"), "/lib/bit");
-        Self::run(cfg, ctx, include_str!("../air/lib/key.air"), "/lib/key");
-        Self::run(cfg, ctx, include_str!("../air/lib/text.air"), "/lib/text");
-        Self::run(cfg, ctx, include_str!("../air/lib/integer.air"), "/lib/integer");
-        Self::run(cfg, ctx, include_str!("../air/lib/decimal.air"), "/lib/decimal");
-        Self::run(cfg, ctx, include_str!("../air/lib/byte.air"), "/lib/byte");
-        Self::run(cfg, ctx, include_str!("../air/lib/cell.air"), "/lib/cell");
-        Self::run(cfg, ctx, include_str!("../air/lib/pair.air"), "/lib/pair");
-        Self::run(cfg, ctx, include_str!("../air/lib/list.air"), "/lib/list");
-        Self::run(cfg, ctx, include_str!("../air/lib/map.air"), "lib/map");
-        Self::run(cfg, ctx, include_str!("../air/lib/quote.air"), "/lib/quote");
-        Self::run(cfg, ctx, include_str!("../air/lib/call.air"), "/lib/call");
-        Self::run(cfg, ctx, include_str!("../air/lib/solve.air"), "/lib/solve");
-        Self::run(cfg, ctx, include_str!("../air/lib/link.air"), "/lib/link");
-        Self::run(cfg, ctx, include_str!("../air/lib/config.air"), "/lib/config");
-        Self::run(cfg, ctx, include_str!("../air/lib/function.air"), "/lib/function");
-
-        Self::run(cfg, ctx, include_str!("../air/lib/value.air"), "/lib/value");
-        Self::run(cfg, ctx, include_str!("../air/lib/error.air"), "/lib/error");
-        Self::run(cfg, ctx, include_str!("../air/lib/language.air"), "/lib/language");
-        // } don't depend on the execution order
-
-        Self::run(cfg, ctx, include_str!("../air/last.air"), "/last");
+    pub fn run_sequence(cfg: &mut Cfg, ctx: &mut Val, list: &[(&str, &str)]) {
+        for (source, path) in list {
+            Self::run(cfg, ctx, source, path);
+        }
     }
 
     pub fn run(cfg: &mut Cfg, ctx: &mut Val, source: &str, path: &str) -> Val {

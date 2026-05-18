@@ -20,8 +20,9 @@ impl ExtCompCfg {
     pub fn extend(cfg: &mut Cfg, ctx: &mut Val) {
         BaseCompCfg::extend(cfg, ctx);
 
-        BaseCompCfg::run(cfg, ctx, include_str!("../air/first.air"), "/first");
-
-        BaseCompCfg::run(cfg, ctx, include_str!("../air/last.air"), "/last");
+        BaseCompCfg::run_sequence(cfg, ctx, &[
+            (include_str!("../air/first.air"), "/first"),
+            (include_str!("../air/last.air"), "/last"),
+        ]);
     }
 }
