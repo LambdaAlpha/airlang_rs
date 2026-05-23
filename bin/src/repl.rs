@@ -1,9 +1,6 @@
 use std::fmt::Display;
-use std::io::IsTerminal;
-use std::io::Read;
 use std::io::Result;
 use std::io::Write;
-use std::io::stdin;
 use std::mem::take;
 
 use airlang::cfg::error::ABORT_MSG;
@@ -50,9 +47,9 @@ use crossterm::terminal::size;
 
 use crate::cfg::comp::BinCompCfg;
 
-pub trait ReplTerminal: Write + IsTerminal {}
+pub trait ReplTerminal: Write {}
 
-impl<T: Write + IsTerminal> ReplTerminal for T {}
+impl<T: Write> ReplTerminal for T {}
 
 // todo impl soft wrap
 pub struct Repl<T: ReplTerminal> {
@@ -105,11 +102,6 @@ impl<T: ReplTerminal> Repl<T> {
     }
 
     pub fn run(&mut self) -> Result<()> {
-        // todo impl better support for pipe
-        if !stdin().is_terminal() || !self.terminal.is_terminal() {
-            return self.run_once();
-        }
-
         self.is_raw_mode_enabled = is_raw_mode_enabled()?;
 
         self.setup()?;
@@ -141,17 +133,6 @@ impl<T: ReplTerminal> Repl<T> {
         } else {
             let _ = disable_raw_mode();
         }
-    }
-
-    fn run_once(&mut self) -> Result<()> {
-        let mut input = String::new();
-        stdin().read_to_string(&mut input)?;
-        if input.is_empty() {
-            return Ok(());
-        }
-        self.eval(&input)?;
-        self.terminal.new_line()?;
-        self.terminal.flush()
     }
 
     fn handle_event(&mut self) -> Result<bool /* break */> {
@@ -614,9 +595,5 @@ impl<T: ReplTerminal> Terminal<T> {
 
     fn flush(&mut self) -> Result<()> {
         self.0.flush()
-    }
-
-    fn is_terminal(&self) -> bool {
-        self.0.is_terminal()
     }
 }
