@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+use std::io::stdout;
 use std::rc::Rc;
 
 use airlang::cfg::error::ABORT_MSG;
@@ -13,6 +14,8 @@ use airlang::type_::Key;
 use airlang_ext::cfg::prim::lib::io::Output;
 use airlang_ext::cfg::prim::lib::io::STANDARD_ERROR;
 use airlang_ext::cfg::prim::lib::io::STANDARD_OUTPUT;
+use crossterm::ExecutableCommand;
+use crossterm::event::EnableMouseCapture;
 use ratatui::DefaultTerminal;
 use ratatui::Frame;
 use ratatui::crossterm::event::Event;
@@ -20,6 +23,7 @@ use ratatui::crossterm::event::KeyCode;
 use ratatui::crossterm::event::KeyEvent;
 use ratatui::crossterm::event::KeyEventKind;
 use ratatui::crossterm::event::KeyModifiers;
+use ratatui::crossterm::event::MouseEventKind;
 use ratatui::crossterm::event::read;
 use ratatui::layout::Constraint;
 use ratatui::layout::Direction;
@@ -62,7 +66,7 @@ struct History {
     paragraphs: Vec<Paragraph<'static>>,
 }
 
-const TIPS_TEXT: &str = "Ctrl+Q quit | Ctrl+S submit | Ctrl+PgUp/PgDn history | PgUp/PgDn scroll";
+const TIPS_TEXT: &str = "Type `help` for usage | Ctrl+Q quit | Ctrl+Space submit";
 
 const CTRL_SHIFT: KeyModifiers =
     KeyModifiers::from_bits_truncate(KeyModifiers::CONTROL.bits() | KeyModifiers::SHIFT.bits());
@@ -94,6 +98,7 @@ impl Repl {
     }
 
     fn loop_(&mut self, terminal: &mut DefaultTerminal) -> std::io::Result<()> {
+        let _ = stdout().execute(EnableMouseCapture);
         terminal.draw(|f| self.render(f))?;
         loop {
             match read()? {
@@ -105,7 +110,11 @@ impl Repl {
                         break;
                     }
                 },
-                Event::Mouse(_) => continue,
+                Event::Mouse(mouse) => match mouse.kind {
+                    MouseEventKind::ScrollUp => self.scroll_state.scroll_up(),
+                    MouseEventKind::ScrollDown => self.scroll_state.scroll_down(),
+                    _ => continue,
+                },
                 Event::Paste(text) => {
                     self.history_nav = None;
                     self.textarea.insert_str(&text);
@@ -120,38 +129,34 @@ impl Repl {
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> bool {
-        let reset_nav = !matches!(
-            (key.modifiers, key.code),
-            (KeyModifiers::NONE | KeyModifiers::CONTROL, KeyCode::PageUp | KeyCode::PageDown)
-        );
-        if reset_nav {
-            self.history_nav = None;
-        }
-
         match (key.modifiers, key.code) {
             (KeyModifiers::CONTROL, KeyCode::Char('q')) => return true,
 
-            (KeyModifiers::CONTROL, KeyCode::Char('s')) => self.submit(),
+            (KeyModifiers::CONTROL, KeyCode::Char(' ')) => self.submit(),
 
-            (KeyModifiers::NONE, KeyCode::PageUp) => self.scroll_state.scroll_page_up(),
-            (KeyModifiers::NONE, KeyCode::PageDown) => self.scroll_state.scroll_page_down(),
+            (KeyModifiers::NONE, KeyCode::PageUp) => self.navigate_history(true),
+            (KeyModifiers::NONE, KeyCode::PageDown) => self.navigate_history(false),
             (KeyModifiers::CONTROL, KeyCode::Up) => self.scroll_state.scroll_up(),
             (KeyModifiers::CONTROL, KeyCode::Down) => self.scroll_state.scroll_down(),
-            (KeyModifiers::CONTROL, KeyCode::PageUp) => self.navigate_history(true),
-            (KeyModifiers::CONTROL, KeyCode::PageDown) => self.navigate_history(false),
+            (KeyModifiers::CONTROL, KeyCode::PageUp) => self.scroll_state.scroll_page_up(),
+            (KeyModifiers::CONTROL, KeyCode::PageDown) => self.scroll_state.scroll_page_down(),
 
             (KeyModifiers::CONTROL, KeyCode::Char('a')) => self.textarea.select_all(),
             (KeyModifiers::CONTROL, KeyCode::Char('c')) => self.textarea.copy(),
             (KeyModifiers::CONTROL, KeyCode::Char('x')) => {
+                self.history_nav = None;
                 self.textarea.cut();
             },
             (KeyModifiers::CONTROL, KeyCode::Char('v')) => {
+                self.history_nav = None;
                 self.textarea.paste();
             },
             (KeyModifiers::CONTROL, KeyCode::Char('z')) => {
+                self.history_nav = None;
                 self.textarea.undo();
             },
             (KeyModifiers::CONTROL, KeyCode::Char('y')) => {
+                self.history_nav = None;
                 self.textarea.redo();
             },
 
@@ -159,14 +164,20 @@ impl Repl {
             (KeyModifiers::NONE, KeyCode::Up) => self.textarea.move_cursor(CursorMove::Up),
             (KeyModifiers::NONE, KeyCode::Down) => self.textarea.move_cursor(CursorMove::Down),
             (KeyModifiers::NONE, KeyCode::Backspace) => {
+                self.history_nav = None;
                 self.textarea.delete_char();
             },
             (KeyModifiers::NONE, KeyCode::Delete) => {
+                self.history_nav = None;
                 self.textarea.delete_next_char();
             },
-            (KeyModifiers::NONE, KeyCode::Enter) => self.textarea.insert_newline(),
+            (KeyModifiers::NONE, KeyCode::Enter) => {
+                self.history_nav = None;
+                self.textarea.insert_newline();
+            },
             (KeyModifiers::NONE, KeyCode::Esc) => self.textarea.cancel_selection(),
             (KeyModifiers::NONE | KeyModifiers::SHIFT, KeyCode::Char(c)) => {
+                self.history_nav = None;
                 self.textarea.insert_char(c);
             },
 
@@ -258,6 +269,7 @@ impl Repl {
     }
 
     fn handle_tab(&mut self) {
+        self.history_nav = None;
         let cur = self.textarea.cursor();
         let line = &self.textarea.lines()[cur.0];
         let before = &line[.. cur.1.min(line.len())];

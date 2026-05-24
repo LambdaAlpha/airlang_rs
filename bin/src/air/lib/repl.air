@@ -1,9 +1,9 @@
 _ do _[
     _help set "keyboard shortcuts:
     .    Ctrl+Q                    Quit
-    .    Ctrl+S                    Submit input
-    .    Ctrl+PgUp / PgDn          Navigate history
-    .    PgUp / PgDn               Scroll history page
+    .    Ctrl+Space                Submit input
+    .    PgUp / PgDn               Navigate history
+    .    Ctrl+PgUp / PgDn          Scroll history page
     .    Ctrl+↑ / ↓                Scroll history line
     .    
     .    --- Editing ---
