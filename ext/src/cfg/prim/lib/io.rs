@@ -198,7 +198,7 @@ pub fn read_line(cfg: &mut Cfg, ctx: &mut Val, input: Val) -> Val {
     let Val::Dyn(mut val) = input else {
         return bug!(cfg, "{READ_LINE}: expected input to be a {TYPE_INPUT}, but got {input}");
     };
-    let Some(val) = (&mut val as &mut dyn Any).downcast_mut::<Input>() else {
+    let Some(val) = (&mut *val as &mut dyn Any).downcast_mut::<Input>() else {
         return bug!(cfg, "{READ_LINE}: expected input to be a {TYPE_INPUT}, but got {val}");
     };
     let Ok(mut ref_) = val.0.try_borrow_mut() else {
@@ -217,7 +217,7 @@ pub fn print(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Dyn(mut val) = pair.left else {
         return bug!(cfg, "{PRINT}: expected input to be a {TYPE_OUTPUT}, but got {}", pair.left);
     };
-    let Some(val) = (&mut val as &mut dyn Any).downcast_mut::<Output>() else {
+    let Some(val) = (&mut *val as &mut dyn Any).downcast_mut::<Output>() else {
         return bug!(cfg, "{PRINT}: expected input to be a {TYPE_OUTPUT}, but got {val}");
     };
     let Ok(mut ref_) = val.0.try_borrow_mut() else {
@@ -238,7 +238,7 @@ pub fn print_line(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Dyn(mut val) = pair.left else {
         return bug!(cfg, "{PRINT_LINE}: expected input to be a {TYPE_OUTPUT}, but got {}", pair.left);
     };
-    let Some(val) = (&mut val as &mut dyn Any).downcast_mut::<Output>() else {
+    let Some(val) = (&mut *val as &mut dyn Any).downcast_mut::<Output>() else {
         return bug!(cfg, "{PRINT_LINE}: expected input to be a {TYPE_OUTPUT}, but got {val}");
     };
     let Ok(mut ref_) = val.0.try_borrow_mut() else {
@@ -255,7 +255,7 @@ pub fn flush(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Dyn(mut val) = input else {
         return bug!(cfg, "{FLUSH}: expected input to be a {TYPE_OUTPUT}, but got {input}");
     };
-    let Some(val) = (&mut val as &mut dyn Any).downcast_mut::<Output>() else {
+    let Some(val) = (&mut *val as &mut dyn Any).downcast_mut::<Output>() else {
         return bug!(cfg, "{FLUSH}: expected input to be a {TYPE_OUTPUT}, but got {val}");
     };
     let Ok(mut ref_) = val.0.try_borrow_mut() else {
