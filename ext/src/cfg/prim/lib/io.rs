@@ -139,6 +139,12 @@ impl Value for Input {
     }
 }
 
+impl Output {
+    pub fn new(writer: Rc<RefCell<dyn Write>>) -> Self {
+        Output(writer)
+    }
+}
+
 impl Clone for Output {
     fn clone(&self) -> Self {
         Output(Rc::clone(&self.0))

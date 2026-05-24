@@ -29,7 +29,7 @@ pub fn main() -> std::io::Result<()> {
     if args().len() >= 2 {
         return cmd_run();
     }
-    Repl::new(stdout()).run()
+    Repl::new().run()
 }
 
 fn cmd_run() -> std::io::Result<()> {
