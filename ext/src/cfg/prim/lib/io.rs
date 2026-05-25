@@ -109,7 +109,7 @@ impl Hash for Input {
 
 impl Display for Input {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{TYPE_INPUT}")
+        write!(f, "{TYPE_INPUT}'{:x}'", self.0.as_ptr().addr())
     }
 }
 
@@ -167,13 +167,13 @@ impl Hash for Output {
 
 impl Display for Output {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{TYPE_OUTPUT}")
+        write!(f, "{TYPE_OUTPUT}'{:x}'", self.0.as_ptr().addr())
     }
 }
 
 impl Debug for Output {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{TYPE_OUTPUT}")
+        Display::fmt(&self, f)
     }
 }
 
