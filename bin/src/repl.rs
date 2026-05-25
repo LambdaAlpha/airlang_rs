@@ -66,7 +66,7 @@ struct History {
     paragraphs: Vec<Paragraph<'static>>,
 }
 
-const TIPS_TEXT: &str = "Type `help` for usage | Ctrl+Q quit | Ctrl+Space submit";
+const TIPS_TEXT: &str = "Type `help` for usage | Ctrl+Q quit | Ctrl+S submit";
 
 const CTRL_SHIFT: KeyModifiers =
     KeyModifiers::from_bits_truncate(KeyModifiers::CONTROL.bits() | KeyModifiers::SHIFT.bits());
@@ -132,7 +132,7 @@ impl Repl {
         match (key.modifiers, key.code) {
             (KeyModifiers::CONTROL, KeyCode::Char('q')) => return true,
 
-            (KeyModifiers::CONTROL, KeyCode::Char(' ')) => self.submit(),
+            (KeyModifiers::CONTROL, KeyCode::Char('s')) => self.submit(),
 
             (KeyModifiers::NONE, KeyCode::PageUp) => self.navigate_history(true),
             (KeyModifiers::NONE, KeyCode::PageDown) => self.navigate_history(false),
