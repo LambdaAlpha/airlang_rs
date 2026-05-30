@@ -355,7 +355,7 @@ fn decimal_fmt(decimal: &Decimal, options: FmtOptions, mut f: &mut dyn Write) ->
         f.write_char('+')?;
     }
     f.write_char('E')?;
-    write!(f, "{}", &decimal.order_of_magnitude())?;
+    write!(f, "{}", decimal.order_of_magnitude())?;
     f.write_char('*')?;
     let (i, _exp) = decimal.abs().into_bigint_and_scale();
     let scale = (decimal.digits() - 1) as i64;

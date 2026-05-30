@@ -232,7 +232,7 @@ pub fn print(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = pair.right else {
         return bug!(cfg, "{PRINT}: expected input to be a text, but got {}", pair.right);
     };
-    let _ = write!(ref_, "{}", &**t);
+    let _ = write!(ref_, "{}", **t);
     Val::default()
 }
 
@@ -253,7 +253,7 @@ pub fn print_line(cfg: &mut Cfg, input: Val) -> Val {
     let Val::Text(t) = pair.right else {
         return bug!(cfg, "{PRINT_LINE}: expected input to be a text, but got {}", pair.right);
     };
-    let _ = writeln!(ref_, "{}", &**t);
+    let _ = writeln!(ref_, "{}", **t);
     Val::default()
 }
 
