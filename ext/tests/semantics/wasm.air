@@ -1,0 +1,2046 @@
+module empty
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module []),
+    _b2 set _ wasm.parse "(module)",
+    b1 = b2
+]
+-----
+true
+=====
+module with start
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({start : main} module [
+        _ type type_main function {input : [], output : []},
+        main function {type : type_main, input : [], local : []} : [nop],
+    ]),
+    _b2 set _ wasm.parse "(module (type (func)) (func (type 0) nop) (start 0))",
+    b1 = b2
+]
+-----
+true
+=====
+type
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        _ type t0 function {
+            input : [i32, i64, f32, f64],
+            output : [v128, {} reference {abstract} heap function],
+        },
+        _ type t1 struct {fields : [
+            {mutable} f0 i8,
+            {} f1 i16,
+            {mutable} f2 i32,
+            {} f3 {nullable} reference {abstract} heap function,
+            {mutable} f4 {} reference {abstract} heap no_function,
+            {} f5 {nullable} reference {abstract} heap extern,
+            {mutable} f6 {} reference {abstract} heap no_extern,
+            {} f7 {nullable} reference {abstract} heap continuation,
+            {mutable} f8 {} reference {abstract} heap no_continuation,
+            {} f9 {nullable} reference {abstract} heap exception,
+            {mutable} f10 {} reference {abstract} heap no_exception,
+            {} f11 {nullable} reference {abstract} heap any,
+            {mutable} f12 {} reference {abstract} heap none,
+            {} f13 {nullable} reference {abstract} heap struct,
+            {mutable} f14 {} reference {abstract} heap array,
+            {} f15 {nullable} reference {abstract} heap i31,
+            {mutable} f16 {} reference {abstract} heap equal,
+            {} f17 {nullable} reference {abstract, shared} heap any,
+            {mutable} f18 {} reference {} heap t0,
+            {} f19 {nullable} reference {exact} heap t0,
+        ]},
+        _ type t2 array {mutable, item : i8},
+        _ type t3 array {item : i16},
+        _ type t4 continuation {function : t0},
+        _ type [
+            t5 function {input : [], output : [], final},
+            t6 struct {fields : [{} f0 i8]},
+            t7 struct {final, parent : t6, fields : [{} f0 i8, {} f1 i8]},
+            t8 array {descriptor : t9, item : i32},
+            t9 array {describes : t8, item : f64},
+            t10 continuation {shared, function : t5},
+        ],
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (type (;0;) (func (param i32 i64 f32 f64) (result v128 (ref func))))'_
+      .'  (type (;1;) (struct'_
+      .'    (field (;0;) (mut i8))'_
+      .'    (field (;1;) i16)'_
+      .'    (field (;2;) (mut i32))'_
+      .'    (field (;3;) (ref null func))'_
+      .'    (field (;4;) (mut (ref nofunc)))'_
+      .'    (field (;5;) (ref null extern))'_
+      .'    (field (;6;) (mut (ref noextern)))'_
+      .'    (field (;7;) (ref null cont))'_
+      .'    (field (;8;) (mut (ref nocont)))'_
+      .'    (field (;9;) (ref null exn))'_
+      .'    (field (;10;) (mut (ref noexn)))'_
+      .'    (field (;11;) (ref null any))'_
+      .'    (field (;12;) (mut (ref none)))'_
+      .'    (field (;13;) (ref null struct))'_
+      .'    (field (;14;) (mut (ref array)))'_
+      .'    (field (;15;) (ref null i31))'_
+      .'    (field (;16;) (mut (ref eq)))'_
+      .'    (field (;17;) (ref null (shared any)))'_
+      .'    (field (;18;) (mut (ref 0)))'_
+      .'    (field (;19;) (ref null (exact 0)))'_
+      .'  ))'_
+      .'  (type (;2;) (array (mut i8)))'_
+      .'  (type (;3;) (array i16))'_
+      .'  (type (;4;) (cont 0))'_
+      .'  (rec'_
+      .'    (type (;5;) (func))'_
+      .'    (type (;6;) (sub (struct (field i8))))'_
+      .'    (type (;7;) (sub final 6 (struct (field i8) (field i8))))'_
+      .'    (type (;8;) (sub (descriptor 9) (array i32)))'_
+      .'    (type (;9;) (sub (describes 8) (array f64)))'_
+      .'    (type (;10;) (sub (shared (cont 5))))'_
+      .'  )'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+global
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        g0 global {shared, type : i32, init : [_ i32.constant 0]},
+        g1 global {mutable, type : f64, init : [_ f64.constant 3.14]},
+        g2 global {type : i32, init : [g0 global.get _]},
+        g3 global {
+            type : {nullable} reference {abstract} heap function,
+            init : [_ reference.null {abstract} heap function],
+        },
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (global (;0;) (shared i32) (i32.const 0))'_
+      .'  (global (;1;) (mut f64) (f64.const 3.14))'_
+      .'  (global (;2;) i32 (global.get 0))'_
+      .'  (global (;3;) (ref null func) (ref.null func))'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+memory
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        m0 memory {shared, 64, min : 1, max : 16},
+        m1 memory {min : 4},
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (memory (;0;) i64 1 16 shared)'_
+      .'  (memory (;1;) 4)'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+data
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        m0 memory {min : 1},
+        d0 data {init : "hello"},
+        d1 data {memory : m0, offset : [_ i32.constant 0], init : byte'0011'},
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (memory (;0;) 1)'_
+      .'  (data "hello")'_
+      .'  (data (memory 0) (offset (i32.const 0)) "\00\11")'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+table
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        t0 table {
+            shared,
+            64,
+            min : 1,
+            max : 4,
+            type : {nullable} reference {abstract} heap function,
+        },
+        t1 table {
+            min : 1,
+            type : {nullable} reference {abstract} heap function,
+            init : [_ reference.null {abstract} heap function],
+        },
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (table (;0;) shared i64 1 4 funcref)'_
+      .'  (table (;1;) 1 funcref (ref.null func))'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+element
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        _ type ft0 function {input : [], output : []},
+        f0 function {type : ft0, input : [], local : []} : [nop],
+        t0 table {min : 1, type : {nullable} reference {abstract} heap function},
+        e0 element {declare, type : function, init : [f0]},
+        e1 element {type : function, init : [f0]},
+        e2 element {type : function, init : [f0], table : t0, offset : [_ i32.constant 0]},
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (type (;0;) (func))'_
+      .'  (func (;0;) (type 0) nop)'_
+      .'  (table (;0;) 1 funcref)'_
+      .'  (elem declare func 0)'_
+      .'  (elem func 0)'_
+      .'  (elem (table 0) (offset (i32.const 0)) func 0)'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+tag
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        _ type ft0 function {input : [], output : []},
+        t0 tag {attribute : exception, type : ft0},
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (type (;0;) (func))'_
+      .'  (tag (;0;) (type 0))'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+import
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        _ type ft0 function {input : [], output : []},
+        "module0" import "f0" : f0 function {type : ft0},
+        "module1" import "g0" : g0 global {type : i32},
+        "module2" import "m0" : m0 memory {min : 1},
+        "module3" import "table0" : table0 table {
+            min : 1, 
+            type : {nullable} reference {abstract} heap function,
+        },
+        "module4" import "tag0" : tag0 tag {attribute : exception, type : ft0},
+        "module5" import [
+            "f1" : f1 function {type : ft0},
+            "g1" : g1 global {type : i32},
+            "m1" : m1 memory {min : 1},
+            "table1" : table1 table {
+                min : 1, 
+                type : {nullable} reference {abstract} heap function,
+            },
+            "tag1" : tag1 tag {attribute : exception, type : ft0},
+        ],
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (type (;0;) (func))'_
+      .'  (import "module0" "f0" (func (type 0)))'_
+      .'  (import "module1" "g0" (global i32))'_
+      .'  (import "module2" "m0" (memory 1))'_
+      .'  (import "module3" "table0" (table 1 funcref))'_
+      .'  (import "module4" "tag0" (tag (type 0)))'_
+      .'  (import "module5"'_
+      .'    (item "f1" (func (type 0)))'_
+      .'    (item "g1" (global i32))'_
+      .'    (item "m1" (memory 1))'_
+      .'    (item "table1" (table 1 funcref))'_
+      .'    (item "tag1" (tag (type 0)))'_
+      .'  )'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+export
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        _ type ft0 function {input : [], output : []},
+        f0 function {type : ft0, input : [], local : []} : [nop],
+        g0 global {type : i32, init : [_ i32.constant 0]},
+        m0 memory {min : 1},
+        table0 table {min : 1, type : {nullable} reference {abstract} heap function},
+        tag0 tag {attribute : exception, type : ft0},
+        "f0" export _ function f0,
+        "g0" export _ global g0,
+        "m0" export _ memory m0,
+        "table0" export _ table table0,
+        "tag0" export _ tag tag0,
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (type (;0;) (func))'_
+      .'  (func (;0;) (type 0) nop)'_
+      .'  (global (;0;) i32 (i32.const 0))'_
+      .'  (memory (;0;) 1)'_
+      .'  (table (;0;) 1 funcref)'_
+      .'  (tag (;0;) (type 0))'_
+      .'  (export "f0" (func 0))'_
+      .'  (export "g0" (global 0))'_
+      .'  (export "m0" (memory 0))'_
+      .'  (export "table0" (table 0))'_
+      .'  (export "tag0" (tag 0))'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+zero arg instruction
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({\} module [
+        _ type ft function {input : [], output : []},
+        f function {type : ft, input : [], local : []} : [
+            unreachable,
+            nop,
+            return,
+            drop,
+            select,
+            throw_reference,
+            reference.is_null,
+            reference.as_non_null,
+            reference.equal,
+            reference.i31,
+            reference.i31_shared,
+            i31.get_signed,
+            i31.get_unsigned,
+            array.length,
+            extern.convert_any,
+            any.convert_extern,
+            atomic.fence,
+            i32.+,
+            i32.-,
+            i32.*,
+            i32./_signed,
+            i32./_unsigned,
+            i32.remainder_signed,
+            i32.remainder_unsigned,
+            i32.and,
+            i32.or,
+            i32.xor,
+            i32.shift_left,
+            i32.shift_right_signed,
+            i32.shift_right_unsigned,
+            i32.rotate_left,
+            i32.rotate_right,
+            i32.=0,
+            i32.=,
+            i32.not_=,
+            i32.<_signed,
+            i32.<_unsigned,
+            i32.>_signed,
+            i32.>_unsigned,
+            i32.<=_signed,
+            i32.<=_unsigned,
+            i32.>=_signed,
+            i32.>=_unsigned,
+            i32.count_leading_zero,
+            i32.count_trailing_zero,
+            i32.population_count,
+            i32.extend8_signed,
+            i32.extend16_signed,
+            i32.wrap_i64,
+            i32.truncate_f32_signed,
+            i32.truncate_f32_unsigned,
+            i32.truncate_f64_signed,
+            i32.truncate_f64_unsigned,
+            i32.truncate_saturate_f32_signed,
+            i32.truncate_saturate_f32_unsigned,
+            i32.truncate_saturate_f64_signed,
+            i32.truncate_saturate_f64_unsigned,
+            i32.reinterpret_f32,
+            i64.+,
+            i64.-,
+            i64.*,
+            i64./_signed,
+            i64./_unsigned,
+            i64.remainder_signed,
+            i64.remainder_unsigned,
+            i64.and,
+            i64.or,
+            i64.xor,
+            i64.shift_left,
+            i64.shift_right_signed,
+            i64.shift_right_unsigned,
+            i64.rotate_left,
+            i64.rotate_right,
+            i64.=0,
+            i64.=,
+            i64.not_=,
+            i64.<_signed,
+            i64.<_unsigned,
+            i64.>_signed,
+            i64.>_unsigned,
+            i64.<=_signed,
+            i64.<=_unsigned,
+            i64.>=_signed,
+            i64.>=_unsigned,
+            i64.count_leading_zero,
+            i64.count_trailing_zero,
+            i64.population_count,
+            i64.extend8_signed,
+            i64.extend16_signed,
+            i64.extend32_signed,
+            i64.extend_i32_signed,
+            i64.extend_i32_unsigned,
+            i64.truncate_f32_signed,
+            i64.truncate_f32_unsigned,
+            i64.truncate_f64_signed,
+            i64.truncate_f64_unsigned,
+            i64.truncate_saturate_f32_signed,
+            i64.truncate_saturate_f32_unsigned,
+            i64.truncate_saturate_f64_signed,
+            i64.truncate_saturate_f64_unsigned,
+            i64.reinterpret_f64,
+            i64.+128,
+            i64.-128,
+            i64.*_wide_signed,
+            i64.*_wide_unsigned,
+            f32.+,
+            f32.-,
+            f32.*,
+            f32./,
+            f32.min,
+            f32.max,
+            f32.copy_sign,
+            f32.square_root,
+            f32.floor,
+            f32.ceil,
+            f32.truncate,
+            f32.nearest,
+            f32.absolute,
+            f32.negate,
+            f32.=,
+            f32.not_=,
+            f32.<,
+            f32.>,
+            f32.<=,
+            f32.>=,
+            f32.demote_f64,
+            f32.convert_i32_signed,
+            f32.convert_i32_unsigned,
+            f32.convert_i64_signed,
+            f32.convert_i64_unsigned,
+            f32.reinterpret_i32,
+            f64.+,
+            f64.-,
+            f64.*,
+            f64./,
+            f64.min,
+            f64.max,
+            f64.copy_sign,
+            f64.square_root,
+            f64.floor,
+            f64.ceil,
+            f64.truncate,
+            f64.nearest,
+            f64.absolute,
+            f64.negate,
+            f64.=,
+            f64.not_=,
+            f64.<,
+            f64.>,
+            f64.<=,
+            f64.>=,
+            f64.promote_f32,
+            f64.convert_i32_signed,
+            f64.convert_i32_unsigned,
+            f64.convert_i64_signed,
+            f64.convert_i64_unsigned,
+            f64.reinterpret_i64,
+            i8x16.absolute,
+            i8x16.negate,
+            i8x16.all_true,
+            i8x16.bit_mask,
+            i8x16.narrow_i16x8_signed,
+            i8x16.narrow_i16x8_unsigned,
+            i8x16.shift_left,
+            i8x16.shift_right_signed,
+            i8x16.shift_right_unsigned,
+            i8x16.+,
+            i8x16.+_saturate_signed,
+            i8x16.+_saturate_unsigned,
+            i8x16.-,
+            i8x16.-_saturate_signed,
+            i8x16.-_saturate_unsigned,
+            i8x16.min_signed,
+            i8x16.min_unsigned,
+            i8x16.max_signed,
+            i8x16.max_unsigned,
+            i8x16.average_rounded_unsigned,
+            i8x16.population_count,
+            i8x16.=,
+            i8x16.not_=,
+            i8x16.<_signed,
+            i8x16.<_unsigned,
+            i8x16.>_signed,
+            i8x16.>_unsigned,
+            i8x16.<=_signed,
+            i8x16.<=_unsigned,
+            i8x16.>=_signed,
+            i8x16.>=_unsigned,
+            i8x16.swizzle,
+            i8x16.splat,
+            i8x16.relaxed_swizzle,
+            i8x16.relaxed_lane_select,
+            i16x8.absolute,
+            i16x8.negate,
+            i16x8.all_true,
+            i16x8.bit_mask,
+            i16x8.narrow_i32x4_signed,
+            i16x8.narrow_i32x4_unsigned,
+            i16x8.extend_low_i8x16_signed,
+            i16x8.extend_high_i8x16_signed,
+            i16x8.extend_low_i8x16_unsigned,
+            i16x8.extend_high_i8x16_unsigned,
+            i16x8.shift_left,
+            i16x8.shift_right_signed,
+            i16x8.shift_right_unsigned,
+            i16x8.+,
+            i16x8.+_saturate_signed,
+            i16x8.+_saturate_unsigned,
+            i16x8.-,
+            i16x8.-_saturate_signed,
+            i16x8.-_saturate_unsigned,
+            i16x8.*,
+            i16x8.min_signed,
+            i16x8.min_unsigned,
+            i16x8.max_signed,
+            i16x8.max_unsigned,
+            i16x8.average_rounded_unsigned,
+            i16x8.extend_*_low_i8x16_signed,
+            i16x8.extend_*_high_i8x16_signed,
+            i16x8.extend_*_low_i8x16_unsigned,
+            i16x8.extend_*_high_i8x16_unsigned,
+            i16x8.q15_*_rounded_saturate_signed,
+            i16x8.=,
+            i16x8.not_=,
+            i16x8.<_signed,
+            i16x8.<_unsigned,
+            i16x8.>_signed,
+            i16x8.>_unsigned,
+            i16x8.<=_signed,
+            i16x8.<=_unsigned,
+            i16x8.>=_signed,
+            i16x8.>=_unsigned,
+            i16x8.extend_+_pairwise_i8x16_signed,
+            i16x8.extend_+_pairwise_i8x16_unsigned,
+            i16x8.splat,
+            i16x8.relaxed_lane_select,
+            i16x8.relaxed_q15_*_rounded_signed,
+            i16x8.relaxed_dot_i8x16_i7x16_signed,
+            i32x4.absolute,
+            i32x4.negate,
+            i32x4.all_true,
+            i32x4.bit_mask,
+            i32x4.extend_low_i16x8_signed,
+            i32x4.extend_high_i16x8_signed,
+            i32x4.extend_low_i16x8_unsigned,
+            i32x4.extend_high_i16x8_unsigned,
+            i32x4.shift_left,
+            i32x4.shift_right_signed,
+            i32x4.shift_right_unsigned,
+            i32x4.+,
+            i32x4.-,
+            i32x4.*,
+            i32x4.min_signed,
+            i32x4.min_unsigned,
+            i32x4.max_signed,
+            i32x4.max_unsigned,
+            i32x4.dot_i16x8_signed,
+            i32x4.extend_*_low_i16x8_signed,
+            i32x4.extend_*_high_i16x8_signed,
+            i32x4.extend_*_low_i16x8_unsigned,
+            i32x4.extend_*_high_i16x8_unsigned,
+            i32x4.=,
+            i32x4.not_=,
+            i32x4.<_signed,
+            i32x4.<_unsigned,
+            i32x4.>_signed,
+            i32x4.>_unsigned,
+            i32x4.<=_signed,
+            i32x4.<=_unsigned,
+            i32x4.>=_signed,
+            i32x4.>=_unsigned,
+            i32x4.extend_+_pairwise_i16x8_signed,
+            i32x4.extend_+_pairwise_i16x8_unsigned,
+            i32x4.truncate_saturate_f32x4_signed,
+            i32x4.truncate_saturate_f32x4_unsigned,
+            i32x4.truncate_saturate_f64x2_signed_zero,
+            i32x4.truncate_saturate_f64x2_unsigned_zero,
+            i32x4.splat,
+            i32x4.relaxed_lane_select,
+            i32x4.relaxed_dot_i8x16_i7x16_+_signed,
+            i32x4.relaxed_truncate_f32x4_signed,
+            i32x4.relaxed_truncate_f32x4_unsigned,
+            i32x4.relaxed_truncate_f64x2_signed_zero,
+            i32x4.relaxed_truncate_f64x2_unsigned_zero,
+            i64x2.absolute,
+            i64x2.negate,
+            i64x2.all_true,
+            i64x2.bit_mask,
+            i64x2.extend_low_i32x4_signed,
+            i64x2.extend_high_i32x4_signed,
+            i64x2.extend_low_i32x4_unsigned,
+            i64x2.extend_high_i32x4_unsigned,
+            i64x2.shift_left,
+            i64x2.shift_right_signed,
+            i64x2.shift_right_unsigned,
+            i64x2.+,
+            i64x2.-,
+            i64x2.*,
+            i64x2.=,
+            i64x2.not_=,
+            i64x2.<_signed,
+            i64x2.>_signed,
+            i64x2.<=_signed,
+            i64x2.>=_signed,
+            i64x2.extend_*_low_i32x4_signed,
+            i64x2.extend_*_high_i32x4_signed,
+            i64x2.extend_*_low_i32x4_unsigned,
+            i64x2.extend_*_high_i32x4_unsigned,
+            i64x2.splat,
+            i64x2.relaxed_lane_select,
+            f32x4.absolute,
+            f32x4.negate,
+            f32x4.square_root,
+            f32x4.ceil,
+            f32x4.floor,
+            f32x4.truncate,
+            f32x4.nearest,
+            f32x4.+,
+            f32x4.-,
+            f32x4.*,
+            f32x4./,
+            f32x4.min,
+            f32x4.max,
+            f32x4.pseudo_min,
+            f32x4.pseudo_max,
+            f32x4.=,
+            f32x4.not_=,
+            f32x4.<,
+            f32x4.>,
+            f32x4.<=,
+            f32x4.>=,
+            f32x4.demote_f64x2_zero,
+            f32x4.convert_i32x4_signed,
+            f32x4.convert_i32x4_unsigned,
+            f32x4.splat,
+            f32x4.relaxed_*+,
+            f32x4.relaxed_-*+,
+            f32x4.relaxed_max,
+            f32x4.relaxed_min,
+            f64x2.absolute,
+            f64x2.negate,
+            f64x2.square_root,
+            f64x2.ceil,
+            f64x2.floor,
+            f64x2.truncate,
+            f64x2.nearest,
+            f64x2.+,
+            f64x2.-,
+            f64x2.*,
+            f64x2./,
+            f64x2.min,
+            f64x2.max,
+            f64x2.pseudo_min,
+            f64x2.pseudo_max,
+            f64x2.=,
+            f64x2.not_=,
+            f64x2.<,
+            f64x2.>,
+            f64x2.<=,
+            f64x2.>=,
+            f64x2.promote_low_f32x4,
+            f64x2.convert_low_i32x4_signed,
+            f64x2.convert_low_i32x4_unsigned,
+            f64x2.splat,
+            f64x2.relaxed_*+,
+            f64x2.relaxed_-*+,
+            f64x2.relaxed_max,
+            f64x2.relaxed_min,
+            v128.and,
+            v128.or,
+            v128.xor,
+            v128.and_not,
+            v128.bit_select,
+            v128.any_true,
+            v128.not,
+        ],
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (type (;0;) (func))'_
+      .'  (func (;0;) (type 0)'_
+      .'    unreachable'_
+      .'    nop'_
+      .'    return'_
+      .'    drop'_
+      .'    select'_
+      .'    throw_ref'_
+      .'    ref.is_null'_
+      .'    ref.as_non_null'_
+      .'    ref.eq'_
+      .'    ref.i31'_
+      .'    ref.i31_shared'_
+      .'    i31.get_s'_
+      .'    i31.get_u'_
+      .'    array.len'_
+      .'    extern.convert_any'_
+      .'    any.convert_extern'_
+      .'    atomic.fence'_
+      .'    i32.add'_
+      .'    i32.sub'_
+      .'    i32.mul'_
+      .'    i32.div_s'_
+      .'    i32.div_u'_
+      .'    i32.rem_s'_
+      .'    i32.rem_u'_
+      .'    i32.and'_
+      .'    i32.or'_
+      .'    i32.xor'_
+      .'    i32.shl'_
+      .'    i32.shr_s'_
+      .'    i32.shr_u'_
+      .'    i32.rotl'_
+      .'    i32.rotr'_
+      .'    i32.eqz'_
+      .'    i32.eq'_
+      .'    i32.ne'_
+      .'    i32.lt_s'_
+      .'    i32.lt_u'_
+      .'    i32.gt_s'_
+      .'    i32.gt_u'_
+      .'    i32.le_s'_
+      .'    i32.le_u'_
+      .'    i32.ge_s'_
+      .'    i32.ge_u'_
+      .'    i32.clz'_
+      .'    i32.ctz'_
+      .'    i32.popcnt'_
+      .'    i32.extend8_s'_
+      .'    i32.extend16_s'_
+      .'    i32.wrap_i64'_
+      .'    i32.trunc_f32_s'_
+      .'    i32.trunc_f32_u'_
+      .'    i32.trunc_f64_s'_
+      .'    i32.trunc_f64_u'_
+      .'    i32.trunc_sat_f32_s'_
+      .'    i32.trunc_sat_f32_u'_
+      .'    i32.trunc_sat_f64_s'_
+      .'    i32.trunc_sat_f64_u'_
+      .'    i32.reinterpret_f32'_
+      .'    i64.add'_
+      .'    i64.sub'_
+      .'    i64.mul'_
+      .'    i64.div_s'_
+      .'    i64.div_u'_
+      .'    i64.rem_s'_
+      .'    i64.rem_u'_
+      .'    i64.and'_
+      .'    i64.or'_
+      .'    i64.xor'_
+      .'    i64.shl'_
+      .'    i64.shr_s'_
+      .'    i64.shr_u'_
+      .'    i64.rotl'_
+      .'    i64.rotr'_
+      .'    i64.eqz'_
+      .'    i64.eq'_
+      .'    i64.ne'_
+      .'    i64.lt_s'_
+      .'    i64.lt_u'_
+      .'    i64.gt_s'_
+      .'    i64.gt_u'_
+      .'    i64.le_s'_
+      .'    i64.le_u'_
+      .'    i64.ge_s'_
+      .'    i64.ge_u'_
+      .'    i64.clz'_
+      .'    i64.ctz'_
+      .'    i64.popcnt'_
+      .'    i64.extend8_s'_
+      .'    i64.extend16_s'_
+      .'    i64.extend32_s'_
+      .'    i64.extend_i32_s'_
+      .'    i64.extend_i32_u'_
+      .'    i64.trunc_f32_s'_
+      .'    i64.trunc_f32_u'_
+      .'    i64.trunc_f64_s'_
+      .'    i64.trunc_f64_u'_
+      .'    i64.trunc_sat_f32_s'_
+      .'    i64.trunc_sat_f32_u'_
+      .'    i64.trunc_sat_f64_s'_
+      .'    i64.trunc_sat_f64_u'_
+      .'    i64.reinterpret_f64'_
+      .'    i64.add128'_
+      .'    i64.sub128'_
+      .'    i64.mul_wide_s'_
+      .'    i64.mul_wide_u'_
+      .'    f32.add'_
+      .'    f32.sub'_
+      .'    f32.mul'_
+      .'    f32.div'_
+      .'    f32.min'_
+      .'    f32.max'_
+      .'    f32.copysign'_
+      .'    f32.sqrt'_
+      .'    f32.floor'_
+      .'    f32.ceil'_
+      .'    f32.trunc'_
+      .'    f32.nearest'_
+      .'    f32.abs'_
+      .'    f32.neg'_
+      .'    f32.eq'_
+      .'    f32.ne'_
+      .'    f32.lt'_
+      .'    f32.gt'_
+      .'    f32.le'_
+      .'    f32.ge'_
+      .'    f32.demote_f64'_
+      .'    f32.convert_i32_s'_
+      .'    f32.convert_i32_u'_
+      .'    f32.convert_i64_s'_
+      .'    f32.convert_i64_u'_
+      .'    f32.reinterpret_i32'_
+      .'    f64.add'_
+      .'    f64.sub'_
+      .'    f64.mul'_
+      .'    f64.div'_
+      .'    f64.min'_
+      .'    f64.max'_
+      .'    f64.copysign'_
+      .'    f64.sqrt'_
+      .'    f64.floor'_
+      .'    f64.ceil'_
+      .'    f64.trunc'_
+      .'    f64.nearest'_
+      .'    f64.abs'_
+      .'    f64.neg'_
+      .'    f64.eq'_
+      .'    f64.ne'_
+      .'    f64.lt'_
+      .'    f64.gt'_
+      .'    f64.le'_
+      .'    f64.ge'_
+      .'    f64.promote_f32'_
+      .'    f64.convert_i32_s'_
+      .'    f64.convert_i32_u'_
+      .'    f64.convert_i64_s'_
+      .'    f64.convert_i64_u'_
+      .'    f64.reinterpret_i64'_
+      .'    i8x16.abs'_
+      .'    i8x16.neg'_
+      .'    i8x16.all_true'_
+      .'    i8x16.bitmask'_
+      .'    i8x16.narrow_i16x8_s'_
+      .'    i8x16.narrow_i16x8_u'_
+      .'    i8x16.shl'_
+      .'    i8x16.shr_s'_
+      .'    i8x16.shr_u'_
+      .'    i8x16.add'_
+      .'    i8x16.add_sat_s'_
+      .'    i8x16.add_sat_u'_
+      .'    i8x16.sub'_
+      .'    i8x16.sub_sat_s'_
+      .'    i8x16.sub_sat_u'_
+      .'    i8x16.min_s'_
+      .'    i8x16.min_u'_
+      .'    i8x16.max_s'_
+      .'    i8x16.max_u'_
+      .'    i8x16.avgr_u'_
+      .'    i8x16.popcnt'_
+      .'    i8x16.eq'_
+      .'    i8x16.ne'_
+      .'    i8x16.lt_s'_
+      .'    i8x16.lt_u'_
+      .'    i8x16.gt_s'_
+      .'    i8x16.gt_u'_
+      .'    i8x16.le_s'_
+      .'    i8x16.le_u'_
+      .'    i8x16.ge_s'_
+      .'    i8x16.ge_u'_
+      .'    i8x16.swizzle'_
+      .'    i8x16.splat'_
+      .'    i8x16.relaxed_swizzle'_
+      .'    i8x16.relaxed_laneselect'_
+      .'    i16x8.abs'_
+      .'    i16x8.neg'_
+      .'    i16x8.all_true'_
+      .'    i16x8.bitmask'_
+      .'    i16x8.narrow_i32x4_s'_
+      .'    i16x8.narrow_i32x4_u'_
+      .'    i16x8.extend_low_i8x16_s'_
+      .'    i16x8.extend_high_i8x16_s'_
+      .'    i16x8.extend_low_i8x16_u'_
+      .'    i16x8.extend_high_i8x16_u'_
+      .'    i16x8.shl'_
+      .'    i16x8.shr_s'_
+      .'    i16x8.shr_u'_
+      .'    i16x8.add'_
+      .'    i16x8.add_sat_s'_
+      .'    i16x8.add_sat_u'_
+      .'    i16x8.sub'_
+      .'    i16x8.sub_sat_s'_
+      .'    i16x8.sub_sat_u'_
+      .'    i16x8.mul'_
+      .'    i16x8.min_s'_
+      .'    i16x8.min_u'_
+      .'    i16x8.max_s'_
+      .'    i16x8.max_u'_
+      .'    i16x8.avgr_u'_
+      .'    i16x8.extmul_low_i8x16_s'_
+      .'    i16x8.extmul_high_i8x16_s'_
+      .'    i16x8.extmul_low_i8x16_u'_
+      .'    i16x8.extmul_high_i8x16_u'_
+      .'    i16x8.q15mulr_sat_s'_
+      .'    i16x8.eq'_
+      .'    i16x8.ne'_
+      .'    i16x8.lt_s'_
+      .'    i16x8.lt_u'_
+      .'    i16x8.gt_s'_
+      .'    i16x8.gt_u'_
+      .'    i16x8.le_s'_
+      .'    i16x8.le_u'_
+      .'    i16x8.ge_s'_
+      .'    i16x8.ge_u'_
+      .'    i16x8.extadd_pairwise_i8x16_s'_
+      .'    i16x8.extadd_pairwise_i8x16_u'_
+      .'    i16x8.splat'_
+      .'    i16x8.relaxed_laneselect'_
+      .'    i16x8.relaxed_q15mulr_s'_
+      .'    i16x8.relaxed_dot_i8x16_i7x16_s'_
+      .'    i32x4.abs'_
+      .'    i32x4.neg'_
+      .'    i32x4.all_true'_
+      .'    i32x4.bitmask'_
+      .'    i32x4.extend_low_i16x8_s'_
+      .'    i32x4.extend_high_i16x8_s'_
+      .'    i32x4.extend_low_i16x8_u'_
+      .'    i32x4.extend_high_i16x8_u'_
+      .'    i32x4.shl'_
+      .'    i32x4.shr_s'_
+      .'    i32x4.shr_u'_
+      .'    i32x4.add'_
+      .'    i32x4.sub'_
+      .'    i32x4.mul'_
+      .'    i32x4.min_s'_
+      .'    i32x4.min_u'_
+      .'    i32x4.max_s'_
+      .'    i32x4.max_u'_
+      .'    i32x4.dot_i16x8_s'_
+      .'    i32x4.extmul_low_i16x8_s'_
+      .'    i32x4.extmul_high_i16x8_s'_
+      .'    i32x4.extmul_low_i16x8_u'_
+      .'    i32x4.extmul_high_i16x8_u'_
+      .'    i32x4.eq'_
+      .'    i32x4.ne'_
+      .'    i32x4.lt_s'_
+      .'    i32x4.lt_u'_
+      .'    i32x4.gt_s'_
+      .'    i32x4.gt_u'_
+      .'    i32x4.le_s'_
+      .'    i32x4.le_u'_
+      .'    i32x4.ge_s'_
+      .'    i32x4.ge_u'_
+      .'    i32x4.extadd_pairwise_i16x8_s'_
+      .'    i32x4.extadd_pairwise_i16x8_u'_
+      .'    i32x4.trunc_sat_f32x4_s'_
+      .'    i32x4.trunc_sat_f32x4_u'_
+      .'    i32x4.trunc_sat_f64x2_s_zero'_
+      .'    i32x4.trunc_sat_f64x2_u_zero'_
+      .'    i32x4.splat'_
+      .'    i32x4.relaxed_laneselect'_
+      .'    i32x4.relaxed_dot_i8x16_i7x16_add_s'_
+      .'    i32x4.relaxed_trunc_f32x4_s'_
+      .'    i32x4.relaxed_trunc_f32x4_u'_
+      .'    i32x4.relaxed_trunc_f64x2_s_zero'_
+      .'    i32x4.relaxed_trunc_f64x2_u_zero'_
+      .'    i64x2.abs'_
+      .'    i64x2.neg'_
+      .'    i64x2.all_true'_
+      .'    i64x2.bitmask'_
+      .'    i64x2.extend_low_i32x4_s'_
+      .'    i64x2.extend_high_i32x4_s'_
+      .'    i64x2.extend_low_i32x4_u'_
+      .'    i64x2.extend_high_i32x4_u'_
+      .'    i64x2.shl'_
+      .'    i64x2.shr_s'_
+      .'    i64x2.shr_u'_
+      .'    i64x2.add'_
+      .'    i64x2.sub'_
+      .'    i64x2.mul'_
+      .'    i64x2.eq'_
+      .'    i64x2.ne'_
+      .'    i64x2.lt_s'_
+      .'    i64x2.gt_s'_
+      .'    i64x2.le_s'_
+      .'    i64x2.ge_s'_
+      .'    i64x2.extmul_low_i32x4_s'_
+      .'    i64x2.extmul_high_i32x4_s'_
+      .'    i64x2.extmul_low_i32x4_u'_
+      .'    i64x2.extmul_high_i32x4_u'_
+      .'    i64x2.splat'_
+      .'    i64x2.relaxed_laneselect'_
+      .'    f32x4.abs'_
+      .'    f32x4.neg'_
+      .'    f32x4.sqrt'_
+      .'    f32x4.ceil'_
+      .'    f32x4.floor'_
+      .'    f32x4.trunc'_
+      .'    f32x4.nearest'_
+      .'    f32x4.add'_
+      .'    f32x4.sub'_
+      .'    f32x4.mul'_
+      .'    f32x4.div'_
+      .'    f32x4.min'_
+      .'    f32x4.max'_
+      .'    f32x4.pmin'_
+      .'    f32x4.pmax'_
+      .'    f32x4.eq'_
+      .'    f32x4.ne'_
+      .'    f32x4.lt'_
+      .'    f32x4.gt'_
+      .'    f32x4.le'_
+      .'    f32x4.ge'_
+      .'    f32x4.demote_f64x2_zero'_
+      .'    f32x4.convert_i32x4_s'_
+      .'    f32x4.convert_i32x4_u'_
+      .'    f32x4.splat'_
+      .'    f32x4.relaxed_madd'_
+      .'    f32x4.relaxed_nmadd'_
+      .'    f32x4.relaxed_max'_
+      .'    f32x4.relaxed_min'_
+      .'    f64x2.abs'_
+      .'    f64x2.neg'_
+      .'    f64x2.sqrt'_
+      .'    f64x2.ceil'_
+      .'    f64x2.floor'_
+      .'    f64x2.trunc'_
+      .'    f64x2.nearest'_
+      .'    f64x2.add'_
+      .'    f64x2.sub'_
+      .'    f64x2.mul'_
+      .'    f64x2.div'_
+      .'    f64x2.min'_
+      .'    f64x2.max'_
+      .'    f64x2.pmin'_
+      .'    f64x2.pmax'_
+      .'    f64x2.eq'_
+      .'    f64x2.ne'_
+      .'    f64x2.lt'_
+      .'    f64x2.gt'_
+      .'    f64x2.le'_
+      .'    f64x2.ge'_
+      .'    f64x2.promote_low_f32x4'_
+      .'    f64x2.convert_low_i32x4_s'_
+      .'    f64x2.convert_low_i32x4_u'_
+      .'    f64x2.splat'_
+      .'    f64x2.relaxed_madd'_
+      .'    f64x2.relaxed_nmadd'_
+      .'    f64x2.relaxed_max'_
+      .'    f64x2.relaxed_min'_
+      .'    v128.and'_
+      .'    v128.or'_
+      .'    v128.xor'_
+      .'    v128.andnot'_
+      .'    v128.bitselect'_
+      .'    v128.any_true'_
+      .'    v128.not'_
+      .'  )'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+local instruction
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        _ type ft function {input : [], output : []},
+        f function {type : ft, input : [], local : [x : i32]} : [
+            x local.get _,
+            x local.set _,
+            x local.tee _,
+            _ select i32,
+        ],
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (type (;0;) (func))'_
+      .'  (func (;0;) (type 0) (local i32)'_
+      .'    local.get 0'_
+      .'    local.set 0'_
+      .'    local.tee 0'_
+      .'    select (result i32)'_
+      .'  )'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+block instruction
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        _ type ft function {input : [], output : []},
+        _ type tg0 function {input : [], output : []},
+        _ type tg1 function {input : [i32], output : []},
+        tag0 tag {attribute : exception, type : tg0},
+        tag1 tag {attribute : exception, type : tg1},
+        f function {type : ft, input : [], local : []} : [
+            {label : blk, type : ft} block [nop],
+            {type : ft} if [nop] : [nop],
+            {label : lp} loop [_ branch lp],
+            {label : tr} try_table [
+                _ throw tag0,
+            ] : [
+                {reference, tag : tag0, label : tr},
+                {tag : tag1, label : tr},
+                {reference, label : tr},
+            ],
+            {label : L2, type : ft} block [
+                {label : L1} block [
+                    {label : L0} block [
+                        _ branch L0,
+                        _ branch L1,
+                        _ branch L2,
+                    ],
+                ],
+            ],
+        ],
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (type (;0;) (func))'_
+      .'  (type (;1;) (func))'_
+      .'  (type (;2;) (func (param i32)))'_
+      .'  (tag (;0;) (type 1))'_
+      .'  (tag (;1;) (type 2))'_
+      .'  (func (;0;) (type 0)'_
+      .'    (block (type 0) nop)'_
+      .'    (if (type 0) (then nop) (else nop))'_
+      .'    (loop br 0)'_
+      .'    (try_table (catch_ref 0 0) (catch 1 0) (catch_all_ref 0)'_
+      .'      throw 0'_
+      .'    )'_
+      .'    (block (type 0)'_
+      .'      (block'_
+      .'        (block'_
+      .'          br 0'_
+      .'          br 1'_
+      .'          br 2'_
+      .'        )'_
+      .'      )'_
+      .'    )'_
+      .'  )'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+branch instruction
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        _ type ft function {input : [], output : []},
+        f function {type : ft, input : [], local : []} : [
+            {label : L0} block [
+                _ branch L0,
+                _ branch_if L0,
+                _ branch_table [L0, L0],
+                _ branch_on_null L0,
+                _ branch_on_non_null L0,
+                _ reference.null {abstract} heap function,
+                _ branch_on_cast {
+                    from : {nullable} reference {abstract} heap function,
+                    to : {nullable} reference {abstract} heap extern,
+                    label : L0,
+                },
+                _ reference.null {abstract} heap function,
+                _ branch_on_cast_fail {
+                    from : {nullable} reference {abstract} heap function,
+                    to : {nullable} reference {abstract} heap extern,
+                    label : L0,
+                },
+                _ reference.null {abstract} heap function,
+                _ branch_on_cast_descriptor_equal {
+                    from : {nullable} reference {abstract} heap function,
+                    to : {nullable} reference {abstract} heap extern,
+                    label : L0,
+                },
+                _ reference.null {abstract} heap function,
+                _ branch_on_cast_descriptor_equal_fail {
+                    from : {nullable} reference {abstract} heap function,
+                    to : {nullable} reference {abstract} heap extern,
+                    label : L0,
+                },
+            ],
+        ],
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (type (;0;) (func))'_
+      .'  (func (;0;) (type 0)'_
+      .'    (block'_
+      .'      br 0'_
+      .'      br_if 0'_
+      .'      br_table 0 0'_
+      .'      br_on_null 0'_
+      .'      br_on_non_null 0'_
+      .'      ref.null func'_
+      .'      br_on_cast 0 (ref null func) (ref null extern)'_
+      .'      ref.null func'_
+      .'      br_on_cast_fail 0 (ref null func) (ref null extern)'_
+      .'      ref.null func'_
+      .'      br_on_cast_desc_eq 0 (ref null func) (ref null extern)'_
+      .'      ref.null func'_
+      .'      br_on_cast_desc_eq_fail 0 (ref null func) (ref null extern)'_
+      .'    )'_
+      .'  )'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+call instruction
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        _ type ft function {input : [], output : []},
+        tbl table {min : 1, type : {nullable} reference {abstract} heap function},
+        callee function {type : ft, input : [], local : []} : [nop],
+        f function {type : ft, input : [], local : []} : [
+            {label : blk, type : ft} block [
+                _ call callee,
+                _ return_call callee,
+                _ call_reference ft,
+                _ return_call_reference ft,
+                _ call_indirect {table : tbl, type : ft},
+                _ return_call_indirect {table : tbl, type : ft},
+            ],
+        ],
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (type (;0;) (func))'_
+      .'  (table (;0;) 1 funcref)'_
+      .'  (func (;0;) (type 0) nop)'_
+      .'  (func (;1;) (type 0)'_
+      .'    (block (type 0)'_
+      .'      call 0'_
+      .'      return_call 0'_
+      .'      call_ref 0'_
+      .'      return_call_ref 0'_
+      .'      call_indirect (type 0)'_
+      .'      return_call_indirect (type 0)'_
+      .'    )'_
+      .'  )'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+switch instruction
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        _ type ft function {input : [], output : []},
+        _ type _tg function {input : [], output : []},
+        _ type cont_t continuation {function : ft},
+        _ type cont_u continuation {function : ft},
+        tag0 tag {attribute : exception, type : _tg},
+        f function {type : ft, input : [], local : []} : [
+            {label : sw, type : ft} block [
+                _ throw tag0,
+                _ continuation.new cont_t,
+                cont_t continuation.bind cont_u,
+                _ suspend tag0,
+                _ resume {type : cont_t, handlers : []},
+                _ resume.throw {type : cont_t, tag : tag0, handlers : []},
+                _ resume.throw_reference {type : cont_t, handlers : []},
+                _ switch {type : cont_t, tag : tag0},
+            ],
+        ],
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (type (;0;) (func))'_
+      .'  (type (;1;) (func))'_
+      .'  (type (;2;) (cont 0))'_
+      .'  (type (;3;) (cont 0))'_
+      .'  (tag (;0;) (type 1))'_
+      .'  (func (;0;) (type 0)'_
+      .'    (block (type 0)'_
+      .'      throw 0'_
+      .'      cont.new 2'_
+      .'      cont.bind 2 3'_
+      .'      suspend 0'_
+      .'      resume 2'_
+      .'      resume_throw 2 0'_
+      .'      resume_throw_ref 2'_
+      .'      switch 2 0'_
+      .'    )'_
+      .'  )'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+global instruction
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        g0 global {type : i32, mutable, init : [_ i32.constant 0]},
+        _ type ft function {input : [], output : []},
+        f function {type : ft, input : [], local : []} : [
+            g0 global.get _,
+            g0 global.set _,
+            g0 global.atomic.get acquire_release,
+            g0 global.atomic.set acquire_release,
+            g0 global.atomic.read_modify_write.+ acquire_release,
+            g0 global.atomic.read_modify_write.- acquire_release,
+            g0 global.atomic.read_modify_write.and acquire_release,
+            g0 global.atomic.read_modify_write.or acquire_release,
+            g0 global.atomic.read_modify_write.xor acquire_release,
+            g0 global.atomic.read_modify_write.exchange acquire_release,
+            g0 global.atomic.read_modify_write.compare_exchange acquire_release,
+        ],
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (type (;0;) (func))'_
+      .'  (global (;0;) (mut i32) (i32.const 0))'_
+      .'  (func (;0;) (type 0)'_
+      .'    global.get 0'_
+      .'    global.set 0'_
+      .'    global.atomic.get acq_rel 0'_
+      .'    global.atomic.set acq_rel 0'_
+      .'    global.atomic.rmw.add acq_rel 0'_
+      .'    global.atomic.rmw.sub acq_rel 0'_
+      .'    global.atomic.rmw.and acq_rel 0'_
+      .'    global.atomic.rmw.or acq_rel 0'_
+      .'    global.atomic.rmw.xor acq_rel 0'_
+      .'    global.atomic.rmw.xchg acq_rel 0'_
+      .'    global.atomic.rmw.cmpxchg acq_rel 0'_
+      .'  )'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+memory instruction
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        m0 memory {min : 1},
+        d0 data {init : "hi"},
+        _ type ft function {input : [], output : []},
+        f function {type : ft, input : [], local : []} : [
+            m0 memory.init d0,
+            m0 memory.size _,
+            m0 memory.grow _,
+            m0 memory.fill _,
+            _ memory.copy {from : m0, to : m0},
+            m0 memory.discard _,
+            _ memory.atomic.notify {memory : m0},
+            _ memory.atomic.wait32 {memory : m0},
+            _ memory.atomic.wait64 {memory : m0},
+        ],
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (type (;0;) (func))'_
+      .'  (memory (;0;) 1)'_
+      .'  (data "hi")'_
+      .'  (func (;0;) (type 0)'_
+      .'    memory.init 0 0'_
+      .'    memory.size 0'_
+      .'    memory.grow 0'_
+      .'    memory.fill 0'_
+      .'    memory.copy 0 0'_
+      .'    memory.discard 0'_
+      .'    memory.atomic.notify 0'_
+      .'    memory.atomic.wait32 0'_
+      .'    memory.atomic.wait64 0'_
+      .'  )'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+data instruction
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        d0 data {init : "hi"},
+        _ type ft function {input : [], output : []},
+        f function {type : ft, input : [], local : []} : [
+            _ data.drop d0,
+        ],
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (type (;0;) (func))'_
+      .'  (data "hi")'_
+      .'  (func (;0;) (type 0)'_
+      .'    data.drop 0'_
+      .'  )'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+table instruction
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        tbl table {min : 1, type : {nullable} reference {abstract} heap function},
+        ef function {type : ft, input : [], local : []} : [nop],
+        el element {type : function, init : [ef]},
+        _ type ft function {input : [], output : []},
+        f function {type : ft, input : [], local : []} : [
+            tbl table.init el,
+            tbl table.get _,
+            tbl table.set _,
+            tbl table.size _,
+            tbl table.grow _,
+            tbl table.fill _,
+            _ table.copy {from : tbl, to : tbl},
+            tbl table.atomic.get acquire_release,
+            tbl table.atomic.set acquire_release,
+            tbl table.atomic.read_modify_write.exchange acquire_release,
+            tbl table.atomic.read_modify_write.compare_exchange acquire_release,
+        ],
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (type (;0;) (func))'_
+      .'  (table (;0;) 1 funcref)'_
+      .'  (func (;0;) (type 0) nop)'_
+      .'  (elem func 0)'_
+      .'  (func (;1;) (type 0)'_
+      .'    table.init 0 0'_
+      .'    table.get 0'_
+      .'    table.set 0'_
+      .'    table.size 0'_
+      .'    table.grow 0'_
+      .'    table.fill 0'_
+      .'    table.copy 0 0'_
+      .'    table.atomic.get acq_rel 0'_
+      .'    table.atomic.set acq_rel 0'_
+      .'    table.atomic.rmw.xchg acq_rel 0'_
+      .'    table.atomic.rmw.cmpxchg acq_rel 0'_
+      .'  )'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+element instruction
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        _ type ft function {input : [], output : []},
+        ef function {type : ft, input : [], local : []} : [nop],
+        el element {type : function, init : [ef]},
+        f function {type : ft, input : [], local : []} : [
+            _ element.drop el,
+        ],
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (type (;0;) (func))'_
+      .'  (func (;0;) (type 0) nop)'_
+      .'  (elem func 0)'_
+      .'  (func (;1;) (type 0)'_
+      .'    elem.drop 0'_
+      .'  )'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+reference instruction
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        _ type s0 struct {fields : [{} f0 i32]},
+        _ type ft function {input : [], output : []},
+        f function {type : ft, input : [], local : []} : [
+            _ reference.null {abstract} heap any,
+            _ reference.function f,
+            _ reference.get_descriptor s0,
+            _ reference.test_nullable {abstract} heap any,
+            _ reference.test_non_null {abstract} heap any,
+            _ reference.cast_nullable {abstract} heap any,
+            _ reference.cast_non_null {abstract} heap any,
+            _ reference.cast_descriptor_equal_nullable {abstract} heap any,
+            _ reference.cast_descriptor_equal_non_null {abstract} heap any,
+        ],
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (type (;0;) (struct (field i32)))'_
+      .'  (type (;1;) (func))'_
+      .'  (func (;0;) (type 1)'_
+      .'    ref.null any'_
+      .'    ref.func 0'_
+      .'    ref.get_desc 0'_
+      .'    ref.test (ref null any)'_
+      .'    ref.test (ref any)'_
+      .'    ref.cast (ref null any)'_
+      .'    ref.cast (ref any)'_
+      .'    ref.cast_desc_eq (ref null any)'_
+      .'    ref.cast_desc_eq (ref any)'_
+      .'  )'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+struct instruction
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        _ type s0 struct {fields : [{} f0 i32, {} f1 i64]},
+        _ type ft function {input : [], output : []},
+        f function {type : ft, input : [], local : []} : [
+            s0 struct.new _,
+            s0 struct.new_default _,
+            s0 struct.new_descriptor _,
+            s0 struct.new_default_descriptor _,
+            s0 struct.get f0,
+            s0 struct.get_signed f0,
+            s0 struct.get_unsigned f0,
+            s0 struct.set f0,
+            s0 struct.atomic.get f0 : acquire_release,
+            s0 struct.atomic.get_signed f0 : acquire_release,
+            s0 struct.atomic.get_unsigned f0 : acquire_release,
+            s0 struct.atomic.set f0 : acquire_release,
+            s0 struct.atomic.read_modify_write.+ f0 : acquire_release,
+            s0 struct.atomic.read_modify_write.- f0 : acquire_release,
+            s0 struct.atomic.read_modify_write.and f0 : acquire_release,
+            s0 struct.atomic.read_modify_write.or f0 : acquire_release,
+            s0 struct.atomic.read_modify_write.xor f0 : acquire_release,
+            s0 struct.atomic.read_modify_write.exchange f0 : acquire_release,
+            s0 struct.atomic.read_modify_write.compare_exchange f0 : acquire_release,
+        ],
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (type (;0;) (struct (field i32) (field i64)))'_
+      .'  (type (;1;) (func))'_
+      .'  (func (;0;) (type 1)'_
+      .'    struct.new 0'_
+      .'    struct.new_default 0'_
+      .'    struct.new_desc 0'_
+      .'    struct.new_default_desc 0'_
+      .'    struct.get 0 0'_
+      .'    struct.get_s 0 0'_
+      .'    struct.get_u 0 0'_
+      .'    struct.set 0 0'_
+      .'    struct.atomic.get acq_rel 0 0'_
+      .'    struct.atomic.get_s acq_rel 0 0'_
+      .'    struct.atomic.get_u acq_rel 0 0'_
+      .'    struct.atomic.set acq_rel 0 0'_
+      .'    struct.atomic.rmw.add acq_rel 0 0'_
+      .'    struct.atomic.rmw.sub acq_rel 0 0'_
+      .'    struct.atomic.rmw.and acq_rel 0 0'_
+      .'    struct.atomic.rmw.or acq_rel 0 0'_
+      .'    struct.atomic.rmw.xor acq_rel 0 0'_
+      .'    struct.atomic.rmw.xchg acq_rel 0 0'_
+      .'    struct.atomic.rmw.cmpxchg acq_rel 0 0'_
+      .'  )'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+array instruction
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        _ type a0 array {item : i32},
+        d0 data {init : "12"},
+        _ type ft function {input : [], output : []},
+        ef function {type : ft, input : [], local : []} : [nop],
+        el element {type : function, init : [ef]},
+        f function {type : ft, input : [], local : []} : [
+            a0 array.new _,
+            a0 array.new_default _,
+            a0 array.new_fixed 2,
+            a0 array.new_data d0,
+            a0 array.init_data d0,
+            a0 array.new_element el,
+            a0 array.init_element el,
+            a0 array.get _,
+            a0 array.get_signed _,
+            a0 array.get_unsigned _,
+            a0 array.set _,
+            a0 array.fill _,
+            _ array.copy {from : a0, to : a0},
+            a0 array.atomic.get acquire_release,
+            a0 array.atomic.get_signed acquire_release,
+            a0 array.atomic.get_unsigned acquire_release,
+            a0 array.atomic.set acquire_release,
+            a0 array.atomic.read_modify_write.+ acquire_release,
+            a0 array.atomic.read_modify_write.- acquire_release,
+            a0 array.atomic.read_modify_write.and acquire_release,
+            a0 array.atomic.read_modify_write.or acquire_release,
+            a0 array.atomic.read_modify_write.xor acquire_release,
+            a0 array.atomic.read_modify_write.exchange acquire_release,
+            a0 array.atomic.read_modify_write.compare_exchange acquire_release,
+        ],
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (type (;0;) (array i32))'_
+      .'  (type (;1;) (func))'_
+      .'  (data (;0;) "12")'_
+      .'  (func (;0;) (type 1) nop)'_
+      .'  (elem (;0;) func 0)'_
+      .'  (func (;1;) (type 1)'_
+      .'    array.new 0'_
+      .'    array.new_default 0'_
+      .'    array.new_fixed 0 2'_
+      .'    array.new_data 0 0'_
+      .'    array.init_data 0 0'_
+      .'    array.new_elem 0 0'_
+      .'    array.init_elem 0 0'_
+      .'    array.get 0'_
+      .'    array.get_s 0'_
+      .'    array.get_u 0'_
+      .'    array.set 0'_
+      .'    array.fill 0'_
+      .'    array.copy 0 0'_
+      .'    array.atomic.get acq_rel 0'_
+      .'    array.atomic.get_s acq_rel 0'_
+      .'    array.atomic.get_u acq_rel 0'_
+      .'    array.atomic.set acq_rel 0'_
+      .'    array.atomic.rmw.add acq_rel 0'_
+      .'    array.atomic.rmw.sub acq_rel 0'_
+      .'    array.atomic.rmw.and acq_rel 0'_
+      .'    array.atomic.rmw.or acq_rel 0'_
+      .'    array.atomic.rmw.xor acq_rel 0'_
+      .'    array.atomic.rmw.xchg acq_rel 0'_
+      .'    array.atomic.rmw.cmpxchg acq_rel 0'_
+      .'  )'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+number instruction
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        m0 memory {min : 1},
+        _ type ft function {input : [], output : []},
+        f function {type : ft, input : [], local : []} : [
+            _ i32.constant 42,
+            _ i32.load {memory : m0},
+            _ i32.load8_signed {memory : m0},
+            _ i32.load8_unsigned {memory : m0},
+            _ i32.load16_signed {memory : m0},
+            _ i32.load16_unsigned {memory : m0},
+            _ i32.store {memory : m0},
+            _ i32.store8 {memory : m0},
+            _ i32.store16 {memory : m0},
+            _ i32.atomic.load {memory : m0},
+            _ i32.atomic.load8_unsigned {memory : m0},
+            _ i32.atomic.load16_unsigned {memory : m0},
+            _ i32.atomic.store {memory : m0},
+            _ i32.atomic.store8 {memory : m0},
+            _ i32.atomic.store16 {memory : m0},
+            _ i32.atomic.read_modify_write.+ {memory : m0},
+            _ i32.atomic.read_modify_write.- {memory : m0},
+            _ i32.atomic.read_modify_write.and {memory : m0},
+            _ i32.atomic.read_modify_write.or {memory : m0},
+            _ i32.atomic.read_modify_write.xor {memory : m0},
+            _ i32.atomic.read_modify_write.exchange {memory : m0},
+            _ i32.atomic.read_modify_write.compare_exchange {memory : m0},
+            _ i32.atomic.read_modify_write8.+_unsigned {memory : m0},
+            _ i32.atomic.read_modify_write8.-_unsigned {memory : m0},
+            _ i32.atomic.read_modify_write8.and_unsigned {memory : m0},
+            _ i32.atomic.read_modify_write8.or_unsigned {memory : m0},
+            _ i32.atomic.read_modify_write8.xor_unsigned {memory : m0},
+            _ i32.atomic.read_modify_write8.exchange_unsigned {memory : m0},
+            _ i32.atomic.read_modify_write8.compare_exchange_unsigned {memory : m0},
+            _ i32.atomic.read_modify_write16.+_unsigned {memory : m0},
+            _ i32.atomic.read_modify_write16.-_unsigned {memory : m0},
+            _ i32.atomic.read_modify_write16.and_unsigned {memory : m0},
+            _ i32.atomic.read_modify_write16.or_unsigned {memory : m0},
+            _ i32.atomic.read_modify_write16.xor_unsigned {memory : m0},
+            _ i32.atomic.read_modify_write16.exchange_unsigned {memory : m0},
+            _ i32.atomic.read_modify_write16.compare_exchange_unsigned {memory : m0},
+            _ i64.constant 100,
+            _ i64.load {memory : m0},
+            _ i64.load8_signed {memory : m0},
+            _ i64.load8_unsigned {memory : m0},
+            _ i64.load16_signed {memory : m0},
+            _ i64.load16_unsigned {memory : m0},
+            _ i64.load32_signed {memory : m0},
+            _ i64.load32_unsigned {memory : m0},
+            _ i64.store {memory : m0},
+            _ i64.store8 {memory : m0},
+            _ i64.store16 {memory : m0},
+            _ i64.store32 {memory : m0},
+            _ i64.atomic.load {memory : m0},
+            _ i64.atomic.load8_unsigned {memory : m0},
+            _ i64.atomic.load16_unsigned {memory : m0},
+            _ i64.atomic.load32_unsigned {memory : m0},
+            _ i64.atomic.store {memory : m0},
+            _ i64.atomic.store8 {memory : m0},
+            _ i64.atomic.store16 {memory : m0},
+            _ i64.atomic.store32 {memory : m0},
+            _ i64.atomic.read_modify_write.+ {memory : m0},
+            _ i64.atomic.read_modify_write.- {memory : m0},
+            _ i64.atomic.read_modify_write.and {memory : m0},
+            _ i64.atomic.read_modify_write.or {memory : m0},
+            _ i64.atomic.read_modify_write.xor {memory : m0},
+            _ i64.atomic.read_modify_write.exchange {memory : m0},
+            _ i64.atomic.read_modify_write.compare_exchange {memory : m0},
+            _ i64.atomic.read_modify_write8.+_unsigned {memory : m0},
+            _ i64.atomic.read_modify_write8.-_unsigned {memory : m0},
+            _ i64.atomic.read_modify_write8.and_unsigned {memory : m0},
+            _ i64.atomic.read_modify_write8.or_unsigned {memory : m0},
+            _ i64.atomic.read_modify_write8.xor_unsigned {memory : m0},
+            _ i64.atomic.read_modify_write8.exchange_unsigned {memory : m0},
+            _ i64.atomic.read_modify_write8.compare_exchange_unsigned {memory : m0},
+            _ i64.atomic.read_modify_write16.+_unsigned {memory : m0},
+            _ i64.atomic.read_modify_write16.-_unsigned {memory : m0},
+            _ i64.atomic.read_modify_write16.and_unsigned {memory : m0},
+            _ i64.atomic.read_modify_write16.or_unsigned {memory : m0},
+            _ i64.atomic.read_modify_write16.xor_unsigned {memory : m0},
+            _ i64.atomic.read_modify_write16.exchange_unsigned {memory : m0},
+            _ i64.atomic.read_modify_write16.compare_exchange_unsigned {memory : m0},
+            _ i64.atomic.read_modify_write32.+_unsigned {memory : m0},
+            _ i64.atomic.read_modify_write32.-_unsigned {memory : m0},
+            _ i64.atomic.read_modify_write32.and_unsigned {memory : m0},
+            _ i64.atomic.read_modify_write32.or_unsigned {memory : m0},
+            _ i64.atomic.read_modify_write32.xor_unsigned {memory : m0},
+            _ i64.atomic.read_modify_write32.exchange_unsigned {memory : m0},
+            _ i64.atomic.read_modify_write32.compare_exchange_unsigned {memory : m0},
+            _ f32.constant 3.14,
+            _ f32.load {memory : m0},
+            _ f32.store {memory : m0},
+            _ f64.constant 2.718,
+            _ f64.load {memory : m0},
+            _ f64.store {memory : m0},
+            _ v128.constant 0,
+            _ v128.load {memory : m0},
+            _ v128.load8x8_signed {memory : m0},
+            _ v128.load8x8_unsigned {memory : m0},
+            _ v128.load16x4_signed {memory : m0},
+            _ v128.load16x4_unsigned {memory : m0},
+            _ v128.load32x2_signed {memory : m0},
+            _ v128.load32x2_unsigned {memory : m0},
+            _ v128.load8_splat {memory : m0},
+            _ v128.load8_lane {memory : m0, lane : 0},
+            _ v128.load16_splat {memory : m0},
+            _ v128.load16_lane {memory : m0, lane : 0},
+            _ v128.load32_splat {memory : m0},
+            _ v128.load32_lane {memory : m0, lane : 0},
+            _ v128.load32_zero {memory : m0},
+            _ v128.load64_splat {memory : m0},
+            _ v128.load64_lane {memory : m0, lane : 0},
+            _ v128.load64_zero {memory : m0},
+            _ v128.store {memory : m0},
+            _ v128.store8_lane {memory : m0, lane : 0},
+            _ v128.store16_lane {memory : m0, lane : 0},
+            _ v128.store32_lane {memory : m0, lane : 0},
+            _ v128.store64_lane {memory : m0, lane : 0},
+            _ i8x16.extract_lane_signed 0,
+            _ i8x16.extract_lane_unsigned 0,
+            _ i8x16.replace_lane 0,
+            _ i8x16.shuffle [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            _ i16x8.extract_lane_signed 0,
+            _ i16x8.extract_lane_unsigned 0,
+            _ i16x8.replace_lane 0,
+            _ i32x4.extract_lane 0,
+            _ i32x4.replace_lane 0,
+            _ i64x2.extract_lane 0,
+            _ i64x2.replace_lane 0,
+            _ f32x4.extract_lane 0,
+            _ f32x4.replace_lane 0,
+            _ f64x2.extract_lane 0,
+            _ f64x2.replace_lane 0,
+        ],
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (type (;0;) (func))'_
+      .'  (memory (;0;) 1)'_
+      .'  (func (;0;) (type 0)'_
+      .'    i32.const 42'_
+      .'    i32.load'_
+      .'    i32.load8_s'_
+      .'    i32.load8_u'_
+      .'    i32.load16_s'_
+      .'    i32.load16_u'_
+      .'    i32.store'_
+      .'    i32.store8'_
+      .'    i32.store16'_
+      .'    i32.atomic.load'_
+      .'    i32.atomic.load8_u'_
+      .'    i32.atomic.load16_u'_
+      .'    i32.atomic.store'_
+      .'    i32.atomic.store8'_
+      .'    i32.atomic.store16'_
+      .'    i32.atomic.rmw.add'_
+      .'    i32.atomic.rmw.sub'_
+      .'    i32.atomic.rmw.and'_
+      .'    i32.atomic.rmw.or'_
+      .'    i32.atomic.rmw.xor'_
+      .'    i32.atomic.rmw.xchg'_
+      .'    i32.atomic.rmw.cmpxchg'_
+      .'    i32.atomic.rmw8.add_u'_
+      .'    i32.atomic.rmw8.sub_u'_
+      .'    i32.atomic.rmw8.and_u'_
+      .'    i32.atomic.rmw8.or_u'_
+      .'    i32.atomic.rmw8.xor_u'_
+      .'    i32.atomic.rmw8.xchg_u'_
+      .'    i32.atomic.rmw8.cmpxchg_u'_
+      .'    i32.atomic.rmw16.add_u'_
+      .'    i32.atomic.rmw16.sub_u'_
+      .'    i32.atomic.rmw16.and_u'_
+      .'    i32.atomic.rmw16.or_u'_
+      .'    i32.atomic.rmw16.xor_u'_
+      .'    i32.atomic.rmw16.xchg_u'_
+      .'    i32.atomic.rmw16.cmpxchg_u'_
+      .'    i64.const 100'_
+      .'    i64.load'_
+      .'    i64.load8_s'_
+      .'    i64.load8_u'_
+      .'    i64.load16_s'_
+      .'    i64.load16_u'_
+      .'    i64.load32_s'_
+      .'    i64.load32_u'_
+      .'    i64.store'_
+      .'    i64.store8'_
+      .'    i64.store16'_
+      .'    i64.store32'_
+      .'    i64.atomic.load'_
+      .'    i64.atomic.load8_u'_
+      .'    i64.atomic.load16_u'_
+      .'    i64.atomic.load32_u'_
+      .'    i64.atomic.store'_
+      .'    i64.atomic.store8'_
+      .'    i64.atomic.store16'_
+      .'    i64.atomic.store32'_
+      .'    i64.atomic.rmw.add'_
+      .'    i64.atomic.rmw.sub'_
+      .'    i64.atomic.rmw.and'_
+      .'    i64.atomic.rmw.or'_
+      .'    i64.atomic.rmw.xor'_
+      .'    i64.atomic.rmw.xchg'_
+      .'    i64.atomic.rmw.cmpxchg'_
+      .'    i64.atomic.rmw8.add_u'_
+      .'    i64.atomic.rmw8.sub_u'_
+      .'    i64.atomic.rmw8.and_u'_
+      .'    i64.atomic.rmw8.or_u'_
+      .'    i64.atomic.rmw8.xor_u'_
+      .'    i64.atomic.rmw8.xchg_u'_
+      .'    i64.atomic.rmw8.cmpxchg_u'_
+      .'    i64.atomic.rmw16.add_u'_
+      .'    i64.atomic.rmw16.sub_u'_
+      .'    i64.atomic.rmw16.and_u'_
+      .'    i64.atomic.rmw16.or_u'_
+      .'    i64.atomic.rmw16.xor_u'_
+      .'    i64.atomic.rmw16.xchg_u'_
+      .'    i64.atomic.rmw16.cmpxchg_u'_
+      .'    i64.atomic.rmw32.add_u'_
+      .'    i64.atomic.rmw32.sub_u'_
+      .'    i64.atomic.rmw32.and_u'_
+      .'    i64.atomic.rmw32.or_u'_
+      .'    i64.atomic.rmw32.xor_u'_
+      .'    i64.atomic.rmw32.xchg_u'_
+      .'    i64.atomic.rmw32.cmpxchg_u'_
+      .'    f32.const 3.14'_
+      .'    f32.load'_
+      .'    f32.store'_
+      .'    f64.const 2.718'_
+      .'    f64.load'_
+      .'    f64.store'_
+      .'    v128.const i32x4 0 0 0 0'_
+      .'    v128.load'_
+      .'    v128.load8x8_s'_
+      .'    v128.load8x8_u'_
+      .'    v128.load16x4_s'_
+      .'    v128.load16x4_u'_
+      .'    v128.load32x2_s'_
+      .'    v128.load32x2_u'_
+      .'    v128.load8_splat'_
+      .'    v128.load8_lane 0'_
+      .'    v128.load16_splat'_
+      .'    v128.load16_lane 0'_
+      .'    v128.load32_splat'_
+      .'    v128.load32_lane 0'_
+      .'    v128.load32_zero'_
+      .'    v128.load64_splat'_
+      .'    v128.load64_lane 0'_
+      .'    v128.load64_zero'_
+      .'    v128.store'_
+      .'    v128.store8_lane 0'_
+      .'    v128.store16_lane 0'_
+      .'    v128.store32_lane 0'_
+      .'    v128.store64_lane 0'_
+      .'    i8x16.extract_lane_s 0'_
+      .'    i8x16.extract_lane_u 0'_
+      .'    i8x16.replace_lane 0'_
+      .'    i8x16.shuffle 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0'_
+      .'    i16x8.extract_lane_s 0'_
+      .'    i16x8.extract_lane_u 0'_
+      .'    i16x8.replace_lane 0'_
+      .'    i32x4.extract_lane 0'_
+      .'    i32x4.replace_lane 0'_
+      .'    i64x2.extract_lane 0'_
+      .'    i64x2.replace_lane 0'_
+      .'    f32x4.extract_lane 0'_
+      .'    f32x4.replace_lane 0'_
+      .'    f64x2.extract_lane 0'_
+      .'    f64x2.replace_lane 0'_
+      .'  )'_
+      .')',
+    b1 = b2
+]
+-----
+true
+=====
+arguments
+-----
+_ do _[
+    _wasm.make set _ import .wasm.make,
+    _wasm.parse set _ import .dev.wasm.parse,
+    _b1 set _ wasm.make _({} module [
+        m0 memory {min : 1},
+        m1 memory {min : 1},
+        g0 global {type : i32, mutable, init : [_ i32.constant 0]},
+        _ type s0 struct {fields : [{} f0 i32]},
+        _ type a0 array {item : i32},
+        tbl table {min : 1, type : {nullable} reference {abstract} heap function},
+        _ type ft function {input : [], output : []},
+        f function {type : ft, input : [], local : []} : [
+            _ i32.load {memory : m0},
+            _ i32.load {align : 4},
+            _ i32.load {offset : 16},
+            _ i32.load {memory : m1},
+
+            _ i64.store {align : 8, memory : m0},
+            _ i64.store {offset : 64},
+            _ i64.store {memory : m0},
+
+            _ v128.load8_lane {memory : m0, lane : 7},
+            _ v128.store16_lane {memory : m0, lane : 3},
+
+            _ i32.atomic.load {memory : m0},
+            _ i32.atomic.read_modify_write.+ {memory : m0},
+
+            g0 global.atomic.get acquire_release,
+            s0 struct.atomic.get f0 : sequential_consistency,
+            a0 array.atomic.set sequential_consistency,
+            tbl table.atomic.set acquire_release,
+        ],
+    ]),
+    _b2 set _ wasm.parse "(module"_
+      .'  (type (;0;) (struct (field i32)))'_
+      .'  (type (;1;) (array i32))'_
+      .'  (type (;2;) (func))'_
+      .'  (memory (;0;) 1)'_
+      .'  (memory (;1;) 1)'_
+      .'  (global (;0;) (mut i32) (i32.const 0))'_
+      .'  (table (;0;) 1 funcref)'_
+      .'  (func (;0;) (type 2)'_
+      .'    i32.load'_
+      .'    i32.load'_
+      .'    i32.load offset=16'_
+      .'    i32.load 1'_
+      .'    i64.store'_
+      .'    i64.store offset=64'_
+      .'    i64.store'_
+      .'    v128.load8_lane 0 7'_
+      .'    v128.store16_lane 0 3'_
+      .'    i32.atomic.load'_
+      .'    i32.atomic.rmw.add'_
+      .'    global.atomic.get acq_rel 0'_
+      .'    struct.atomic.get seq_cst 0 0'_
+      .'    array.atomic.set seq_cst 1'_
+      .'    table.atomic.set acq_rel 0'_
+      .'  )'_
+      .')',
+    b1 = b2
+]
+-----
+true

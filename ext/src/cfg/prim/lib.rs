@@ -6,9 +6,11 @@ use self::build::BuildLib;
 use self::file::FileLib;
 use self::io::IoLib;
 use self::process::ProcessLib;
+use self::wasm::WasmLib;
 
 #[derive(Default, Copy, Clone)]
 pub struct ExtPrimLib {
+    pub wasm: WasmLib,
     pub io: IoLib,
     pub file: FileLib,
     pub process: ProcessLib,
@@ -18,6 +20,7 @@ pub struct ExtPrimLib {
 
 impl CfgMod for ExtPrimLib {
     fn extend(self, cfg: &mut Cfg) {
+        self.wasm.extend(cfg);
         self.io.extend(cfg);
         self.file.extend(cfg);
         self.process.extend(cfg);
@@ -25,6 +28,8 @@ impl CfgMod for ExtPrimLib {
         self.base.extend(cfg);
     }
 }
+
+pub mod wasm;
 
 pub mod io;
 

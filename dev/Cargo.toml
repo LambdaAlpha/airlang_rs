@@ -11,6 +11,10 @@ path = "../lib"
 [dependencies.airlang_ext]
 path = "../ext"
 
+# wasm
+[dependencies.wat]
+version = "1"
+
 # const str
 [dependencies.const_format]
 version = "0.2"
