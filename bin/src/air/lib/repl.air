@@ -1,29 +1,29 @@
 _ do _[
-    _help set "keyboard shortcuts:
-    .    Ctrl+Q                    Quit
-    .    Ctrl+S                    Submit input
-    .    PgUp / PgDn               Navigate history
-    .    Ctrl+PgUp / PgDn          Scroll history page
-    .    Ctrl+↑ / ↓                Scroll history line
-    .    
-    .    --- Editing ---
-    .    Ctrl+A                    Select all
-    .    Ctrl+C / V / X            Copy / Paste / Cut
-    .    Ctrl+Z / Y                Undo / Redo
-    .    Ctrl+← / →                Move by word
-    .    Shift+← / →               Select by character
-    .    Ctrl+Shift+← / →          Select by word
-    .    Home / End                Line start / end
-    .    Ctrl+Home / End           Input start / end
-    .    Shift+Home / End          Select to line boundary
-    .    Ctrl+Shift+Home / End     Select to input start / end
-    .    Esc                       Cancel selection
-    .
-    .prelude:
-    .    help: help message
-    .    run: run a command, i.e. `_ run "'"git commit --amend"'"`
-    .
-    .library:
-    .    .repl.help: help message, named 'help' in prelude
-    .    .command.run: run a command, named 'run' in prelude",
+    _help set "keyboard shortcuts:".
+    '    Ctrl+Q                    Quit'.
+    '    Ctrl+S                    Submit input'.
+    '    PgUp / PgDn               Navigate history'.
+    '    Ctrl+PgUp / PgDn          Scroll history page'.
+    '    Ctrl+↑ / ↓                Scroll history line'.
+    '    '.
+    '    --- Editing ---'.
+    '    Ctrl+A                    Select all'.
+    '    Ctrl+C / V / X            Copy / Paste / Cut'.
+    '    Ctrl+Z / Y                Undo / Redo'.
+    '    Ctrl+← / →                Move by word'.
+    '    Shift+← / →               Select by character'.
+    '    Ctrl+Shift+← / →          Select by word'.
+    '    Home / End                Line start / end'.
+    '    Ctrl+Home / End           Input start / end'.
+    '    Shift+Home / End          Select to line boundary'.
+    '    Ctrl+Shift+Home / End     Select to input start / end'.
+    '    Esc                       Cancel selection'.
+    ''.
+    'prelude:'.
+    '    help: help message'.
+    '    run: run a command, i.e. `_ run "git commit --amend"`'.
+    ''.
+    'library:'.
+    '    .repl.help: help message, named `help` in prelude'.
+    '    .command.run: run a command, named `run` in prelude',
 ]

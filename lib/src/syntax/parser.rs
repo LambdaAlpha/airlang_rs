@@ -654,139 +654,93 @@ fn any_key(i: &mut &str) -> ModalResult<Key> {
 }
 
 fn key(i: &mut &str) -> ModalResult<Key> {
-    let key = take_while(1 .., |c| is_key(c) && c != KEY_QUOTE);
-    let text = take_while(1 .., |c| is_key(c) && c != TEXT_QUOTE);
+    let key = take_while(0 .., |c| is_key(c) && c != KEY_QUOTE);
+    let text = take_while(0 .., |c| is_key(c) && c != TEXT_QUOTE);
     let comment = take_until(0 .., ('\r', '\n', SCOPE_RIGHT)).void();
     let token = take_while(1 .., |c| is_key(c) && c != ' ' && c != LIST_RIGHT)
         .verify_map(character)
         .verify(|c| is_key(*c));
-    let newline = (line_ending, space_tab(0 ..), '|'.context(expect_char('|'))).value("");
-    let key = key_text(key, text, comment, token, newline).map(Key::from_string_unchecked);
+    let key = key_text(key, text, comment, token, false).map(Key::from_string_unchecked);
     preceded(peek(KEY_QUOTE), key).context(label("key")).parse_next(i)
 }
 
 fn text(i: &mut &str) -> ModalResult<Text> {
-    let key = take_until(1 .., (KEY_QUOTE, '\r', '\n'));
-    let text = take_until(1 .., (TEXT_QUOTE, '\r', '\n'));
+    let key = take_until(0 .., (KEY_QUOTE, '\r', '\n'));
+    let text = take_until(0 .., (TEXT_QUOTE, '\r', '\n'));
     let comment = take_until(0 .., (SCOPE_RIGHT, '\n')).void();
     let token =
         take_while(1 .., |c| is_key(c) && c != ' ' && c != LIST_RIGHT).verify_map(character);
-    let fail_newline =
-        fail.context(expect_char('|')).context(expect_char('.')).context(expect_char(':'));
-    let newline = alt((
-        '|'.value(NewLine::None),
-        '.'.value(NewLine::Lf),
-        ':'.value(NewLine::Crlf),
-        fail_newline,
-    ));
-    #[expect(clippy::redundant_closure_for_method_calls)]
-    let newline = preceded((line_ending, space_tab(0 ..)), newline).map(|newline| newline.as_str());
-    let text = key_text(key, text, comment, token, newline).map(Text::from);
+    let text = key_text(key, text, comment, token, true).map(Text::from);
     preceded(peek(TEXT_QUOTE), text).context(label("text")).parse_next(i)
-}
-
-#[derive(Copy, Clone)]
-enum NewLine {
-    None,
-    Lf,
-    Crlf,
-}
-
-impl NewLine {
-    fn as_str(self) -> &'static str {
-        match self {
-            NewLine::None => "",
-            NewLine::Lf => "\n",
-            NewLine::Crlf => "\r\n",
-        }
-    }
-}
-
-#[derive(Copy, Clone)]
-enum State {
-    Clean,
-    More,
-    Key,
-    Text,
-    Comment,
-    Token,
 }
 
 fn key_text<'a>(
     mut key: impl Parser<&'a str, &'a str, E>, mut text: impl Parser<&'a str, &'a str, E>,
     mut comment: impl Parser<&'a str, (), E>, mut token: impl Parser<&'a str, char, E>,
-    mut newline: impl Parser<&'a str, &'a str, E>,
+    support_newline: bool,
 ) -> impl Parser<&'a str, String, E> {
-    fn clean(i: &mut &str, state: &mut State) -> ModalResult<()> {
-        *state = State::Clean;
-        any.void().parse_next(i)
-    }
     move |i: &mut _| {
         let i: &mut &str = i;
+        let mut opt_peek_one = opt(peek(any));
         let mut peek_one = peek(any);
+        let mut format_newline = opt((line_ending, space_tab(0 ..)));
+        let mut newline = (line_ending, space_tab(0 ..));
+        let mut fail_newline = fail.context(expect_char('_'));
+        let mut fail_quote = fail
+            .context(expect_char(KEY_QUOTE))
+            .context(expect_char(TEXT_QUOTE))
+            .context(expect_char(SCOPE_LEFT))
+            .context(expect_char(LIST_LEFT));
 
-        let mut state = State::Clean;
         let mut s = String::new();
         loop {
-            match state {
-                State::Clean => {
-                    if i.is_empty() {
-                        break;
+            match any.parse_next(i)? {
+                KEY_QUOTE => {
+                    s.push_str(key.parse_next(i)?);
+                    KEY_QUOTE.context(expect_char(KEY_QUOTE)).parse_next(i)?;
+                },
+                TEXT_QUOTE => {
+                    s.push_str(text.parse_next(i)?);
+                    TEXT_QUOTE.context(expect_char(TEXT_QUOTE)).parse_next(i)?;
+                },
+                SCOPE_LEFT => {
+                    comment.parse_next(i)?;
+                    SCOPE_RIGHT.context(expect_char(SCOPE_RIGHT)).parse_next(i)?;
+                },
+                LIST_LEFT => loop {
+                    match peek_one.parse_next(i)? {
+                        LIST_RIGHT => {
+                            any.parse_next(i)?;
+                            break;
+                        },
+                        ' ' => {
+                            any.parse_next(i)?;
+                        },
+                        _ => s.push(token.parse_next(i)?),
                     }
-                    state = match peek_one.parse_next(i)? {
-                        KEY_QUOTE => State::Key,
-                        TEXT_QUOTE => State::Text,
-                        SCOPE_LEFT => State::Comment,
-                        LIST_LEFT => State::Token,
-                        EMPTY_CHAR => State::More,
-                        _ => break,
-                    };
+                },
+                _ => {
+                    return fail_quote.parse_next(i);
+                },
+            }
+            let Some(next) = opt_peek_one.parse_next(i)? else {
+                break;
+            };
+            match next {
+                KEY_QUOTE | TEXT_QUOTE | SCOPE_LEFT | LIST_LEFT => {},
+                EMPTY_CHAR => {
                     any.parse_next(i)?;
+                    format_newline.parse_next(i)?;
                 },
-                State::More => {
-                    state = match peek_one.parse_next(i)? {
-                        KEY_QUOTE => State::Key,
-                        TEXT_QUOTE => State::Text,
-                        SCOPE_LEFT => State::Comment,
-                        LIST_LEFT => State::Token,
-                        '\r' | '\n' => {
-                            s.push_str(newline.parse_next(i)?);
-                            continue;
-                        },
-                        _ => {
-                            return fail
-                                .context(expect_char(KEY_QUOTE))
-                                .context(expect_char(TEXT_QUOTE))
-                                .context(expect_char(SCOPE_LEFT))
-                                .context(expect_char(LIST_LEFT))
-                                .context(expect_desc("`\\n`"))
-                                .context(expect_desc("`\\r\\n`"))
-                                .parse_next(i);
-                        },
-                    };
+                c @ ('.' | ':') => {
                     any.parse_next(i)?;
+                    if !support_newline {
+                        return fail_newline.parse_next(i);
+                    }
+                    newline.parse_next(i)?;
+                    s.push_str(if c == '.' { "\n" } else { "\r\n" });
                 },
-                State::Key => match peek_one.parse_next(i)? {
-                    KEY_QUOTE => clean(i, &mut state)?,
-                    '\r' | '\n' => s.push_str(newline.parse_next(i)?),
-                    _ => s.push_str(key.parse_next(i)?),
-                },
-                State::Text => match peek_one.parse_next(i)? {
-                    TEXT_QUOTE => clean(i, &mut state)?,
-                    '\r' | '\n' => s.push_str(newline.parse_next(i)?),
-                    _ => s.push_str(text.parse_next(i)?),
-                },
-                State::Comment => match peek_one.parse_next(i)? {
-                    SCOPE_RIGHT => clean(i, &mut state)?,
-                    '\r' | '\n' => s.push_str(newline.parse_next(i)?),
-                    _ => comment.parse_next(i)?,
-                },
-                State::Token => match peek_one.parse_next(i)? {
-                    LIST_RIGHT => clean(i, &mut state)?,
-                    '\r' | '\n' => s.push_str(newline.parse_next(i)?),
-                    ' ' => any.void().parse_next(i)?,
-                    _ => s.push(token.parse_next(i)?),
-                },
+                _ => break,
             }
         }
         Ok(s)

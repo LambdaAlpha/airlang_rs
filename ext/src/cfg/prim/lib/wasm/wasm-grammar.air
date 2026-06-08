@@ -1,15 +1,15 @@
-!"Syntax Design Rules"_
-.'- No numeric indices; only name-based indexing'_
-.'- Use common, well-known words; avoid obscure abbreviations or compound words'_
-.'- Named entity names are placed on the left side of a pair'_
-.'- Module entity lists, function bodies, and block bodies are placed on the right side of a pair'_
-.'- Use call functions to express categories'_
-.'- Use the presence of a key in a map to express boolean attributes'_
-.'- One-to-one instruction mapping; do not merge similar instructions'_
-.'- Zero-arg and single-arg instructions use the standard form'_
-.'- Multi-arg instructions do not require remembering argument order;'_
-|' use a pair if there is a clearly best order, otherwise use a map'_
-.''
+!"Syntax Design Rules".
+'- No numeric indices; only name-based indexing'.
+'- Use common, well-known words; avoid obscure abbreviations or compound words'.
+'- Named entity names are placed on the left side of a pair'.
+'- Module entity lists, function bodies, and block bodies are placed on the right side of a pair'.
+'- Use call functions to express categories'.
+'- Use the presence of a key in a map to express boolean attributes'.
+'- One-to-one instruction mapping; do not merge similar instructions'.
+'- Zero-arg and single-arg instructions use the standard form'.
+'- Multi-arg instructions do not require remembering argument order;'_
+' use a pair if there is a clearly best order, otherwise use a map'.
+''
 
 {
     @module : {start : @function_name} module [@entity],

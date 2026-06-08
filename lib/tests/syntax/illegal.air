@@ -50,11 +50,20 @@ unicode not exist
 -----
 ""[X1234567]
 =====
-multiline no line indicator
+multiline unpaired
 -----
+"abc
 "
-abc
-+"
+=====
+multiline unknown line indicator
+-----
+"abc"|
+""
+=====
+multiline prefix
+-----
+"a"_
+_"b"
 =====
 key empty unpaired
 -----
@@ -94,18 +103,18 @@ key unknown key prefix
 =====
 key wrong line indicator
 -----
-'
-+a'
+''.
+'a'
 =====
 key multiline illegal
 -----
-'
-|中'
+''_
+'中'
 =====
 key code not key
 -----
-'
-|'[cr]
+''_
+[cr]
 =====
 unknown prefix
 -----

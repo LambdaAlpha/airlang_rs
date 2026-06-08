@@ -149,16 +149,15 @@ concat
 multiline
 -----
 'a'_
-|"b
-|"[sp
-|](c)
+"b"_
+[sp](c)
 =====
 multiline indent
 -----
     'a'_
-    |"b
-    |"[sp
-    |](c)
+    "b"_
+    [sp]_
+    (c)
 =====
 ->
 -----

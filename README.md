@@ -41,11 +41,11 @@ a.b.c
 ➔ "a"?'")( 'a'
 
 'abcdefghijklmnopqrstuvwxyz'_
-|"()[]{}<>\|/'"_
-|'"`^*+=-~_.,:;!?@#$%&'_
-|(this is a comment)_
-|[sp 0 1 2 3 4 5 6 7 8 9]_
-|'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+"()[]{}<>\|/'"_
+'"`^*+=-~_.,:;!?@#$%&'_
+(this is a comment)_
+[sp 0 1 2 3 4 5 6 7 8 9]_
+'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 ➔ abcdefghijklmnopqrstuvwxyz()[]{}<>\|/'"`^*+=-~_.,:;!?@#$%& 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ
 ```
 
@@ -61,9 +61,9 @@ a.b.c
 ➔ 'a'🜁'" \t\r\n"a"
 
     "()[]{}<>\|/'"_
-    |'"`^*+=-~_.,:;!?@#$%&'_
-    |(this is a comment)_
-    |[X1f701 ' " sp ht cr lf]
+    '"`^*+=-~_.,:;!?@#$%&'_
+    (this is a comment)_
+    [X1f701 ' " sp ht cr lf]
 ➔ ()[]{}<>\|/'"`^*+=-~_.,:;!?@#$%&🜁'" \t\r\n
 ```
 

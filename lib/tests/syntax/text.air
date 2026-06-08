@@ -29,13 +29,13 @@ escape unicode
 multiline
 -----
 "a"_
-|'b
-.'[sp
-:](c)
+'b'.
+[sp]:
+(c)
 =====
 multiline indent
 -----
     "a"_
-    |'b
-    |'[sp
-    |](c)
+    'b'_
+    [sp]_
+    (c)

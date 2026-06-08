@@ -167,9 +167,11 @@ impl FmtRepr for Text {
                         f.write_str("lf")?;
                     }
                 } else {
-                    f.write_char('\n')?;
+                    end_state(state, f)?;
                     let s = if has_cr { ':' } else { '.' };
                     f.write_char(s)?;
+                    f.write_char('\n')?;
+                    begin_state(state, f)?;
                 }
                 has_cr = false;
                 continue;
@@ -276,13 +278,13 @@ fn switch_state(
     }
     end_state(*state, f)?;
     *state = target;
-    begin_state(target, options, f)
-}
-
-fn begin_state(state: State, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
     if options.pretty {
         f.write_str(EMPTY)?;
     }
+    begin_state(target, f)
+}
+
+fn begin_state(state: State, f: &mut dyn Write) -> std::fmt::Result {
     match state {
         State::Key => f.write_char(KEY_QUOTE),
         State::Text => f.write_char(TEXT_QUOTE),
