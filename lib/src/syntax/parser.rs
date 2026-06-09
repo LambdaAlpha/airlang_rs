@@ -37,12 +37,13 @@ use winnow::token::take_while;
 use super::BYTE;
 use super::COMMENT;
 use super::DECIMAL;
+use super::DOUBLE_QUOTE;
 use super::Direction;
 use super::EMPTY;
 use super::EMPTY_CHAR;
 use super::FALSE;
 use super::INT;
-use super::KEY_QUOTE;
+use super::KEY;
 use super::LEFT;
 use super::LIST_LEFT;
 use super::LIST_RIGHT;
@@ -53,9 +54,9 @@ use super::RIGHT;
 use super::SCOPE_LEFT;
 use super::SCOPE_RIGHT;
 use super::SEPARATOR;
+use super::SINGLE_QUOTE;
 use super::SOLVE;
 use super::SPACE;
-use super::TEXT_QUOTE;
 use super::TOKEN;
 use super::TRUE;
 use super::UNIT;
@@ -160,8 +161,7 @@ fn void<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
 fn comment<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
     let comment_tokens = repeat(0 .., comment_token(ctx));
     let scope = delimited_cut(SCOPE_LEFT, comment_tokens, SCOPE_RIGHT);
-    let comment =
-        alt((scope, key.void(), text.void(), list::<C>(ctx).void(), map::<C>(ctx).void()));
+    let comment = alt((scope, list::<C>(ctx).void(), map::<C>(ctx).void(), text.void()));
     let f = preceded(COMMENT, comment);
     f.context(label("comment"))
 }
@@ -219,8 +219,7 @@ fn token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Either<'a, T, 
         SCOPE_RIGHT => fail.parse_next(i),
         SEPARATOR => fail.parse_next(i),
         SPACE => fail.parse_next(i),
-        TEXT_QUOTE => text.map(T::from).map(Either::Repr).parse_next(i),
-        KEY_QUOTE => key.map(T::from).map(Either::Repr).parse_next(i),
+        DOUBLE_QUOTE | SINGLE_QUOTE => text.map(T::from).map(Either::Repr).parse_next(i),
         '0' ..= '9' => number.map(Either::Repr).parse_next(i),
         _ => cut_err(key_token(ctx)).parse_next(i),
     };
@@ -248,7 +247,7 @@ fn key_token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, Either<'a,
     }
 }
 
-const LEFT_DELIMITERS: [char; 5] = [SCOPE_LEFT, LIST_LEFT, MAP_LEFT, KEY_QUOTE, TEXT_QUOTE];
+const LEFT_DELIMITERS: [char; 5] = [SCOPE_LEFT, LIST_LEFT, MAP_LEFT, SINGLE_QUOTE, DOUBLE_QUOTE];
 
 fn prefix<'a, T: ParseRepr>(prefix: &str, ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     move |i: &mut _| {
@@ -261,6 +260,7 @@ fn prefix<'a, T: ParseRepr>(prefix: &str, ctx: ParseCtx) -> impl Parser<&'a str,
             },
             EMPTY => quote(ctx).parse_next(i),
             UNIT => cell(ctx).parse_next(i),
+            KEY => key.map(T::from).parse_next(i),
             INT => int.map(T::from).parse_next(i),
             DECIMAL => decimal.map(T::from).parse_next(i),
             BYTE => byte.map(T::from).parse_next(i),
@@ -359,7 +359,7 @@ fn compose_right_recursive<'a, T: ParseRepr>(
             return if let Either::Repr(left) = left {
                 Ok(T::from(Pair::new(left, right)))
             } else {
-                reset_expect(i, checkpoint, QUOTE_PAIR)
+                reset_expect(i, checkpoint, KEY_PAIR)
             };
         },
     };
@@ -392,7 +392,7 @@ fn compose_infix<'a, T: ParseRepr>(
             let FuncToken::Pair = token;
             let left = match left {
                 Either::Repr(left) => left,
-                Either::Token { .. } => return reset_expect(i, checkpoint, QUOTE_PAIR),
+                Either::Token { .. } => return reset_expect(i, checkpoint, KEY_PAIR),
             };
             let right = match right {
                 Either::Repr(right) => right,
@@ -413,8 +413,8 @@ fn compose_infix<'a, T: ParseRepr>(
         },
         (Either::Token { .. }, Either::Token { checkpoint, token: right }) => {
             let expect = match right {
-                InputToken::Empty => QUOTE_EMPTY,
-                InputToken::Solve => QUOTE_SOLVE,
+                InputToken::Empty => KEY_EMPTY,
+                InputToken::Solve => KEY_SOLVE,
             };
             return reset_expect(i, checkpoint, expect);
         },
@@ -449,9 +449,9 @@ enum InputToken {
     Solve,
 }
 
-const QUOTE_EMPTY: &str = concatcp!(KEY_QUOTE, EMPTY, KEY_QUOTE);
-const QUOTE_PAIR: &str = concatcp!(KEY_QUOTE, PAIR, KEY_QUOTE);
-const QUOTE_SOLVE: &str = concatcp!(KEY_QUOTE, SOLVE, KEY_QUOTE);
+const KEY_EMPTY: &str = concatcp!(KEY, SINGLE_QUOTE, EMPTY, SINGLE_QUOTE);
+const KEY_PAIR: &str = concatcp!(KEY, SINGLE_QUOTE, PAIR, SINGLE_QUOTE);
+const KEY_SOLVE: &str = concatcp!(KEY, SINGLE_QUOTE, SOLVE, SINGLE_QUOTE);
 
 fn func_token<'a, T: ParseRepr>(
     ctx: ParseCtx,
@@ -460,11 +460,11 @@ fn func_token<'a, T: ParseRepr>(
         Either::Repr(repr) => Ok(Either::Repr(repr)),
         Either::Token { checkpoint, token } => {
             let expect = match token {
-                Token::Empty => QUOTE_EMPTY,
+                Token::Empty => KEY_EMPTY,
                 Token::Pair => {
                     return Ok(Either::Token { checkpoint, token: FuncToken::Pair });
                 },
-                Token::Solve => QUOTE_SOLVE,
+                Token::Solve => KEY_SOLVE,
             };
             reset_expect(i, checkpoint, expect)
         },
@@ -479,7 +479,7 @@ fn input_token<'a, T: ParseRepr>(
         Either::Token { checkpoint, token } => {
             let token = match token {
                 Token::Empty => InputToken::Empty,
-                Token::Pair => return reset_expect(i, checkpoint, QUOTE_PAIR),
+                Token::Pair => return reset_expect(i, checkpoint, KEY_PAIR),
                 Token::Solve => InputToken::Solve,
             };
             Ok(Either::Token { checkpoint, token })
@@ -492,9 +492,9 @@ fn repr<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
         Either::Repr(repr) => Ok(repr),
         Either::Token { checkpoint, token } => {
             let expect = match token {
-                Token::Empty => QUOTE_EMPTY,
-                Token::Pair => QUOTE_PAIR,
-                Token::Solve => QUOTE_SOLVE,
+                Token::Empty => KEY_EMPTY,
+                Token::Pair => KEY_PAIR,
+                Token::Solve => KEY_SOLVE,
             };
             reset_expect(i, checkpoint, expect)
         },
@@ -514,8 +514,8 @@ fn input_repr<'a, T: ParseRepr>(
 
 fn input_token_expect(token: InputToken) -> &'static str {
     match token {
-        InputToken::Empty => QUOTE_EMPTY,
-        InputToken::Solve => QUOTE_SOLVE,
+        InputToken::Empty => KEY_EMPTY,
+        InputToken::Solve => KEY_SOLVE,
     }
 }
 
@@ -527,14 +527,14 @@ fn reset_expect<'a, T>(
 }
 
 fn quote<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
-    let quote = alt((scope(ctx), key.map(T::from), text.map(T::from), list(ctx), map(ctx)))
-        .map(|v| T::from(Quote::new(v)));
+    let quote =
+        alt((scope(ctx), list(ctx), map(ctx), text.map(T::from))).map(|v| T::from(Quote::new(v)));
     quote.context(label("quote"))
 }
 
 fn cell<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
-    let cell = alt((scope(ctx), key.map(T::from), text.map(T::from), list(ctx), map(ctx)))
-        .map(|v| T::from(Cell::new(v)));
+    let cell =
+        alt((scope(ctx), list(ctx), map(ctx), text.map(T::from))).map(|v| T::from(Cell::new(v)));
     cell.context(label("cell"))
 }
 
@@ -649,102 +649,74 @@ fn map_token<'a, T: ParseRepr>(ctx: ParseCtx) -> impl Parser<&'a str, T, E> {
     f.context(label("token map"))
 }
 
-fn any_key(i: &mut &str) -> ModalResult<Key> {
-    alt((trivial_key1.map(Key::from_str_unchecked), key)).parse_next(i)
-}
-
-fn key(i: &mut &str) -> ModalResult<Key> {
-    let key = take_while(0 .., |c| is_key(c) && c != KEY_QUOTE);
-    let text = take_while(0 .., |c| is_key(c) && c != TEXT_QUOTE);
-    let comment = take_until(0 .., ('\r', '\n', SCOPE_RIGHT)).void();
-    let token = take_while(1 .., |c| is_key(c) && c != ' ' && c != LIST_RIGHT)
-        .verify_map(character)
-        .verify(|c| is_key(*c));
-    let key = key_text(key, text, comment, token, false).map(Key::from_string_unchecked);
-    preceded(peek(KEY_QUOTE), key).context(label("key")).parse_next(i)
-}
-
 fn text(i: &mut &str) -> ModalResult<Text> {
-    let key = take_until(0 .., (KEY_QUOTE, '\r', '\n'));
-    let text = take_until(0 .., (TEXT_QUOTE, '\r', '\n'));
-    let comment = take_until(0 .., (SCOPE_RIGHT, '\n')).void();
-    let token =
-        take_while(1 .., |c| is_key(c) && c != ' ' && c != LIST_RIGHT).verify_map(character);
-    let text = key_text(key, text, comment, token, true).map(Text::from);
-    preceded(peek(TEXT_QUOTE), text).context(label("text")).parse_next(i)
-}
-
-fn key_text<'a>(
-    mut key: impl Parser<&'a str, &'a str, E>, mut text: impl Parser<&'a str, &'a str, E>,
-    mut comment: impl Parser<&'a str, (), E>, mut token: impl Parser<&'a str, char, E>,
-    support_newline: bool,
-) -> impl Parser<&'a str, String, E> {
-    move |i: &mut _| {
-        let i: &mut &str = i;
-        let mut opt_peek_one = opt(peek(any));
-        let mut peek_one = peek(any);
-        let mut format_newline = opt((line_ending, space_tab(0 ..)));
-        let mut newline = (line_ending, space_tab(0 ..));
-        let mut fail_newline = fail.context(expect_char('_'));
-        let mut fail_quote = fail
-            .context(expect_char(KEY_QUOTE))
-            .context(expect_char(TEXT_QUOTE))
-            .context(expect_char(SCOPE_LEFT))
-            .context(expect_char(LIST_LEFT));
-
-        let mut s = String::new();
-        loop {
-            match any.parse_next(i)? {
-                KEY_QUOTE => {
-                    s.push_str(key.parse_next(i)?);
-                    KEY_QUOTE.context(expect_char(KEY_QUOTE)).parse_next(i)?;
-                },
-                TEXT_QUOTE => {
-                    s.push_str(text.parse_next(i)?);
-                    TEXT_QUOTE.context(expect_char(TEXT_QUOTE)).parse_next(i)?;
-                },
-                SCOPE_LEFT => {
-                    comment.parse_next(i)?;
-                    SCOPE_RIGHT.context(expect_char(SCOPE_RIGHT)).parse_next(i)?;
-                },
-                LIST_LEFT => loop {
-                    match peek_one.parse_next(i)? {
-                        LIST_RIGHT => {
-                            any.parse_next(i)?;
-                            break;
-                        },
-                        ' ' => {
-                            any.parse_next(i)?;
-                        },
-                        _ => s.push(token.parse_next(i)?),
-                    }
-                },
-                _ => {
-                    return fail_quote.parse_next(i);
-                },
-            }
-            let Some(next) = opt_peek_one.parse_next(i)? else {
-                break;
-            };
-            match next {
-                KEY_QUOTE | TEXT_QUOTE | SCOPE_LEFT | LIST_LEFT => {},
-                EMPTY_CHAR => {
-                    any.parse_next(i)?;
-                    format_newline.parse_next(i)?;
-                },
-                c @ ('.' | ':') => {
-                    any.parse_next(i)?;
-                    if !support_newline {
-                        return fail_newline.parse_next(i);
-                    }
-                    newline.parse_next(i)?;
-                    s.push_str(if c == '.' { "\n" } else { "\r\n" });
-                },
-                _ => break,
-            }
-        }
-        Ok(s)
+    if !i.starts_with([SINGLE_QUOTE, DOUBLE_QUOTE]) {
+        return fail.parse_next(i);
     }
+    let mut single = take_until(0 .., (SINGLE_QUOTE, '\r', '\n'));
+    let mut double = take_until(0 .., (DOUBLE_QUOTE, '\r', '\n'));
+    let mut comment = take_until(0 .., (SCOPE_RIGHT, '\n')).void();
+    let mut token =
+        take_while(1 .., |c| is_key(c) && c != ' ' && c != LIST_RIGHT).verify_map(character);
+    let mut opt_peek_one = opt(peek(any));
+    let mut peek_one = peek(any);
+    let mut format_newline = opt((line_ending, space_tab(0 ..)));
+    let mut newline = (line_ending, space_tab(0 ..));
+    let mut fail_quote = fail
+        .context(expect_char(SINGLE_QUOTE))
+        .context(expect_char(DOUBLE_QUOTE))
+        .context(expect_char(SCOPE_LEFT))
+        .context(expect_char(LIST_LEFT));
+
+    let mut s = String::new();
+    loop {
+        match any.parse_next(i)? {
+            SINGLE_QUOTE => {
+                s.push_str(single.parse_next(i)?);
+                SINGLE_QUOTE.context(expect_char(SINGLE_QUOTE)).parse_next(i)?;
+            },
+            DOUBLE_QUOTE => {
+                s.push_str(double.parse_next(i)?);
+                DOUBLE_QUOTE.context(expect_char(DOUBLE_QUOTE)).parse_next(i)?;
+            },
+            SCOPE_LEFT => {
+                comment.parse_next(i)?;
+                SCOPE_RIGHT.context(expect_char(SCOPE_RIGHT)).parse_next(i)?;
+            },
+            LIST_LEFT => loop {
+                match peek_one.parse_next(i)? {
+                    LIST_RIGHT => {
+                        any.parse_next(i)?;
+                        break;
+                    },
+                    ' ' => {
+                        any.parse_next(i)?;
+                    },
+                    _ => s.push(token.parse_next(i)?),
+                }
+            },
+            _ => {
+                return fail_quote.parse_next(i);
+            },
+        }
+        let Some(next) = opt_peek_one.parse_next(i)? else {
+            break;
+        };
+        match next {
+            SINGLE_QUOTE | DOUBLE_QUOTE | SCOPE_LEFT | LIST_LEFT => {},
+            EMPTY_CHAR => {
+                any.parse_next(i)?;
+                format_newline.parse_next(i)?;
+            },
+            c @ ('.' | ':') => {
+                any.parse_next(i)?;
+                newline.parse_next(i)?;
+                s.push_str(if c == '.' { "\n" } else { "\r\n" });
+            },
+            _ => break,
+        }
+    }
+    Ok(Text::from(s))
 }
 
 fn character(s: &str) -> Option<char> {
@@ -800,6 +772,20 @@ fn character(s: &str) -> Option<char> {
     Some(c)
 }
 
+fn any_key(i: &mut &str) -> ModalResult<Key> {
+    alt((trivial_key1.map(Key::from_str_unchecked), key)).parse_next(i)
+}
+
+fn key(i: &mut &str) -> ModalResult<Key> {
+    let f = text.verify_map(|text| {
+        if !text.chars().all(is_key) {
+            return None;
+        }
+        Some(Key::from_string_unchecked(text.into()))
+    });
+    f.context(label("key")).parse_next(i)
+}
+
 fn number<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
     let int = norm_int.map(T::from);
     let decimal = norm_decimal.map(T::from);
@@ -810,12 +796,12 @@ fn number<T: ParseRepr>(i: &mut &str) -> ModalResult<T> {
 }
 
 fn int(i: &mut &str) -> ModalResult<Int> {
-    let f = key.verify_map(|key| alt((norm_int, plain_int)).parse(&*key).ok());
+    let f = text.verify_map(|text| alt((norm_int, plain_int)).parse(&*text).ok());
     cut_err(f).context(label("int")).parse_next(i)
 }
 
 fn decimal(i: &mut &str) -> ModalResult<Decimal> {
-    let f = key.verify_map(|key| alt((norm_decimal, plain_decimal)).parse(&*key).ok());
+    let f = text.verify_map(|text| alt((norm_decimal, plain_decimal)).parse(&*text).ok());
     cut_err(f).context(label("decimal")).parse_next(i)
 }
 
@@ -920,11 +906,11 @@ fn build_decimal(sign: Sign, int: &str, frac: &str) -> Option<Decimal> {
 }
 
 fn byte(i: &mut &str) -> ModalResult<Byte> {
-    let f = key.verify_map(|key| {
+    let f = text.verify_map(|text| {
         let hex = preceded('X', cut_err(hexadecimal_byte));
         let bin = preceded('B', cut_err(binary_byte));
         let mut byte = alt((hex, bin, hexadecimal_byte));
-        byte.parse(&*key).ok()
+        byte.parse(&*text).ok()
     });
     cut_err(f).context(label("byte")).parse_next(i)
 }

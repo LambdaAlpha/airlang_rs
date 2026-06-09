@@ -87,7 +87,7 @@ _ do _[
             iterate : iterate,
             set : set,
             import : import,
-            empty : _'',
+            empty : _(key''),
             join : _ import .key.join,
             export : export,
             context.let.bind : context.let.bind,

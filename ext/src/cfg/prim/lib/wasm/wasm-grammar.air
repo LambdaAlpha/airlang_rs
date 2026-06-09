@@ -1,4 +1,4 @@
-!"Syntax Design Rules".
+!'Syntax Design Rules'.
 '- No numeric indices; only name-based indexing'.
 '- Use common, well-known words; avoid obscure abbreviations or compound words'.
 '- Named entity names are placed on the left side of a pair'.

@@ -4,7 +4,7 @@ _ do _[
     _wasm.make set _ import .wasm.make,
     _wasm.parse set _ import .dev.wasm.parse,
     _b1 set _ wasm.make _({} module []),
-    _b2 set _ wasm.parse "(module)",
+    _b2 set _ wasm.parse '(module)',
     b1 = b2
 ]
 -----
@@ -19,7 +19,7 @@ _ do _[
         _ type type_main function {input : [], output : []},
         main function {type : type_main, input : [], local : []} : [nop],
     ]),
-    _b2 set _ wasm.parse "(module (type (func)) (func (type 0) nop) (start 0))",
+    _b2 set _ wasm.parse '(module (type (func)) (func (type 0) nop) (start 0))',
     b1 = b2
 ]
 -----
@@ -69,7 +69,7 @@ _ do _[
             t10 continuation {shared, function : t5},
         ],
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (type (;0;) (func (param i32 i64 f32 f64) (result v128 (ref func))))'.
       '  (type (;1;) (struct'.
       '    (field (;0;) (mut i8))'.
@@ -124,7 +124,7 @@ _ do _[
             init : [_ reference.null {abstract} heap function],
         },
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (global (;0;) (shared i32) (i32.const 0))'.
       '  (global (;1;) (mut f64) (f64.const 3.14))'.
       '  (global (;2;) i32 (global.get 0))'.
@@ -144,7 +144,7 @@ _ do _[
         m0 memory {shared, 64, min : 1, max : 16},
         m1 memory {min : 4},
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (memory (;0;) i64 1 16 shared)'.
       '  (memory (;1;) 4)'.
       ')',
@@ -160,10 +160,10 @@ _ do _[
     _wasm.parse set _ import .dev.wasm.parse,
     _b1 set _ wasm.make _({} module [
         m0 memory {min : 1},
-        d0 data {init : "hello"},
+        d0 data {init : 'hello'},
         d1 data {memory : m0, offset : [_ i32.constant 0], init : byte'0011'},
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (memory (;0;) 1)'.
       '  (data "hello")'.
       '  (data (memory 0) (offset (i32.const 0)) "\00\11")'.
@@ -192,7 +192,7 @@ _ do _[
             init : [_ reference.null {abstract} heap function],
         },
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (table (;0;) shared i64 1 4 funcref)'.
       '  (table (;1;) 1 funcref (ref.null func))'.
       ')',
@@ -214,7 +214,7 @@ _ do _[
         e1 element {type : function, init : [f0]},
         e2 element {type : function, init : [f0], table : t0, offset : [_ i32.constant 0]},
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (type (;0;) (func))'.
       '  (func (;0;) (type 0) nop)'.
       '  (table (;0;) 1 funcref)'.
@@ -236,7 +236,7 @@ _ do _[
         _ type ft0 function {input : [], output : []},
         t0 tag {attribute : exception, type : ft0},
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (type (;0;) (func))'.
       '  (tag (;0;) (type 0))'.
       ')',
@@ -252,26 +252,26 @@ _ do _[
     _wasm.parse set _ import .dev.wasm.parse,
     _b1 set _ wasm.make _({} module [
         _ type ft0 function {input : [], output : []},
-        "module0" import "f0" : f0 function {type : ft0},
-        "module1" import "g0" : g0 global {type : i32},
-        "module2" import "m0" : m0 memory {min : 1},
-        "module3" import "table0" : table0 table {
+        'module0' import 'f0' : f0 function {type : ft0},
+        'module1' import 'g0' : g0 global {type : i32},
+        'module2' import 'm0' : m0 memory {min : 1},
+        'module3' import 'table0' : table0 table {
             min : 1, 
             type : {nullable} reference {abstract} heap function,
         },
-        "module4" import "tag0" : tag0 tag {attribute : exception, type : ft0},
-        "module5" import [
-            "f1" : f1 function {type : ft0},
-            "g1" : g1 global {type : i32},
-            "m1" : m1 memory {min : 1},
-            "table1" : table1 table {
+        'module4' import 'tag0' : tag0 tag {attribute : exception, type : ft0},
+        'module5' import [
+            'f1' : f1 function {type : ft0},
+            'g1' : g1 global {type : i32},
+            'm1' : m1 memory {min : 1},
+            'table1' : table1 table {
                 min : 1, 
                 type : {nullable} reference {abstract} heap function,
             },
-            "tag1" : tag1 tag {attribute : exception, type : ft0},
+            'tag1' : tag1 tag {attribute : exception, type : ft0},
         ],
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (type (;0;) (func))'.
       '  (import "module0" "f0" (func (type 0)))'.
       '  (import "module1" "g0" (global i32))'.
@@ -303,13 +303,13 @@ _ do _[
         m0 memory {min : 1},
         table0 table {min : 1, type : {nullable} reference {abstract} heap function},
         tag0 tag {attribute : exception, type : ft0},
-        "f0" export _ function f0,
-        "g0" export _ global g0,
-        "m0" export _ memory m0,
-        "table0" export _ table table0,
-        "tag0" export _ tag tag0,
+        'f0' export _ function f0,
+        'g0' export _ global g0,
+        'm0' export _ memory m0,
+        'table0' export _ table table0,
+        'tag0' export _ tag tag0,
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (type (;0;) (func))'.
       '  (func (;0;) (type 0) nop)'.
       '  (global (;0;) i32 (i32.const 0))'.
@@ -712,7 +712,7 @@ _ do _[
             v128.not,
         ],
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (type (;0;) (func))'.
       '  (func (;0;) (type 0)'.
       '    unreachable'.
@@ -1111,7 +1111,7 @@ _ do _[
             _ select i32,
         ],
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (type (;0;) (func))'.
       '  (func (;0;) (type 0) (local i32)'.
       '    local.get 0'.
@@ -1158,7 +1158,7 @@ _ do _[
             ],
         ],
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (type (;0;) (func))'.
       '  (type (;1;) (func))'.
       '  (type (;2;) (func (param i32)))'.
@@ -1228,7 +1228,7 @@ _ do _[
             ],
         ],
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (type (;0;) (func))'.
       '  (func (;0;) (type 0)'.
       '    (block'.
@@ -1273,7 +1273,7 @@ _ do _[
             ],
         ],
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (type (;0;) (func))'.
       '  (table (;0;) 1 funcref)'.
       '  (func (;0;) (type 0) nop)'.
@@ -1317,7 +1317,7 @@ _ do _[
             ],
         ],
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (type (;0;) (func))'.
       '  (type (;1;) (func))'.
       '  (type (;2;) (cont 0))'.
@@ -1363,7 +1363,7 @@ _ do _[
             g0 global.atomic.read_modify_write.compare_exchange acquire_release,
         ],
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (type (;0;) (func))'.
       '  (global (;0;) (mut i32) (i32.const 0))'.
       '  (func (;0;) (type 0)'.
@@ -1392,7 +1392,7 @@ _ do _[
     _wasm.parse set _ import .dev.wasm.parse,
     _b1 set _ wasm.make _({} module [
         m0 memory {min : 1},
-        d0 data {init : "hi"},
+        d0 data {init : 'hi'},
         _ type ft function {input : [], output : []},
         f function {type : ft, input : [], local : []} : [
             m0 memory.init d0,
@@ -1406,7 +1406,7 @@ _ do _[
             _ memory.atomic.wait64 {memory : m0},
         ],
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (type (;0;) (func))'.
       '  (memory (;0;) 1)'.
       '  (data "hi")'.
@@ -1433,13 +1433,13 @@ _ do _[
     _wasm.make set _ import .wasm.make,
     _wasm.parse set _ import .dev.wasm.parse,
     _b1 set _ wasm.make _({} module [
-        d0 data {init : "hi"},
+        d0 data {init : 'hi'},
         _ type ft function {input : [], output : []},
         f function {type : ft, input : [], local : []} : [
             _ data.drop d0,
         ],
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (type (;0;) (func))'.
       '  (data "hi")'.
       '  (func (;0;) (type 0)'.
@@ -1475,7 +1475,7 @@ _ do _[
             tbl table.atomic.read_modify_write.compare_exchange acquire_release,
         ],
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (type (;0;) (func))'.
       '  (table (;0;) 1 funcref)'.
       '  (func (;0;) (type 0) nop)'.
@@ -1512,7 +1512,7 @@ _ do _[
             _ element.drop el,
         ],
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (type (;0;) (func))'.
       '  (func (;0;) (type 0) nop)'.
       '  (elem func 0)'.
@@ -1545,7 +1545,7 @@ _ do _[
             _ reference.cast_descriptor_equal_non_null {abstract} heap any,
         ],
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (type (;0;) (struct (field i32)))'.
       '  (type (;1;) (func))'.
       '  (func (;0;) (type 1)'.
@@ -1595,7 +1595,7 @@ _ do _[
             s0 struct.atomic.read_modify_write.compare_exchange f0 : acquire_release,
         ],
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (type (;0;) (struct (field i32) (field i64)))'.
       '  (type (;1;) (func))'.
       '  (func (;0;) (type 1)'.
@@ -1632,7 +1632,7 @@ _ do _[
     _wasm.parse set _ import .dev.wasm.parse,
     _b1 set _ wasm.make _({} module [
         _ type a0 array {item : i32},
-        d0 data {init : "12"},
+        d0 data {init : '12'},
         _ type ft function {input : [], output : []},
         ef function {type : ft, input : [], local : []} : [nop],
         el element {type : function, init : [ef]},
@@ -1663,7 +1663,7 @@ _ do _[
             a0 array.atomic.read_modify_write.compare_exchange acquire_release,
         ],
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (type (;0;) (array i32))'.
       '  (type (;1;) (func))'.
       '  (data (;0;) "12")'.
@@ -1840,7 +1840,7 @@ _ do _[
             _ f64x2.replace_lane 0,
         ],
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (type (;0;) (func))'.
       '  (memory (;0;) 1)'.
       '  (func (;0;) (type 0)'.
@@ -2014,7 +2014,7 @@ _ do _[
             tbl table.atomic.set acquire_release,
         ],
     ]),
-    _b2 set _ wasm.parse "(module".
+    _b2 set _ wasm.parse '(module'.
       '  (type (;0;) (struct (field i32)))'.
       '  (type (;1;) (array i32))'.
       '  (type (;2;) (func))'.

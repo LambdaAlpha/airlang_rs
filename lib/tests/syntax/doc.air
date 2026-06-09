@@ -12,11 +12,11 @@ false
 =====
 key quoted
 -----
-'key'
+key'xxx'
 =====
 key unquote
 -----
-key
+xxx
 =====
 key punctuation
 -----
@@ -28,28 +28,32 @@ a.b.c
 =====
 key quote
 -----
-'[0, 1, 2]'
+key'[0, 1, 2]'
 =====
 key concat
 -----
-'"a"'_(this is a comment)_[X3f ' " ) ( sp]_"'a'"
+key'"a"'_(this is a comment)_[X3f ' " ) ( sp]_"'a'"
 =====
 key all
 -----
-'abcdefghijklmnopqrstuvwxyz'_
+key'abcdefghijklmnopqrstuvwxyz'_
 "()[]{}<>\|/'"_
 '"`^*+=-~_.,:;!?@#$%&'_
 (this is a comment)_
 [sp 0 1 2 3 4 5 6 7 8 9]_
 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 =====
-text pattern
+text pattern single
+-----
+'text'
+=====
+text pattern double
 -----
 "text"
 =====
 text unicode
 -----
-"🜁: Alchemical Symbol For Air"
+'🜁: Alchemical Symbol For Air'
 =====
 text concat
 -----
@@ -138,11 +142,11 @@ cell scope
 -----
 .(v)
 =====
-cell key
+cell text single
 -----
-.'key'
+.'text'
 =====
-cell text
+cell text double
 -----
 ."text"
 =====
@@ -158,7 +162,7 @@ cell bit
 -----
 .(true)
 =====
-cell scope key
+cell scope text
 -----
 .('cell')
 =====
@@ -231,11 +235,11 @@ quote scope
 -----
 _(v)
 =====
-quote key
+quote text single
 -----
-_'key'
+_'text'
 =====
-quote text
+quote text double
 -----
 _"text"
 =====
@@ -251,7 +255,7 @@ quote bit
 -----
 _(true)
 =====
-quote scope key
+quote scope text
 -----
 _('quote')
 =====
@@ -283,11 +287,11 @@ comment scope
 -----
 !(t1 t2 ... tn) .
 =====
-comment key .
+comment text single
 -----
-!'key' .
+!'text' .
 =====
-comment text
+comment text double
 -----
 !"text" .
 =====

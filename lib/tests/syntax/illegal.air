@@ -67,53 +67,41 @@ _"b"
 =====
 key empty unpaired
 -----
-'
+key'
 =====
 key unpaired
 -----
-'a
+key'a
 =====
 key extra unpaired
 -----
-'''
+key'''
 =====
 key escape unpaired
 -----
-''["
+key''["
 =====
 key unknown escape
 -----
-''[abc]
+key''[abc]
 =====
 key illegal
 -----
-'中'
-=====
-key unknown alphabet prefix
------
-a''
-=====
-key unknown digit prefix
------
-1''
-=====
-key unknown key prefix
------
-@''
+key'中'
 =====
 key wrong line indicator
 -----
-''.
+key''.
 'a'
 =====
 key multiline illegal
 -----
-''_
+key''_
 '中'
 =====
 key code not key
 -----
-''_
+key''_
 [cr]
 =====
 unknown prefix
@@ -351,10 +339,6 @@ map missing comma
 map duplicate keys
 -----
 {a : 2, a : 3}
-=====
-map text key
------
-{"a" : b}
 =====
 raw map duplicate keys
 -----

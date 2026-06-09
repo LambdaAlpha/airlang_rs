@@ -10,7 +10,7 @@ use crate::unit;
 
 pub(super) fn expected() -> Vec<Repr> {
     vec![
-        quote(key("")),
+        quote(text("")),
         quote(text("")),
         quote(list(vec![])),
         quote(map(vec![])),

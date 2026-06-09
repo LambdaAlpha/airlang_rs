@@ -6,6 +6,7 @@ use crate::list;
 use crate::map;
 use crate::pair;
 use crate::solve;
+use crate::text;
 
 pub(super) fn expected() -> Vec<Repr> {
     vec![
@@ -31,6 +32,6 @@ pub(super) fn expected() -> Vec<Repr> {
         solve(key("a"), list(vec![key("b"), key("c")])),
         list(vec![solve(key("a"), key("b"))]),
         map(vec![("a", solve(key("b"), key("c")))]),
-        solve(key("?"), key("?")),
+        solve(text("?"), text("?")),
     ]
 }

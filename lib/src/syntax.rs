@@ -25,8 +25,8 @@ pub(crate) const SCOPE_RIGHT: char = ')';
 pub(crate) const SPACE: char = ' ';
 pub(crate) const SEPARATOR: char = ',';
 
-pub(crate) const TEXT_QUOTE: char = '"';
-pub(crate) const KEY_QUOTE: char = '\'';
+pub(crate) const DOUBLE_QUOTE: char = '"';
+pub(crate) const SINGLE_QUOTE: char = '\'';
 // } delimiters
 
 // keywords {
@@ -46,6 +46,7 @@ pub(crate) const LEFT: &str = "<";
 pub(crate) const RIGHT: &str = ">";
 pub(crate) const TOKEN: &str = "#";
 
+pub(crate) const KEY: &str = "key";
 pub(crate) const INT: &str = "integer";
 pub(crate) const DECIMAL: &str = "decimal";
 pub(crate) const BYTE: &str = "byte";
@@ -62,8 +63,8 @@ pub(crate) fn is_delimiter(c: char) -> bool {
             | MAP_RIGHT
             | SCOPE_LEFT
             | SCOPE_RIGHT
-            | TEXT_QUOTE
-            | KEY_QUOTE
+            | DOUBLE_QUOTE
+            | SINGLE_QUOTE
     )
 }
 

@@ -322,9 +322,9 @@ _ do _[
     _exist set _ import .map.contain,
     _a set [1] match _[
         true : [1],
-        _'' : [2],
+        empty : [2],
     ],
-    (a = 2) and _ not _ exist _''
+    (a = 2) and _ not _ exist empty
 ]
 -----
 true

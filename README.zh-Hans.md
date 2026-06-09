@@ -24,8 +24,8 @@
 
 **键**
 
-- `'key'`
-- `key`
+- `key'xxx'`
+- `xxx`
 
 ```air
 >=
@@ -34,13 +34,13 @@
 a.b.c
 ➔ a.b.c
 
-'[0, 1, 2]'
+key'[0, 1, 2]'
 ➔ [0, 1, 2]
 
-'"a"'_(this is a comment)_[X3f ' " ) ( sp]_"'a'"
+key'"a"'_(this is a comment)_[X3f ' " ) ( sp]_"'a'"
 ➔ "a"?'")( 'a'
 
-'abcdefghijklmnopqrstuvwxyz'_
+key'abcdefghijklmnopqrstuvwxyz'_
 "()[]{}<>\|/'"_
 '"`^*+=-~_.,:;!?@#$%&'_
 (this is a comment)_
@@ -51,10 +51,11 @@ a.b.c
 
 **文本**
 
-`"text"`
+- `'text'`
+- `"text"`
 
 ```air
-"🜁: Alchemical Symbol For Air"
+'🜁: Alchemical Symbol For Air'
 ➔ 🜁: Alchemical Symbol For Air
 
 "'a'"_(this is a comment)_[X1f701 ' " sp ht cr lf]_'"a"'
@@ -106,7 +107,7 @@ byte'X00ffff'
 **单元格**
 
 - `.(v)`
-- `.'key'` = `.('key')`
+- `.'text'` = `.('text')`
 - `."text"` = `.("text")`
 - `.[l, i, s, t]` = `.([l, i, s, t])`
 - `.{a : map}` = `.({a : map})`
@@ -157,7 +158,7 @@ a : b : c
 **引用**
 
 - `_(v)`
-- `_'key'` = `_('key')`
+- `_'text'` = `_('text')`
 - `_"text"` = `_("text")`
 - `_[l, i, s, t]` = `_([l, i, s, t])`
 - `_{a : map}` = `_({a : map})`
@@ -193,7 +194,7 @@ true is_carmichael_number ?
 **注释**
 
 - `!(t1 t2 ... tn)`
-- `!'key'`
+- `!'text'`
 - `!"text"`
 - `![l, i, s, t]`
 - `!{a : map}`

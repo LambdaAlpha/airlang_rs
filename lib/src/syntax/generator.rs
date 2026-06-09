@@ -9,11 +9,12 @@ use num_traits::Signed;
 
 use super::BYTE;
 use super::DECIMAL;
+use super::DOUBLE_QUOTE;
 use super::Direction;
 use super::EMPTY;
 use super::FALSE;
 use super::INT;
-use super::KEY_QUOTE;
+use super::KEY;
 use super::LEFT;
 use super::LIST_LEFT;
 use super::LIST_RIGHT;
@@ -25,8 +26,8 @@ use super::ReprType;
 use super::SCOPE_LEFT;
 use super::SCOPE_RIGHT;
 use super::SEPARATOR;
+use super::SINGLE_QUOTE;
 use super::SOLVE;
-use super::TEXT_QUOTE;
 use super::TRUE;
 use super::UNIT;
 use super::is_delimiter;
@@ -99,27 +100,30 @@ impl FmtRepr for Key {
         if !key_should_quote(self, options) {
             return f.write_str(self);
         }
-        f.write_char(KEY_QUOTE)?;
-        let mut is_key = true;
+        if !options.key_ctx {
+            f.write_str(KEY)?;
+        }
+        f.write_char(SINGLE_QUOTE)?;
+        let mut single = true;
         for c in self.chars() {
-            if is_key && c == KEY_QUOTE {
-                f.write_char(KEY_QUOTE)?;
+            if single && c == SINGLE_QUOTE {
+                f.write_char(SINGLE_QUOTE)?;
                 if options.pretty {
                     f.write_str(EMPTY)?;
                 }
-                f.write_char(TEXT_QUOTE)?;
-                is_key = false;
-            } else if !is_key && c == TEXT_QUOTE {
-                f.write_char(TEXT_QUOTE)?;
+                f.write_char(DOUBLE_QUOTE)?;
+                single = false;
+            } else if !single && c == DOUBLE_QUOTE {
+                f.write_char(DOUBLE_QUOTE)?;
                 if options.pretty {
                     f.write_str(EMPTY)?;
                 }
-                f.write_char(KEY_QUOTE)?;
-                is_key = true;
+                f.write_char(SINGLE_QUOTE)?;
+                single = true;
             }
             f.write_char(c)?;
         }
-        if is_key { f.write_char(KEY_QUOTE) } else { f.write_char(TEXT_QUOTE) }
+        if single { f.write_char(SINGLE_QUOTE) } else { f.write_char(DOUBLE_QUOTE) }
     }
 
     fn get_type(&self) -> ReprType {
@@ -149,8 +153,8 @@ fn key_should_quote(key: &str, options: FmtOptions) -> bool {
 
 impl FmtRepr for Text {
     fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
-        f.write_char(TEXT_QUOTE)?;
-        let mut state = State::Text;
+        f.write_char(DOUBLE_QUOTE)?;
+        let mut state = State::Double;
         let mut has_cr = false;
         for c in self.chars() {
             if has_cr && c != '\n' {
@@ -180,26 +184,26 @@ impl FmtRepr for Text {
                 has_cr = true;
                 continue;
             }
-            if c == KEY_QUOTE {
-                switch_state(&mut state, State::Text, options, f)?;
-                f.write_char(KEY_QUOTE)?;
+            if c == SINGLE_QUOTE {
+                switch_state(&mut state, State::Double, options, f)?;
+                f.write_char(SINGLE_QUOTE)?;
                 continue;
             }
-            if c == TEXT_QUOTE {
-                switch_state(&mut state, State::Key, options, f)?;
-                f.write_char(TEXT_QUOTE)?;
+            if c == DOUBLE_QUOTE {
+                switch_state(&mut state, State::Single, options, f)?;
+                f.write_char(DOUBLE_QUOTE)?;
                 continue;
             }
             if Key::is_key(c) {
                 if state == State::Token {
-                    switch_state(&mut state, State::Text, options, f)?;
+                    switch_state(&mut state, State::Double, options, f)?;
                 }
                 f.write_char(c)?;
                 continue;
             }
             if !options.id_mode && !options.normalized && !c.is_ascii() {
                 if state == State::Token {
-                    switch_state(&mut state, State::Text, options, f)?;
+                    switch_state(&mut state, State::Double, options, f)?;
                 }
                 f.write_char(c)?;
                 continue;
@@ -262,8 +266,8 @@ impl FmtRepr for Text {
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 enum State {
-    Key,
-    Text,
+    Single,
+    Double,
     Token,
 }
 
@@ -286,16 +290,16 @@ fn switch_state(
 
 fn begin_state(state: State, f: &mut dyn Write) -> std::fmt::Result {
     match state {
-        State::Key => f.write_char(KEY_QUOTE),
-        State::Text => f.write_char(TEXT_QUOTE),
+        State::Single => f.write_char(SINGLE_QUOTE),
+        State::Double => f.write_char(DOUBLE_QUOTE),
         State::Token => f.write_char(LIST_LEFT),
     }
 }
 
 fn end_state(state: State, f: &mut dyn Write) -> std::fmt::Result {
     match state {
-        State::Key => f.write_char(KEY_QUOTE),
-        State::Text => f.write_char(TEXT_QUOTE),
+        State::Single => f.write_char(SINGLE_QUOTE),
+        State::Double => f.write_char(DOUBLE_QUOTE),
         State::Token => f.write_char(LIST_RIGHT),
     }
 }
@@ -304,9 +308,9 @@ impl FmtRepr for Int {
     fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
         if options.normalized {
             f.write_str(INT)?;
-            f.write_char(KEY_QUOTE)?;
+            f.write_char(SINGLE_QUOTE)?;
             int_fmt(self, options, f)?;
-            f.write_char(KEY_QUOTE)
+            f.write_char(SINGLE_QUOTE)
         } else {
             if self.is_negative() {
                 f.write_char('0')?;
@@ -336,9 +340,9 @@ impl FmtRepr for Decimal {
     fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
         if options.normalized {
             f.write_str(DECIMAL)?;
-            f.write_char(KEY_QUOTE)?;
+            f.write_char(SINGLE_QUOTE)?;
             decimal_fmt(self, options, f)?;
-            f.write_char(KEY_QUOTE)
+            f.write_char(SINGLE_QUOTE)
         } else {
             f.write_char('0')?;
             decimal_fmt(self, options, f)
@@ -373,14 +377,14 @@ fn decimal_fmt(decimal: &Decimal, options: FmtOptions, mut f: &mut dyn Write) ->
 impl FmtRepr for Byte {
     fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
         f.write_str(BYTE)?;
-        f.write_char(KEY_QUOTE)?;
+        f.write_char(SINGLE_QUOTE)?;
         if options.normalized {
             f.write_char('X')?;
         }
         for &b in self.iter() {
             write!(f, "{b:02x}")?;
         }
-        f.write_char(KEY_QUOTE)
+        f.write_char(SINGLE_QUOTE)
     }
 
     fn get_type(&self) -> ReprType {
@@ -410,21 +414,13 @@ impl<T: FmtRepr> FmtRepr for Quote<T> {
     }
 }
 
-fn fmt_delimited(
-    repr: &dyn FmtRepr, mut options: FmtOptions, f: &mut dyn Write,
-) -> std::fmt::Result {
-    match repr.get_type() {
-        ReprType::Text | ReprType::List | ReprType::Map => repr.fmt(options, f),
-        ReprType::Key => {
-            options.normalized = true;
-            repr.fmt(options, f)
-        },
-        _ => {
-            f.write_char(SCOPE_LEFT)?;
-            repr.fmt(options, f)?;
-            f.write_char(SCOPE_RIGHT)
-        },
+fn fmt_delimited(repr: &dyn FmtRepr, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
+    if let ReprType::Text | ReprType::List | ReprType::Map = repr.get_type() {
+        return repr.fmt(options, f);
     }
+    f.write_char(SCOPE_LEFT)?;
+    repr.fmt(options, f)?;
+    f.write_char(SCOPE_RIGHT)
 }
 
 impl<T: FmtRepr> FmtRepr for Pair<T, T> {

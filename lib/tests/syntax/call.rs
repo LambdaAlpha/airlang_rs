@@ -6,6 +6,7 @@ use crate::key;
 use crate::list;
 use crate::map;
 use crate::pair;
+use crate::text;
 
 pub(super) fn expected() -> Vec<Repr> {
     vec![
@@ -38,6 +39,6 @@ pub(super) fn expected() -> Vec<Repr> {
         call(key("a"), list(vec![key("b"), key("c")])),
         list(vec![call(key("a"), key("b"))]),
         map(vec![("a", call(key("b"), key("c")))]),
-        infix_call(key("_"), key("_"), key("_")),
+        infix_call(text("_"), text("_"), text("_")),
     ]
 }

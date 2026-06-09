@@ -50,7 +50,7 @@ _ do _[
     empty join []
 ]
 -----
-''
+key''
 =====
 join else
 -----
@@ -81,7 +81,7 @@ _ do _[
     _ from_text ""
 ]
 -----
-''
+key''
 =====
 from_text trivial
 -----
@@ -99,7 +99,7 @@ _ do _[
     _ from_text "{}"
 ]
 -----
-'{}'
+key'{}'
 =====
 into_text empty
 -----
