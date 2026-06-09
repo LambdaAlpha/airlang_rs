@@ -26,6 +26,10 @@ escape unicode
 -----
 ""[a X3f X1f701]
 =====
+token followed by quote
+-----
+"a"[bel]'"'
+=====
 multiline
 -----
 "a"_

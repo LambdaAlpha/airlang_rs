@@ -180,12 +180,12 @@ impl FmtRepr for Text {
                 has_cr = true;
                 continue;
             }
-            if c == KEY_QUOTE && state == State::Key {
+            if c == KEY_QUOTE {
                 switch_state(&mut state, State::Text, options, f)?;
                 f.write_char(KEY_QUOTE)?;
                 continue;
             }
-            if c == TEXT_QUOTE && state == State::Text {
+            if c == TEXT_QUOTE {
                 switch_state(&mut state, State::Key, options, f)?;
                 f.write_char(TEXT_QUOTE)?;
                 continue;
