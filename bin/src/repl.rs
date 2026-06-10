@@ -15,6 +15,7 @@ use airlang_ext::cfg::prim::lib::io::Output;
 use airlang_ext::cfg::prim::lib::io::STANDARD_ERROR;
 use airlang_ext::cfg::prim::lib::io::STANDARD_OUTPUT;
 use crossterm::ExecutableCommand;
+use crossterm::event::DisableMouseCapture;
 use crossterm::event::EnableMouseCapture;
 use ratatui::DefaultTerminal;
 use ratatui::Frame;
@@ -125,6 +126,7 @@ impl Repl {
             }
             terminal.draw(|f| self.render(f))?;
         }
+        stdout().execute(DisableMouseCapture)?;
         Ok(())
     }
 
