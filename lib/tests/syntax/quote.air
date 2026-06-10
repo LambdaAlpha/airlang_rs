@@ -1,8 +1,8 @@
-quote key
+quote text single
 -----
 _''
 =====
-quote text
+quote text double
 -----
 _""
 =====

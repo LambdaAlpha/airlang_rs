@@ -20,11 +20,11 @@ empty comment
 -----
 !() a
 =====
-key comment
+text single comment
 -----
 !'' a
 =====
-text comment
+text double comment
 -----
 !"" a
 =====

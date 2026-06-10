@@ -106,6 +106,7 @@ impl FmtRepr for LinkVal {
         let id = Key::from_string_unchecked(format!("{id:x}"));
         let repr = Val::Key(id);
         options.normalized = true;
+        options.key_ctx = true;
         FmtRepr::fmt(&repr, options, f)
     }
 
@@ -165,6 +166,7 @@ impl FmtRepr for FuncVal {
             let id = self.id();
             let id = Key::from_string_unchecked(format!("{id:x}"));
             options.normalized = true;
+            options.key_ctx = true;
             FmtRepr::fmt(&id, options, f)
         } else {
             let repr = generate_func(self.clone());
