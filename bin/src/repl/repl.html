@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+<title>Air v0.27.0 REPL</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Source Code Pro', Consolas, 'Cascadia Code', 'JetBrains Mono', 'Fira Code', Menlo, monospace;
+    background: #1e1e1e; color: #d4d4d4;
+    height: 100dvh; display: flex; flex-direction: column;
+    max-width: 960px; margin: 0 auto;
+}
+
+header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 16px; border-bottom: 1px solid #3c3c3c;
+    font-size: 15px; font-weight: bold; flex-shrink: 0;
+}
+.btn {
+    font-family: inherit; font-size: 13px;
+    border: none; border-radius: 2px; cursor: pointer;
+}
+.btn-muted {
+    background: #3c3c3c; color: #d4d4d4;
+    padding: 4px 12px;
+}
+.btn-muted:hover { background: #888; }
+.btn-primary {
+    background: #0e639c; color: #fff;
+    padding: 8px 20px; white-space: nowrap;
+    align-self: flex-end; line-height: 1.5; font-size: 14px;
+}
+.btn-primary:hover { background: #1177bb; }
+.btn-primary:disabled { background: #3c3c3c; color: #777; cursor: not-allowed; }
+header .title { color: #fff; }
+#history {
+    flex: 1; /* fill remaining vertical space */ overflow-y: auto; padding: 12px 16px;
+    scrollbar-width: thin;
+    scrollbar-color: #888 transparent;
+}
+
+#history::-webkit-scrollbar { width: 6px; }
+#history::-webkit-scrollbar-track { background: transparent; }
+#history::-webkit-scrollbar-thumb { background: #888; border-radius: 3px; }
+#history::-webkit-scrollbar-thumb:hover { background: #aaa; }
+.history-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto; /* minmax(0,…) prevents grid blowout from long content */
+    border-bottom: 1px solid #3c3c3c;
+    padding: 8px 0;
+}
+.history-item:first-child { padding-top: 0; }
+.history-item .main {
+    grid-column: 1;
+}
+.history-item .fill-cell {
+    grid-column: 2; grid-row: 1 / -1;
+    padding: 0 0 0 8px;
+}
+.msg { white-space: pre-wrap; word-break: break-all; line-height: 1.5; }
+.input-code { color: #d4d4d4; }
+.output-ok { color: #4ec94e; }
+.output-err { color: #e06c75; }
+.stdout-line { color: #61afef; margin-top: 2px; }
+.stderr-line { color: #e06c75; margin-top: 2px; }
+.line-label {
+    display: inline-block;
+    padding: 0 6px;
+    margin-right: 8px;
+    border-radius: 2px;
+    font-size: 12px;
+    line-height: 1.6;
+    vertical-align: bottom;
+}
+.line-label.stdout {
+    background: #1a3a5c;
+    color: #61afef;
+}
+.line-label.stderr {
+    background: #3a1a1a;
+    color: #e06c75;
+}
+footer {
+    padding: 10px 16px;
+    display: flex; gap: 10px; align-items: flex-end; flex-shrink: 0;
+}
+#input-area {
+    flex: 1; display: flex; flex-direction: column;
+}
+#input-area textarea {
+    width: 100%; background: #2d2d2d; color: #d4d4d4;
+    border: 1px solid #3c3c3c; padding: 8px;
+    font-family: inherit; font-size: 14px; line-height: 1.5;
+    resize: none; min-height: 80px; max-height: 300px;
+    scrollbar-width: thin;
+    scrollbar-color: #888 transparent;
+}
+#input-area textarea:focus { outline: none; border-color: #666; }
+#input-area textarea::-webkit-scrollbar { width: 6px; }
+#input-area textarea::-webkit-scrollbar-track { background: transparent; }
+#input-area textarea::-webkit-scrollbar-thumb { background: #888; border-radius: 3px; }
+#input-area textarea::-webkit-scrollbar-thumb:hover { background: #aaa; }
+#btn-hint { font-size: 11px; opacity: 0.7; }
+
+@media (max-width: 480px) {
+    header { padding: 8px 12px; font-size: 14px; }
+    #history { padding: 8px 12px; }
+    footer { padding: 8px 12px; gap: 6px; flex-direction: column; align-items: stretch; }
+    .btn-muted { font-size: 12px; padding: 3px 8px; }
+    .btn-primary { font-size: 13px; padding: 8px 0; width: 100%; text-align: center; }
+    #btn-hint { display: none; }
+    #input-area textarea { min-height: 60px; max-height: 50vh; font-size: 16px; }
+    .history-item { padding: 6px 0; }
+    .history-item .fill-cell {
+        grid-column: 1; grid-row: auto;
+        padding: 4px 0 0 0;
+    }
+    .history-item .fill-btn { font-size: 12px; padding: 2px 6px; }
+}
+</style>
+</head>
+<body>
+<header>
+    <span class="title">Air v0.27.0</span>
+    <button id="help-btn" class="btn btn-muted">Help</button>
+</header>
+<div id="history"></div>
+<footer>
+    <div id="input-area">
+        <label for="input"></label><textarea id="input" rows="4" placeholder="Type Air code..."></textarea>
+    </div>
+    <button id="submit-btn" class="btn btn-primary">
+        <span id="btn-line">Submit</span>
+        <br>
+        <span id="btn-hint">Ctrl+Enter</span>
+    </button>
+</footer>
+<script>
+const historyEl = document.getElementById('history');
+const inputEl = document.getElementById('input');
+const submitBtn = document.getElementById('submit-btn');
+const helpBtn = document.getElementById('help-btn');
+
+let history = [];
+let submitting = false;
+
+// each tab gets its own session; no storage to avoid cross-tab sharing
+const SESSION_ID = crypto.randomUUID();
+
+function renderHistoryItem(item, i) {
+    const div = document.createElement('div');
+    div.className = 'history-item';
+
+    const main = document.createElement('div');
+    main.className = 'main';
+
+    const inputLine = document.createElement('div');
+    inputLine.className = 'input-code msg';
+    inputLine.textContent = item.input;
+    main.appendChild(inputLine);
+
+    if (item.ok) {
+        if (item.output) {
+            const outputEl = document.createElement('div');
+            outputEl.className = 'output-ok msg';
+            outputEl.textContent = item.output;
+            main.appendChild(outputEl);
+        }
+    } else {
+        if (item.error) {
+            const errEl = document.createElement('div');
+            errEl.className = 'output-err msg';
+            errEl.textContent = item.error;
+            main.appendChild(errEl);
+        }
+    }
+
+    if (item.stdout) {
+        const stdoutEl = document.createElement('div');
+        stdoutEl.className = 'stdout-line msg';
+        const label = document.createElement('span');
+        label.className = 'line-label stdout';
+        label.textContent = 'output';
+        stdoutEl.appendChild(label);
+        stdoutEl.appendChild(document.createTextNode(item.stdout));
+        main.appendChild(stdoutEl);
+    }
+
+    if (item.stderr) {
+        const stderrEl = document.createElement('div');
+        stderrEl.className = 'stderr-line msg';
+        const label = document.createElement('span');
+        label.className = 'line-label stderr';
+        label.textContent = 'error';
+        stderrEl.appendChild(label);
+        stderrEl.appendChild(document.createTextNode(item.stderr));
+        main.appendChild(stderrEl);
+    }
+
+    div.appendChild(main);
+
+    const fillCell = document.createElement('div');
+    fillCell.className = 'fill-cell';
+    const fillBtn = document.createElement('button');
+    fillBtn.className = 'fill-btn btn btn-muted';
+    fillBtn.dataset.idx = i;
+    fillBtn.textContent = 'Fill';
+    fillCell.appendChild(fillBtn);
+    div.appendChild(fillCell);
+
+    return div;
+}
+
+// history only grows; render just the newest item
+function renderHistory() {
+    const i = history.length - 1;
+    historyEl.appendChild(renderHistoryItem(history[i], i));
+    historyEl.scrollTop = historyEl.scrollHeight;
+}
+
+async function doSubmit(code) {
+    if (submitting) return;
+    submitting = true;
+    submitBtn.disabled = true;
+    submitBtn.title = 'Evaluating…';
+
+    try {
+        const resp = await fetch('/eval?session=' + encodeURIComponent(SESSION_ID), {
+            method: 'POST',
+            body: code
+        });
+        const data = await resp.json();
+        history.push({
+            input: code,
+            ok: data.ok,
+            output: data.output || '',
+            error: data.error || '',
+            stdout: data.stdout || '',
+            stderr: data.stderr || ''
+        });
+        renderHistory();
+    } catch (e) {
+        history.push({
+            input: code,
+            ok: false,
+            output: '',
+            error: 'Request failed: ' + e.message,
+            stdout: '',
+            stderr: ''
+        });
+        renderHistory();
+    } finally {
+        submitting = false;
+        submitBtn.disabled = false;
+        submitBtn.title = '';
+    }
+}
+
+function handleSubmit() {
+    const code = inputEl.value;
+    if (!code.trim()) return;
+    doSubmit(code);
+    inputEl.value = '';
+    inputEl.style.height = ''; // reset to CSS min-height
+    inputEl.focus();
+}
+
+submitBtn.addEventListener('click', handleSubmit);
+
+function indentLines(indent) {
+    const val = inputEl.value;
+    let start = inputEl.selectionStart;
+    let end = inputEl.selectionEnd;
+
+    // expand selection to whole lines
+    const lineStart = val.lastIndexOf('\n', start - 1) + 1; // +1: past the newline
+    let lineEnd = val.indexOf('\n', end);
+    if (lineEnd === -1) lineEnd = val.length;
+
+    const before = val.substring(0, lineStart);
+    const lines = val.substring(lineStart, lineEnd).split('\n');
+    const after = val.substring(lineEnd);
+
+    if (indent) {
+        const indented = lines.map(l => '    ' + l).join('\n');
+        inputEl.value = before + indented + after;
+        inputEl.selectionStart = lineStart;
+        inputEl.selectionEnd = lineStart + indented.length;
+    } else {
+        const outdented = lines.map(l => l.replace(/^ {1,4}/, '')).join('\n');
+        inputEl.value = before + outdented + after;
+        inputEl.selectionStart = lineStart;
+        inputEl.selectionEnd = lineStart + outdented.length;
+    }
+}
+
+inputEl.addEventListener('keydown', function(e) {
+    if (e.key === 'Tab') {
+        e.preventDefault();
+        indentLines(!e.shiftKey); // Shift+Tab = outdent
+    } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        handleSubmit();
+    }
+});
+
+inputEl.addEventListener('input', function() {
+    inputEl.style.height = ''; // reset so scrollHeight reflects actual content, not previous height
+    inputEl.style.height = Math.min(inputEl.scrollHeight + 2, 300) + 'px'; // +2: borderTop + borderBottom, not included in scrollHeight
+});
+
+helpBtn.addEventListener('click', function() {
+    inputEl.value = 'help';
+    handleSubmit();
+});
+
+historyEl.addEventListener('click', function(e) {
+    if (e.target.classList.contains('fill-btn')) {
+        const idx = parseInt(e.target.dataset.idx, 10);
+        if (idx >= 0 && idx < history.length) {
+            inputEl.value = history[idx].input;
+            inputEl.focus();
+        }
+    }
+});
+</script>
+</body>
+</html>

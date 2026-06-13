@@ -19,22 +19,21 @@ version = "0.27.0"
 path = "../ext"
 version = "0.27.0"
 
-# repl
-[dependencies.crossterm]
-version = "0.29"
+# web repl
+[dependencies.tiny_http]
+version = "0.12"
 
-# repl
-[dependencies.ratatui]
-version = "0.30"
-features = ["unstable-rendered-line-info"]
+# web repl
+[dependencies.url]
+version = "2"
 
-# repl
-[dependencies.ratatui-textarea]
-version = "0.9"
+# web repl
+[dependencies.serde_json]
+version = "1"
 
-# repl
-[dependencies.tui-scrollview]
-version = "0.6"
+# web repl
+[dependencies.webbrowser]
+version = "1"
 
 # const str
 [dependencies.const_format]

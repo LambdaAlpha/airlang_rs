@@ -20,7 +20,7 @@ use airlang::type_::Key;
 use airlang::type_::Text;
 
 use crate::cfg::comp::BinCompCfg;
-use crate::repl::Repl;
+use crate::repl::WebRepl;
 
 pub fn main() -> std::io::Result<()> {
     if !stdin().is_terminal() || !stdout().is_terminal() {
@@ -29,7 +29,7 @@ pub fn main() -> std::io::Result<()> {
     if args().len() >= 2 {
         return cmd_run();
     }
-    Repl::new().run()
+    WebRepl::new().run()
 }
 
 fn cmd_run() -> std::io::Result<()> {
