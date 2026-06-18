@@ -9,7 +9,7 @@ _ do _[
     _l1 set _a get_length .,
     _k set _ any .key,
     _v set _ any .,
-    _i set (_a contain k) test [0] : [1],
+    _i set (_a contain k) then [0] : [1],
     _a map.set k : v,
     _l2 set _a get_length .,
     l2 = l1 + i
@@ -147,7 +147,7 @@ _ do _[
     _push set _ import .list.push.context.let,
     _a set _ any .map,
     _ks set [],
-    10 iterate _i : _[
+    10 each _i : _[
         _ks push _ any .key,
     ],
     _a remove_many ks,
@@ -199,7 +199,7 @@ _ do _[
     _push set _ import .list.push.context.let,
     _a set _ any .map,
     _ks set [],
-    10 iterate _i : _[
+    10 each _i : _[
         _ks push _ any .key,
     ],
     _vs1 set _a get_many ks,

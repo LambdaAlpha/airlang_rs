@@ -247,12 +247,12 @@ true is_carmichael_number ?
 
 ### Context
 
-The context is the local information environment during execution. In core semantics, the context can be accessed via keys, and functions also support sensing or updating the context. Variables in the context can be read via the `get` function, updated via the `set` function, or specified via the `which` function. Based on this capability of functions, we implement various control flow functions, including sequential execution `do`, conditional execution `test`, pattern matching `match`, loops `loop`, iteration `iterate`, etc. The most commonly used and essential core functions are provided in the initial context.
+The context is the local information environment during execution. In core semantics, the context can be accessed via keys, and functions also support sensing or updating the context. Variables in the context can be read via the `get` function, updated via the `set` function, or specified via the `which` function. Based on this capability of functions, we implement various control flow functions, including sequential execution `do`, conditional execution `then`, pattern matching `match`, loops `loop`, iteration `each`, etc. The most commonly used and essential core functions are provided in the initial context.
 
 ```air
 _ do _[
     _sum set 0,
-    100 iterate _i : _[
+    100 each _i : _[
         _sum set sum + i
     ],
     sum
@@ -282,7 +282,7 @@ _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
     _b set a * 1,
-    (a <> b) test _[
+    (a <> b) then _[
         _ abort .
     ],
     _ assert a = b / 1
@@ -315,7 +315,7 @@ _ do _[
     .solver export _ function {
         code : _(. : fo) : _(_ do _[
             _(f : o) is fo,
-            (o and f = formula) test [
+            (o and f = formula) then [
                 formula fact [true, false, true, true, false]
             ]
         ]),
@@ -324,7 +324,7 @@ _ do _[
             is : is,
             = : =,
             and : and,
-            test : test,
+            then : then,
             formula : formula,
             fact : fact,
         },

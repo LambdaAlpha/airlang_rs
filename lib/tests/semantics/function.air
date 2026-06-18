@@ -486,7 +486,7 @@ _ do _[
     _g set _ function {
         code : _((. : fi) : _ do _[
             _(f : i) is fi,
-            (i < 1) test _[
+            (i < 1) then _[
                 0
             ] : _[
                 i + f f i - 1
@@ -496,7 +496,7 @@ _ do _[
             do : do,
             is : is,
             < : <,
-            test : test,
+            then : then,
             + : +,
             - : -,
         },

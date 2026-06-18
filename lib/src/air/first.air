@@ -77,14 +77,14 @@ _ do _[
     },
     .link.let.bind export link.let.bind,
     _export_let_bind_many set _ function {
-        code : _(. : keys) : _((_ take _keys) iterate _key : _[
+        code : _(. : keys) : _((_ take _keys) each _key : _[
             _f set _ import key,
             (empty join [key, .context.let]) export _ context.let.bind f,
             (empty join [key, .link.let]) export _ link.let.bind f,
         ]),
         prelude : {
             take : take,
-            iterate : iterate,
+            each : each,
             set : set,
             import : import,
             empty : _(key''),

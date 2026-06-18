@@ -114,29 +114,29 @@ _ do [
 -----
 []
 =====
-test true
+then true
 -----
-true test [1] : [2]
+true then [1] : [2]
 -----
 1
 =====
-test false
+then false
 -----
-false test [1] : [2]
+false then [1] : [2]
 -----
 2
 =====
-test no default
+then no default
 -----
-true test [1]
+true then [1]
 -----
 1
 =====
-test conditional eval
+then conditional eval
 -----
 _ do _[
     _a set 1,
-    true test [
+    true then [
         1
     ] : _[
         _a set 2
@@ -146,19 +146,19 @@ _ do _[
 -----
 1
 =====
-test recursive
+then recursive
 -----
-true test [
-    false test [1] : [2]
+true then [
+    false then [1] : [2]
 ] : [
     3
 ]
 -----
 2
 =====
-test try return
+then try return
 -----
-true test _[
+true then _[
     1,
     _ .try .(2),
     3
@@ -168,36 +168,36 @@ true test _[
 -----
 2
 =====
-test list
+then list
 -----
-true test [
+true then [
     []
 ] : [
 ]
 -----
 []
 =====
-switch key
+branch key
 -----
-_a switch _{
+_a branch _{
     a : [_ not true],
     b : [1]
 }
 -----
 false
 =====
-switch default
+branch default
 -----
-_a switch {
+_a branch {
 } : _[_b]
 -----
 b
 =====
-switch not eval
+branch not eval
 -----
 _ do _[
     _a set 0,
-    _b switch _{
+    _b branch _{
         c : [_a set 1],
         d : [_a set 2]
     },
@@ -206,9 +206,9 @@ _ do _[
 -----
 0
 =====
-switch block
+branch block
 -----
-_a switch _{
+_a branch _{
     a : [_b set 2, b]
 }
 -----
@@ -392,13 +392,13 @@ _ do _[
 -----
 6
 =====
-loop test
+loop then
 -----
 _ do _[
     _a set 42,
     _b set 24,
     _(a <> b) loop _[
-        (a > b) test _[
+        (a > b) then _[
             _a set a - b
         ] : _[
             _b set b - a
@@ -416,7 +416,7 @@ _ do _[
     _b set 0,
     _(b < 5) loop _[
         _b set b + 1,
-        _ .try (b = 2) test _[continue],
+        _ .try (b = 2) then _[continue],
         _a set a + b,
     ],
     a
@@ -430,7 +430,7 @@ _ do _[
     _a set 0,
     _b set 0,
     _(b < 5) loop _[
-        _ .try (a > 5) test _[.(.(a))],
+        _ .try (a > 5) then _[.(.(a))],
         _b set b + 1,
         _a set a + b,
     ]
@@ -438,11 +438,11 @@ _ do _[
 -----
 6
 =====
-iterate list
+each list
 -----
 _ do _[
     _sum set 0,
-    [1, 2, 3, 4, 5] iterate _i : _[
+    [1, 2, 3, 4, 5] each _i : _[
         _sum set sum + i
     ],
     sum
@@ -450,11 +450,11 @@ _ do _[
 -----
 15
 =====
-iterate empty list
+each empty list
 -----
 _ do _[
     _sum set 0,
-    [] iterate _i : _[
+    [] each _i : _[
         _sum set sum + i
     ],
     sum
@@ -462,19 +462,19 @@ _ do _[
 -----
 0
 =====
-iterate return 1
+each return 1
 -----
-[1, 2, 3, 4, 5] iterate _i : _[
-    _ .try (i = 3) test [.(.(true))]
+[1, 2, 3, 4, 5] each _i : _[
+    _ .try (i = 3) then [.(.(true))]
 ]
 -----
 true
 =====
-iterate return 2
+each return 2
 -----
 _ do _[
-    [1, 2, 3, 4, 5] iterate _i : _[
-        _ .try (i = 3) test _[break],
+    [1, 2, 3, 4, 5] each _i : _[
+        _ .try (i = 3) then _[break],
         _a set i
     ],
     a
@@ -482,14 +482,14 @@ _ do _[
 -----
 2
 =====
-iterate continue
+each continue
 -----
 _ do _[
     _a set 0,
     _b set 0,
-    [1, 2, 3, 4, 5] iterate _i : _[
+    [1, 2, 3, 4, 5] each _i : _[
         _a set a + i,
-        _ .try (i = 3) test _[continue],
+        _ .try (i = 3) then _[continue],
         _b set b + i
     ],
     a : b
@@ -497,12 +497,12 @@ _ do _[
 -----
 15 : 12
 =====
-iterate list map
+each list map
 -----
 _ do _[
     _push set _ import .list.push.context.let,
     _a set [],
-    [1, 2, 3, 4, 5] iterate _i : _[
+    [1, 2, 3, 4, 5] each _i : _[
         _a push i + 1
     ],
     a
@@ -510,11 +510,11 @@ _ do _[
 -----
 [2, 3, 4, 5, 6]
 =====
-iterate integer
+each integer
 -----
 _ do _[
     _sum set 0,
-    10 iterate _i : _[
+    10 each _i : _[
         _sum set sum + i
     ],
     sum
@@ -522,11 +522,11 @@ _ do _[
 -----
 45
 =====
-iterate integer 0
+each integer 0
 -----
 _ do _[
     _sum set 0,
-    0 iterate _i : _[
+    0 each _i : _[
         _sum set sum + i
     ],
     sum
@@ -534,7 +534,7 @@ _ do _[
 -----
 0
 =====
-iterate integer negative
+each integer negative
 -----
 _ do _[
     _config.make set _ import .config.make,
@@ -543,21 +543,21 @@ _ do _[
     _is_aborted set _ import .error.is_aborted.context.let,
     _c set _ config.make {
         .prelude : _ link.make {
-            iterate : iterate,
+            each : each,
         },
     },
-    _c config.let _(0-1 iterate _i : []),
+    _c config.let _(0-1 each _i : []),
     _c is_aborted .,
 ]
 -----
 true
 =====
-iterate byte
+each byte
 -----
 _ do _[
     _push set _ import .list.push.context.let,
     _b set [],
-    byte'1122334455' iterate _i : _[
+    byte'1122334455' each _i : _[
         _b push i
     ],
     b
@@ -565,12 +565,12 @@ _ do _[
 -----
 [byte'11', byte'22', byte'33', byte'44', byte'55']
 =====
-iterate key
+each key
 -----
 _ do _[
     _push set _ import .list.push.context.let,
     _s set [],
-    _abc iterate _i : _[
+    _abc each _i : _[
         _s push i
     ],
     s
@@ -578,12 +578,12 @@ _ do _[
 -----
 [a, b, c]
 =====
-iterate text
+each text
 -----
 _ do _[
     _push set _ import .list.push.context.let,
     _t set [],
-    "hello" iterate _i : _[
+    "hello" each _i : _[
         _t push i
     ],
     t
@@ -591,13 +591,13 @@ _ do _[
 -----
 ["h", "e", "l", "l", "o"]
 =====
-iterate map
+each map
 -----
 _ do _[
     _push set _ import .list.push.context.let,
     _map.make set _ import .map.make,
     _kv set [],
-    {1 : 2, 3 : 4} iterate _i : _[
+    {1 : 2, 3 : 4} each _i : _[
         _kv push i
     ],
     _ map.make kv

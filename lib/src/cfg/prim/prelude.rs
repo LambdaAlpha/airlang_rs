@@ -54,11 +54,11 @@ pub struct BasePrimPrelude {
     pub let_: PrimFuncVal,
 
     pub do_: PrimFuncVal,
-    pub test: PrimFuncVal,
-    pub switch: PrimFuncVal,
+    pub then: PrimFuncVal,
+    pub branch: PrimFuncVal,
     pub match_: PrimFuncVal,
     pub loop_: PrimFuncVal,
-    pub iterate: PrimFuncVal,
+    pub each: PrimFuncVal,
 
     pub equal: PrimFuncVal,
 
@@ -123,11 +123,11 @@ impl BasePrimPrelude {
             let_: lib.ctx.let_,
 
             do_: lib.ctrl.do_,
-            test: lib.ctrl.test,
-            switch: lib.ctrl.switch,
+            then: lib.ctrl.then,
+            branch: lib.ctrl.branch,
             match_: lib.ctrl.match_,
             loop_: lib.ctrl.loop_,
-            iterate: lib.ctrl.iterate,
+            each: lib.ctrl.each,
 
             equal: lib.value.equal,
 
@@ -189,11 +189,11 @@ impl Prelude for BasePrimPrelude {
         map_put_func(map, "let", self.let_);
 
         map_put_func(map, "do", self.do_);
-        map_put_func(map, "test", self.test);
-        map_put_func(map, "switch", self.switch);
+        map_put_func(map, "then", self.then);
+        map_put_func(map, "branch", self.branch);
         map_put_func(map, "match", self.match_);
         map_put_func(map, "loop", self.loop_);
-        map_put_func(map, "iterate", self.iterate);
+        map_put_func(map, "each", self.each);
 
         map_put_func(map, "=", self.equal);
 

@@ -36,31 +36,31 @@ use crate::type_::Text;
 #[derive(Copy, Clone)]
 pub struct CtrlLib {
     pub do_: PrimFuncVal,
-    pub test: PrimFuncVal,
-    pub switch: PrimFuncVal,
+    pub then: PrimFuncVal,
+    pub branch: PrimFuncVal,
     pub match_: PrimFuncVal,
     pub loop_: PrimFuncVal,
-    pub iterate: PrimFuncVal,
+    pub each: PrimFuncVal,
 }
 
 const CTRL: &str = "control";
 
 pub const DO: &str = concatcp!(PREFIX_CELL, CTRL, ".do");
-pub const TEST: &str = concatcp!(PREFIX_CELL, CTRL, ".test");
-pub const SWITCH: &str = concatcp!(PREFIX_CELL, CTRL, ".switch");
+pub const THEN: &str = concatcp!(PREFIX_CELL, CTRL, ".then");
+pub const BRANCH: &str = concatcp!(PREFIX_CELL, CTRL, ".branch");
 pub const MATCH: &str = concatcp!(PREFIX_CELL, CTRL, ".match");
 pub const LOOP: &str = concatcp!(PREFIX_CELL, CTRL, ".loop");
-pub const ITERATE: &str = concatcp!(PREFIX_CELL, CTRL, ".iterate");
+pub const EACH: &str = concatcp!(PREFIX_CELL, CTRL, ".each");
 
 impl Default for CtrlLib {
     fn default() -> Self {
         Self {
             do_: DefaultFunc { fn_: do_ }.build(),
-            test: DefaultFunc { fn_: test }.build(),
-            switch: DefaultFunc { fn_: switch }.build(),
+            then: DefaultFunc { fn_: then }.build(),
+            branch: DefaultFunc { fn_: branch }.build(),
             match_: DefaultFunc { fn_: match_ }.build(),
             loop_: DefaultFunc { fn_: loop_ }.build(),
-            iterate: DefaultFunc { fn_: iterate }.build(),
+            each: DefaultFunc { fn_: each }.build(),
         }
     }
 }
@@ -68,11 +68,11 @@ impl Default for CtrlLib {
 impl CfgMod for CtrlLib {
     fn extend(self, cfg: &mut Cfg) {
         extend_func(cfg, DO, self.do_);
-        extend_func(cfg, TEST, self.test);
-        extend_func(cfg, SWITCH, self.switch);
+        extend_func(cfg, THEN, self.then);
+        extend_func(cfg, BRANCH, self.branch);
         extend_func(cfg, MATCH, self.match_);
         extend_func(cfg, LOOP, self.loop_);
-        extend_func(cfg, ITERATE, self.iterate);
+        extend_func(cfg, EACH, self.each);
     }
 }
 
@@ -153,76 +153,76 @@ pub fn do_(cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
     block.flow(cfg, DO, ctx).unwrap_or_default()
 }
 
-pub fn test(cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
-    let Ok(test) = Test::parse(cfg, input) else {
+pub fn then(cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
+    let Ok(then) = Then::parse(cfg, input) else {
         return Val::default();
     };
-    test.eval(cfg, ctx)
+    then.eval(cfg, ctx)
 }
 
-struct Test {
+struct Then {
     condition: Bit,
     body: Block,
     default: Option<Block>,
 }
 
-impl Test {
+impl Then {
     fn parse(cfg: &mut Cfg, input: Val) -> Result<Self, Val> {
         let Val::Pair(pair) = input else {
-            return Err(bug!(cfg, "{TEST}: expect input to be a pair, but got {input}"));
+            return Err(bug!(cfg, "{THEN}: expect input to be a pair, but got {input}"));
         };
         let pair = Pair::from(pair);
         let condition = pair.left;
         let Val::Bit(condition) = condition else {
-            return Err(bug!(cfg, "{TEST}: expected condition to be a bit, but got {condition}"));
+            return Err(bug!(cfg, "{THEN}: expected condition to be a bit, but got {condition}"));
         };
         match pair.right {
             Val::Pair(branches) => {
                 let branches = Pair::from(branches);
-                let body = Block::parse(cfg, TEST, branches.left)?;
-                let default = Block::parse(cfg, TEST, branches.right)?;
-                Ok(Test { condition, body, default: Some(default) })
+                let body = Block::parse(cfg, THEN, branches.left)?;
+                let default = Block::parse(cfg, THEN, branches.right)?;
+                Ok(Then { condition, body, default: Some(default) })
             },
             body => {
-                let body = Block::parse(cfg, TEST, body)?;
-                Ok(Test { condition, body, default: None })
+                let body = Block::parse(cfg, THEN, body)?;
+                Ok(Then { condition, body, default: None })
             },
         }
     }
 
     fn eval(self, cfg: &mut Cfg, ctx: Ctx<Val>) -> Val {
         if *self.condition {
-            return self.body.flow(cfg, TEST, ctx).unwrap_or_default();
+            return self.body.flow(cfg, THEN, ctx).unwrap_or_default();
         }
         let Some(default) = self.default else {
             return Val::default();
         };
-        default.flow(cfg, TEST, ctx).unwrap_or_default()
+        default.flow(cfg, THEN, ctx).unwrap_or_default()
     }
 }
 
-pub fn switch(cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
-    let Ok(switch) = Switch::parse(cfg, input) else {
+pub fn branch(cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
+    let Ok(branch) = Branch::parse(cfg, input) else {
         return Val::default();
     };
-    switch.eval(cfg, ctx)
+    branch.eval(cfg, ctx)
 }
 
-struct Switch {
+struct Branch {
     val: Key,
     map: HashMap<Key, Block>,
     default: Option<Block>,
 }
 
-impl Switch {
+impl Branch {
     fn parse(cfg: &mut Cfg, input: Val) -> Result<Self, Val> {
         let Val::Pair(pair) = input else {
-            return Err(bug!(cfg, "{SWITCH}: expected input to be a pair, but got {input}"));
+            return Err(bug!(cfg, "{BRANCH}: expected input to be a pair, but got {input}"));
         };
         let pair = Pair::from(pair);
         let val = pair.left;
         let Val::Key(val) = val else {
-            return Err(bug!(cfg, "{SWITCH}: expected input.left to be a key, but got {val}"));
+            return Err(bug!(cfg, "{BRANCH}: expected input.left to be a key, but got {val}"));
         };
         match pair.right {
             Val::Map(map) => {
@@ -232,15 +232,15 @@ impl Switch {
             Val::Pair(pair) => {
                 let pair = Pair::from(pair);
                 let Val::Map(map) = pair.left else {
-                    return Err(bug!(cfg, "{SWITCH}: expected input.right.left to be a map, \
+                    return Err(bug!(cfg, "{BRANCH}: expected input.right.left to be a map, \
                         but got {}", pair.left));
                 };
                 let map = Self::parse_block_map(cfg, map)?;
-                let default = Some(Block::parse(cfg, SWITCH, pair.right)?);
+                let default = Some(Block::parse(cfg, BRANCH, pair.right)?);
                 Ok(Self { val, map, default })
             },
             v => {
-                Err(bug!(cfg, "{SWITCH}: expected input.right to be a map or a pair, but got {v}"))
+                Err(bug!(cfg, "{BRANCH}: expected input.right to be a map or a pair, but got {v}"))
             },
         }
     }
@@ -248,7 +248,7 @@ impl Switch {
     fn parse_block_map(cfg: &mut Cfg, map: MapVal) -> Result<HashMap<Key, Block>, Val> {
         let mut block_map = HashMap::<Key, Block>::new();
         for (k, v) in Map::from(map) {
-            block_map.insert(k, Block::parse(cfg, SWITCH, v)?);
+            block_map.insert(k, Block::parse(cfg, BRANCH, v)?);
         }
         Ok(block_map)
     }
@@ -257,7 +257,7 @@ impl Switch {
         let Some(body) = self.map.remove(&self.val).or(self.default) else {
             return Val::default();
         };
-        body.flow(cfg, SWITCH, ctx).unwrap_or_default()
+        body.flow(cfg, BRANCH, ctx).unwrap_or_default()
     }
 }
 
@@ -372,28 +372,28 @@ impl Loop {
     }
 }
 
-pub fn iterate(cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
-    let Ok(iterate) = Iterate::parse(cfg, input) else {
+pub fn each(cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
+    let Ok(each) = Each::parse(cfg, input) else {
         return Val::default();
     };
-    iterate.eval(cfg, ctx)
+    each.eval(cfg, ctx)
 }
 
-struct Iterate {
+struct Each {
     val: Val,
     name: Option<Key>,
     body: Block,
 }
 
-impl Iterate {
+impl Each {
     fn parse(cfg: &mut Cfg, input: Val) -> Result<Self, Val> {
         let Val::Pair(pair) = input else {
-            return Err(bug!(cfg, "{ITERATE}: expected input to be a pair, but got {input}"));
+            return Err(bug!(cfg, "{EACH}: expected input to be a pair, but got {input}"));
         };
         let pair = Pair::from(pair);
         let val = pair.left;
         let Val::Pair(name_body) = pair.right else {
-            return Err(bug!(cfg, "{ITERATE}: expected input.right to be a pair, \
+            return Err(bug!(cfg, "{EACH}: expected input.right to be a pair, \
                 but got {}", pair.right));
         };
         let name_body = Pair::from(name_body);
@@ -402,11 +402,11 @@ impl Iterate {
             Val::Unit(_) => None,
             v => {
                 return Err(
-                    bug!(cfg, "{ITERATE}: expected input.right.left to be a key, but got {v}"),
+                    bug!(cfg, "{EACH}: expected input.right.left to be a key, but got {v}"),
                 );
             },
         };
-        let body = Block::parse(cfg, ITERATE, name_body.right)?;
+        let body = Block::parse(cfg, EACH, name_body.right)?;
         Ok(Self { val, name, body })
     }
 
@@ -415,43 +415,43 @@ impl Iterate {
             Val::Int(i) => {
                 let i = Int::from(i);
                 if i.is_negative() {
-                    return bug!(cfg, "{ITERATE}: expected integer to be non-negative, \
+                    return bug!(cfg, "{EACH}: expected integer to be non-negative, \
                         but got {i}");
                 }
                 let Some(i) = i.to_u128() else {
-                    return bug!(cfg, "{ITERATE}: unable to iterate {i}");
+                    return bug!(cfg, "{EACH}: unable to each {i}");
                 };
                 let iter = (0 .. i).map(|i| {
                     let i = Int::from(i);
                     Val::Int(i.into())
                 });
-                iterate_val(cfg, ctx, self.body, self.name, iter)
+                each_val(cfg, ctx, self.body, self.name, iter)
             },
             Val::Byte(byte) => {
                 let iter = byte.iter().map(|byte| {
                     let byte = Byte::from(vec![*byte]);
                     Val::Byte(byte.into())
                 });
-                iterate_val(cfg, ctx, self.body, self.name, iter)
+                each_val(cfg, ctx, self.body, self.name, iter)
             },
             Val::Key(key) => {
                 let iter = key.char_indices().map(|(start, c)| {
                     let key = Key::from_str_unchecked(&key[start .. start + c.len_utf8()]);
                     Val::Key(key)
                 });
-                iterate_val(cfg, ctx, self.body, self.name, iter)
+                each_val(cfg, ctx, self.body, self.name, iter)
             },
             Val::Text(t) => {
                 let iter = t.chars().map(|c| {
                     let text = Text::from(c.to_string());
                     Val::Text(text.into())
                 });
-                iterate_val(cfg, ctx, self.body, self.name, iter)
+                each_val(cfg, ctx, self.body, self.name, iter)
             },
             Val::List(list) => {
                 let list = List::from(list);
                 let iter = list.into_iter();
-                iterate_val(cfg, ctx, self.body, self.name, iter)
+                each_val(cfg, ctx, self.body, self.name, iter)
             },
             Val::Map(map) => {
                 let map = Map::from(map);
@@ -459,35 +459,35 @@ impl Iterate {
                     let pair = Pair::new(Val::Key(pair.0), pair.1);
                     Val::Pair(pair.into())
                 });
-                iterate_val(cfg, ctx, self.body, self.name, iter)
+                each_val(cfg, ctx, self.body, self.name, iter)
             },
-            v => bug!(cfg, "{ITERATE}: expected input.left to be iterable, but got {v}"),
+            v => bug!(cfg, "{EACH}: expected input.left to be iterable, but got {v}"),
         }
     }
 }
 
-fn iterate_val<ValIter>(
+fn each_val<ValIter>(
     cfg: &mut Cfg, mut ctx: Ctx<Val>, body: Block, name: Option<Key>, values: ValIter,
 ) -> Val
 where ValIter: Iterator<Item = Val> {
     for val in values {
         if let Some(name) = name.clone() {
             if ctx.const_ {
-                return bug!(cfg, "{ITERATE}: expected name to be a unit in constant context, \
+                return bug!(cfg, "{EACH}: expected name to be a unit in constant context, \
                     but got {name}");
             }
             if ctx.val.set(cfg, name, val).is_none() {
                 return Val::default();
             }
         }
-        let Some(output) = body.clone().flow(cfg, ITERATE, ctx.reborrow()) else {
+        let Some(output) = body.clone().flow(cfg, EACH, ctx.reborrow()) else {
             return Val::default();
         };
         match output {
             Val::Cell(cell) => return Cell::from(cell).value,
             Val::Unit(_) => {},
             output => {
-                bug!(cfg, "{ITERATE}: expected return value of body to be a cell or unit, \
+                bug!(cfg, "{EACH}: expected return value of body to be a cell or unit, \
                     but got {output}");
                 return Val::default();
             },

@@ -4,7 +4,7 @@ _ do _[
     _x set 42,
     _y set 24,
     _(x <> y) loop _[
-        (x > y) test _[
+        (x > y) then _[
             _x set x - y
         ] : _[
             _y set y - x

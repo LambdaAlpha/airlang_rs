@@ -247,12 +247,12 @@ true is_carmichael_number ?
 
 ### 上下文
 
-上下文是执行过程中的局部信息环境，在核心语义中可以通过键访问上下文，函数也支持感知或更新上下文。可通过 `get` 函数读取上下文中的变量，或通过 `set` 函数更新上下文中的变量，亦可通过 `which` 函数指定上下文。我们基于函数的这项特性实现了各种控制流函数，包含顺序执行 `do`，条件执行 `test`，模式匹配 `match`，循环 `loop`，迭代 `iterate` 等，并在初始上下文中提供了最常用和最必要的核心函数。
+上下文是执行过程中的局部信息环境，在核心语义中可以通过键访问上下文，函数也支持感知或更新上下文。可通过 `get` 函数读取上下文中的变量，或通过 `set` 函数更新上下文中的变量，亦可通过 `which` 函数指定上下文。我们基于函数的这项特性实现了各种控制流函数，包含顺序执行 `do`，条件执行 `then`，模式匹配 `match`，循环 `loop`，迭代 `each` 等，并在初始上下文中提供了最常用和最必要的核心函数。
 
 ```air
 _ do _[
     _sum set 0,
-    100 iterate _i : _[
+    100 each _i : _[
         _sum set sum + i
     ],
     sum
@@ -282,7 +282,7 @@ _ do _[
     _any set _ import .value.any,
     _a set _ any .integer,
     _b set a * 1,
-    (a <> b) test _[
+    (a <> b) then _[
         _ abort .
     ],
     _ assert a = b / 1
@@ -315,7 +315,7 @@ _ do _[
     .solver export _ function {
         code : _(. : fo) : _(_ do _[
             _(f : o) is fo,
-            (o and f = formula) test [
+            (o and f = formula) then [
                 formula fact [true, false, true, true, false]
             ]
         ]),
@@ -324,7 +324,7 @@ _ do _[
             is : is,
             = : =,
             and : and,
-            test : test,
+            then : then,
             formula : formula,
             fact : fact,
         },

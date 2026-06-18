@@ -5,8 +5,8 @@ _ do _[
     _f set _ function {
         code : _((. : n) : _ do _[
             _sum set 0,
-            n iterate _i : _[
-                _ .try (0 = i % 3) test _[continue],
+            n each _i : _[
+                _ .try (0 = i % 3) then _[continue],
                 _sum set sum + i,
             ],
             sum
@@ -14,10 +14,10 @@ _ do _[
         prelude : {
             do : do,
             set : set,
-            iterate : iterate,
+            each : each,
             = : =,
             % : %,
-            test : test,
+            then : then,
             continue : continue,
             + : +,
         },
