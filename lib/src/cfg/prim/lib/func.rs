@@ -8,7 +8,6 @@ use crate::cfg::repr::func::generate_func;
 use crate::cfg::repr::func::parse_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
-use crate::semantics::func::ConstInputFreeFunc;
 use crate::semantics::func::CtxFreeFunc;
 use crate::semantics::func::PrimCtx;
 use crate::semantics::func::PrimInput;
@@ -46,13 +45,13 @@ impl Default for FuncLib {
         Self {
             make: CtxFreeFunc { fn_: make }.build(),
             represent: CtxFreeFunc { fn_: represent }.build(),
-            is_free: ConstInputFreeFunc { fn_: is_free }.build(),
-            is_constant: ConstInputFreeFunc { fn_: is_constant }.build(),
-            is_input_free: ConstInputFreeFunc { fn_: is_input_free }.build(),
-            is_primitive: ConstInputFreeFunc { fn_: is_primitive }.build(),
-            get_code: ConstInputFreeFunc { fn_: get_code }.build(),
-            get_prelude: ConstInputFreeFunc { fn_: get_prelude }.build(),
-            get_id: ConstInputFreeFunc { fn_: get_id }.build(),
+            is_free: CtxFreeFunc { fn_: is_free }.build(),
+            is_constant: CtxFreeFunc { fn_: is_constant }.build(),
+            is_input_free: CtxFreeFunc { fn_: is_input_free }.build(),
+            is_primitive: CtxFreeFunc { fn_: is_primitive }.build(),
+            get_code: CtxFreeFunc { fn_: get_code }.build(),
+            get_prelude: CtxFreeFunc { fn_: get_prelude }.build(),
+            get_id: CtxFreeFunc { fn_: get_id }.build(),
         }
     }
 }
@@ -85,16 +84,16 @@ pub fn represent(cfg: &mut Cfg, input: Val) -> Val {
     Val::Map(generate_func(func))
 }
 
-pub fn is_free(cfg: &mut Cfg, ctx: &Val) -> Val {
-    let Val::Func(func) = ctx else {
-        return bug!(cfg, "{IS_FREE}: expected context to be a function, but got {ctx}");
+pub fn is_free(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Func(func) = input else {
+        return bug!(cfg, "{IS_FREE}: expected input to be a function, but got {input}");
     };
     Val::Bit(Bit::from(matches!(func.ctx(), PrimCtx::Free)))
 }
 
-pub fn is_constant(cfg: &mut Cfg, ctx: &Val) -> Val {
-    let Val::Func(func) = ctx else {
-        return bug!(cfg, "{IS_CONSTANT}: expected context to be a function, but got {ctx}");
+pub fn is_constant(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Func(func) = input else {
+        return bug!(cfg, "{IS_CONSTANT}: expected input to be a function, but got {input}");
     };
     match func.ctx() {
         PrimCtx::Free => Val::Bit(Bit::from(true)),
@@ -104,31 +103,31 @@ pub fn is_constant(cfg: &mut Cfg, ctx: &Val) -> Val {
     }
 }
 
-pub fn is_input_free(cfg: &mut Cfg, ctx: &Val) -> Val {
-    let Val::Func(func) = ctx else {
-        return bug!(cfg, "{IS_INPUT_FREE}: expected context to be a function, but got {ctx}");
+pub fn is_input_free(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Func(func) = input else {
+        return bug!(cfg, "{IS_INPUT_FREE}: expected input to be a function, but got {input}");
     };
     Val::Bit(Bit::from(matches!(func.input(), PrimInput::Free)))
 }
 
-pub fn is_primitive(cfg: &mut Cfg, ctx: &Val) -> Val {
-    let Val::Func(func) = ctx else {
-        return bug!(cfg, "{IS_PRIMITIVE}: expected context to be a function, but got {ctx}");
+pub fn is_primitive(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Func(func) = input else {
+        return bug!(cfg, "{IS_PRIMITIVE}: expected input to be a function, but got {input}");
     };
     let is_primitive = func.is_primitive();
     Val::Bit(Bit::from(is_primitive))
 }
 
-pub fn get_code(cfg: &mut Cfg, ctx: &Val) -> Val {
-    let Val::Func(func) = ctx else {
-        return bug!(cfg, "{GET_CODE}: expected context to be a function, but got {ctx}");
+pub fn get_code(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Func(func) = input else {
+        return bug!(cfg, "{GET_CODE}: expected input to be a function, but got {input}");
     };
-    generate_code(func)
+    generate_code(&func)
 }
 
-pub fn get_prelude(cfg: &mut Cfg, ctx: &Val) -> Val {
-    let Val::Func(func) = ctx else {
-        return bug!(cfg, "{GET_PRELUDE}: expected context to be a function, but got {ctx}");
+pub fn get_prelude(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Func(func) = input else {
+        return bug!(cfg, "{GET_PRELUDE}: expected input to be a function, but got {input}");
     };
     let Some(ctx) = func.prelude() else {
         return bug!(cfg, "{GET_PRELUDE}: prelude not found");
@@ -136,9 +135,9 @@ pub fn get_prelude(cfg: &mut Cfg, ctx: &Val) -> Val {
     ctx.clone()
 }
 
-pub fn get_id(cfg: &mut Cfg, ctx: &Val) -> Val {
-    let Val::Func(func) = ctx else {
-        return bug!(cfg, "{GET_ID}: expected context to be a function, but got {ctx}");
+pub fn get_id(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Func(func) = input else {
+        return bug!(cfg, "{GET_ID}: expected input to be a function, but got {input}");
     };
     let id = func.id();
     let id = Key::from_string_unchecked(format!("{id:x}"));

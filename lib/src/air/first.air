@@ -10,7 +10,7 @@ _ do _[
     _context.let.bind set _ function {
         code : _(. : f) : _(_ do _[
             _ assert .function = _f context.let get_type : .,
-            _constant set _f context.let is_constant : .,
+            _constant set f is_constant _,
             _ function {
                 constant : constant,
                 code : _(context : input) : _(_ do _[
@@ -45,7 +45,7 @@ _ do _[
     _link.let.bind set _ function {
         code : _(. : f) : _(_ do _[
             _ assert .function = _f context.let get_type : .,
-            _constant set _f context.let is_constant : .,
+            _constant set f is_constant _,
             _ function {
                 constant : constant,
                 code : _(. : input) : _(_ do _[

@@ -1,11 +1,2 @@
 _ do _[
-    _ export_let_bind_many [
-        .function.is_free,
-        .function.is_constant,
-        .function.is_input_free,
-        .function.is_primitive,
-        .function.get_code,
-        .function.get_prelude,
-        .function.get_id,
-    ],
 ]
