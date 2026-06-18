@@ -108,6 +108,6 @@ fn is_syntax(val: &Val) -> bool {
         Val::Quote(quote) => is_syntax(&quote.value),
         Val::Call(call) => is_syntax(&call.func) && is_syntax(&call.input),
         Val::Solve(solve) => is_syntax(&solve.func) && is_syntax(&solve.output),
-        Val::Link(_) | Val::Cfg(_) | Val::Func(_) | Val::Dyn(_) => false,
+        Val::Fact(_) | Val::Link(_) | Val::Cfg(_) | Val::Func(_) | Val::Dyn(_) => false,
     }
 }

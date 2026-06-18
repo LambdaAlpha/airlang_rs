@@ -223,7 +223,7 @@ true is_carmichael_number ?
 
 **solve**
 
-`? f o` ➔ `i`, where `f'(i) = o'` is a fact in the configuration's fact database
+`? f o` ➔ `i`, where `i` is any value satisfying `f'(i) = o'`
 
 **cell**
 
@@ -261,7 +261,7 @@ _ do _[
 
 ### Configuration
 
-Configuration is the global information environment during execution. Through mechanisms like append-only and scoped override, it balances flexibility and predictability. Configuration items can be imported via the `import` function, exported via the `export` function, or locally overridden via the `with` function. We will implement features like module management, task management, error handling, and testing frameworks based on the configuration mechanism, and provide native functions and standard libraries in the initial configuration.
+`Config` is the global information environment during execution. Through mechanisms like append-only and scoped override, it balances flexibility and predictability. Configuration items can be imported via the `import` function, exported via the `export` function, or locally overridden via the `with` function. We will implement features like module management, task management, error handling, and testing frameworks based on the configuration mechanism, and provide native functions and standard libraries in the initial configuration.
 
 ```air
 _ with {
@@ -291,7 +291,7 @@ _ do _[
 
 ### Solve
 
-**Solve** is used to express the need to solve a problem. For example, "find an assignment that makes a Boolean formula true" is a need to solve a problem, where the "Boolean formula" is a function `formula` whose expected output is `true`, which can be expressed as a solve `? formula true`. The solve mechanism allows any need to be expressed formally, without caring about the specific implementation. However, the solve mechanism is not magic and cannot automatically solve problems; it still requires the implementer of the need to actually solve the problem.
+`Solve` is used to formally express the need to solve a problem. For example, "find an assignment that makes a Boolean formula true" is a need to solve a problem, where the "Boolean formula" is a function (`formula`) whose expected output is `true`, which can be expressed as a `solve` (`? formula true`). The configured solver can use any strategy to solve the problem. If successful, it returns a `fact`. A `fact` is an immutable record of a function call (function, input, output), ensuring the reliability of the answer.
 
 ```air
 _ do _[
@@ -312,7 +312,23 @@ _ do _[
             or : or,
         },
     },
-    formula fact [true, false, true, true, false],
+    .solver export _ function {
+        code : _(. : fo) : _(_ do _[
+            _(f : o) is fo,
+            (o and f = formula) test [
+                formula fact [true, false, true, true, false]
+            ]
+        ]),
+        prelude : {
+            do : do,
+            is : is,
+            = : =,
+            and : and,
+            test : test,
+            formula : formula,
+            fact : fact,
+        },
+    },
     ? formula true
 ]
 ```

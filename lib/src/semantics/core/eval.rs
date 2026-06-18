@@ -1,4 +1,7 @@
+use const_format::concatcp;
+
 use crate::semantics::cfg::Cfg;
+use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::core::form::CellForm;
 use crate::semantics::core::form::ListForm;
 use crate::semantics::core::form::MapForm;
@@ -16,6 +19,7 @@ use crate::semantics::val::SolveVal;
 use crate::semantics::val::Val;
 use crate::type_::Call;
 use crate::type_::Key;
+use crate::type_::Pair;
 use crate::type_::Quote;
 use crate::type_::Solve;
 
@@ -42,8 +46,7 @@ where
         let call = Call::from(call);
         let func = self.func.call(cfg, ctx.reborrow(), call.func);
         let Val::Func(func) = func else {
-            cfg.abort();
-            return Val::default();
+            return cfg.abort();
         };
         let input = self.input.call(cfg, ctx.reborrow(), call.input);
         if cfg.is_aborted() {
@@ -52,6 +55,8 @@ where
         func.call(cfg, ctx, input)
     }
 }
+
+pub const SOLVER: &str = concatcp!(PREFIX_CELL, "solver");
 
 pub(crate) struct SolveEval<'a, Func, Output> {
     pub(crate) func: &'a Func,
@@ -67,18 +72,30 @@ where
         let solve = Solve::from(solve);
         let func = self.func.call(cfg, ctx.reborrow(), solve.func);
         let Val::Func(func) = func else {
-            cfg.abort();
-            return Val::default();
+            return cfg.abort();
         };
-        let output = self.output.call(cfg, ctx, solve.output);
+        let output = self.output.call(cfg, ctx.reborrow(), solve.output);
         if cfg.is_aborted() {
             return Val::default();
         }
-        let Some(input) = cfg.fact_solve(func, output) else {
-            cfg.abort();
-            return Val::default();
+        let Some(solver) = cfg.import(Key::from_str_unchecked(SOLVER)) else {
+            return cfg.abort();
         };
-        input
+        let Val::Func(solver) = solver else {
+            return cfg.abort();
+        };
+        let solver = solver.clone();
+        let problem = Val::Pair(Pair::new(Val::Func(func.clone()), output.clone()).into());
+        let Val::Fact(fact) = solver.call(cfg, ctx.reborrow(), problem) else {
+            return cfg.abort();
+        };
+        if cfg.is_aborted() {
+            return Val::default();
+        }
+        if *fact.func() != func || *fact.output() != output {
+            return cfg.abort();
+        }
+        fact.input().clone()
     }
 }
 

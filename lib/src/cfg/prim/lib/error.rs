@@ -48,8 +48,7 @@ impl CfgMod for ErrorLib {
 }
 
 pub fn abort(cfg: &mut Cfg) -> Val {
-    cfg.abort();
-    Val::default()
+    cfg.abort()
 }
 
 pub fn assert(cfg: &mut Cfg, input: Val) -> Val {
@@ -57,7 +56,7 @@ pub fn assert(cfg: &mut Cfg, input: Val) -> Val {
         return bug!(cfg, "{ASSERT}: expected input.left to be a bit, but got {input}");
     };
     if !*bit {
-        cfg.abort();
+        return cfg.abort();
     }
     Val::default()
 }

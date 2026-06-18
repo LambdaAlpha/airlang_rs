@@ -14,8 +14,7 @@ pub const ABORT_TYPE_BUG: &str = concatcp!(PREFIX_CELL, "bug");
 pub fn abort_by_bug_with_msg(cfg: &mut Cfg, msg: Text) -> Val {
     abort_by_bug(cfg);
     set_abort_msg(cfg, msg);
-    cfg.abort();
-    Val::default()
+    cfg.abort()
 }
 
 pub fn abort_by_bug(cfg: &mut Cfg) {

@@ -11,6 +11,8 @@ use rand::distr::Uniform;
 use rand::prelude::Distribution;
 
 use crate::semantics::cfg::Cfg;
+use crate::semantics::ctx::Ctx;
+use crate::semantics::fact::Fact;
 use crate::semantics::func::CompCtx;
 use crate::semantics::func::CompFunc;
 use crate::semantics::func::CompInput;
@@ -43,7 +45,7 @@ pub(crate) struct Any {
 
 impl Distribution<Val> for Any {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Val {
-        let max = if self.syntax { 13 } else { 16 };
+        let max = if self.syntax { 13 } else { 17 };
         match rng.random_range(0 ..= max) {
             0 => Val::Unit(Distribution::<Unit>::sample(self, rng)),
             1 => Val::Bit(Distribution::<Bit>::sample(self, rng)),
@@ -59,9 +61,10 @@ impl Distribution<Val> for Any {
             11 => Val::Quote(Distribution::<Quote<Val>>::sample(self, rng).into()),
             12 => Val::Call(Distribution::<Call<Val, Val>>::sample(self, rng).into()),
             13 => Val::Solve(Distribution::<Solve<Val, Val>>::sample(self, rng).into()),
-            14 => Val::Link(Distribution::<LinkVal>::sample(self, rng)),
-            15 => Val::Cfg(Distribution::<Cfg>::sample(self, rng).into()),
-            16 => Val::Func(Distribution::<FuncVal>::sample(self, rng)),
+            14 => Val::Fact(Distribution::<Fact>::sample(self, rng).into()),
+            15 => Val::Link(Distribution::<LinkVal>::sample(self, rng)),
+            16 => Val::Cfg(Distribution::<Cfg>::sample(self, rng).into()),
+            17 => Val::Func(Distribution::<FuncVal>::sample(self, rng)),
             _ => unreachable!(),
         }
     }
@@ -208,6 +211,24 @@ where
             map.insert(self.sample(rng), self.sample(rng));
         }
         map
+    }
+}
+
+// todo impl
+impl Distribution<Fact> for Any {
+    fn sample<R: Rng + ?Sized>(&self, _rng: &mut R) -> Fact {
+        // generate safe facts, don't abort
+        let ctx = CompCtx { name: Key::default(), prim: PrimCtx::Free };
+        let input = CompInput { name: Key::default(), prim: PrimInput::Free };
+        let prelude = Val::default();
+        let body = Val::default();
+        let func = CompFunc { prelude, body, input, ctx };
+        let func = FuncVal::Comp(func.into());
+        let input = Val::default();
+        let mut cfg = Cfg::default();
+        let mut ctx = Val::default();
+        let ctx = Ctx::new_const(&mut ctx);
+        Fact::new(&mut cfg, ctx, func, input)
     }
 }
 

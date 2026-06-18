@@ -11,6 +11,7 @@ use crate::cfg::extend_func;
 use crate::cfg::prim::lib::value::arbitrary::Any;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
+use crate::semantics::fact::Fact;
 use crate::semantics::func::ConstInputFreeFunc;
 use crate::semantics::func::CtxFreeFunc;
 use crate::semantics::val::BIT;
@@ -19,6 +20,7 @@ use crate::semantics::val::CALL;
 use crate::semantics::val::CELL;
 use crate::semantics::val::CFG;
 use crate::semantics::val::DECIMAL;
+use crate::semantics::val::FACT;
 use crate::semantics::val::FUNC;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::INT;
@@ -95,6 +97,7 @@ const TYPE_MAP: &str = concatcp!(PREFIX_CELL, MAP);
 const TYPE_QUOTE: &str = concatcp!(PREFIX_CELL, QUOTE);
 const TYPE_CALL: &str = concatcp!(PREFIX_CELL, CALL);
 const TYPE_SOLVE: &str = concatcp!(PREFIX_CELL, SOLVE);
+const TYPE_FACT: &str = concatcp!(PREFIX_CELL, FACT);
 const TYPE_LINK: &str = concatcp!(PREFIX_CELL, LINK);
 const TYPE_CFG: &str = concatcp!(PREFIX_CELL, CFG);
 const TYPE_FUNC: &str = concatcp!(PREFIX_CELL, FUNC);
@@ -134,6 +137,7 @@ pub fn any(cfg: &mut Cfg, input: Val) -> Val {
             TYPE_SOLVE => {
                 Val::Solve(Distribution::<Solve<Val, Val>>::sample(&Any::default(), rng).into())
             },
+            TYPE_FACT => Val::Fact(Distribution::<Fact>::sample(&Any::default(), rng).into()),
             TYPE_LINK => Val::Link(Distribution::<LinkVal>::sample(&Any::default(), rng)),
             TYPE_CFG => Val::Cfg(Distribution::<Cfg>::sample(&Any::default(), rng).into()),
             TYPE_FUNC => Val::Func(Distribution::<FuncVal>::sample(&Any::default(), rng)),
@@ -159,6 +163,7 @@ pub fn get_type(_cfg: &mut Cfg, ctx: &Val) -> Val {
         Val::Quote(_) => TYPE_QUOTE,
         Val::Call(_) => TYPE_CALL,
         Val::Solve(_) => TYPE_SOLVE,
+        Val::Fact(_) => TYPE_FACT,
         Val::Link(_) => TYPE_LINK,
         Val::Cfg(_) => TYPE_CFG,
         Val::Func(_) => TYPE_FUNC,

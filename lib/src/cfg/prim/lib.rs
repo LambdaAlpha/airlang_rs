@@ -40,6 +40,7 @@ pub struct BasePrimLib {
     pub quote: QuoteLib,
     pub call: CallLib,
     pub solve: SolveLib,
+    pub fact: FactLib,
     pub link: LinkLib,
     pub cfg: CfgLib,
     pub func: FuncLib,
@@ -47,7 +48,6 @@ pub struct BasePrimLib {
     pub ctrl: CtrlLib,
     pub value: ValueLib,
     pub error: ErrorLib,
-    pub fact: FactLib,
     pub lang: LangLib,
 }
 
@@ -67,6 +67,7 @@ impl CfgMod for BasePrimLib {
         self.quote.extend(cfg);
         self.call.extend(cfg);
         self.solve.extend(cfg);
+        self.fact.extend(cfg);
         self.link.extend(cfg);
         self.cfg.extend(cfg);
         self.func.extend(cfg);
@@ -74,7 +75,6 @@ impl CfgMod for BasePrimLib {
         self.ctrl.extend(cfg);
         self.value.extend(cfg);
         self.error.extend(cfg);
-        self.fact.extend(cfg);
         self.lang.extend(cfg);
     }
 }
@@ -107,6 +107,8 @@ pub mod call;
 
 pub mod solve;
 
+pub mod fact;
+
 pub mod link;
 
 pub mod cfg;
@@ -122,7 +124,5 @@ pub mod ctrl;
 pub mod value;
 
 pub mod error;
-
-pub mod fact;
 
 pub mod lang;

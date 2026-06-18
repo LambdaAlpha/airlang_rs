@@ -6,103 +6,80 @@ use crate::cfg::extend_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::ctx::Ctx;
+use crate::semantics::fact::Fact;
 use crate::semantics::func::CtxFreeFunc;
+use crate::semantics::func::DefaultFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
-use crate::type_::Bit;
-use crate::type_::Cell;
 use crate::type_::Pair;
 
 #[derive(Copy, Clone)]
 pub struct FactLib {
-    pub put: PrimFuncVal,
-    pub call: PrimFuncVal,
-    pub solve: PrimFuncVal,
-    pub exist: PrimFuncVal,
+    pub make: PrimFuncVal,
+    pub get_function: PrimFuncVal,
+    pub get_input: PrimFuncVal,
+    pub get_output: PrimFuncVal,
 }
 
 const FACT: &str = "fact";
 
-pub const PUT: &str = concatcp!(PREFIX_CELL, FACT, ".put");
-pub const CALL: &str = concatcp!(PREFIX_CELL, FACT, ".call");
-pub const SOLVE: &str = concatcp!(PREFIX_CELL, FACT, ".solve");
-pub const EXIST: &str = concatcp!(PREFIX_CELL, FACT, ".exist");
+pub const MAKE: &str = concatcp!(PREFIX_CELL, FACT, ".make");
+pub const GET_FUNCTION: &str = concatcp!(PREFIX_CELL, FACT, ".get_function");
+pub const GET_INPUT: &str = concatcp!(PREFIX_CELL, FACT, ".get_input");
+pub const GET_OUTPUT: &str = concatcp!(PREFIX_CELL, FACT, ".get_output");
 
 impl Default for FactLib {
     fn default() -> Self {
         Self {
-            put: CtxFreeFunc { fn_: put }.build(),
-            call: CtxFreeFunc { fn_: call }.build(),
-            solve: CtxFreeFunc { fn_: solve }.build(),
-            exist: CtxFreeFunc { fn_: exist }.build(),
+            make: DefaultFunc { fn_: make }.build(),
+            get_function: CtxFreeFunc { fn_: get_function }.build(),
+            get_input: CtxFreeFunc { fn_: get_input }.build(),
+            get_output: CtxFreeFunc { fn_: get_output }.build(),
         }
     }
 }
 
 impl CfgMod for FactLib {
     fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, PUT, self.put);
-        extend_func(cfg, CALL, self.call);
-        extend_func(cfg, SOLVE, self.solve);
-        extend_func(cfg, EXIST, self.exist);
+        extend_func(cfg, MAKE, self.make);
+        extend_func(cfg, GET_FUNCTION, self.get_function);
+        extend_func(cfg, GET_INPUT, self.get_input);
+        extend_func(cfg, GET_OUTPUT, self.get_output);
     }
 }
 
-pub fn put(cfg: &mut Cfg, input: Val) -> Val {
+fn make(cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
     let Val::Pair(pair) = input else {
-        return bug!(cfg, "{PUT}: expected input to be a pair, but got {input}");
+        return bug!(cfg, "{MAKE}: expected input to be a pair, but got {input}");
     };
     let pair = Pair::from(pair);
     let Val::Func(func) = pair.left else {
-        return bug!(cfg, "{PUT}: expected input.left to be a function, but got {}", pair.left);
+        return bug!(cfg, "{MAKE}: expected input.left to be a function, but got {}", pair.left);
     };
-    // todo design support ctx aware facts?
-    let mut ctx = Val::default();
-    let ctx = Ctx::new_mut(&mut ctx);
-    cfg.fact_put(ctx, func, pair.right);
-    Val::default()
-}
-
-pub fn call(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return bug!(cfg, "{CALL}: expected input to be a pair, but got {input}");
-    };
-    let pair = Pair::from(pair);
-    let Val::Func(func) = pair.left else {
-        return bug!(cfg, "{CALL}: expected input.left to be a function, but got {}", pair.left);
-    };
-    match cfg.fact_call(func, pair.right) {
-        Some(output) => Val::Cell(Cell::new(output).into()),
-        None => Val::default(),
+    let fact = Fact::new(cfg, ctx, func, pair.right);
+    if cfg.is_aborted() {
+        return Val::default();
     }
+    Val::Fact(fact.into())
 }
 
-pub fn solve(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return bug!(cfg, "{SOLVE}: expected input to be a pair, but got {input}");
+fn get_function(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Fact(fact) = input else {
+        return bug!(cfg, "{GET_FUNCTION}: expected input to be a fact, but got {input}");
     };
-    let pair = Pair::from(pair);
-    let Val::Func(func) = pair.left else {
-        return bug!(cfg, "{SOLVE}: expected input.left to be a function, but got {}", pair.left);
-    };
-    match cfg.fact_solve(func, pair.right) {
-        Some(input) => Val::Cell(Cell::new(input).into()),
-        None => Val::default(),
-    }
+    Val::Func(fact.func().clone())
 }
 
-pub fn exist(cfg: &mut Cfg, input: Val) -> Val {
-    let Val::Pair(pair) = input else {
-        return bug!(cfg, "{EXIST}: expected input to be a pair, but got {input}");
+fn get_input(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Fact(fact) = input else {
+        return bug!(cfg, "{GET_INPUT}: expected input to be a fact, but got {input}");
     };
-    let pair = Pair::from(pair);
-    let Val::Func(func) = pair.left else {
-        return bug!(cfg, "{EXIST}: expected input.left to be a function, but got {}", pair.left);
+    fact.input().clone()
+}
+
+fn get_output(cfg: &mut Cfg, input: Val) -> Val {
+    let Val::Fact(fact) = input else {
+        return bug!(cfg, "{GET_OUTPUT}: expected input to be a fact, but got {input}");
     };
-    let Val::Pair(pair) = pair.right else {
-        return bug!(cfg, "{EXIST}: expected input.right to be a pair, but got {}", pair.right);
-    };
-    let pair = Pair::from(pair);
-    let exist = cfg.fact_exist(func, pair.left, pair.right);
-    Val::Bit(Bit::from(exist))
+    fact.output().clone()
 }

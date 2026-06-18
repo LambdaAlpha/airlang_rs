@@ -1,4 +1,5 @@
 pub use self::eval::Eval;
+pub use self::eval::SOLVER;
 pub use self::key::PREFIX_CELL;
 pub use self::key::PREFIX_QUOTE;
 

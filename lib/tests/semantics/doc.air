@@ -56,7 +56,23 @@ _ do _[
             or : or,
         },
     },
-    formula fact [true, false, true, true, false],
+    .solver export _ function {
+        code : _(. : fo) : _(_ do _[
+            _(f : o) is fo,
+            (o and f = formula) test [
+                formula fact [true, false, true, true, false]
+            ]
+        ]),
+        prelude : {
+            do : do,
+            is : is,
+            = : =,
+            and : and,
+            test : test,
+            formula : formula,
+            fact : fact,
+        },
+    },
     ? formula true
 ]
 -----

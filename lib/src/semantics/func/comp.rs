@@ -47,8 +47,7 @@ impl DynFunc<Cfg, Val, Val, Val> for CompFunc {
             PrimCtx::Const_ => true,
             PrimCtx::Mut => {
                 if ctx.const_ {
-                    cfg.abort();
-                    return Val::default();
+                    return cfg.abort();
                 }
                 false
             },

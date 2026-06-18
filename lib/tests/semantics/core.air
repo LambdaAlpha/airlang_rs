@@ -170,7 +170,9 @@ true
 solve eval
 -----
 _ do _[
-    not fact true,
+    .solver export _ function {
+        code : (. : .) : fact call not : true,
+    },
     ? not false
 ]
 -----

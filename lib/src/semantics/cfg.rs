@@ -3,11 +3,6 @@ use std::collections::hash_map::Entry;
 use derive_more::Deref;
 use derive_more::DerefMut;
 
-use crate::semantics::cfg::fact::Facts;
-use crate::semantics::cfg::fact::ValId;
-use crate::semantics::ctx::Ctx;
-use crate::semantics::func::DynFunc;
-use crate::semantics::val::FuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Key;
 use crate::type_::Map;
@@ -19,7 +14,6 @@ pub struct Cfg {
     #[deref]
     #[deref_mut]
     map: Map<Key, Val>,
-    facts: Facts,
 }
 
 impl Cfg {
@@ -44,18 +38,10 @@ impl Cfg {
         }
     }
 
-    #[inline(always)]
-    pub fn step(&mut self) -> bool {
-        if self.aborted {
-            cold_path();
-            return false;
-        }
-        true
-    }
-
     #[cold]
-    pub fn abort(&mut self) {
+    pub fn abort(&mut self) -> Val {
         self.aborted = true;
+        Val::default()
     }
 
     pub fn recover(&mut self) {
@@ -71,39 +57,6 @@ impl Cfg {
             false
         }
     }
-
-    pub(crate) fn facts(&self) -> &Facts {
-        &self.facts
-    }
-
-    pub fn fact_put(&mut self, ctx: Ctx<Val>, func: FuncVal, input: Val) {
-        let output = func.call(self, ctx, input.clone());
-        let input = ValId::from(input);
-        let output = ValId::from(output);
-        self.facts.put(func, input, output);
-    }
-
-    pub fn fact_call(&self, func: FuncVal, input: Val) -> Option<Val> {
-        let outputs = self.facts.call(func, ValId::from(input))?;
-        if outputs.is_empty() {
-            return None;
-        }
-        Some(Val::clone(&outputs[0]))
-    }
-
-    pub fn fact_solve(&self, func: FuncVal, output: Val) -> Option<Val> {
-        let inputs = self.facts.solve(func, ValId::from(output))?;
-        if inputs.is_empty() {
-            return None;
-        }
-        Some(Val::clone(&inputs[0]))
-    }
-
-    pub fn fact_exist(&self, func: FuncVal, input: Val, output: Val) -> bool {
-        let input = ValId::from(input);
-        let output = ValId::from(output);
-        self.facts.exist(func, input, output)
-    }
 }
 
 impl From<Map<Key, Val>> for Cfg {
@@ -117,5 +70,3 @@ impl From<Cfg> for Map<Key, Val> {
         cfg.map
     }
 }
-
-pub(crate) mod fact;

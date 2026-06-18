@@ -83,8 +83,7 @@ where F: Fn(&mut Cfg, &mut Val, Val) -> Val + 'static
 {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
         if ctx.const_ {
-            cfg.abort();
-            return Val::default();
+            return cfg.abort();
         }
         (self.fn_)(cfg, ctx.val, input)
     }
@@ -107,8 +106,7 @@ where F: Fn(&mut Cfg, &mut Val) -> Val + 'static
 {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, _input: Val) -> Val {
         if ctx.const_ {
-            cfg.abort();
-            return Val::default();
+            return cfg.abort();
         }
         (self.fn_)(cfg, ctx.val)
     }

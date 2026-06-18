@@ -7,9 +7,9 @@ use std::str::FromStr;
 
 use crate::cfg::repr::func::generate_func;
 use crate::semantics::cfg::Cfg;
-use crate::semantics::cfg::fact::Facts;
-use crate::semantics::cfg::fact::Io;
+use crate::semantics::fact::Fact;
 use crate::semantics::val::CFG;
+use crate::semantics::val::FACT;
 use crate::semantics::val::FUNC;
 use crate::semantics::val::FuncVal;
 use crate::semantics::val::LINK;
@@ -63,6 +63,7 @@ impl FmtRepr for Val {
             Val::Quote(quote) => <Quote<Val> as FmtRepr>::fmt(quote, options, f),
             Val::Call(call) => <Call<Val, Val> as FmtRepr>::fmt(call, options, f),
             Val::Solve(solve) => <Solve<Val, Val> as FmtRepr>::fmt(solve, options, f),
+            Val::Fact(fact) => <Fact as FmtRepr>::fmt(fact, options, f),
             Val::Link(link) => <LinkVal as FmtRepr>::fmt(link, options, f),
             Val::Cfg(cfg) => <Cfg as FmtRepr>::fmt(cfg, options, f),
             Val::Func(func) => <FuncVal as FmtRepr>::fmt(func, options, f),
@@ -86,6 +87,7 @@ impl FmtRepr for Val {
             Val::Quote(_) => ReprType::Quote,
             Val::Call(_) => ReprType::Call,
             Val::Solve(_) => ReprType::Solve,
+            Val::Fact(_) => ReprType::Other,
             Val::Link(_) => ReprType::Other,
             Val::Cfg(_) => ReprType::Other,
             Val::Func(_) => ReprType::Other,
@@ -96,6 +98,21 @@ impl FmtRepr for Val {
     fn to_pair(&self) -> Pair<&dyn FmtRepr, &dyn FmtRepr> {
         let Val::Pair(pair) = self else { panic!("called `FmtRepr::to_pair()` on non-pair value") };
         Pair::new(&pair.left, &pair.right)
+    }
+}
+
+impl FmtRepr for Fact {
+    fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
+        f.write_str(FACT)?;
+        let mut map: Map<Key, &dyn FmtRepr> = Map::default();
+        map.insert(Key::from_str_unchecked("function"), self.func());
+        map.insert(Key::from_str_unchecked("input"), self.input());
+        map.insert(Key::from_str_unchecked("output"), self.output());
+        FmtRepr::fmt(&map, options, f)
+    }
+
+    fn get_type(&self) -> ReprType {
+        ReprType::Other
     }
 }
 
@@ -122,40 +139,11 @@ impl FmtRepr for Cfg {
         let aborted = Bit::from(self.is_aborted());
         map.insert(Key::from_str_unchecked("aborted"), &aborted);
         map.insert(Key::from_str_unchecked("map"), &**self);
-        map.insert(Key::from_str_unchecked("facts"), self.facts());
         FmtRepr::fmt(&map, options, f)
     }
 
     fn get_type(&self) -> ReprType {
         ReprType::Other
-    }
-}
-
-impl FmtRepr for Facts {
-    fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
-        let map: Map<Key, &Io> = self
-            .iter()
-            .map(|(k, v)| {
-                let k = Key::from_string_unchecked(format!("{k:x}"));
-                (k, v)
-            })
-            .collect();
-        FmtRepr::fmt(&map, options, f)
-    }
-
-    fn get_type(&self) -> ReprType {
-        ReprType::Map
-    }
-}
-
-impl FmtRepr for Io {
-    fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
-        let list: List<Pair<&Val, &Val>> = self.iter().map(|(i, o)| Pair::new(i, o)).collect();
-        FmtRepr::fmt(&list, options, f)
-    }
-
-    fn get_type(&self) -> ReprType {
-        ReprType::List
     }
 }
 
@@ -180,6 +168,7 @@ impl FmtRepr for FuncVal {
 }
 
 impl_display_debug_for_fmt_repr!(Val);
+impl_display_debug_for_fmt_repr!(Fact);
 impl_display_debug_for_fmt_repr!(LinkVal);
 impl_display_debug_for_fmt_repr!(Cfg);
 impl_display_debug_for_fmt_repr!(FuncVal);

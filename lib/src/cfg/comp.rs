@@ -39,6 +39,7 @@ impl BaseCompCfg {
             (include_str!("../air/lib/quote.air"), "/lib/quote"),
             (include_str!("../air/lib/call.air"), "/lib/call"),
             (include_str!("../air/lib/solve.air"), "/lib/solve"),
+            (include_str!("../air/lib/fact.air"), "/lib/fact"),
             (include_str!("../air/lib/link.air"), "/lib/link"),
             (include_str!("../air/lib/config.air"), "/lib/config"),
             (include_str!("../air/lib/function.air"), "/lib/function"),

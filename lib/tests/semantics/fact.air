@@ -1,57 +1,31 @@
-put ?
+make ?
 -----
 _ do _[
     _any set _ import .value.any,
     _i1 set _ any .integer,
     _i2 set _ any .integer,
     _sum set i1 + i2,
-    + fact i1 : i2,
+    .solver export _ function {
+        code : (. : .) : fact call + : i1 : i2,
+    },
     _(i3 : i4) is ? + sum,
     sum = i3 + i4
 ]
 -----
 true
 =====
-put call
+make get
 -----
 _ do _[
-    _fact.call set _ import .fact.call,
-    _any set _ import .value.any,
-    _i1 set _ any .integer,
-    _i2 set _ any .integer,
-    _sum1 set i1 + i2,
-    + fact i1 : i2,
-    .(_sum2) is + fact.call i1 : i2,
-    sum1 = sum2
-]
------
-true
-=====
-put solve
------
-_ do _[
-    _fact.solve set _ import .fact.solve,
+    _get_function set _ import .fact.get_function,
+    _get_input set _ import .fact.get_input,
+    _get_output set _ import .fact.get_output,
     _any set _ import .value.any,
     _i1 set _ any .integer,
     _i2 set _ any .integer,
     _sum set i1 + i2,
-    + fact i1 : i2,
-    .(_i3 : _i4) is + fact.solve sum,
-    sum = i3 + i4
-]
------
-true
-=====
-put exist
------
-_ do _[
-    _fact.exist set _ import .fact.exist,
-    _any set _ import .value.any,
-    _i1 set _ any .integer,
-    _i2 set _ any .integer,
-    _sum set i1 + i2,
-    + fact i1 : i2,
-    + fact.exist (i1 : i2) : sum
+    _f set + fact i1 : i2,
+    (+ = f get_function _) and (sum = f get_output _) and (i1 : i2) = f get_input _
 ]
 -----
 true
