@@ -155,21 +155,14 @@ fn void<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
         .context(expect_desc("`\\n`"))
         .context(expect_desc("`\\r\\n`"))
         .context(expect_desc("comment"));
-    repeat(1 .., alt((spaces, comment(ctx), fail_void))).context(label("void"))
+    repeat(1 .., alt((spaces, comment(ctx).void(), fail_void))).context(label("void"))
 }
 
-fn comment<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
-    let comment_tokens = repeat(0 .., comment_token(ctx));
-    let scope = delimited_cut(SCOPE_LEFT, comment_tokens, SCOPE_RIGHT);
-    let comment = alt((scope, list::<C>(ctx).void(), map::<C>(ctx).void(), text.void()));
-    let f = preceded(COMMENT, comment);
-    f.context(label("comment"))
-}
-
-fn comment_token<'a>(ctx: ParseCtx) -> impl Parser<&'a str, (), E> {
+fn comment<'a>(ctx: ParseCtx) -> impl Parser<&'a str, C, E> {
     // to avoid error[E0720]: cannot resolve opaque type
     move |i: &mut _| {
-        alt((spaces, SEPARATOR.void(), comment(ctx), token::<C>(ctx).void())).parse_next(i)
+        let body = alt((scope(ctx), list(ctx), map(ctx), text.value(C)));
+        preceded(COMMENT, body).context(label("comment")).parse_next(i)
     }
 }
 

@@ -379,3 +379,7 @@ illegal unicode
 comment unpaired
 -----
 !([) a
+=====
+empty comment
+-----
+!() a

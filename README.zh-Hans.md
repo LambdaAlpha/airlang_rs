@@ -193,7 +193,7 @@ true is_carmichael_number ?
 
 **注释**
 
-- `!(t1 t2 ... tn)`
+- `!(v)`
 - `!'text'`
 - `!"text"`
 - `![l, i, s, t]`
@@ -201,8 +201,9 @@ true is_carmichael_number ?
 
 ```air
 !"comment"
-[1, !(2, 3,) 4]
-{a : !(1, b :) 2}
+[1, ![2, 3,] 4]
+{a : 1, !{b : 2,} c : 3}
+!(a and _) b and c
 ```
 
 ### 语义

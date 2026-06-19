@@ -100,6 +100,7 @@ pub(super) fn expected() -> Vec<Repr> {
         unit(),
         unit(),
         list(vec![int("1", 10), int("4", 10)]),
-        map(vec![("a", int("2", 10))]),
+        map(vec![("a", int("1", 10)), ("c", int("3", 10))]),
+        infix_call(key("b"), key("and"), key("c")),
     ]
 }
