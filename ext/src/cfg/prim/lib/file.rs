@@ -1,11 +1,13 @@
 use airlang::bug;
 use airlang::cfg::CfgMod;
-use airlang::cfg::extend_func;
+use airlang::cfg::export_func;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_CELL;
 use airlang::semantics::func::CtxFreeFunc;
 use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
+use airlang::type_::Key;
+use airlang::type_::Map;
 use airlang::type_::Text;
 use const_format::concatcp;
 
@@ -25,8 +27,8 @@ impl Default for FileLib {
 }
 
 impl CfgMod for FileLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, READ_TO_TEXT, self.read_to_text);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, READ_TO_TEXT, self.read_to_text);
     }
 }
 

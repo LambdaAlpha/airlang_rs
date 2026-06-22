@@ -1,5 +1,7 @@
 use airlang::cfg::CfgMod;
-use airlang::semantics::cfg::Cfg;
+use airlang::semantics::val::Val;
+use airlang::type_::Key;
+use airlang::type_::Map;
 use airlang_ext::cfg::prim::lib::ExtPrimLib;
 
 use self::cmd::CmdLib;
@@ -13,10 +15,10 @@ pub struct BinPrimLib {
 }
 
 impl CfgMod for BinPrimLib {
-    fn extend(self, cfg: &mut Cfg) {
-        self.repl.extend(cfg);
-        self.cmd.extend(cfg);
-        self.ext.extend(cfg);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        self.repl.export(cfg);
+        self.cmd.export(cfg);
+        self.ext.export(cfg);
     }
 }
 

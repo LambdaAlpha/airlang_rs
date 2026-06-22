@@ -2,7 +2,7 @@ use const_format::concatcp;
 
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::extend_func;
+use crate::cfg::export_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::ctx::Ctx;
@@ -11,6 +11,8 @@ use crate::semantics::func::CtxFreeFunc;
 use crate::semantics::func::DefaultFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
+use crate::type_::Key;
+use crate::type_::Map;
 use crate::type_::Pair;
 
 #[derive(Copy, Clone)]
@@ -40,11 +42,11 @@ impl Default for FactLib {
 }
 
 impl CfgMod for FactLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, MAKE, self.make);
-        extend_func(cfg, GET_FUNCTION, self.get_function);
-        extend_func(cfg, GET_INPUT, self.get_input);
-        extend_func(cfg, GET_OUTPUT, self.get_output);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, MAKE, self.make);
+        export_func(cfg, GET_FUNCTION, self.get_function);
+        export_func(cfg, GET_INPUT, self.get_input);
+        export_func(cfg, GET_OUTPUT, self.get_output);
     }
 }
 

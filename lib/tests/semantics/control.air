@@ -537,17 +537,15 @@ _ do _[
 each integer negative
 -----
 _ do _[
-    _config.make set _ import .config.make,
     _link.make set _ import .link.make,
     _config.let set _ import .config.let,
-    _is_aborted set _ import .error.is_aborted.context.let,
-    _c set _ config.make {
+    _c set {
         .prelude : _ link.make {
             each : each,
         },
     },
-    _c config.let _(0-1 each _i : []),
-    _c is_aborted .,
+    _(key'' : aborted) is _c config.let _(0-1 each _i : []),
+    aborted
 ]
 -----
 true

@@ -5,7 +5,8 @@ use num_bigint::BigInt;
 
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::extend_func;
+use crate::cfg::export_func;
+use crate::cfg::import;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxFreeFunc;
@@ -15,6 +16,7 @@ use crate::semantics::val::Val;
 use crate::type_::Decimal;
 use crate::type_::DecimalConfig;
 use crate::type_::Key;
+use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::RoundingMode;
 
@@ -59,16 +61,16 @@ impl Default for DecimalLib {
 }
 
 impl CfgMod for DecimalLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, ADD, self.add);
-        extend_func(cfg, SUBTRACT, self.subtract);
-        extend_func(cfg, MULTIPLY, self.multiply);
-        extend_func(cfg, DIVIDE, self.divide);
-        extend_func(cfg, LESS, self.less);
-        extend_func(cfg, LESS_EQUAL, self.less_equal);
-        extend_func(cfg, GREATER, self.greater);
-        extend_func(cfg, GREATER_EQUAL, self.greater_equal);
-        extend_func(cfg, LESS_GREATER, self.less_greater);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, ADD, self.add);
+        export_func(cfg, SUBTRACT, self.subtract);
+        export_func(cfg, MULTIPLY, self.multiply);
+        export_func(cfg, DIVIDE, self.divide);
+        export_func(cfg, LESS, self.less);
+        export_func(cfg, LESS_EQUAL, self.less_equal);
+        export_func(cfg, GREATER, self.greater);
+        export_func(cfg, GREATER_EQUAL, self.greater_equal);
+        export_func(cfg, LESS_GREATER, self.less_greater);
     }
 }
 
@@ -76,7 +78,7 @@ pub const ROUNDING_MODE: &str = concatcp!(PREFIX_CELL, DECIMAL, ".rounding.mode"
 pub const ROUNDING_PRECISION: &str = concatcp!(PREFIX_CELL, DECIMAL, ".rounding.precision");
 
 fn decimal_config(cfg: &mut Cfg, tag: &str) -> Option<DecimalConfig> {
-    let Some(mode) = cfg.import(Key::from_str_unchecked(ROUNDING_MODE)) else {
+    let Some(mode) = import(&cfg.map, ROUNDING_MODE) else {
         bug!(cfg, "{tag}: config {ROUNDING_MODE} not found");
         return None;
     };
@@ -85,7 +87,7 @@ fn decimal_config(cfg: &mut Cfg, tag: &str) -> Option<DecimalConfig> {
         return None;
     };
     let mode = parse_rounding_mode(mode)?;
-    let Some(precision) = cfg.import(Key::from_str_unchecked(ROUNDING_PRECISION)) else {
+    let Some(precision) = import(&cfg.map, ROUNDING_PRECISION) else {
         bug!(cfg, "{tag}: config {ROUNDING_PRECISION} not found");
         return None;
     };

@@ -10,6 +10,7 @@ use std::rc::Rc;
 
 use airlang::cfg::error::ABORT_MSG;
 use airlang::cfg::error::ABORT_TYPE;
+use airlang::cfg::import;
 use airlang::cfg::prelude;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::Eval;
@@ -17,6 +18,7 @@ use airlang::semantics::ctx::Ctx;
 use airlang::semantics::func::DynFunc;
 use airlang::semantics::val::Val;
 use airlang::type_::Key;
+use airlang::type_::Map;
 use airlang_ext::cfg::prim::lib::io::Output;
 use airlang_ext::cfg::prim::lib::io::STANDARD_ERROR;
 use airlang_ext::cfg::prim::lib::io::STANDARD_OUTPUT;
@@ -109,7 +111,7 @@ impl WebRepl {
             Ok(source) => {
                 let (output, stdout, stderr) = eval(session, source);
                 if session.cfg.is_aborted() {
-                    let error = get_abort_message(&session.cfg);
+                    let error = get_abort_message(&session.cfg.map);
                     recover(&mut session.cfg);
                     json!({"ok": false, "output": "", "error": error, "stdout": stdout, "stderr": stderr})
                 } else {
@@ -135,9 +137,9 @@ fn eval(session: &mut Session, source: Val) -> (Val, String, String) {
     (output, stdout, stderr)
 }
 
-fn get_abort_message(cfg: &Cfg) -> String {
-    let type_ = cfg.import(Key::from_str_unchecked(ABORT_TYPE));
-    let msg = cfg.import(Key::from_str_unchecked(ABORT_MSG));
+fn get_abort_message(cfg: &Map<Key, Val>) -> String {
+    let type_ = import(cfg, ABORT_TYPE);
+    let msg = import(cfg, ABORT_MSG);
     match (type_, msg) {
         (Some(type_), Some(msg)) => format!("aborted by {type_}: {msg}"),
         (None, Some(msg)) => format!("aborted: {msg}"),
@@ -147,9 +149,9 @@ fn get_abort_message(cfg: &Cfg) -> String {
 }
 
 fn recover(cfg: &mut Cfg) {
-    cfg.remove(&Key::from_str_unchecked(ABORT_TYPE));
-    cfg.remove(&Key::from_str_unchecked(ABORT_MSG));
-    cfg.recover();
+    cfg.map.remove(&Key::from_str_unchecked(ABORT_TYPE));
+    cfg.map.remove(&Key::from_str_unchecked(ABORT_MSG));
+    cfg.aborted = false;
 }
 
 fn html_header() -> Header {
@@ -197,9 +199,9 @@ impl SessionStore {
 impl Session {
     fn new() -> Self {
         let mut cfg = BinCompCfg::generate();
-        let ctx = prelude(&mut cfg);
-        let stdout_buf = new_buffer(&mut cfg, STANDARD_OUTPUT);
-        let stderr_buf = new_buffer(&mut cfg, STANDARD_ERROR);
+        let ctx = prelude(&cfg.map);
+        let stdout_buf = new_buffer(&mut cfg.map, STANDARD_OUTPUT);
+        let stderr_buf = new_buffer(&mut cfg.map, STANDARD_ERROR);
         Self { cfg, ctx, stdout_buf, stderr_buf }
     }
 }
@@ -210,7 +212,7 @@ fn read_buffer(buffer: Rc<RefCell<Vec<u8>>>) -> String {
     s
 }
 
-fn new_buffer(cfg: &mut Cfg, key: &str) -> Rc<RefCell<Vec<u8>>> {
+fn new_buffer(cfg: &mut Map<Key, Val>, key: &str) -> Rc<RefCell<Vec<u8>>> {
     let buf = Rc::new(RefCell::new(Vec::new()));
     let writer = Rc::clone(&buf);
     let writer: Rc<RefCell<dyn Write>> = writer;

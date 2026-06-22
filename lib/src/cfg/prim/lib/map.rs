@@ -4,7 +4,7 @@ use const_format::concatcp;
 
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::extend_func;
+use crate::cfg::export_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::ConstFunc;
@@ -94,26 +94,26 @@ impl Default for MapLib {
 }
 
 impl CfgMod for MapLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, MAKE, self.make);
-        extend_func(cfg, MAKE_SET, self.make_set);
-        extend_func(cfg, GET_LENGTH, self.get_length);
-        extend_func(cfg, GET_ITEMS, self.get_items);
-        extend_func(cfg, INTO_ITEMS, self.into_items);
-        extend_func(cfg, GET_KEYS, self.get_keys);
-        extend_func(cfg, INTO_KEYS, self.into_keys);
-        extend_func(cfg, GET_VALUES, self.get_values);
-        extend_func(cfg, INTO_VALUES, self.into_values);
-        extend_func(cfg, CONTAIN, self.contain);
-        extend_func(cfg, CONTAIN_ALL, self.contain_all);
-        extend_func(cfg, CONTAIN_ANY, self.contain_any);
-        extend_func(cfg, SET, self.set);
-        extend_func(cfg, SET_MANY, self.set_many);
-        extend_func(cfg, GET, self.get);
-        extend_func(cfg, GET_MANY, self.get_many);
-        extend_func(cfg, REMOVE, self.remove);
-        extend_func(cfg, REMOVE_MANY, self.remove_many);
-        extend_func(cfg, CLEAR, self.clear);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, MAKE, self.make);
+        export_func(cfg, MAKE_SET, self.make_set);
+        export_func(cfg, GET_LENGTH, self.get_length);
+        export_func(cfg, GET_ITEMS, self.get_items);
+        export_func(cfg, INTO_ITEMS, self.into_items);
+        export_func(cfg, GET_KEYS, self.get_keys);
+        export_func(cfg, INTO_KEYS, self.into_keys);
+        export_func(cfg, GET_VALUES, self.get_values);
+        export_func(cfg, INTO_VALUES, self.into_values);
+        export_func(cfg, CONTAIN, self.contain);
+        export_func(cfg, CONTAIN_ALL, self.contain_all);
+        export_func(cfg, CONTAIN_ANY, self.contain_any);
+        export_func(cfg, SET, self.set);
+        export_func(cfg, SET_MANY, self.set_many);
+        export_func(cfg, GET, self.get);
+        export_func(cfg, GET_MANY, self.get_many);
+        export_func(cfg, REMOVE, self.remove);
+        export_func(cfg, REMOVE_MANY, self.remove_many);
+        export_func(cfg, CLEAR, self.clear);
     }
 }
 

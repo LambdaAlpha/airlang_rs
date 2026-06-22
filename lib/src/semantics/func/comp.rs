@@ -32,7 +32,7 @@ pub(crate) struct CompInput {
     pub(crate) prim: PrimInput,
 }
 
-impl DynFunc<Cfg, Val, Val, Val> for CompFunc {
+impl DynFunc<Val, Val, Val> for CompFunc {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
         let mut new_ctx = self.prelude.clone();
         let new_ctx = Ctx::new_mut(&mut new_ctx);

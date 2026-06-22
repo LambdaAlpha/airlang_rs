@@ -1,11 +1,13 @@
 use airlang::cfg::CfgMod;
-use airlang::cfg::extend_func;
+use airlang::cfg::export_func;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_CELL;
 use airlang::semantics::func::CtxFreeFunc;
 use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Byte;
+use airlang::type_::Key;
+use airlang::type_::Map;
 use const_format::concatcp;
 
 use self::repr::parse_module;
@@ -21,8 +23,8 @@ const WASM: &str = "wasm";
 pub const MAKE: &str = concatcp!(PREFIX_CELL, WASM, ".make");
 
 impl CfgMod for WasmLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, MAKE, self.make);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, MAKE, self.make);
     }
 }
 

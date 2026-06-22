@@ -2,13 +2,15 @@ use const_format::concatcp;
 
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::extend_func;
+use crate::cfg::export_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxFreeFunc;
 use crate::semantics::val::BIT;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
+use crate::type_::Key;
+use crate::type_::Map;
 
 #[derive(Copy, Clone)]
 pub struct BitLib {
@@ -38,12 +40,12 @@ impl Default for BitLib {
 }
 
 impl CfgMod for BitLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, NOT, self.not);
-        extend_func(cfg, AND, self.and);
-        extend_func(cfg, OR, self.or);
-        extend_func(cfg, XOR, self.xor);
-        extend_func(cfg, IMPLY, self.imply);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, NOT, self.not);
+        export_func(cfg, AND, self.and);
+        export_func(cfg, OR, self.or);
+        export_func(cfg, XOR, self.xor);
+        export_func(cfg, IMPLY, self.imply);
     }
 }
 

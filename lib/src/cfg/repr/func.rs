@@ -110,7 +110,7 @@ pub(in crate::cfg) fn generate_code(func: &FuncVal) -> Val {
     }
 }
 
-fn prim_code(fn_: *const dyn DynFunc<Cfg, Val, Val, Val>) -> Val {
+fn prim_code(fn_: *const dyn DynFunc<Val, Val, Val>) -> Val {
     let s = format!("{:x}", fn_.addr());
     Val::Key(Key::from_string_unchecked(s))
 }

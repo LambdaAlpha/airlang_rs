@@ -2,7 +2,7 @@ use const_format::concatcp;
 
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::extend_func;
+use crate::cfg::export_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::ConstInputFreeFunc;
@@ -13,6 +13,8 @@ use crate::semantics::val::TEXT;
 use crate::semantics::val::Val;
 use crate::type_::Byte;
 use crate::type_::Int;
+use crate::type_::Key;
+use crate::type_::Map;
 use crate::type_::Text;
 
 // todo design add more
@@ -44,12 +46,12 @@ impl Default for TextLib {
 }
 
 impl CfgMod for TextLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, FROM_UTF8, self.from_utf8);
-        extend_func(cfg, INTO_UTF8, self.into_utf8);
-        extend_func(cfg, GET_LENGTH, self.get_length);
-        extend_func(cfg, PUSH, self.push);
-        extend_func(cfg, JOIN, self.join);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, FROM_UTF8, self.from_utf8);
+        export_func(cfg, INTO_UTF8, self.into_utf8);
+        export_func(cfg, GET_LENGTH, self.get_length);
+        export_func(cfg, PUSH, self.push);
+        export_func(cfg, JOIN, self.join);
     }
 }
 

@@ -1,6 +1,7 @@
 use crate::cfg::CfgMod;
 use crate::cfg::error::ABORT_MSG;
 use crate::cfg::error::ABORT_TYPE;
+use crate::cfg::import;
 use crate::cfg::prelude;
 use crate::cfg::prim::BasePrimCfg;
 use crate::semantics::cfg::Cfg;
@@ -8,20 +9,21 @@ use crate::semantics::core::Eval;
 use crate::semantics::ctx::Ctx;
 use crate::semantics::func::DynFunc;
 use crate::semantics::val::Val;
-use crate::type_::Key;
+use crate::type_::Map;
 
 pub struct BaseCompCfg;
 
 impl BaseCompCfg {
     pub fn generate() -> Cfg {
-        let mut cfg = Cfg::default();
-        BasePrimCfg::default().extend(&mut cfg);
-        let mut ctx = prelude(&mut cfg);
-        Self::extend(&mut cfg, &mut ctx);
+        let mut cfg = Map::default();
+        BasePrimCfg::default().export(&mut cfg);
+        let mut ctx = prelude(&cfg);
+        let mut cfg = Cfg::new(cfg);
+        Self::export(&mut cfg, &mut ctx);
         cfg
     }
 
-    pub fn extend(cfg: &mut Cfg, ctx: &mut Val) {
+    pub fn export(cfg: &mut Cfg, ctx: &mut Val) {
         Self::run_sequence(cfg, ctx, &[
             (include_str!("../air/first.air"), "/first"),
             // don't depend on the execution order {
@@ -63,9 +65,9 @@ impl BaseCompCfg {
             Err(err) => panic!("stage 2: failed to parse {path}: {err}"),
         };
         let output = Eval.call(cfg, Ctx::new_mut(ctx), input);
-        if cfg.is_aborted() {
-            let type_ = cfg.import(Key::from_str_unchecked(ABORT_TYPE));
-            let msg = cfg.import(Key::from_str_unchecked(ABORT_MSG));
+        if cfg.aborted {
+            let type_ = import(&cfg.map, ABORT_TYPE);
+            let msg = import(&cfg.map, ABORT_MSG);
             match (type_, msg) {
                 (Some(type_), Some(msg)) => panic!("stage 2: aborted by {type_}: {msg}"),
                 (None, Some(msg)) => panic!("stage 2: aborted: {msg}"),

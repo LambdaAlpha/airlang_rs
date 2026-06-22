@@ -3,7 +3,7 @@ use airlang::VERSION_MINOR;
 use airlang::VERSION_PATCH;
 use airlang::bug;
 use airlang::cfg::CfgMod;
-use airlang::cfg::extend_func;
+use airlang::cfg::export_func;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_CELL;
 use airlang::semantics::func::CtxFreeFunc;
@@ -11,6 +11,8 @@ use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Bit;
 use airlang::type_::Int;
+use airlang::type_::Key;
+use airlang::type_::Map;
 use const_format::concatcp;
 
 #[derive(Copy, Clone)]
@@ -29,8 +31,8 @@ impl Default for LangLib {
 }
 
 impl CfgMod for LangLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, CHECK_VERSION, self.check_version);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, CHECK_VERSION, self.check_version);
     }
 }
 

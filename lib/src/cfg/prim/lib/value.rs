@@ -7,7 +7,7 @@ use rand::rng;
 
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::extend_func;
+use crate::cfg::export_func;
 use crate::cfg::prim::lib::value::arbitrary::Any;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
@@ -18,7 +18,6 @@ use crate::semantics::val::BIT;
 use crate::semantics::val::BYTE;
 use crate::semantics::val::CALL;
 use crate::semantics::val::CELL;
-use crate::semantics::val::CFG;
 use crate::semantics::val::DECIMAL;
 use crate::semantics::val::FACT;
 use crate::semantics::val::FUNC;
@@ -76,10 +75,10 @@ impl Default for ValueLib {
 }
 
 impl CfgMod for ValueLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, ANY, self.any);
-        extend_func(cfg, GET_TYPE, self.get_type);
-        extend_func(cfg, EQUAL, self.equal);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, ANY, self.any);
+        export_func(cfg, GET_TYPE, self.get_type);
+        export_func(cfg, EQUAL, self.equal);
     }
 }
 
@@ -99,7 +98,6 @@ const TYPE_CALL: &str = concatcp!(PREFIX_CELL, CALL);
 const TYPE_SOLVE: &str = concatcp!(PREFIX_CELL, SOLVE);
 const TYPE_FACT: &str = concatcp!(PREFIX_CELL, FACT);
 const TYPE_LINK: &str = concatcp!(PREFIX_CELL, LINK);
-const TYPE_CFG: &str = concatcp!(PREFIX_CELL, CFG);
 const TYPE_FUNC: &str = concatcp!(PREFIX_CELL, FUNC);
 
 const SYNTAX: &str = concatcp!(PREFIX_CELL, "syntax");
@@ -139,7 +137,6 @@ pub fn any(cfg: &mut Cfg, input: Val) -> Val {
             },
             TYPE_FACT => Val::Fact(Distribution::<Fact>::sample(&Any::default(), rng).into()),
             TYPE_LINK => Val::Link(Distribution::<LinkVal>::sample(&Any::default(), rng)),
-            TYPE_CFG => Val::Cfg(Distribution::<Cfg>::sample(&Any::default(), rng).into()),
             TYPE_FUNC => Val::Func(Distribution::<FuncVal>::sample(&Any::default(), rng)),
             s => bug!(cfg, "{ANY}: unknown type {s}"),
         },
@@ -165,7 +162,6 @@ pub fn get_type(_cfg: &mut Cfg, ctx: &Val) -> Val {
         Val::Solve(_) => TYPE_SOLVE,
         Val::Fact(_) => TYPE_FACT,
         Val::Link(_) => TYPE_LINK,
-        Val::Cfg(_) => TYPE_CFG,
         Val::Func(_) => TYPE_FUNC,
         Val::Dyn(val) => return Val::Key(val.type_name()),
     };

@@ -139,6 +139,26 @@ _ do _[
 -----
 .call
 =====
+any solve
+-----
+_ do _[
+    _any set _ import .value.any,
+    _c set _ any .solve,
+    _c type .
+]
+-----
+.solve
+=====
+any fact
+-----
+_ do _[
+    _any set _ import .value.any,
+    _c set _ any .fact,
+    _c type .
+]
+-----
+.fact
+=====
 any link
 -----
 _ do _[
@@ -276,6 +296,24 @@ _ do _[
 -----
 .call
 =====
+type solve
+-----
+_ do _[
+    _a set _(? f a),
+    _a type .
+]
+-----
+.solve
+=====
+type fact
+-----
+_ do _[
+    _a set not fact true,
+    _a type .
+]
+-----
+.fact
+=====
 type link
 -----
 _ do _[
@@ -378,6 +416,22 @@ true
 = call
 -----
 _(_ 1 2) = _(_ 1 2)
+-----
+true
+=====
+= solve
+-----
+_(? 1 2) = _(? 1 2)
+-----
+true
+=====
+= fact
+-----
+_ do _[
+    _a set not fact true,
+    _b set a,
+    (a = b) and _ not a = .
+]
 -----
 true
 =====

@@ -1,7 +1,6 @@
 pub use self::byte::ByteVal;
 pub use self::call::CallVal;
 pub use self::cell::CellVal;
-pub use self::cfg::CfgVal;
 pub use self::decimal::DecimalVal;
 pub use self::fact::FactVal;
 pub use self::func::CompFuncVal;
@@ -67,7 +66,6 @@ pub enum Val {
     Fact(FactVal),
 
     Link(LinkVal),
-    Cfg(CfgVal),
     Func(FuncVal),
 
     Dyn(Box<dyn DynVal>),
@@ -89,7 +87,6 @@ pub(crate) const CALL: &str = "call";
 pub(crate) const SOLVE: &str = "solve";
 pub(crate) const FACT: &str = "fact";
 pub(crate) const LINK: &str = "link";
-pub(crate) const CFG: &str = "config";
 pub(crate) const FUNC: &str = "function";
 
 impl Default for Val {
@@ -189,7 +186,5 @@ mod solve;
 mod fact;
 
 mod link;
-
-mod cfg;
 
 mod func;

@@ -6,9 +6,7 @@ use std::ops::Deref;
 use std::str::FromStr;
 
 use crate::cfg::repr::func::generate_func;
-use crate::semantics::cfg::Cfg;
 use crate::semantics::fact::Fact;
-use crate::semantics::val::CFG;
 use crate::semantics::val::FACT;
 use crate::semantics::val::FUNC;
 use crate::semantics::val::FuncVal;
@@ -65,7 +63,6 @@ impl FmtRepr for Val {
             Val::Solve(solve) => <Solve<Val, Val> as FmtRepr>::fmt(solve, options, f),
             Val::Fact(fact) => <Fact as FmtRepr>::fmt(fact, options, f),
             Val::Link(link) => <LinkVal as FmtRepr>::fmt(link, options, f),
-            Val::Cfg(cfg) => <Cfg as FmtRepr>::fmt(cfg, options, f),
             Val::Func(func) => <FuncVal as FmtRepr>::fmt(func, options, f),
             Val::Dyn(val) => write!(f, "{}", val.deref()),
         }
@@ -89,7 +86,6 @@ impl FmtRepr for Val {
             Val::Solve(_) => ReprType::Solve,
             Val::Fact(_) => ReprType::Other,
             Val::Link(_) => ReprType::Other,
-            Val::Cfg(_) => ReprType::Other,
             Val::Func(_) => ReprType::Other,
             Val::Dyn(_) => ReprType::Other,
         }
@@ -132,21 +128,6 @@ impl FmtRepr for LinkVal {
     }
 }
 
-impl FmtRepr for Cfg {
-    fn fmt(&self, options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
-        f.write_str(CFG)?;
-        let mut map: Map<Key, &dyn FmtRepr> = Map::default();
-        let aborted = Bit::from(self.is_aborted());
-        map.insert(Key::from_str_unchecked("aborted"), &aborted);
-        map.insert(Key::from_str_unchecked("map"), &**self);
-        FmtRepr::fmt(&map, options, f)
-    }
-
-    fn get_type(&self) -> ReprType {
-        ReprType::Other
-    }
-}
-
 impl FmtRepr for FuncVal {
     fn fmt(&self, mut options: FmtOptions, f: &mut dyn Write) -> std::fmt::Result {
         f.write_str(FUNC)?;
@@ -170,7 +151,6 @@ impl FmtRepr for FuncVal {
 impl_display_debug_for_fmt_repr!(Val);
 impl_display_debug_for_fmt_repr!(Fact);
 impl_display_debug_for_fmt_repr!(LinkVal);
-impl_display_debug_for_fmt_repr!(Cfg);
 impl_display_debug_for_fmt_repr!(FuncVal);
 
 pub(in crate::cfg) mod func;

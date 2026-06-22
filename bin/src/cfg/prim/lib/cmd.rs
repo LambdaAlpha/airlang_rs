@@ -2,12 +2,14 @@ use std::process::Command;
 
 use airlang::bug;
 use airlang::cfg::CfgMod;
-use airlang::cfg::extend_func;
+use airlang::cfg::export_func;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_CELL;
 use airlang::semantics::func::CtxFreeFunc;
 use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
+use airlang::type_::Key;
+use airlang::type_::Map;
 use const_format::concatcp;
 
 #[derive(Copy, Clone)]
@@ -26,8 +28,8 @@ impl Default for CmdLib {
 }
 
 impl CfgMod for CmdLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, RUN, self.run);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, RUN, self.run);
     }
 }
 

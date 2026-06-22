@@ -4,7 +4,7 @@ use const_format::concatcp;
 
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::extend_func;
+use crate::cfg::export_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::ConstInputFreeFunc;
@@ -14,6 +14,8 @@ use crate::semantics::val::CALL;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Call;
+use crate::type_::Key;
+use crate::type_::Map;
 use crate::type_::Pair;
 
 #[derive(Copy, Clone)]
@@ -44,12 +46,12 @@ impl Default for CallLib {
 }
 
 impl CfgMod for CallLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, MAKE, self.make);
-        extend_func(cfg, GET_FUNCTION, self.get_function);
-        extend_func(cfg, SET_FUNCTION, self.set_function);
-        extend_func(cfg, GET_INPUT, self.get_input);
-        extend_func(cfg, SET_INPUT, self.set_input);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, MAKE, self.make);
+        export_func(cfg, GET_FUNCTION, self.get_function);
+        export_func(cfg, SET_FUNCTION, self.set_function);
+        export_func(cfg, GET_INPUT, self.get_input);
+        export_func(cfg, SET_INPUT, self.set_input);
     }
 }
 

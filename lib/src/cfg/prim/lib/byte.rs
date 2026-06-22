@@ -2,7 +2,7 @@ use const_format::concatcp;
 
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::extend_func;
+use crate::cfg::export_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::ConstInputFreeFunc;
@@ -13,6 +13,8 @@ use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Byte;
 use crate::type_::Int;
+use crate::type_::Key;
+use crate::type_::Map;
 use crate::type_::Pair;
 
 // todo design add more
@@ -38,10 +40,10 @@ impl Default for ByteLib {
 }
 
 impl CfgMod for ByteLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, GET_LENGTH, self.get_length);
-        extend_func(cfg, PUSH, self.push);
-        extend_func(cfg, JOIN, self.join);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, GET_LENGTH, self.get_length);
+        export_func(cfg, PUSH, self.push);
+        export_func(cfg, JOIN, self.join);
     }
 }
 

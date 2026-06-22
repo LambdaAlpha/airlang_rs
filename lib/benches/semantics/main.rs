@@ -23,7 +23,7 @@ pub fn bench_all(c: &mut Criterion) {
 fn bench_interpret(c: &mut Criterion) {
     c.bench_function("interpret", |b| {
         let mut cfg = BaseCompCfg::generate();
-        let mut ctx = prelude(&mut cfg);
+        let mut ctx = prelude(&cfg.map);
         let s = include_str!("interpret.air");
         let src_val: Val = s.parse().expect("parse failed");
         b.iter_batched(

@@ -86,19 +86,17 @@ true
 -----
 _ do _[
     _any set _ import .value.any,
-    _config.make set _ import .config.make,
     _link.make set _ import .link.make,
     _config.let set _ import .config.let,
-    _is_aborted set _ import .error.is_aborted.context.let,
     _a set _ any .integer,
-    _c set _ config.make {
+    _c set {
         .prelude : _ link.make {
             a : a,
             / : /,
         },
     },
-    _c config.let _(a / 0),
-    _c is_aborted .,
+    _(key'' : aborted) is _c config.let _(a / 0),
+    aborted
 ]
 -----
 true
@@ -151,19 +149,17 @@ remainder 0
 _ do _[
     _% set _ import .integer.remainder,
     _any set _ import .value.any,
-    _config.make set _ import .config.make,
     _link.make set _ import .link.make,
     _config.let set _ import .config.let,
-    _is_aborted set _ import .error.is_aborted.context.let,
     _a set _ any .integer,
-    _c set _ config.make {
+    _c set {
         .prelude : _ link.make {
             a : a,
             % : %,
         },
     },
-    _c config.let _(a % 0),
-    _c is_aborted .,
+    _(key'' : aborted) is _c config.let _(a % 0),
+    aborted
 ]
 -----
 true

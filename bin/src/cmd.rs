@@ -8,6 +8,7 @@ use std::io::stdout;
 
 use airlang::cfg::error::ABORT_MSG;
 use airlang::cfg::error::ABORT_TYPE;
+use airlang::cfg::import;
 use airlang::cfg::prelude;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::Eval;
@@ -16,7 +17,6 @@ use airlang::semantics::func::DynFunc;
 use airlang::semantics::val::Val;
 use airlang::syntax::FmtOptions;
 use airlang::syntax::FmtRepr;
-use airlang::type_::Key;
 use airlang::type_::Text;
 
 use crate::cfg::comp::BinCompCfg;
@@ -51,7 +51,7 @@ fn cmd_run() -> std::io::Result<()> {
 
 pub fn eval(source: &str) -> std::io::Result<()> {
     let mut cfg = BinCompCfg::generate();
-    let mut ctx = prelude(&mut cfg);
+    let mut ctx = prelude(&cfg.map);
     match source.parse::<Val>() {
         Ok(val) => {
             let output = Eval.call(&mut cfg, Ctx::new_mut(&mut ctx), val);
@@ -62,8 +62,8 @@ pub fn eval(source: &str) -> std::io::Result<()> {
 }
 
 fn print_abort(cfg: &Cfg) -> std::io::Result<()> {
-    let type_ = cfg.import(Key::from_str_unchecked(ABORT_TYPE));
-    let msg = cfg.import(Key::from_str_unchecked(ABORT_MSG));
+    let type_ = import(&cfg.map, ABORT_TYPE);
+    let msg = import(&cfg.map, ABORT_MSG);
     match (type_, msg) {
         (Some(type_), Some(msg)) => write!(stderr(), "aborted by {type_}: {msg}"),
         (None, Some(msg)) => write!(stderr(), "aborted: {msg}"),

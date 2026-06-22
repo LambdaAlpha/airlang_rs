@@ -2,7 +2,7 @@ use const_format::concatcp;
 
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::extend_func;
+use crate::cfg::export_func;
 use crate::cfg::repr::func::generate_code;
 use crate::cfg::repr::func::generate_func;
 use crate::cfg::repr::func::parse_func;
@@ -16,6 +16,7 @@ use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::Key;
+use crate::type_::Map;
 
 #[derive(Copy, Clone)]
 pub struct FuncLib {
@@ -57,16 +58,16 @@ impl Default for FuncLib {
 }
 
 impl CfgMod for FuncLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, MAKE, self.make);
-        extend_func(cfg, REPRESENT, self.represent);
-        extend_func(cfg, IS_FREE, self.is_free);
-        extend_func(cfg, IS_CONSTANT, self.is_constant);
-        extend_func(cfg, IS_INPUT_FREE, self.is_input_free);
-        extend_func(cfg, IS_PRIMITIVE, self.is_primitive);
-        extend_func(cfg, GET_CODE, self.get_code);
-        extend_func(cfg, GET_PRELUDE, self.get_prelude);
-        extend_func(cfg, GET_ID, self.get_id);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, MAKE, self.make);
+        export_func(cfg, REPRESENT, self.represent);
+        export_func(cfg, IS_FREE, self.is_free);
+        export_func(cfg, IS_CONSTANT, self.is_constant);
+        export_func(cfg, IS_INPUT_FREE, self.is_input_free);
+        export_func(cfg, IS_PRIMITIVE, self.is_primitive);
+        export_func(cfg, GET_CODE, self.get_code);
+        export_func(cfg, GET_PRELUDE, self.get_prelude);
+        export_func(cfg, GET_ID, self.get_id);
     }
 }
 

@@ -22,7 +22,9 @@ use self::text::TextLib;
 use self::unit::UnitLib;
 use self::value::ValueLib;
 use crate::cfg::CfgMod;
-use crate::semantics::cfg::Cfg;
+use crate::semantics::val::Val;
+use crate::type_::Key;
+use crate::type_::Map;
 
 #[derive(Default, Copy, Clone)]
 pub struct BasePrimLib {
@@ -52,30 +54,30 @@ pub struct BasePrimLib {
 }
 
 impl CfgMod for BasePrimLib {
-    fn extend(self, cfg: &mut Cfg) {
-        self.unit.extend(cfg);
-        self.bit.extend(cfg);
-        self.key.extend(cfg);
-        self.text.extend(cfg);
-        self.int.extend(cfg);
-        self.decimal.extend(cfg);
-        self.byte.extend(cfg);
-        self.cell.extend(cfg);
-        self.pair.extend(cfg);
-        self.list.extend(cfg);
-        self.map.extend(cfg);
-        self.quote.extend(cfg);
-        self.call.extend(cfg);
-        self.solve.extend(cfg);
-        self.fact.extend(cfg);
-        self.link.extend(cfg);
-        self.cfg.extend(cfg);
-        self.func.extend(cfg);
-        self.ctx.extend(cfg);
-        self.ctrl.extend(cfg);
-        self.value.extend(cfg);
-        self.error.extend(cfg);
-        self.lang.extend(cfg);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        self.unit.export(cfg);
+        self.bit.export(cfg);
+        self.key.export(cfg);
+        self.text.export(cfg);
+        self.int.export(cfg);
+        self.decimal.export(cfg);
+        self.byte.export(cfg);
+        self.cell.export(cfg);
+        self.pair.export(cfg);
+        self.list.export(cfg);
+        self.map.export(cfg);
+        self.quote.export(cfg);
+        self.call.export(cfg);
+        self.solve.export(cfg);
+        self.fact.export(cfg);
+        self.link.export(cfg);
+        self.cfg.export(cfg);
+        self.func.export(cfg);
+        self.ctx.export(cfg);
+        self.ctrl.export(cfg);
+        self.value.export(cfg);
+        self.error.export(cfg);
+        self.lang.export(cfg);
     }
 }
 

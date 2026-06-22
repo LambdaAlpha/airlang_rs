@@ -1,5 +1,7 @@
 use airlang::cfg::CfgMod;
-use airlang::semantics::cfg::Cfg;
+use airlang::semantics::val::Val;
+use airlang::type_::Key;
+use airlang::type_::Map;
 
 #[derive(Copy, Clone)]
 pub struct ReplLib {}
@@ -15,5 +17,5 @@ impl Default for ReplLib {
 }
 
 impl CfgMod for ReplLib {
-    fn extend(self, _cfg: &mut Cfg) {}
+    fn export(self, _cfg: &mut Map<Key, Val>) {}
 }

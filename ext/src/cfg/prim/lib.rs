@@ -1,6 +1,8 @@
 use airlang::cfg::CfgMod;
 use airlang::cfg::prim::lib::BasePrimLib;
-use airlang::semantics::cfg::Cfg;
+use airlang::semantics::val::Val;
+use airlang::type_::Key;
+use airlang::type_::Map;
 
 use self::build::BuildLib;
 use self::file::FileLib;
@@ -19,13 +21,13 @@ pub struct ExtPrimLib {
 }
 
 impl CfgMod for ExtPrimLib {
-    fn extend(self, cfg: &mut Cfg) {
-        self.wasm.extend(cfg);
-        self.io.extend(cfg);
-        self.file.extend(cfg);
-        self.process.extend(cfg);
-        self.build.extend(cfg);
-        self.base.extend(cfg);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        self.wasm.export(cfg);
+        self.io.export(cfg);
+        self.file.export(cfg);
+        self.process.export(cfg);
+        self.build.export(cfg);
+        self.base.export(cfg);
     }
 }
 

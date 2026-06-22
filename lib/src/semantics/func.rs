@@ -18,14 +18,15 @@ pub(crate) use self::comp::CompInput;
 
 _____!();
 
+use crate::semantics::cfg::Cfg;
 use crate::semantics::ctx::Ctx;
 
-pub trait DynFunc<Cfg, C, I, O> {
+pub trait DynFunc<C, I, O> {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<C>, input: I) -> O;
 }
 
-impl<Cfg, C, I, O, T> DynFunc<Cfg, C, I, O> for &T
-where T: ?Sized + DynFunc<Cfg, C, I, O>
+impl<C, I, O, T> DynFunc<C, I, O> for &T
+where T: ?Sized + DynFunc<C, I, O>
 {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<C>, input: I) -> O {
         (**self).call(cfg, ctx, input)

@@ -5,7 +5,7 @@ use num_traits::ToPrimitive;
 
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::extend_func;
+use crate::cfg::export_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::ConstFunc;
@@ -16,7 +16,9 @@ use crate::semantics::val::LIST;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Int;
+use crate::type_::Key;
 use crate::type_::List;
+use crate::type_::Map;
 use crate::type_::Pair;
 
 // todo design
@@ -75,21 +77,21 @@ impl Default for ListLib {
 }
 
 impl CfgMod for ListLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, GET_LENGTH, self.get_length);
-        extend_func(cfg, SET, self.set);
-        extend_func(cfg, SET_MANY, self.set_many);
-        extend_func(cfg, GET, self.get);
-        extend_func(cfg, GET_MANY, self.get_many);
-        extend_func(cfg, INSERT, self.insert);
-        extend_func(cfg, INSERT_MANY, self.insert_many);
-        extend_func(cfg, REMOVE, self.remove);
-        extend_func(cfg, REMOVE_MANY, self.remove_many);
-        extend_func(cfg, PUSH, self.push);
-        extend_func(cfg, PUSH_MANY, self.push_many);
-        extend_func(cfg, POP, self.pop);
-        extend_func(cfg, POP_MANY, self.pop_many);
-        extend_func(cfg, CLEAR, self.clear);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, GET_LENGTH, self.get_length);
+        export_func(cfg, SET, self.set);
+        export_func(cfg, SET_MANY, self.set_many);
+        export_func(cfg, GET, self.get);
+        export_func(cfg, GET_MANY, self.get_many);
+        export_func(cfg, INSERT, self.insert);
+        export_func(cfg, INSERT_MANY, self.insert_many);
+        export_func(cfg, REMOVE, self.remove);
+        export_func(cfg, REMOVE_MANY, self.remove_many);
+        export_func(cfg, PUSH, self.push);
+        export_func(cfg, PUSH_MANY, self.push_many);
+        export_func(cfg, POP, self.pop);
+        export_func(cfg, POP_MANY, self.pop_many);
+        export_func(cfg, CLEAR, self.clear);
     }
 }
 

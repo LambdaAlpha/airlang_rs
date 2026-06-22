@@ -3,13 +3,13 @@ use std::error::Error;
 
 use airlang::cfg::error::ABORT_MSG;
 use airlang::cfg::error::ABORT_TYPE;
+use airlang::cfg::import;
 use airlang::cfg::prelude;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::Eval;
 use airlang::semantics::ctx::Ctx;
 use airlang::semantics::func::DynFunc;
 use airlang::semantics::val::Val;
-use airlang::type_::Key;
 use log::error;
 use log::trace;
 
@@ -36,8 +36,8 @@ pub fn parse_file<'a, const N: usize>(input: &'a str, file_name: &str) -> Vec<[&
 
 pub fn test_eval(input: &str, file_name: &str) -> Result<(), Box<dyn Error>> {
     init_logger();
-    let mut cfg = DevCompCfg::generate();
-    let ctx = prelude(&mut cfg);
+    let cfg = DevCompCfg::generate();
+    let ctx = prelude(&cfg.map);
     run_test_eval(cfg, ctx, input, file_name)
 }
 
@@ -50,7 +50,7 @@ fn run_test_eval(cfg: Cfg, ctx: Val, input: &str, file_name: &str) -> Result<(),
             e
         })?;
         trace!("file {file_name} case ({title})");
-        let mut cfg = backup_cfg.clone();
+        let mut cfg = Cfg::new(backup_cfg.map.clone());
         let mut ctx = backup_ctx.clone();
         let ret = Eval.call(&mut cfg, Ctx::new_mut(&mut ctx), src);
         check_abort(&cfg, file_name, title);
@@ -68,7 +68,7 @@ fn run_test_eval(cfg: Cfg, ctx: Val, input: &str, file_name: &str) -> Result<(),
                 ret, ret_expected,
                 "file {file_name} case({title}) input({i}): expect({o}) != real({ret:#})\n\
                 current ctx:\n{:#}\ncurrent cfg:\n{:#}",
-                ctx, cfg
+                ctx, cfg.map
             );
         } else {
             assert_eq!(
@@ -84,8 +84,8 @@ fn check_abort(cfg: &Cfg, file_name: &str, title: &str) {
     if !cfg.is_aborted() {
         return;
     }
-    let type_ = cfg.import(Key::from_str_unchecked(ABORT_TYPE));
-    let msg = cfg.import(Key::from_str_unchecked(ABORT_MSG));
+    let type_ = import(&cfg.map, ABORT_TYPE);
+    let msg = import(&cfg.map, ABORT_MSG);
     match (type_, msg) {
         (Some(type_), Some(msg)) => {
             error!("file {file_name} case ({title}): aborted by {type_}: {msg}");

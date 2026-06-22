@@ -26,7 +26,7 @@ impl KeyEval {
     }
 }
 
-impl DynFunc<Cfg, Val, Key, Val> for KeyEval {
+impl DynFunc<Val, Key, Val> for KeyEval {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, key: Key) -> Val {
         let (mode, key) = self.recognize(key);
         if matches!(mode, KeyMode::Quote | KeyMode::Cell) {

@@ -15,8 +15,8 @@ use std::rc::Rc;
 
 use airlang::bug;
 use airlang::cfg::CfgMod;
-use airlang::cfg::extend;
-use airlang::cfg::extend_func;
+use airlang::cfg::export;
+use airlang::cfg::export_func;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_CELL;
 use airlang::semantics::ctx::DynCtx;
@@ -27,6 +27,7 @@ use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::semantics::val::Value;
 use airlang::type_::Key;
+use airlang::type_::Map;
 use airlang::type_::Pair;
 use const_format::concatcp;
 
@@ -72,14 +73,14 @@ impl Default for IoLib {
 }
 
 impl CfgMod for IoLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend(cfg, STANDARD_INPUT, Val::Dyn(self.standard_input.dyn_clone()));
-        extend(cfg, STANDARD_OUTPUT, Val::Dyn(self.standard_output.dyn_clone()));
-        extend(cfg, STANDARD_ERROR, Val::Dyn(self.standard_error.dyn_clone()));
-        extend_func(cfg, READ_LINE, self.read_line);
-        extend_func(cfg, PRINT, self.print);
-        extend_func(cfg, PRINT_LINE, self.print_line);
-        extend_func(cfg, FLUSH, self.flush);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export(cfg, STANDARD_INPUT, Val::Dyn(self.standard_input.dyn_clone()));
+        export(cfg, STANDARD_OUTPUT, Val::Dyn(self.standard_output.dyn_clone()));
+        export(cfg, STANDARD_ERROR, Val::Dyn(self.standard_error.dyn_clone()));
+        export_func(cfg, READ_LINE, self.read_line);
+        export_func(cfg, PRINT, self.print);
+        export_func(cfg, PRINT_LINE, self.print_line);
+        export_func(cfg, FLUSH, self.flush);
     }
 }
 

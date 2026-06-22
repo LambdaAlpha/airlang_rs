@@ -262,7 +262,7 @@ _ do _[
 
 ### Configuration
 
-`Config` is the global information environment during execution. Through mechanisms like append-only and scoped override, it balances flexibility and predictability. Configuration items can be imported via the `import` function, exported via the `export` function, or locally overridden via the `with` function. We will implement features like module management, task management, error handling, and testing frameworks based on the configuration mechanism, and provide native functions and standard libraries in the initial configuration.
+Configuration is the global information environment during execution. Through mechanisms like append-only and scoped override, it balances flexibility and predictability. Configuration items can be imported via the `import` function, exported via the `export` function, or locally overridden via the `with` function. We will implement features like module management, task management, error handling, and testing frameworks based on the configuration mechanism, and provide native functions and standard libraries in the initial configuration.
 
 ```air
 _ with {

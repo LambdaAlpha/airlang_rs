@@ -1,43 +1,23 @@
-make repr
------
-_ do _[
-    _any set _ import .value.any,
-    _make set _ import .config.make,
-    _represent set _ import .config.represent,
-    _c set {a : _ any ., b : _ any ., c : _ any .},
-    _c1 set _ represent _ make c,
-    c = c1
-]
------
-true
-=====
 get_length
 -----
 _ do _[
-    _make set _ import .config.make,
-    _get_length set _ import .config.get_length.context.let,
+    _get_length set _ import .config.get_length,
+    _link.make set _ import .link.make,
+    _config.let set _ import .config.let,
     _any set _ import .value.any,
-    _c set _ make {a : _ any ., b : _ any ., c : _ any .,},
-    _c get_length .,
+    _c set {
+        .prelude : _ link.make {
+            get_length : get_length,
+        },
+        a : _ any .,
+        b : _ any .,
+        c : _ any .,
+    },
+    _(l : key'') is _c config.let _(_ get_length .),
+    l
 ]
 -----
-3
-=====
-get_length = represent length
------
-_ do _[
-    _config.get_length set _ import .config.get_length.context.let,
-    _map.get_length set _ import .map.get_length.context.let,
-    _represent set _ import .config.represent,
-    _any set _ import .value.any,
-    _c set _ any .config,
-    _m set _ represent c,
-    _lc set _c config.get_length .,
-    _lm set _m map.get_length .,
-    lc = lm
-]
------
-true
+4
 =====
 export exist
 -----
@@ -65,22 +45,18 @@ true
 get_self
 -----
 _ do _[
-    _make set _ import .config.make,
     _link.make set _ import .link.make,
     _any set _ import .value.any,
     _config.let set _ import .config.let,
     _get_self set _ import .config.get_self,
-    _represent set _ import .config.represent,
-    _c1 set _ make {
+    _m1 set {
         .prelude : _ link.make {
             get_self : get_self,
         },
         a : _ any .,
     },
-    _c2 set _c1 config.let _(_ get_self .),
-    _m1 set _ represent c1,
-    _m2 set _ represent c2,
-    m1 = m2
+    _(m2 : aborted) is _m1 config.let _(_ get_self .),
+    (m1 = m2) and _ not aborted
 ]
 -----
 true
@@ -120,23 +96,20 @@ true
 with abort safe
 -----
 _ do _[
-    _make set _ import .config.make,
     _link.make set _ import .link.make,
     _config.let set _ import .config.let,
-    _recover set _ import .error.recover.context.let,
-    _c set _ make {
+    _contain set _ import .map.contain,
+    _c set {
         .prelude : _ link.make {
             with : with,
             do : do,
             abort : abort,
-            exist : exist,
         },
     },
     _c config.let _(_ do _[
         {.a : 1} with _(_ abort .),
     ]),
-    _c recover .,
-    _ not _c config.let _(_ exist .a),
+    _ not _c let contain : .a,
 ]
 -----
 true
@@ -145,18 +118,22 @@ config.let
 -----
 _ do _[
     _any set _ import .value.any,
-    _make set _ import .config.make,
     _link.make set _ import .link.make,
     _config.let set _ import .config.let,
     _a set _ any .,
-    _c set _ make {
+    _c set {
         .prelude : _ link.make {
+            do : do,
             import : import,
+            export : export,
         },
         .a : a,
     },
-    _a1 set _c config.let _(_ import .a),
-    a = a1
+    _(a1 : aborted) is _c config.let _(_ do _[
+        .b export true,
+        _ import .a
+    ]),
+    (a = a1) and (_ not aborted) and _c let get : .b
 ]
 -----
 true

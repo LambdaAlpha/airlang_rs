@@ -4,7 +4,7 @@ use const_format::concatcp;
 
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::extend_func;
+use crate::cfg::export_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::ConstInputFreeFunc;
@@ -12,6 +12,8 @@ use crate::semantics::func::MutFunc;
 use crate::semantics::val::PAIR;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
+use crate::type_::Key;
+use crate::type_::Map;
 
 #[derive(Copy, Clone)]
 pub struct PairLib {
@@ -38,11 +40,11 @@ impl Default for PairLib {
 }
 
 impl CfgMod for PairLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, GET_LEFT, self.get_left);
-        extend_func(cfg, SET_LEFT, self.set_left);
-        extend_func(cfg, GET_RIGHT, self.get_right);
-        extend_func(cfg, SET_RIGHT, self.set_right);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, GET_LEFT, self.get_left);
+        export_func(cfg, SET_LEFT, self.set_left);
+        export_func(cfg, GET_RIGHT, self.get_right);
+        export_func(cfg, SET_RIGHT, self.set_right);
     }
 }
 

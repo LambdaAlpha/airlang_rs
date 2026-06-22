@@ -11,7 +11,7 @@ use airlang::type_::Int;
 #[test]
 fn test_interpret() -> Result<(), Box<dyn Error>> {
     let mut cfg = BaseCompCfg::generate();
-    let mut ctx = prelude(&mut cfg);
+    let mut ctx = prelude(&cfg.map);
     let s = include_str!("../../benches/semantics/interpret.air");
     let src_val: Val = s.parse()?;
     let output = Eval.call(&mut cfg, Ctx::new_mut(&mut ctx), src_val);

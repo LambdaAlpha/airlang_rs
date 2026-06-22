@@ -3,7 +3,7 @@ use num_traits::Zero;
 
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::extend_func;
+use crate::cfg::export_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::CtxFreeFunc;
@@ -11,6 +11,8 @@ use crate::semantics::val::INT;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Int;
+use crate::type_::Key;
+use crate::type_::Map;
 use crate::type_::Pair;
 
 #[derive(Copy, Clone)]
@@ -59,18 +61,18 @@ impl Default for IntLib {
 }
 
 impl CfgMod for IntLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, ADD, self.add);
-        extend_func(cfg, SUBTRACT, self.subtract);
-        extend_func(cfg, MULTIPLY, self.multiply);
-        extend_func(cfg, DIVIDE, self.divide);
-        extend_func(cfg, REMAINDER, self.remainder);
-        extend_func(cfg, DIVIDE_REMAINDER, self.divide_remainder);
-        extend_func(cfg, LESS, self.less);
-        extend_func(cfg, LESS_EQUAL, self.less_equal);
-        extend_func(cfg, GREATER, self.greater);
-        extend_func(cfg, GREATER_EQUAL, self.greater_equal);
-        extend_func(cfg, LESS_GREATER, self.less_greater);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, ADD, self.add);
+        export_func(cfg, SUBTRACT, self.subtract);
+        export_func(cfg, MULTIPLY, self.multiply);
+        export_func(cfg, DIVIDE, self.divide);
+        export_func(cfg, REMAINDER, self.remainder);
+        export_func(cfg, DIVIDE_REMAINDER, self.divide_remainder);
+        export_func(cfg, LESS, self.less);
+        export_func(cfg, LESS_EQUAL, self.less_equal);
+        export_func(cfg, GREATER, self.greater);
+        export_func(cfg, GREATER_EQUAL, self.greater_equal);
+        export_func(cfg, LESS_GREATER, self.less_greater);
     }
 }
 

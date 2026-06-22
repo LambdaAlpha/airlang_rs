@@ -4,7 +4,7 @@ use const_format::concatcp;
 
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::extend_func;
+use crate::cfg::export_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::ConstInputFreeFunc;
@@ -14,6 +14,7 @@ use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Int;
 use crate::type_::Key;
+use crate::type_::Map;
 use crate::type_::Text;
 
 // todo design add more
@@ -42,11 +43,11 @@ impl Default for KeyLib {
 }
 
 impl CfgMod for KeyLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, FROM_TEXT, self.from_text);
-        extend_func(cfg, INTO_TEXT, self.into_text);
-        extend_func(cfg, GET_LENGTH, self.get_length);
-        extend_func(cfg, JOIN, self.join);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, FROM_TEXT, self.from_text);
+        export_func(cfg, INTO_TEXT, self.into_text);
+        export_func(cfg, GET_LENGTH, self.get_length);
+        export_func(cfg, JOIN, self.join);
     }
 }
 

@@ -25,7 +25,7 @@ use crate::type_::Solve;
 
 pub(crate) struct QuoteEval;
 
-impl DynFunc<Cfg, Val, QuoteVal, Val> for QuoteEval {
+impl DynFunc<Val, QuoteVal, Val> for QuoteEval {
     fn call(&self, _cfg: &mut Cfg, _ctx: Ctx<Val>, quote: QuoteVal) -> Val {
         let quote = Quote::from(quote);
         quote.value
@@ -37,10 +37,10 @@ pub(crate) struct CallEval<'a, Func, Input> {
     pub(crate) input: &'a Input,
 }
 
-impl<'a, Func, Input> DynFunc<Cfg, Val, CallVal, Val> for CallEval<'a, Func, Input>
+impl<'a, Func, Input> DynFunc<Val, CallVal, Val> for CallEval<'a, Func, Input>
 where
-    Func: DynFunc<Cfg, Val, Val, Val>,
-    Input: DynFunc<Cfg, Val, Val, Val>,
+    Func: DynFunc<Val, Val, Val>,
+    Input: DynFunc<Val, Val, Val>,
 {
     fn call(&self, cfg: &mut Cfg, mut ctx: Ctx<Val>, call: CallVal) -> Val {
         let call = Call::from(call);
@@ -63,10 +63,10 @@ pub(crate) struct SolveEval<'a, Func, Output> {
     pub(crate) output: &'a Output,
 }
 
-impl<'a, Func, Output> DynFunc<Cfg, Val, SolveVal, Val> for SolveEval<'a, Func, Output>
+impl<'a, Func, Output> DynFunc<Val, SolveVal, Val> for SolveEval<'a, Func, Output>
 where
-    Func: DynFunc<Cfg, Val, Val, Val>,
-    Output: DynFunc<Cfg, Val, Val, Val>,
+    Func: DynFunc<Val, Val, Val>,
+    Output: DynFunc<Val, Val, Val>,
 {
     fn call(&self, cfg: &mut Cfg, mut ctx: Ctx<Val>, solve: SolveVal) -> Val {
         let solve = Solve::from(solve);
@@ -78,7 +78,7 @@ where
         if cfg.is_aborted() {
             return Val::default();
         }
-        let Some(solver) = cfg.import(Key::from_str_unchecked(SOLVER)) else {
+        let Some(solver) = cfg.map.get(&Key::from_str_unchecked(SOLVER)) else {
             return cfg.abort();
         };
         let Val::Func(solver) = solver else {
@@ -102,7 +102,7 @@ where
 #[derive(Default, Copy, Clone)]
 pub struct Eval;
 
-impl DynFunc<Cfg, Val, Val, Val> for Eval {
+impl DynFunc<Val, Val, Val> for Eval {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, val: Val) -> Val {
         if cfg.is_aborted() {
             return Val::default();
@@ -121,49 +121,49 @@ impl DynFunc<Cfg, Val, Val, Val> for Eval {
     }
 }
 
-impl DynFunc<Cfg, Val, Key, Val> for Eval {
+impl DynFunc<Val, Key, Val> for Eval {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, key: Key) -> Val {
         KeyEval.call(cfg, ctx, key)
     }
 }
 
-impl DynFunc<Cfg, Val, CellVal, Val> for Eval {
+impl DynFunc<Val, CellVal, Val> for Eval {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, cell: CellVal) -> Val {
         Val::Cell(CellForm { value: self }.call(cfg, ctx, cell))
     }
 }
 
-impl DynFunc<Cfg, Val, PairVal, Val> for Eval {
+impl DynFunc<Val, PairVal, Val> for Eval {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, pair: PairVal) -> Val {
         Val::Pair(PairForm { left: self, right: self }.call(cfg, ctx, pair))
     }
 }
 
-impl DynFunc<Cfg, Val, ListVal, Val> for Eval {
+impl DynFunc<Val, ListVal, Val> for Eval {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, list: ListVal) -> Val {
         Val::List(ListForm { item: self }.call(cfg, ctx, list))
     }
 }
 
-impl DynFunc<Cfg, Val, MapVal, Val> for Eval {
+impl DynFunc<Val, MapVal, Val> for Eval {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, map: MapVal) -> Val {
         Val::Map(MapForm { value: self }.call(cfg, ctx, map))
     }
 }
 
-impl DynFunc<Cfg, Val, QuoteVal, Val> for Eval {
+impl DynFunc<Val, QuoteVal, Val> for Eval {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, quote: QuoteVal) -> Val {
         QuoteEval.call(cfg, ctx, quote)
     }
 }
 
-impl DynFunc<Cfg, Val, CallVal, Val> for Eval {
+impl DynFunc<Val, CallVal, Val> for Eval {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, call: CallVal) -> Val {
         CallEval { func: self, input: self }.call(cfg, ctx, call)
     }
 }
 
-impl DynFunc<Cfg, Val, SolveVal, Val> for Eval {
+impl DynFunc<Val, SolveVal, Val> for Eval {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, solve: SolveVal) -> Val {
         SolveEval { func: self, output: self }.call(cfg, ctx, solve)
     }

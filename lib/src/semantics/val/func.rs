@@ -61,7 +61,7 @@ impl Hash for CompFuncVal {
     }
 }
 
-impl DynFunc<Cfg, Val, Val, Val> for FuncVal {
+impl DynFunc<Val, Val, Val> for FuncVal {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
         match self {
             FuncVal::Prim(prim) => prim.call(cfg, ctx, input),

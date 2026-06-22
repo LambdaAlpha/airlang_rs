@@ -7,7 +7,7 @@ use crate::utils::memory::leak_const;
 
 #[derive(Copy, Clone)]
 pub struct PrimFunc {
-    pub(crate) fn_: &'static dyn DynFunc<Cfg, Val, Val, Val>,
+    pub(crate) fn_: &'static dyn DynFunc<Val, Val, Val>,
     pub(crate) ctx: PrimCtx,
     pub(crate) input: PrimInput,
 }
@@ -28,7 +28,7 @@ pub enum PrimInput {
     Default,
 }
 
-impl DynFunc<Cfg, Val, Val, Val> for PrimFunc {
+impl DynFunc<Val, Val, Val> for PrimFunc {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
         self.fn_.call(cfg, ctx, input)
     }
@@ -38,7 +38,7 @@ pub struct DefaultFunc<F> {
     pub fn_: F,
 }
 
-impl<F> DynFunc<Cfg, Val, Val, Val> for DefaultFunc<F>
+impl<F> DynFunc<Val, Val, Val> for DefaultFunc<F>
 where F: Fn(&mut Cfg, Ctx<Val>, Val) -> Val + 'static
 {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
@@ -58,7 +58,7 @@ pub struct InputFreeFunc<F> {
     pub fn_: F,
 }
 
-impl<F> DynFunc<Cfg, Val, Val, Val> for InputFreeFunc<F>
+impl<F> DynFunc<Val, Val, Val> for InputFreeFunc<F>
 where F: Fn(&mut Cfg, Ctx<Val>) -> Val + 'static
 {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, _input: Val) -> Val {
@@ -78,7 +78,7 @@ pub struct MutFunc<F> {
     pub fn_: F,
 }
 
-impl<F> DynFunc<Cfg, Val, Val, Val> for MutFunc<F>
+impl<F> DynFunc<Val, Val, Val> for MutFunc<F>
 where F: Fn(&mut Cfg, &mut Val, Val) -> Val + 'static
 {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
@@ -101,7 +101,7 @@ pub struct MutInputFreeFunc<F> {
     pub fn_: F,
 }
 
-impl<F> DynFunc<Cfg, Val, Val, Val> for MutInputFreeFunc<F>
+impl<F> DynFunc<Val, Val, Val> for MutInputFreeFunc<F>
 where F: Fn(&mut Cfg, &mut Val) -> Val + 'static
 {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, _input: Val) -> Val {
@@ -124,7 +124,7 @@ pub struct ConstFunc<F> {
     pub fn_: F,
 }
 
-impl<F> DynFunc<Cfg, Val, Val, Val> for ConstFunc<F>
+impl<F> DynFunc<Val, Val, Val> for ConstFunc<F>
 where F: Fn(&mut Cfg, &Val, Val) -> Val + 'static
 {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, input: Val) -> Val {
@@ -144,7 +144,7 @@ pub struct ConstInputFreeFunc<F> {
     pub fn_: F,
 }
 
-impl<F> DynFunc<Cfg, Val, Val, Val> for ConstInputFreeFunc<F>
+impl<F> DynFunc<Val, Val, Val> for ConstInputFreeFunc<F>
 where F: Fn(&mut Cfg, &Val) -> Val + 'static
 {
     fn call(&self, cfg: &mut Cfg, ctx: Ctx<Val>, _input: Val) -> Val {
@@ -164,7 +164,7 @@ pub struct CtxFreeFunc<F> {
     pub fn_: F,
 }
 
-impl<F> DynFunc<Cfg, Val, Val, Val> for CtxFreeFunc<F>
+impl<F> DynFunc<Val, Val, Val> for CtxFreeFunc<F>
 where F: Fn(&mut Cfg, Val) -> Val + 'static
 {
     fn call(&self, cfg: &mut Cfg, _ctx: Ctx<Val>, input: Val) -> Val {
@@ -184,7 +184,7 @@ pub struct FreeFunc<F> {
     pub fn_: F,
 }
 
-impl<F> DynFunc<Cfg, Val, Val, Val> for FreeFunc<F>
+impl<F> DynFunc<Val, Val, Val> for FreeFunc<F>
 where F: Fn(&mut Cfg) -> Val + 'static
 {
     fn call(&self, cfg: &mut Cfg, _ctx: Ctx<Val>, _input: Val) -> Val {

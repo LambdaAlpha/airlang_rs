@@ -1,5 +1,7 @@
 use airlang::cfg::CfgMod;
-use airlang::semantics::cfg::Cfg;
+use airlang::semantics::val::Val;
+use airlang::type_::Key;
+use airlang::type_::Map;
 use airlang_ext::cfg::prim::lib::ExtPrimLib;
 
 use self::lang::LangLib;
@@ -13,10 +15,10 @@ pub struct DevPrimLib {
 }
 
 impl CfgMod for DevPrimLib {
-    fn extend(self, cfg: &mut Cfg) {
-        self.ext.extend(cfg);
-        self.lang.extend(cfg);
-        self.wasm.extend(cfg);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        self.ext.export(cfg);
+        self.lang.export(cfg);
+        self.wasm.export(cfg);
     }
 }
 

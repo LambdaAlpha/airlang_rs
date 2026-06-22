@@ -1,13 +1,15 @@
 use const_format::concatcp;
 
 use crate::cfg::CfgMod;
-use crate::cfg::extend_func;
+use crate::cfg::export_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::FreeFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::UNIT;
 use crate::semantics::val::Val;
+use crate::type_::Key;
+use crate::type_::Map;
 use crate::type_::Unit;
 
 #[derive(Copy, Clone)]
@@ -24,8 +26,8 @@ impl Default for UnitLib {
 }
 
 impl CfgMod for UnitLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, DEFAULT, self.default);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, DEFAULT, self.default);
     }
 }
 

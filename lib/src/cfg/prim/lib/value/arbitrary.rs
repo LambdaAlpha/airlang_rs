@@ -45,7 +45,7 @@ pub(crate) struct Any {
 
 impl Distribution<Val> for Any {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Val {
-        let max = if self.syntax { 13 } else { 17 };
+        let max = if self.syntax { 13 } else { 16 };
         match rng.random_range(0 ..= max) {
             0 => Val::Unit(Distribution::<Unit>::sample(self, rng)),
             1 => Val::Bit(Distribution::<Bit>::sample(self, rng)),
@@ -63,8 +63,7 @@ impl Distribution<Val> for Any {
             13 => Val::Solve(Distribution::<Solve<Val, Val>>::sample(self, rng).into()),
             14 => Val::Fact(Distribution::<Fact>::sample(self, rng).into()),
             15 => Val::Link(Distribution::<LinkVal>::sample(self, rng)),
-            16 => Val::Cfg(Distribution::<Cfg>::sample(self, rng).into()),
-            17 => Val::Func(Distribution::<FuncVal>::sample(self, rng)),
+            16 => Val::Func(Distribution::<FuncVal>::sample(self, rng)),
             _ => unreachable!(),
         }
     }
@@ -225,7 +224,7 @@ impl Distribution<Fact> for Any {
         let func = CompFunc { prelude, body, input, ctx };
         let func = FuncVal::Comp(func.into());
         let input = Val::default();
-        let mut cfg = Cfg::default();
+        let mut cfg = Cfg::new(Map::default());
         let mut ctx = Val::default();
         let ctx = Ctx::new_const(&mut ctx);
         Fact::new(&mut cfg, ctx, func, input)
@@ -237,13 +236,6 @@ impl Distribution<LinkVal> for Any {
         let val = self.sample(rng);
         let const_ = rng.random();
         LinkVal::new(val, const_)
-    }
-}
-
-impl Distribution<Cfg> for Any {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Cfg {
-        let map: Map<Key, Val> = self.sample(rng);
-        Cfg::from(map)
     }
 }
 

@@ -4,7 +4,7 @@ use const_format::concatcp;
 
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::extend_func;
+use crate::cfg::export_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::ConstInputFreeFunc;
@@ -13,6 +13,8 @@ use crate::semantics::func::MutFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::QUOTE;
 use crate::semantics::val::Val;
+use crate::type_::Key;
+use crate::type_::Map;
 use crate::type_::Quote;
 
 #[derive(Copy, Clone)]
@@ -37,10 +39,10 @@ impl Default for QuoteLib {
 }
 
 impl CfgMod for QuoteLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, MAKE, self.make);
-        extend_func(cfg, GET_VALUE, self.get_value);
-        extend_func(cfg, SET_VALUE, self.set_value);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, MAKE, self.make);
+        export_func(cfg, GET_VALUE, self.get_value);
+        export_func(cfg, SET_VALUE, self.set_value);
     }
 }
 

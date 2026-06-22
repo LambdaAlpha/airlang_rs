@@ -5,8 +5,9 @@ use std::path::Path;
 
 use airlang::bug;
 use airlang::cfg::CfgMod;
-use airlang::cfg::eval_with_prelude;
-use airlang::cfg::extend_func;
+use airlang::cfg::export_func;
+use airlang::cfg::import;
+use airlang::cfg::prim::lib::cfg::eval_task;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_CELL;
 use airlang::semantics::func::CtxFreeFunc;
@@ -14,6 +15,7 @@ use airlang::semantics::val::PrimFuncVal;
 use airlang::semantics::val::Val;
 use airlang::type_::Cell;
 use airlang::type_::Key;
+use airlang::type_::Map;
 use airlang::type_::Text;
 use const_format::concatcp;
 
@@ -33,8 +35,8 @@ impl Default for BuildLib {
 }
 
 impl CfgMod for BuildLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, LOAD, self.load);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, LOAD, self.load);
     }
 }
 
@@ -48,8 +50,7 @@ pub fn load(cfg: &mut Cfg, input: Val) -> Val {
         return bug!(cfg, "{LOAD}: expected input to be a text, but got {input}");
     };
     let url = Text::from(url);
-    let cur_url_key = Key::from_str_unchecked(CUR_URL_KEY);
-    let cur_url = get_cur_url(cfg, cur_url_key);
+    let cur_url = get_cur_url(&cfg.map);
     let new_url =
         cur_url.as_ref().and_then(|cur_url| join_url(cur_url, &url)).unwrap_or(String::from(url));
     load_from_url(cfg, cur_url, new_url)
@@ -60,17 +61,17 @@ fn load_from_url(cfg: &mut Cfg, cur_url: Option<String>, url: String) -> Val {
     let content = match read_to_string(&url, &mut buffer) {
         Ok(content) => content,
         Err(_err) => {
-            return Val::Key(Key::from_str_unchecked("_read_error"));
+            return Val::Key(Key::from_str_unchecked(".read_error"));
         },
     };
     let Ok(val) = content.parse() else {
-        return Val::Key(Key::from_str_unchecked("_parse_error"));
+        return Val::Key(Key::from_str_unchecked(".parse_error"));
     };
     let cur_url_key = Key::from_str_unchecked(CUR_URL_KEY);
-    cfg.insert(cur_url_key.clone(), Val::Text(Text::from(url).into()));
-    let output = eval_with_prelude(cfg, LOAD, val);
+    cfg.map.insert(cur_url_key.clone(), Val::Text(Text::from(url).into()));
+    let output = eval_task(cfg, LOAD, val);
     if let Some(cur_url) = cur_url {
-        cfg.insert(cur_url_key, Val::Text(Text::from(cur_url).into()));
+        cfg.map.insert(cur_url_key, Val::Text(Text::from(cur_url).into()));
     }
     Val::Cell(Cell::new(output).into())
 }
@@ -83,8 +84,8 @@ fn read_to_string<'a>(url: &str, buffer: &'a mut String) -> std::io::Result<&'a 
     Ok(content)
 }
 
-fn get_cur_url(cfg: &Cfg, key: Key) -> Option<String> {
-    if let Some(val) = cfg.import(key) {
+fn get_cur_url(cfg: &Map<Key, Val>) -> Option<String> {
+    if let Some(val) = import(cfg, CUR_URL_KEY) {
         return if let Val::Text(url) = val { Some(String::clone(url)) } else { None };
     }
     let Ok(cur_dir) = current_dir() else {

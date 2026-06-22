@@ -185,17 +185,15 @@ _ do _[
 is list more pattern
 -----
 _ do _[
-    _config.make set _ import .config.make,
     _link.make set _ import .link.make,
     _config.let set _ import .config.let,
-    _is_aborted set _ import .error.is_aborted.context.let,
-    _c set _ config.make {
+    _c set {
         .prelude : _ link.make {
             is : is,
         },
     },
-    _c config.let _(_[a, b] is [3]),
-    _c is_aborted .,
+    _(key'' : aborted) is _c config.let _(_[a, b] is [3]),
+    aborted
 ]
 -----
 true

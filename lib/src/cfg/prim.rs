@@ -1,12 +1,13 @@
 use self::lib::BasePrimLib;
 use crate::cfg::CfgMod;
-use crate::cfg::KEY_PRELUDE;
+use crate::cfg::PRELUDE;
+use crate::cfg::export;
 use crate::cfg::prim::prelude::BasePrimPrelude;
 use crate::cfg::prim::prelude::prelude_repr;
-use crate::semantics::cfg::Cfg;
 use crate::semantics::val::LinkVal;
 use crate::semantics::val::Val;
 use crate::type_::Key;
+use crate::type_::Map;
 
 #[derive(Copy, Clone)]
 pub struct BasePrimCfg {
@@ -23,11 +24,11 @@ impl Default for BasePrimCfg {
 }
 
 impl CfgMod for BasePrimCfg {
-    fn extend(self, cfg: &mut Cfg) {
-        self.lib.extend(cfg);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        self.lib.export(cfg);
         let prelude = prelude_repr(self.prelude);
         let prelude = Val::Link(LinkVal::new(Val::Map(prelude.into()), false));
-        cfg.extend(Key::from_str_unchecked(KEY_PRELUDE), prelude);
+        export(cfg, PRELUDE, prelude);
     }
 }
 

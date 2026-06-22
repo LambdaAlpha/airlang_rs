@@ -2,7 +2,7 @@ use const_format::concatcp;
 
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::extend_func;
+use crate::cfg::export_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::Eval;
 use crate::semantics::core::PREFIX_CELL;
@@ -18,6 +18,7 @@ use crate::syntax::FmtRepr;
 use crate::type_::Bit;
 use crate::type_::Cell;
 use crate::type_::Key;
+use crate::type_::Map;
 use crate::type_::Text;
 use crate::utils::memory::leak_const;
 
@@ -57,12 +58,12 @@ impl Default for LangLib {
 }
 
 impl CfgMod for LangLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, SEMANTICS_EVAL, self.semantics_eval);
-        extend_func(cfg, SYNTAX_PARSE, self.syntax_parse);
-        extend_func(cfg, SYNTAX_GENERATE_PRETTY, self.syntax_generate_pretty);
-        extend_func(cfg, SYNTAX_GENERATE_KEY, self.syntax_generate_key);
-        extend_func(cfg, SYNTAX_IS_VALID, self.syntax_is_valid);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, SEMANTICS_EVAL, self.semantics_eval);
+        export_func(cfg, SYNTAX_PARSE, self.syntax_parse);
+        export_func(cfg, SYNTAX_GENERATE_PRETTY, self.syntax_generate_pretty);
+        export_func(cfg, SYNTAX_GENERATE_KEY, self.syntax_generate_key);
+        export_func(cfg, SYNTAX_IS_VALID, self.syntax_is_valid);
     }
 }
 
@@ -108,6 +109,6 @@ fn is_syntax(val: &Val) -> bool {
         Val::Quote(quote) => is_syntax(&quote.value),
         Val::Call(call) => is_syntax(&call.func) && is_syntax(&call.input),
         Val::Solve(solve) => is_syntax(&solve.func) && is_syntax(&solve.output),
-        Val::Fact(_) | Val::Link(_) | Val::Cfg(_) | Val::Func(_) | Val::Dyn(_) => false,
+        Val::Fact(_) | Val::Link(_) | Val::Func(_) | Val::Dyn(_) => false,
     }
 }

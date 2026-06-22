@@ -2,7 +2,7 @@ use std::process::Command;
 
 use airlang::bug;
 use airlang::cfg::CfgMod;
-use airlang::cfg::extend_func;
+use airlang::cfg::export_func;
 use airlang::semantics::cfg::Cfg;
 use airlang::semantics::core::PREFIX_CELL;
 use airlang::semantics::func::CtxFreeFunc;
@@ -33,8 +33,8 @@ impl Default for ProcessLib {
 }
 
 impl CfgMod for ProcessLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, CALL, self.call);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, CALL, self.call);
     }
 }
 

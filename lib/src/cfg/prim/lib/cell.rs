@@ -4,7 +4,7 @@ use const_format::concatcp;
 
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::extend_func;
+use crate::cfg::export_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::ConstInputFreeFunc;
@@ -12,6 +12,8 @@ use crate::semantics::func::MutFunc;
 use crate::semantics::val::CELL;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
+use crate::type_::Key;
+use crate::type_::Map;
 
 #[derive(Copy, Clone)]
 pub struct CellLib {
@@ -32,9 +34,9 @@ impl Default for CellLib {
 }
 
 impl CfgMod for CellLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, GET_VALUE, self.get_value);
-        extend_func(cfg, SET_VALUE, self.set_value);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, GET_VALUE, self.get_value);
+        export_func(cfg, SET_VALUE, self.set_value);
     }
 }
 

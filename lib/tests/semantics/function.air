@@ -124,10 +124,8 @@ call mut func by default func inside const ctx
 -----
 _ do _[
     _link.let set _ import .link.let,
-    _config.make set _ import .config.make,
     _link.make set _ import .link.make,
     _config.let set _ import .config.let,
-    _is_aborted set _ import .error.is_aborted.context.let,
     _f set _ function {
         code : _((c : .) : c link.let eval : _(_a set 1)),
         constant : true,
@@ -136,13 +134,13 @@ _ do _[
             eval : eval,
         },
     },
-    _c set _ config.make {
+    _c set {
         .prelude : _ link.make {
             f : f,
         },
     },
-    _c config.let _(_ f .),
-    _c is_aborted .,
+    _(key'' : aborted) is _c config.let _(_ f .),
+    aborted
 ]
 -----
 true
@@ -203,10 +201,8 @@ const mutate fail
 -----
 _ do _[
     _map.set set _ import .map.set.link.let,
-    _config.make set _ import .config.make,
     _link.make set _ import .link.make,
     _config.let set _ import .config.let,
-    _is_aborted set _ import .error.is_aborted.context.let,
     _f set _ function {
         code : _((c : i) : c map.set i : 2),
         constant : true,
@@ -214,14 +210,14 @@ _ do _[
             map.set : map.set,
         },
     },
-    _c set _ config.make {
+    _c set {
         .prelude : _ link.make {
             f : f,
             a : 1,
         },
     },
-    _c config.let _(_ f _a),
-    _c is_aborted .,
+    _(key'' : aborted) is _c config.let _(_ f _a),
+    aborted
 ]
 -----
 true

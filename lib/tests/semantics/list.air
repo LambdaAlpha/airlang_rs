@@ -279,22 +279,20 @@ set length
 -----
 _ do _[
     _list.set set _ import .list.set.context.let,
-    _config.make set _ import .config.make,
     _link.make set _ import .link.make,
     _config.let set _ import .config.let,
-    _is_aborted set _ import .error.is_aborted.context.let,
-    _c set _ config.make {
+    _c set {
         .prelude : _ link.make {
             do : do,
             set : set,
             list.set : list.set,
         },
     },
-    _c config.let _(_ do _[
+    _(key'' : aborted) is _c config.let _(_ do _[
         _a set [],
         _a list.set 1 : 1,
     ]),
-    _c is_aborted .,
+    aborted
 ]
 -----
 true
@@ -346,22 +344,20 @@ get out of bound
 -----
 _ do _[
     _list.get set _ import .list.get.context.let,
-    _config.make set _ import .config.make,
     _link.make set _ import .link.make,
     _config.let set _ import .config.let,
-    _is_aborted set _ import .error.is_aborted.context.let,
-    _c set _ config.make {
+    _c set {
         .prelude : _ link.make {
             do : do,
             set : set,
             list.get : list.get,
         },
     },
-    _c config.let _(_ do _[
+    _(key'' : aborted) is _c config.let _(_ do _[
         _l set [],
         _l list.get 0
     ]),
-    _c is_aborted .,
+    aborted
 ]
 -----
 true
@@ -440,22 +436,20 @@ insert out of bound
 -----
 _ do _[
     _insert set _ import .list.insert.context.let,
-    _config.make set _ import .config.make,
     _link.make set _ import .link.make,
     _config.let set _ import .config.let,
-    _is_aborted set _ import .error.is_aborted.context.let,
-    _c set _ config.make {
+    _c set {
         .prelude : _ link.make {
             do : do,
             set : set,
             insert : insert,
         },
     },
-    _c config.let _(_ do _[
+    _(key'' : aborted) is _c config.let _(_ do _[
         _l set [],
         _l insert 1 : 1,
     ]),
-    _c is_aborted .,
+    aborted
 ]
 -----
 true
@@ -561,22 +555,20 @@ pop empty
 -----
 _ do _[
     _pop set _ import .list.pop.context.let,
-    _config.make set _ import .config.make,
     _link.make set _ import .link.make,
     _config.let set _ import .config.let,
-    _is_aborted set _ import .error.is_aborted.context.let,
-    _c set _ config.make {
+    _c set {
         .prelude : _ link.make {
             do : do,
             set : set,
             pop : pop,
         },
     },
-    _c config.let _(_ do _[
+    _(key'' : aborted) is _c config.let _(_ do _[
         _l set [],
         _l pop .,
     ]),
-    _c is_aborted .,
+    aborted
 ]
 -----
 true
@@ -635,22 +627,20 @@ pop_many out of bound
 -----
 _ do _[
     _pop_many set _ import .list.pop_many.context.let,
-    _config.make set _ import .config.make,
     _link.make set _ import .link.make,
     _config.let set _ import .config.let,
-    _is_aborted set _ import .error.is_aborted.context.let,
-    _c set _ config.make {
+    _c set {
         .prelude : _ link.make {
             do : do,
             set : set,
             pop_many : pop_many,
         },
     },
-    _c config.let _(_ do _[
+    _(key'' : aborted) is _c config.let _(_ do _[
         _l set [1, 2],
         _l pop_many 3,
     ]),
-    _c is_aborted .,
+    aborted
 ]
 -----
 true

@@ -4,7 +4,7 @@ use const_format::concatcp;
 
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::extend_func;
+use crate::cfg::export_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::func::ConstInputFreeFunc;
@@ -13,6 +13,8 @@ use crate::semantics::func::MutFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::SOLVE;
 use crate::semantics::val::Val;
+use crate::type_::Key;
+use crate::type_::Map;
 use crate::type_::Pair;
 use crate::type_::Solve;
 
@@ -44,12 +46,12 @@ impl Default for SolveLib {
 }
 
 impl CfgMod for SolveLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, MAKE, self.make);
-        extend_func(cfg, GET_FUNCTION, self.get_function);
-        extend_func(cfg, SET_FUNCTION, self.set_function);
-        extend_func(cfg, GET_OUTPUT, self.get_output);
-        extend_func(cfg, SET_OUTPUT, self.set_output);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, MAKE, self.make);
+        export_func(cfg, GET_FUNCTION, self.get_function);
+        export_func(cfg, SET_FUNCTION, self.set_function);
+        export_func(cfg, GET_OUTPUT, self.get_output);
+        export_func(cfg, SET_OUTPUT, self.set_output);
     }
 }
 

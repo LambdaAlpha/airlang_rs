@@ -7,7 +7,7 @@ use num_traits::ToPrimitive;
 
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::extend_func;
+use crate::cfg::export_func;
 use crate::cfg::prim::lib::ctx::pattern::PatternAssign;
 use crate::cfg::prim::lib::ctx::pattern::PatternMatch;
 use crate::cfg::prim::lib::ctx::pattern::PatternParse;
@@ -66,13 +66,13 @@ impl Default for CtrlLib {
 }
 
 impl CfgMod for CtrlLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, DO, self.do_);
-        extend_func(cfg, THEN, self.then);
-        extend_func(cfg, BRANCH, self.branch);
-        extend_func(cfg, MATCH, self.match_);
-        extend_func(cfg, LOOP, self.loop_);
-        extend_func(cfg, EACH, self.each);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, DO, self.do_);
+        export_func(cfg, THEN, self.then);
+        export_func(cfg, BRANCH, self.branch);
+        export_func(cfg, MATCH, self.match_);
+        export_func(cfg, LOOP, self.loop_);
+        export_func(cfg, EACH, self.each);
     }
 }
 

@@ -4,7 +4,7 @@ use const_format::concatcp;
 
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::extend_func;
+use crate::cfg::export_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::ctx::Ctx;
@@ -16,6 +16,7 @@ use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
 use crate::type_::Key;
+use crate::type_::Map;
 use crate::type_::Pair;
 
 // todo design
@@ -50,13 +51,13 @@ impl Default for LinkLib {
 }
 
 impl CfgMod for LinkLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, MAKE, self.make);
-        extend_func(cfg, MAKE_CONSTANT, self.make_constant);
-        extend_func(cfg, IS_CONSTANT, self.is_constant);
-        extend_func(cfg, IS_AVAILABLE, self.is_available);
-        extend_func(cfg, GET_ID, self.get_id);
-        extend_func(cfg, LET, self.let_);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, MAKE, self.make);
+        export_func(cfg, MAKE_CONSTANT, self.make_constant);
+        export_func(cfg, IS_CONSTANT, self.is_constant);
+        export_func(cfg, IS_AVAILABLE, self.is_available);
+        export_func(cfg, GET_ID, self.get_id);
+        export_func(cfg, LET, self.let_);
     }
 }
 

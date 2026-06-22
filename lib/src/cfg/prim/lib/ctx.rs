@@ -5,7 +5,7 @@ use self::pattern::PatternMatch;
 use self::pattern::PatternParse;
 use crate::bug;
 use crate::cfg::CfgMod;
-use crate::cfg::extend_func;
+use crate::cfg::export_func;
 use crate::semantics::cfg::Cfg;
 use crate::semantics::core::PREFIX_CELL;
 use crate::semantics::ctx::Ctx;
@@ -19,6 +19,8 @@ use crate::semantics::func::MutFunc;
 use crate::semantics::val::PrimFuncVal;
 use crate::semantics::val::Val;
 use crate::type_::Bit;
+use crate::type_::Key;
+use crate::type_::Map;
 use crate::type_::Pair;
 
 #[derive(Copy, Clone)]
@@ -57,14 +59,14 @@ impl Default for CtxLib {
 }
 
 impl CfgMod for CtxLib {
-    fn extend(self, cfg: &mut Cfg) {
-        extend_func(cfg, GET, self.get);
-        extend_func(cfg, TAKE, self.take);
-        extend_func(cfg, SET, self.set);
-        extend_func(cfg, IS_CONSTANT, self.is_constant);
-        extend_func(cfg, IS, self.is);
-        extend_func(cfg, GET_SELF, self.get_self);
-        extend_func(cfg, LET, self.let_);
+    fn export(self, cfg: &mut Map<Key, Val>) {
+        export_func(cfg, GET, self.get);
+        export_func(cfg, TAKE, self.take);
+        export_func(cfg, SET, self.set);
+        export_func(cfg, IS_CONSTANT, self.is_constant);
+        export_func(cfg, IS, self.is);
+        export_func(cfg, GET_SELF, self.get_self);
+        export_func(cfg, LET, self.let_);
     }
 }
 
