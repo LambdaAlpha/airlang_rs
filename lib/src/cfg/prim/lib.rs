@@ -44,8 +44,8 @@ pub struct BasePrimLib {
     pub solve: SolveLib,
     pub fact: FactLib,
     pub link: LinkLib,
-    pub cfg: CfgLib,
     pub func: FuncLib,
+    pub cfg: CfgLib,
     pub ctx: CtxLib,
     pub ctrl: CtrlLib,
     pub value: ValueLib,
@@ -71,8 +71,8 @@ impl CfgMod for BasePrimLib {
         self.solve.export(cfg);
         self.fact.export(cfg);
         self.link.export(cfg);
-        self.cfg.export(cfg);
         self.func.export(cfg);
+        self.cfg.export(cfg);
         self.ctx.export(cfg);
         self.ctrl.export(cfg);
         self.value.export(cfg);
@@ -113,11 +113,11 @@ pub mod fact;
 
 pub mod link;
 
-pub mod cfg;
-
 pub mod func;
 
 // -----
+
+pub mod cfg;
 
 pub mod ctx;
 

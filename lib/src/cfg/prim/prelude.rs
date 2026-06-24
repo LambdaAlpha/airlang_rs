@@ -40,12 +40,12 @@ pub struct BasePrimPrelude {
 
     pub fact: PrimFuncVal,
 
+    pub function: PrimFuncVal,
+
     pub exist: PrimFuncVal,
     pub import: PrimFuncVal,
     pub export: PrimFuncVal,
     pub with: PrimFuncVal,
-
-    pub function: PrimFuncVal,
 
     pub get: PrimFuncVal,
     pub take: PrimFuncVal,
@@ -109,12 +109,12 @@ impl BasePrimPrelude {
 
             fact: lib.fact.make,
 
+            function: lib.func.make,
+
             exist: lib.cfg.exist,
             import: lib.cfg.import,
             export: lib.cfg.export,
             with: lib.cfg.with,
-
-            function: lib.func.make,
 
             get: lib.ctx.get,
             take: lib.ctx.take,
@@ -175,12 +175,12 @@ impl Prelude for BasePrimPrelude {
 
         map_put_func(map, "fact", self.fact);
 
+        map_put_func(map, "function", self.function);
+
         map_put_func(map, "exist", self.exist);
         map_put_func(map, "import", self.import);
         map_put_func(map, "export", self.export);
         map_put_func(map, "with", self.with);
-
-        map_put_func(map, "function", self.function);
 
         map_put_func(map, "get", self.get);
         map_put_func(map, "take", self.take);

@@ -1,4 +1,4 @@
-!("bench generate")
+!'bench generate'
 
 _ do _[
     _x set 42,
