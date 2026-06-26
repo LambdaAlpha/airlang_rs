@@ -305,7 +305,7 @@ comment map
 =====
 comment text example
 -----
-!"comment" .
+!'comment' .
 =====
 comment list item
 -----

@@ -200,7 +200,7 @@ true is_carmichael_number ?
 - `!{a : map}`
 
 ```air
-!"comment"
+!'comment'
 [1, ![2, 3,] 4]
 {a : 1, !{b : 2,} c : 3}
 !(a and _) b and c
@@ -248,7 +248,7 @@ true is_carmichael_number ?
 
 ### Context
 
-The context is the local information environment during execution. In core semantics, the context can be accessed via keys, and functions also support sensing or updating the context. Variables in the context can be read via the `get` function, updated via the `set` function, or specified via the `which` function. Based on this capability of functions, we implement various control flow functions, including sequential execution `do`, conditional execution `then`, pattern matching `match`, loops `loop`, iteration `each`, etc. The most commonly used and essential core functions are provided in the initial context.
+The context is the local information environment during execution. In core semantics, the context can be accessed via keys, and functions also support sensing or updating the context. Variables in the context can be read via the `get` function, updated via the `set` function, or specified via the `let` function. Based on this capability of functions, we implement various control flow functions, including sequential execution `do`, conditional execution `then`, pattern matching `match`, loops `loop`, iteration `each`, etc. The most commonly used and essential core functions are provided in the initial context.
 
 ```air
 _ do _[
